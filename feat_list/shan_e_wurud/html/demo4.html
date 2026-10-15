@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>শানে উরুদ (প্রেক্ষাপট) — ডেমো 4 · রঙিন ব্যান্ড</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): scroll body, chapter card, hadith card, details page ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.appbar.np h1{margin-left:12px}
+.icon-btn svg,.btn svg{flex:none}
+/* Chapter section card (HadithSectionListItem) */
+.sc{padding:12px 16px}
+.sc small{display:block;font-size:12.5px;color:var(--hint)}
+.sc b{display:block;font-size:15.5px;line-height:1.5;color:var(--title)}
+/* Hadith card (HadithListItem): top bar, [প্রেক্ষাপট where the Arabic sits], narrator, translation */
+.hc{padding:12px 14px 14px}
+.hc[data-act="details"]{cursor:pointer}
+.hc .hadith-head .icon-btn{margin-right:-8px;color:var(--hint)}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 6px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+/* Details page: HadithFancyAppBar over RoundedScaffoldBody */
+.screen.rs{background:var(--appbar)}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.rbody .body{padding-top:16px}
+.dsc{padding:14px}
+.dst{display:flex;align-items:center;gap:6px;margin:0 0 10px;font-size:15.5px;font-weight:600;color:var(--primary)}
+/* ===== Shared context pieces: source line + "আলেমদের যাচাই করা" mark (neutral, never a grade colour) ===== */
+.src{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:10px}
+.src .s{font-size:12.5px;line-height:1.5;color:var(--hint)}
+.vmark{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px 0 6px;border:1px solid var(--divider);border-radius:20px;font-size:12px;font-weight:700;color:var(--title);white-space:nowrap}
+.vmark svg{width:13px;height:13px}
+.note{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--hint)}
+/* ===== Menu sheet header (MoreOptionBottomSheet) ===== */
+.mhead{display:flex;align-items:center;padding:18px 12px 8px 22px}
+.mhead div{flex:1;min-width:0}
+.mhead h2{margin:0;font-size:17px;font-weight:800;color:var(--title)}
+.mhead p{margin:0;font-size:12px;color:var(--hint)}
+.xbtn{width:36px;height:36px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;color:var(--title)}
+.xbtn svg{width:18px;height:18px}
+/* ===== Share image (the picture "স্ক্রিনশট শেয়ার" sends) ===== */
+.shot-wrap{padding:4px 16px 0}
+.shot{padding:16px 14px 14px;border-radius:14px;background:var(--surface-2);border:1.5px solid var(--primary-dark)}
+.shot .card{margin:0;box-shadow:none}
+.shot-line{margin:12px 0 0;padding:8px 10px;border-radius:8px;background:var(--tint);font-size:14px;line-height:1.65;color:var(--title)}
+.shot-line b{color:var(--primary-dark)}
+:root[data-theme="dark"] .shot-line b{color:var(--primary)}
+.shot-foot{display:flex;align-items:center;gap:10px;margin-top:14px}
+.shot-logo{width:34px;height:34px;border-radius:9px;background:var(--primary-dark);color:var(--on-appbar);display:grid;place-items:center;flex:none}
+.shot-foot b{display:block;font-size:15px;color:var(--title)}
+.shot-foot small{font-size:12px;color:var(--hint)}
+.shot-btn{margin:16px 16px 0}
+/* ===== Demo 4 only ===== */
+/* A full-width coloured band across the card, white text, fact tiles when open */
+.cb{margin:12px -14px 0;padding:12px 14px 4px;background:var(--primary-dark);color:var(--on-appbar);cursor:default}
+.cb-tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border-radius:20px;background:color-mix(in srgb,var(--on-appbar) 18%,transparent);font-size:12.5px;font-weight:700}
+.cb-t{margin:8px 0 0;font-size:14.5px;line-height:1.7;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.tile{padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--on-appbar) 13%,transparent)}
+.tile.what{grid-column:1/-1}
+.tk{display:flex;align-items:center;gap:5px;font-size:12.5px;opacity:.85}
+.tv{display:block;margin-top:2px;font-size:14.5px;line-height:1.6}
+.cb .note,.cb .s{color:color-mix(in srgb,var(--on-appbar) 82%,transparent)}
+.cb .vmark{color:var(--on-appbar);border-color:color-mix(in srgb,var(--on-appbar) 45%,transparent)}
+.cb-btn{display:inline-flex;align-items:center;gap:2px;height:36px;font-size:14px;font-weight:700;color:var(--on-appbar)}
+/* Details: the same band as its own rounded block above the hadith, always open */
+.cb.d{margin:0 12px 10px;padding-bottom:14px;border-radius:10px}
+/* Menu: two large coloured tiles */
+.m4{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:6px 16px 22px}
+.m4 button{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:14px;border-radius:14px;background:var(--primary-dark);color:var(--on-appbar);text-align:left;font-size:14.5px;font-weight:700;line-height:1.35}
+.m4 small{display:block;font-size:12px;font-weight:400;opacity:.85}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="list"></section>
+      <section class="screen" data-screen="open"></section>
+      <section class="screen rs" data-screen="details"></section>
+      <section class="screen" data-screen="menu"></section>
+      <section class="screen" data-screen="shot" data-status="light"></section>
+      <!-- ===== Overlays (filled by the demo): full context sheet, menu sheet, menu popup ===== -->
+      <div class="sheet" id="sheet-bg" role="dialog" aria-label="প্রেক্ষাপট"></div>
+      <div class="sheet" id="sheet-menu" role="dialog" aria-label="অন্যান্য অপশন"></div>
+      <div class="dialog pop" id="pop-menu" role="menu" aria-label="অন্যান্য অপশন"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, state, the flow and screen
+   wiring. Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const I = {
+  ctx: (w = 16) => svg('<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12.5h5"/>', w),
+  who: (w = 16) => svg('<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>', w),
+  where: (w = 16) => svg('<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>', w),
+  what: (w = 16) => svg('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>', w),
+  shield: (w = 13) => svg('<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="m9 12 2 2 4-4"/>', w),
+  shot: (w = 20) => svg('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l2-3h4l2 3"/><circle cx="12" cy="13.5" r="3.5"/>', w),
+  copy: (w = 20) => svg('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>', w),
+  down: (w = 16) => svg('<path d="M6 9l6 6 6-6"/>', w),
+  up: (w = 16) => svg('<path d="M6 15l6-6 6 6"/>', w),
+  logo: (w = 18) => svg('<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>', w),
+};
+
+/* ---------- Hadith (text only from the safe list, never the Arabic) ---------- */
+const BOOK = { book: 'সহীহ বুখারী', abbr: 'বুখারী', grade: 'সহিহ হাদিস' };
+/* Has a background in another narration: the box shows on this card */
+const H1 = { ...BOOK, no: 1, kitab: 'ওহির সূচনা', bab: 'রাসূলুল্লাহ (সাঃ)-এর প্রতি ওহি কীভাবে শুরু হয়েছিল', bg: true,
+  nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত',
+  text: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে। তাই যার হিজরত দুনিয়া পাওয়ার জন্য বা কোনো নারীকে বিয়ে করার জন্য, তার হিজরত সেদিকেই গণ্য হবে, যার জন্য সে হিজরত করেছে।' };
+/* No separate background (6116 already tells its own story): cards stay as they are */
+const PLAIN = [
+  { ...BOOK, no: 6018, kitab: 'আদব', bab: 'যে আল্লাহ ও শেষ দিবসে বিশ্বাস রাখে, সে যেন প্রতিবেশীকে কষ্ট না দেয়',
+    nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত',
+    text: 'যে ব্যক্তি আল্লাহ ও শেষ দিবসে বিশ্বাস রাখে, সে যেন প্রতিবেশীকে কষ্ট না দেয়। যে আল্লাহ ও শেষ দিবসে বিশ্বাস রাখে, সে যেন মেহমানের সম্মান করে। আর যে আল্লাহ ও শেষ দিবসে বিশ্বাস রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।' },
+  { ...BOOK, no: 6116, kitab: 'আদব', bab: 'রাগ থেকে সতর্ক থাকা',
+    nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত',
+    text: 'এক ব্যক্তি নবী (সাঃ)-এর কাছে বললেন, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বললেন। তিনি প্রতিবারই বললেন, রাগ করো না।' },
+];
+
+/* ---------- The background (প্রেক্ষাপট). Comes verified with the book data;
+   only known facts: who, where, what happened. ---------- */
+const BG = {
+  short: 'হিজরতের সময়ের ঘটনা। মুহাজিরদের মধ্যে এক ব্যক্তি আল্লাহ ও তাঁর রাসূলের (সাঃ) জন্য নয়, এক নারীকে বিয়ে করার উদ্দেশ্যে মদিনায় হিজরত করেছিলেন।',
+  facts: [
+    { k: 'who', label: 'কে', text: 'মক্কা থেকে মদিনায় হিজরত করা এক ব্যক্তি' },
+    { k: 'where', label: 'কোথায়', text: 'মক্কা থেকে মদিনা, হিজরতের সময়' },
+    { k: 'what', label: 'কী ঘটেছিল', text: 'তিনি এক নারীকে বিয়ের প্রস্তাব দেন। ওই নারী জানান, হিজরত না করলে বিয়ে করবেন না। তখন তিনি হিজরত করেন এবং তাঁকে বিয়ে করেন।' },
+  ],
+  note: 'এই ঘটনার কারণেই হাদিসটি বলা হয়েছিল কি না, তা নিশ্চিত নয়। তবে হাদিসের শেষ অংশের সাথে ঘটনাটি মিলে যায়।',
+  src: 'আল-মুজামুল কাবির, ইবনে মাসউদ (রা.) থেকে বর্ণিত',
+  line: 'এক ব্যক্তি এক নারীকে বিয়ে করার উদ্দেশ্যে মক্কা থেকে মদিনায় হিজরত করেছিলেন।',
+};
+const MORE = 'আরো পড়ুন';
+const LESS = 'কম দেখান';
+const srcHTML = () => `<div class="src"><span class="s">সূত্র: ${BG.src}</span><span class="vmark">${I.shield()}আলেমদের যাচাই করা</span></div>`;
+const noteHTML = () => `<p class="note">${BG.note}</p>`;
+
+/* ---------- State ----------
+   has  = the chapter has a hadith with a background (toolbar: আছে / নেই)
+   open = the list box is expanded; from = where the menu / image was opened */
+const S = { has: true, open: false, from: 'list', cur: H1 };
+const SCREENS = [
+  { id: 'list', label: 'অধ্যায়ের লিস্ট' },
+  { id: 'open', label: 'পুরো প্রেক্ষাপট' },
+  { id: 'details', label: 'বিস্তারিত পেজ' },
+  { id: 'menu', label: 'শেয়ার মেনু' },
+  { id: 'shot', label: 'শেয়ারের ছবি' },
+];
+const EXTRA = '<button class="kit-chip" type="button" data-has="1">প্রেক্ষাপট আছে</button><button class="kit-chip" type="button" data-has="0">প্রেক্ষাপট নেই</button>';
+const refText = (h) => `${h.book} · হাদিস: ${bn(h.no)}`;
+
+/* ---------- Shared markup: top bar, hadith card, chapter list, details, share image ---------- */
+function headHTML(h, more = true) {
+  return `<div class="hadith-head"><span class="book-badge">${h.abbr}</span><div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${bn(h.no)}</span></div><span class="grade">${h.grade}</span>${more ? `<button class="icon-btn" data-act="more" data-no="${h.no}" aria-label="অন্যান্য অপশন">${icons.more}</button>` : ''}</div>`;
+}
+/* mode: 'list' (box collapsed or open) | 'detail' (box fully open) */
+function cardHTML(h, mode = 'list') {
+  const box = !h.bg ? '' : mode === 'list' ? D.box(S.open) : (D.detailInCard ? D.detailInCard() : '');
+  const tap = mode === 'list' ? `data-act="details" data-no="${h.no}" role="button" tabindex="0" aria-label="হাদিসের বিস্তারিত খুলুন"` : '';
+  return `<article class="card hc" ${tap}>${headHTML(h)}${box}<p class="narrator">${h.nar}</p><p class="translation">${h.text}</p></article>`;
+}
+const secHTML = (h) => `<div class="card sc"><small>অধ্যায়</small><b>${h.bab}</b></div>`;
+function listHTML() {
+  const hs = S.has ? [H1] : PLAIN;
+  return `<header class="appbar np"><h1>${BOOK.book}<small>${hs[0].kitab}</small></h1></header>
+    <div class="body">${hs.map((h) => secHTML(h) + cardHTML(h)).join('')}</div>`;
+}
+function detailsHTML() {
+  const h = S.cur;
+  return `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="back">${icons.back}</button><h1>${h.book}<small>হাদিস: ${bn(h.no)}</small></h1></header>
+    <div class="rbody"><div class="body">${secHTML(h)}${h.bg && D.detailAbove ? D.detailAbove() : ''}${cardHTML(h, 'detail')}</div></div>`;
+}
+function shotHTML() {
+  const h = S.cur;
+  return `<header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="base">${icons.back}</button><h1>শেয়ারের ছবি</h1></header>
+    <div class="body"><div class="shot-wrap"><div class="shot">
+      <article class="card hc">${headHTML(h, false)}${h.bg ? `<p class="shot-line"><b>প্রেক্ষাপট:</b> ${BG.line}</p>` : ''}<p class="narrator">${h.nar}</p><p class="translation">${h.text}</p></article>
+      <div class="shot-foot"><span class="shot-logo">${I.logo()}</span><div><b>আল হাদিস</b><small>বাংলা হাদিসের নির্ভরযোগ্য অ্যাপ</small></div></div>
+    </div></div>
+    <div class="shot-btn"><button class="btn block" data-act="os">${icons.share}শেয়ার করুন</button></div></div>`;
+}
+
+/* ---------- Render ---------- */
+const MENU_ID = () => D.menuId || 'sheet-menu';
+const base = () => (S.from === 'details' ? 'details' : S.open ? 'open' : 'list');
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  sec.classList.toggle('rs', id === 'details' || (id === 'menu' && S.from === 'details'));
+  if (id === 'details' || (id === 'menu' && S.from === 'details')) sec.innerHTML = detailsHTML();
+  else if (id === 'shot') sec.innerHTML = shotHTML();
+  else sec.innerHTML = listHTML();
+}
+function syncExtra() { $$('[data-has]').forEach((b) => b.setAttribute('aria-pressed', String(!!+b.dataset.has === S.has))); }
+function onScreen(id) {
+  if (id === 'open') { S.has = true; S.open = !D.sheet; }
+  if (id === 'list') S.open = false;
+  if (id === 'list' || id === 'open' || id === 'details') S.from = id;
+  if (S.has) S.cur = H1; else if (S.cur.bg) S.cur = PLAIN[1];
+  syncExtra();
+  render(id);
+  // The full context as a sheet (demos with D.sheet), over the collapsed card.
+  if (id === 'open' && D.sheet) { $('#sheet-bg').innerHTML = D.sheet(); Kit.open('sheet-bg'); }
+  if (id === 'menu') { $(`#${MENU_ID()}`).innerHTML = D.menu(); Kit.open(MENU_ID()); }
+  D.after?.(id);
+}
+function setHas(v) {
+  S.has = v;
+  Kit.show(!v && Kit.current === 'open' ? 'list' : Kit.current);
+}
+
+/* ---------- Wiring ---------- */
+const pick = (t) => [H1, ...PLAIN].find((h) => h.no === +t?.dataset.no) || S.cur;
+const ACT = {
+  toggle: () => Kit.show(Kit.current === 'open' ? 'list' : 'open'),
+  details: (t) => { S.cur = pick(t); Kit.show('details'); },
+  back: () => Kit.show(S.open ? 'open' : 'list'),
+  more: (t) => {
+    S.cur = pick(t);
+    if (Kit.current !== 'menu') S.from = Kit.current === 'details' ? 'details' : Kit.current;
+    Kit.show('menu');
+  },
+  shot: () => Kit.show('shot'),
+  copy: () => { Kit.show(base()); Kit.snack(S.cur.bg ? 'সম্পূর্ণ হাদিস কপি হয়েছে, প্রেক্ষাপটের লাইনসহ' : 'সম্পূর্ণ হাদিস কপি হয়েছে'); },
+  base: () => Kit.show(base()),
+  os: () => Kit.snack('ফোনের শেয়ার মেনু খুলবে'),
+  noop: () => {},
+};
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('scrim')) {
+    if (Kit.current === 'menu' || (Kit.current === 'open' && D.sheet)) Kit.show(Kit.current === 'menu' ? base() : 'list');
+    return;
+  }
+  const h = e.target.closest('[data-has]');
+  if (h) { setHas(!!+h.dataset.has); return; }
+  const t = e.target.closest('[data-act]');
+  if (t) ACT[t.dataset.act]?.(t);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && (Kit.current === 'menu' || (Kit.current === 'open' && D.sheet))) Kit.show(Kit.current === 'menu' ? base() : 'list');
+  if (e.key === 'Enter' && e.target.matches('[data-act="details"]')) ACT.details(e.target);
+});
+/* ======================================================================
+   DEMO 4 — রঙিন ব্যান্ড: the context is a coloured band running edge to
+   edge across the card; opening it shows tiles for কে / কোথায় /
+   কী ঘটেছিল. Details page: the band as a rounded block above the hadith.
+   ====================================================================== */
+const tiles4 = () => `<div class="tiles">${BG.facts.map((f) => `<div class="tile ${f.k}"><span class="tk">${I[f.k](14)}${f.label}</span><span class="tv">${f.text}</span></div>`).join('')}</div>`;
+const D = {
+  box: (open) => `<div class="cb" data-act="noop"><span class="cb-tag">${I.ctx(14)}প্রেক্ষাপট</span>
+    ${open ? tiles4() + noteHTML() + srcHTML() : `<p class="cb-t">${BG.short}</p>`}
+    <button class="cb-btn" data-act="toggle" aria-expanded="${open}">${open ? LESS : MORE}${open ? I.up(15) : I.down(15)}</button></div>`,
+  detailAbove: () => `<section class="cb d"><span class="cb-tag">${I.ctx(14)}প্রেক্ষাপট</span>${tiles4()}${noteHTML()}${srcHTML()}</section>`,
+  menu: () => {
+    const sub = S.cur.bg ? '<small>প্রেক্ষাপটের লাইনসহ</small>' : '';
+    return `<div class="mhead"><div><h2>অন্যান্য অপশন</h2><p>${refText(S.cur)}</p></div><button class="xbtn" data-act="base" aria-label="বন্ধ করুন">${icons.close}</button></div>
+    <div class="m4"><button data-act="shot">${I.shot(24)}<span>স্ক্রিনশট শেয়ার${sub}</span></button><button data-act="copy">${I.copy(24)}<span>সম্পূর্ণ হাদিস কপি${sub}</span></button></div>`;
+  },
+};
+Kit.onScreen(onScreen);
+Kit.init({ demo: 4, name: 'রঙিন ব্যান্ড', extra: EXTRA, screens: SCREENS });
+</script>
+</body>
+</html>

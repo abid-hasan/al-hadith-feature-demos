@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>স্মার্ট সার্চ — ডেমো ১ · অ্যাপের ধরন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): highlight, chapter tag, body, empty art ===== */
+mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-radius:4px;padding:0 2px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+:root[data-theme="dark"] mark.hl{color:var(--primary)}
+.body{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column}
+.body::-webkit-scrollbar{width:0}
+/* "অধ্যায়ে মিলেছে": a match, not a verdict, so neutral colours only */
+.screen .ctag{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:20px;font-size:12px;font-weight:600;line-height:1;color:var(--body);background:var(--surface-2);border:1px solid var(--divider);white-space:nowrap;flex:none}
+.screen .ctag svg{width:13px;height:13px;flex:none}
+[data-hid]{cursor:pointer}
+.q-t{color:var(--primary)}
+.empty-art{color:var(--primary);flex:none}
+
+/* ===== Demo 1: RoundedScaffoldBody — green app bar behind a rounded page ===== */
+.screen{background:var(--appbar)}
+.body{background:var(--scaffold);border-radius:20px 20px 0 0}
+.foot{flex:none;padding:8px 16px 12px;background:var(--scaffold)}
+
+/* ===== _SearchSectionCard + NewSearchField ===== */
+.page{padding:14px 16px}
+.sc{background:var(--card);border-radius:12px;padding:14px}
+.sf{display:flex;align-items:center;height:48px;border-radius:10px;border:1px solid var(--divider);background:color-mix(in srgb,var(--primary) 4%,transparent);color:var(--hint)}
+.sf:focus-within{border-color:var(--primary);box-shadow:0 0 0 .5px var(--primary)}
+.sf .i{width:40px;display:grid;place-items:center}
+.sf .i svg{width:18px;height:18px}
+.sf input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.sf input::placeholder{color:var(--hint)}
+.sf .icon-btn svg{width:20px;height:20px}
+
+/* ===== SearchResultOverViewCard ===== */
+.ov{background:var(--card);border-radius:10px;padding:10px 14px;margin:14px 14px 7px}
+.ov p{margin:0}
+.ov .ql{font-size:16px;font-weight:600;color:var(--title)}
+.ov .ct{font-size:13px;color:var(--body)}
+
+/* ===== HadithListItem: tag sits in the header row, under the book name ===== */
+.hc{margin:7px 14px}
+.hc .narrator{margin:12px 0 0}
+.hadith-meta span.n{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+
+/* ===== Hadith page ===== */
+.hp .card{margin:14px 12px}
+.chl{margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid var(--divider);font-size:13.5px;color:var(--hint)}
+
+/* ===== NoSearchResultFound + spelling tip ===== */
+.nores{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 28px}
+.nores h3{margin:28px 0 0;font-size:20px;font-weight:600;color:var(--title)}
+.nores p{margin:10px 0 0;font-size:14.5px;color:var(--body)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screen: NewSearchPage — one box for every kind of search ===== -->
+      <section class="screen" data-screen="search">
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="home" data-ic="back"></button><h1>সার্চ</h1></header>
+        <div class="body"></div>
+        <div class="foot"><button class="btn block" data-act="run">হাদিস সার্চ করুন</button></div>
+      </section>
+
+      <!-- ===== Screen: SearchPage — summary card + highlighted cards ===== -->
+      <section class="screen" data-screen="results">
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="search" data-ic="back"></button><h1>সার্চ রেজাল্ট<small data-count></small></h1></header>
+        <div class="body"></div>
+      </section>
+
+      <!-- ===== Screen: hadith opened from a result ===== -->
+      <section class="screen" data-screen="hadith">
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="results" data-ic="back"></button><h1><span data-hb></span><small data-hn></small></h1></header>
+        <div class="body hp"></div>
+      </section>
+
+      <!-- ===== Screen: nothing matched ===== -->
+      <section class="screen" data-screen="empty">
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="search" data-ic="back"></button><h1>সার্চ রেজাল্ট<small data-count></small></h1></header>
+        <div class="body"></div>
+      </section>
+
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo hadith, the team's spelling list,
+   the Bangla spelling fold, chapter match, highlight and the flow.
+   Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ---------- Demo hadith (text only from the safe list) + chapter name ---------- */
+const BOOKS = { bukhari: { name: 'সহিহ বুখারি', abbr: 'বুখারী' }, muslim: { name: 'সহিহ মুসলিম', abbr: 'মুসলিম' } };
+const HADITHS = [
+  { id: 'b1', book: 'bukhari', num: 1, chapter: 'ওহীর সূচনা', nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত', bn: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' },
+  { id: 'b1894', book: 'bukhari', num: 1894, chapter: 'সাওম (রোজা)', nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'রোজা ঢালস্বরূপ।' },
+  { id: 'b6018', book: 'bukhari', num: 6018, chapter: 'আদব (শিষ্টাচার)', nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।' },
+  { id: 'b6116', book: 'bukhari', num: 6116, chapter: 'আদব (শিষ্টাচার)', nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'এক ব্যক্তি নবী (সাঃ)-কে বলল, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বলল, তিনি প্রতিবারই বললেন, রাগ করো না।' },
+  { id: 'm223', book: 'muslim', num: 223, chapter: 'পবিত্রতা', nar: 'আবু মালিক আশআরি (রা.) থেকে বর্ণিত', bn: 'পবিত্রতা ঈমানের অর্ধেক।' },
+].map((h, i) => ({ ...h, order: i }));
+
+/* ---------- Spelling fold: small Bangla differences count as the same ----------
+   ঈ/ই, ী/ি, ঊ/উ, ূ/ু, য/জ, ণ/ন, ৎ/ত, য-ফলা dropped. `map` keeps the
+   source index of every folded letter, so the highlight lands on the
+   hadith's own spelling. */
+const FOLD = { 'ঈ': 'ই', 'ী': 'ি', 'ঊ': 'উ', 'ূ': 'ু', 'য': 'জ', 'ণ': 'ন', 'ৎ': 'ত', '‌': '', '‍': '' };
+const YA = 'য', NUKTA = '়', HASANTA = '্', YYA = 'য়';
+function fold(s) {
+  const t = [], map = [];
+  for (let i = 0; i < s.length; i++) {
+    let c = s[i];
+    if (c === YA && s[i + 1] === NUKTA) { t.push(YYA); map.push(i); i++; continue; }   // য + ় = য়
+    if (c === HASANTA && s[i + 1] === YA && s[i + 2] !== NUKTA) { i++; continue; }      // য-ফলা
+    c = c in FOLD ? FOLD[c] : c.toLowerCase();
+    if (c) { t.push(c); map.push(i); }
+  }
+  return { t: t.join(''), map };
+}
+
+/* ---------- Team spelling list (ships with the app, works offline) ---------- */
+const SPELLINGS = [
+  ['সদকা', 'সাদাকা', 'সাদকা', 'ছদকা'],
+  ['নিয়ত', 'নিয়্যত', 'নিয়াত', 'নিয়্যাত'],
+  ['অজু', 'ওজু', 'ওযু', 'উযু'],
+  ['কুরআন', 'কোরআন', 'কুরান'],
+  ['জিকির', 'যিকির', 'যিকর'],
+  ['হজ', 'হজ্জ', 'হজ্ব'],
+].map((g) => [...new Set(g.map((w) => fold(w).t))]);
+function expand(word) {
+  const f = fold(word).t;
+  return SPELLINGS.find((g) => g.includes(f)) || [f];
+}
+
+/* ---------- Highlight ranges (grown to whole Bangla letters) ---------- */
+const MARK = /[ঁ-ঃ়া-্ৗ]/;
+function grow(s, end) {
+  while (end < s.length && MARK.test(s[end])) end += s[end] === HASANTA ? 2 : 1;
+  return Math.min(end, s.length);
+}
+function ranges(text, alts) {
+  const { t, map } = fold(text), out = [];
+  alts.forEach((a) => {
+    if (!a) return;
+    for (let i = t.indexOf(a); i >= 0; i = t.indexOf(a, i + a.length)) out.push([map[i], grow(text, map[i + a.length - 1] + 1)]);
+  });
+  out.sort((x, y) => x[0] - y[0]);
+  return out.reduce((m, r) => {                                       // join touching words: "ভালো কথা"
+    const l = m[m.length - 1];
+    if (l && (r[0] <= l[1] || !text.slice(l[1], r[0]).trim())) l[1] = Math.max(l[1], r[1]); else m.push(r);
+    return m;
+  }, []);
+}
+function hl(text, alts) {
+  if (!alts || !alts.length) return esc(text);
+  let o = '', p = 0;
+  ranges(text, alts).forEach(([a, b]) => { o += esc(text.slice(p, a)) + `<mark class="hl">${esc(text.slice(a, b))}</mark>`; p = b; });
+  return o + esc(text.slice(p));
+}
+
+/* ---------- Search: number, or words in the translation, or the chapter name ---------- */
+const toLatin = (s) => s.replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+function compute(raw) {
+  const q = raw.trim().replace(/\s+/g, ' ');
+  if (/^[0-9০-৯]+$/.test(q)) {
+    const n = +toLatin(q);
+    return { q, num: true, list: HADITHS.filter((h) => h.num === n).map((h) => ({ h, inText: false, inChap: false, alts: [] })) };
+  }
+  const groups = q.split(' ').map(expand);
+  const alts = groups.flat();
+  const list = HADITHS.map((h) => {
+    const ft = fold(h.bn).t, fc = fold(h.chapter).t;
+    const inText = groups.every((g) => g.some((a) => ft.includes(a)));
+    const inChap = groups.every((g) => g.some((a) => fc.includes(a)));
+    return inText || inChap ? { h, inText, inChap, alts } : null;
+  }).filter(Boolean).sort((a, b) => (b.inText - a.inText) || (a.h.order - b.h.order));
+  return { q, list };
+}
+
+/* ---------- App strings ---------- */
+const T = {
+  hint: 'হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন',
+  btn: 'হাদিস সার্চ করুন',
+  you: (q) => `আপনি ( <b class="q-t">${esc(q)}</b> ) লিখে সার্চ করেছেন`,
+  count: (n) => `সর্বমোট ফলাফল পাওয়া গেছে : ${bn(n)} টি`,
+  chap: 'অধ্যায়ে মিলেছে',
+  none: 'কোন সার্চ রেজাল্ট পাওয়া যায়নি',
+  tip: 'বানান একটু বদলে বা আরবিতে লিখে আবার সার্চ করুন।',
+};
+const ART = '<svg class="empty-art" width="84" height="84" viewBox="0 0 84 84" fill="none" aria-hidden="true"><rect x="14" y="8" width="44" height="58" rx="6" style="fill:var(--tint);stroke:var(--primary)" stroke-width="2.5"/><path d="M24 24h24M24 34h24M24 44h12" style="stroke:var(--primary)" stroke-width="2.5" stroke-linecap="round" opacity=".55"/><circle cx="54" cy="54" r="13" style="fill:var(--card);stroke:var(--primary-dark)" stroke-width="3"/><path d="m63.5 63.5 9 9" style="stroke:var(--primary-dark)" stroke-width="4" stroke-linecap="round"/><path d="m49.5 49.5 9 9m0-9-9 9" style="stroke:var(--primary-dark)" stroke-width="2.5" stroke-linecap="round"/></svg>';
+const ctag = (r) => (r && r.inChap ? `<span class="ctag">${icons.book}${T.chap}</span>` : '');
+const grade = () => '<span class="grade">সহিহ হাদিস</span>';
+const input = (cls = '') => `<input class="${cls}" data-q type="search" enterkeyhint="search" autocomplete="off" aria-label="হাদিস সার্চ ইনপুট" placeholder="${T.hint}">`;
+const clearBtn = () => `<button class="icon-btn" type="button" data-act="clear" aria-label="ক্লিয়ার">${icons.close}</button>`;
+
+/* ---------- State + flow ---------- */
+const S = { text: 'ইমান', res: null, cur: null };
+const EXAMPLES = ['ইমান', 'রোযা', 'নিয়্যত', 'আদব', 'ভালো কথা', '৬১১৬', 'রুজা'];
+const EXTRA = EXAMPLES.map((q) => `<button class="kit-chip" type="button" data-ex="${q}" aria-pressed="false">${q}</button>`).join('');
+const cur = () => HADITHS.find((h) => h.id === S.cur);
+const hit = () => (S.res ? S.res.list.find((r) => r.h.id === S.cur) : null);
+function run(raw) {
+  const v = String(raw == null ? S.text : raw).trim();
+  if (!v) { Kit.snack('সার্চ করার জন্য কিছু লিখুন'); return; }
+  S.text = v;
+  S.res = compute(v);
+  Kit.show(S.res.list.length ? 'results' : 'empty');
+}
+function syncClear(sec) {
+  $$('[data-act="clear"]', sec).forEach((b) => { const i = $('[data-q]', sec); b.hidden = !(i && i.value); });
+}
+function markEx() {
+  $$('[data-ex]').forEach((b) => b.setAttribute('aria-pressed', String(!!S.res && Kit.current !== 'search' && b.dataset.ex === S.res.q)));
+}
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  D[id] && D[id](sec);
+  $$('.body, .rl', sec).forEach((b) => { b.scrollTop = 0; });
+  $$('[data-q]', sec).forEach((i) => { i.value = id === 'search' || !S.res ? S.text : S.res.q; });
+  $$('[data-count]', sec).forEach((el) => { el.textContent = T.count(S.res ? S.res.list.length : 0); });
+  const h = cur();
+  if (h) {
+    $$('[data-hb]', sec).forEach((el) => { el.textContent = BOOKS[h.book].name; });
+    $$('[data-hn]', sec).forEach((el) => { el.textContent = `হাদিস: ${bn(h.num)}`; });
+  }
+  syncClear(sec);
+  markEx();
+}
+/* A screen opened straight from the toolbar gets a fitting search. */
+Kit.onScreen((id) => {
+  if ((id === 'results' || id === 'hadith') && !(S.res && S.res.list.length)) { S.text = 'ইমান'; S.res = compute(S.text); }
+  if (id === 'empty' && !(S.res && !S.res.list.length)) { S.text = 'রুজা'; S.res = compute(S.text); }
+  if (id === 'hadith' && !hit()) S.cur = S.res.list[0].h.id;
+  render(id);
+});
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-act],[data-hid],[data-ex]');
+  if (!t) return;
+  if (t.dataset.ex) { S.text = t.dataset.ex; run(); return; }
+  if (t.dataset.hid) { S.cur = t.dataset.hid; Kit.show('hadith'); return; }
+  const a = t.dataset.act, sec = t.closest('.screen');
+  if (a === 'run') { const i = sec && $('[data-q]', sec); run(i ? i.value : S.text); }
+  if (a === 'clear') { const i = $('[data-q]', sec); S.text = ''; i.value = ''; i.focus(); syncClear(sec); }
+  if (a === 'edit') { Kit.show('search'); setTimeout(() => { const i = $('.screen.on [data-q]'); if (i) { i.focus(); i.select(); } }, 30); }
+  if (a === 'home') Kit.snack('হোম পেজে ফিরে যাবে');
+});
+document.addEventListener('input', (e) => { if (e.target.matches('[data-q]')) { S.text = e.target.value; syncClear(e.target.closest('.screen')); } });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.matches('[data-q]')) { e.preventDefault(); run(e.target.value); }
+  if (e.key === 'Enter' && e.target.matches('[data-hid]')) e.target.click();
+});
+
+/* ======================================================================
+   DEMO 1 — অ্যাপের ধরন: NewSearchPage and SearchPage as they are today.
+   New: spelling fold + chapter match in the normal search, and the
+   "অধ্যায়ে মিলেছে" tag next to the hadith number.
+   ====================================================================== */
+function card(r) {
+  const h = r.h, b = BOOKS[h.book];
+  return `<article class="card hc" data-hid="${h.id}" tabindex="0">
+    <div class="hadith-head"><span class="book-badge">${b.abbr}</span>
+      <div class="hadith-meta"><b>${b.name}</b><span class="n">হাদিস: ${bn(h.num)}${ctag(r)}</span></div>${grade()}</div>
+    <p class="narrator">${h.nar}</p><p class="translation">${hl(h.bn, r.alts)}</p></article>`;
+}
+const D = {
+  search(sec) {
+    $('.body', sec).innerHTML = `<div class="page"><div class="sc">
+      <label class="sf"><span class="i">${icons.search}</span>${input()}${clearBtn()}</label></div></div>`;
+  },
+  results(sec) {
+    $('.body', sec).innerHTML = `<div class="ov"><p class="ql">${T.you(S.res.q)}</p><p class="ct">${T.count(S.res.list.length)}</p></div>
+      ${S.res.list.map(card).join('')}<div style="height:16px"></div>`;
+  },
+  hadith(sec) {
+    const h = cur(), b = BOOKS[h.book];
+    $('.body', sec).innerHTML = `<article class="card"><p class="chl">অধ্যায়: ${esc(h.chapter)}</p>
+      <div class="hadith-head"><span class="book-badge">${b.abbr}</span><div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${bn(h.num)}</span></div>${grade()}</div>
+      <p class="narrator">${h.nar}</p><p class="translation">${esc(h.bn)}</p></article>`;
+  },
+  empty(sec) {
+    $('.body', sec).innerHTML = `<div class="nores">${ART}<h3>${T.none}</h3><p>${T.tip}</p></div>`;
+  },
+};
+$$('[data-ic]').forEach((el) => { el.innerHTML = icons[el.dataset.ic]; });
+Kit.init({ demo: 1, name: 'অ্যাপের ধরন', extra: EXTRA, screens: [
+  { id: 'search', label: 'সার্চ পেজ' },
+  { id: 'results', label: 'সার্চ রেজাল্ট' },
+  { id: 'hadith', label: 'হাদিস পেজ' },
+  { id: 'empty', label: 'কিছু মেলেনি' },
+]});
+markEx();
+</script>
+</body>
+</html>

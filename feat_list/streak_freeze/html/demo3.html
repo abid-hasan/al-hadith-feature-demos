@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>হাদিস স্ট্রিক ফ্রিজ — ডেমো ৩ · কার্ডের ভেতরে খোলে</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+  /* ---------- শেয়ার করা টোকেন: বরফ-নীল আসে কিটের একমাত্র নীল থেকে ---------- */
+  :root{--pd:var(--primary-dark);
+    --ice:color-mix(in srgb,var(--grade-other) 82%,var(--card));
+    --ice-bg:color-mix(in srgb,var(--grade-other) 12%,var(--card));
+    --ice-ink:color-mix(in srgb,var(--grade-other) 82%,var(--title))}
+  :root[data-theme="dark"]{--pd:var(--primary);
+    --ice-bg:color-mix(in srgb,var(--grade-other) 20%,var(--card));
+    --ice-ink:color-mix(in srgb,var(--grade-other) 55%,var(--title))}
+  .snack:not(.on){visibility:hidden;transition:transform .25s,visibility 0s .25s}
+  .tint-ic{width:38px;height:38px;border-radius:50%;background:var(--tint);display:grid;place-items:center;flex:none}
+  .tint-ic svg{width:31px;height:31px}
+
+  /* ---------- হোম: বইয়ের সারি ---------- */
+  .brow{display:flex;align-items:center;gap:14px;width:calc(100% - 24px);margin:0 12px 10px;padding:14px 16px;border-radius:10px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+  .hex{width:46px;height:46px;flex:none;display:grid;place-items:center;color:var(--on-appbar);font-weight:700;font-size:14px;background:var(--primary);
+    clip-path:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%)}
+  .bm{flex:1;min-width:0;display:flex;flex-direction:column}
+  .bm b{color:var(--title);font-size:16px;line-height:1.3}
+  .bm small,.bt small{color:var(--hint);font-size:13px}
+  .bt{display:flex;flex-direction:column;align-items:center;flex:none}
+  .bt b{color:var(--title);font-size:14px}
+
+  /* ---------- নিচের নেভিগেশন ---------- */
+  .bottom-nav svg{width:22px;height:22px}
+  .bottom-nav button[aria-disabled="true"]{cursor:default}
+  .sec{margin:22px 16px 10px;font-size:16px;font-weight:700;color:var(--title)}
+  .pbox{margin:0 12px;padding:16px 10px;border-radius:16px;background:var(--card)}
+  /* ---------- লাইফটাইম অ্যাক্টিভিটি: এক সারিতে ৪টা মান ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+  .st{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;text-align:center}
+  .st .tint-ic{width:34px;height:34px}
+  .st .tint-ic svg{width:27px;height:27px}
+  .st b{font-size:14.5px;color:var(--title);line-height:1.3;white-space:nowrap}
+  .st small{font-size:12px;color:var(--hint);white-space:nowrap}
+  .fz{display:inline-flex;align-items:center;gap:3px;height:26px;margin-top:2px;padding:0 8px 0 6px;border-radius:20px;background:var(--ice-bg);color:var(--ice-ink);border:1px solid var(--ice);font-size:12.5px;font-weight:700}
+  .fz svg:last-child{width:14px;height:14px;transition:transform .2s}
+  .fz[aria-expanded="true"] svg:last-child{transform:rotate(180deg)}
+  .fz.zero{background:transparent;border-color:var(--divider);color:var(--hint)}
+  /* ---------- কার্ডের ভেতরে খোলা ফ্রিজের অংশ ---------- */
+  .panel{margin:14px 4px 0;padding-top:14px;border-top:1px solid var(--divider);animation:drop .22s ease}
+  @keyframes drop{from{opacity:0;transform:translateY(-6px)}}
+  .p-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .p-head b{font-size:15.5px;color:var(--title)}
+  .p-head span{font-size:13.5px;color:var(--ice-ink);font-weight:700}
+  .segs{display:flex;gap:6px;margin:10px 0 12px}
+  .segs i{flex:1;height:10px;border-radius:6px;background:var(--ice)}
+  .segs i.off{background:var(--divider)}
+  .note{padding:10px 12px;border-radius:10px;background:var(--ice-bg);color:var(--title);font-size:14px;margin-bottom:10px}
+  .rl{list-style:none;margin:0;padding:0}
+  .rl li{display:flex;gap:10px;padding:6px 0;font-size:14px;color:var(--body)}
+  .rl li svg{flex:none;width:18px;height:18px;color:var(--primary);margin-top:2px}
+  .p-foot{display:flex;justify-content:flex-end;margin-top:4px}
+  /* ---------- সাপ্তাহিক কার্যক্রম: বারের সারি (WeeklyActivityStrip) ---------- */
+  .desc{margin:0 6px 14px;font-size:14px;color:var(--hint)}
+  .strip{display:flex;height:162px}
+  .col{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 2px}
+  .col>small{font-size:14px;color:var(--hint);font-weight:500}
+  .col>small.on{color:var(--primary);font-weight:700}
+  .col .well{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;margin:6px 0}
+  .col .bar{width:16px;border-radius:8px;background:var(--primary);transition:height .3s}
+  .col .bar.off{background:var(--tint)}
+  .col .bar.ice{background:var(--ice)}
+  .col .well>svg{color:var(--ice-ink)}
+  .col b{font-size:14px;color:var(--title)}
+  .col i{font-style:normal;font-size:12px;color:var(--hint);white-space:nowrap}
+  .col i.ice{color:var(--ice-ink);font-weight:700}
+  /* ---------- "স্ট্রিক সেইফ": নিচ থেকে ওঠা শিট ---------- */
+  #sheet-safe .sheet-body{text-align:center;padding-top:22px}
+  .safe-ic{width:64px;height:64px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;background:var(--ice-bg);color:var(--ice-ink)}
+  #sheet-safe h2{margin:0 0 6px;font-size:18px;color:var(--title)}
+  #sheet-safe p{margin:0;font-size:15px;color:var(--body)}
+  #sheet-safe .muted{margin-top:6px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <section class="screen" data-screen="home"></section>
+      <section class="screen" data-screen="reader"></section>
+      <section class="screen" data-screen="profile"></section>
+
+      <!-- "স্ট্রিক সেইফ": ফ্রিজ খরচের পর প্রথমবার হোম খুললে নিচ থেকে ওঠে -->
+      <div class="sheet" id="sheet-safe" role="dialog" aria-label="স্ট্রিক সেইফ">
+        <div class="sheet-body"><div class="safe-ic" id="safe-ic"></div><h2 id="safe-t"></h2><p id="safe-m"></p><p class="muted" id="safe-l"></p></div>
+        <div class="sheet-foot"><button class="btn block" data-close>ঠিক আছে</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+  /* ===== আইকন: বরফ, আর প্রোফাইলের আসল SVG (রং কিটের টোকেন থেকে) ===== */
+  const N = (v) => Kit.bn(v);
+  const I = Kit.icons;
+  const snow = (s = 18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="M9.5 3.5 12 6l2.5-2.5M9.5 20.5 12 18l2.5 2.5M3.6 10.4l3.4-.9-.9-3.4M20.4 13.6l-3.4.9.9 3.4M6.1 17.9l.9-3.4-3.4-.9M17.9 6.1l-.9 3.4 3.4.9"/></svg>`;
+  const G = 'style="fill:var(--primary)"', Y = 'style="fill:var(--accent)"';
+  const appSvg = (inner, t) => `<svg viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(${t})">${inner}</g></svg>`;
+  const ICON = {
+    streak: appSvg(`<path ${G} d="M27.6 8.9C27.7 14.5 22.8 19 18.1 24.3C13.1 29.7 9.7 34.9 9.7 41.2C9.7 48.2 13.8 53.7 19.7 56.7C17.1 47.8 21.3 43.6 25.8 39.1C28 36.9 29.2 34.7 30.6 32.3C32.2 36 34.2 37.9 37.3 40.5C42.4 44.8 44.9 49.2 42.8 56.7C49.1 52.7 53.1 47.1 53.1 40.2C53.1 32.9 49.7 26.4 44.1 21.6C41.9 23.2 39.7 26.6 37.4 28.1C35.7 25 35.8 20.9 34.1 16.9C32.8 13.6 30.7 10.9 27.6 8.9Z"/><path ${Y} d="M30.5 40.4C29.9 44 25.9 46.5 24.3 50.7C22.8 54.8 26.1 60.1 30.7 60.1C35.2 60.1 38 56.8 38 53C38 49.9 36.2 47.8 34.2 45.8C32.7 44.2 31.4 42.4 30.5 40.4Z"/>`, '0.6 -2.5'),
+    best: appSvg(`<path ${G} d="M15 16.8H11.1C7.7 16.8 5.8 18.8 5.8 22.1C5.8 28.3 10.3 33.9 17.1 35.7L19.3 32.2C13.6 30.9 9.6 26.8 9.6 22.1C9.6 21.1 10.1 20.6 11.1 20.6H15V16.8ZM44.5 16.8H48.9C52.3 16.8 54.2 18.8 54.2 22.1C54.2 28.3 49.7 33.9 42.9 35.7L40.7 32.2C46.4 30.9 50.4 26.8 50.4 22.1C50.4 21.1 49.9 20.6 48.9 20.6H44.5V16.8Z"/><path ${G} d="M16.5 11.3H43.3C44.9 11.3 45.8 12.2 45.8 13.8V25.9C45.8 34 40 40.3 32 42V47.9C32 49.5 34.1 50 36.9 50C39.2 50 41.3 51.4 41.3 53.5V54.2H17.6V53.5C17.6 51.4 19.6 50 22 50C24.8 50 27 49.5 27 47.9V42C19.1 40.3 13.3 34 13.3 25.9V14.2C13.3 12.3 14.5 11.3 16.5 11.3Z"/><path ${Y} d="M29.7 17.2L32.2 22L37.6 22.8L33.7 26.5L34.7 31.9L29.7 29.3L24.8 31.9L25.7 26.5L21.8 22.8L27.2 22L29.7 17.2Z"/>`, '2 -0.75'),
+    time: appSvg(`<path ${G} fill-rule="evenodd" d="M33 7.9A25.6 25.6 0 1 1 33 59.1A25.6 25.6 0 1 1 33 7.9ZM33 12.3A21.2 21.2 0 1 0 33 54.7A21.2 21.2 0 1 0 33 12.3Z"/><path ${Y} d="M33 17.25C34.24 17.25 35.25 18.26 35.25 19.5V33.85H43C44.24 33.85 45.25 34.86 45.25 36.1C45.25 37.34 44.24 38.35 43 38.35H33C31.76 38.35 30.75 37.34 30.75 36.1V19.5C30.75 18.26 31.76 17.25 33 17.25Z"/>`, '-1 -1.5'),
+    days: appSvg(`<path ${G} fill-rule="evenodd" d="M15.3 16H45C49.6 16 52.7 19.1 52.7 23.4V50.7C52.7 55.1 49.8 58.4 45.3 58.4H15C10.4 58.4 7.7 55.2 7.7 50.8V23.4C7.7 18.9 10.8 16 15.3 16ZM11.6 29V50.1C11.6 52.8 13.2 54.2 15.9 54.2H44.4C47.3 54.2 48.8 52.7 48.8 50.1V29H11.6Z"/><path ${Y} d="M19.2 9.2C20.53 9.2 21.6 10.27 21.6 11.6V19.6C21.6 20.93 20.53 22 19.2 22C17.87 22 16.8 20.93 16.8 19.6V11.6C16.8 10.27 17.87 9.2 19.2 9.2ZM42 9.2C43.33 9.2 44.4 10.27 44.4 11.6V19.6C44.4 20.93 43.33 22 42 22C40.67 22 39.6 20.93 39.6 19.6V11.6C39.6 10.27 40.67 9.2 42 9.2Z"/>`, '1.8 -1.8'),
+  };
+
+  /* ===== ডেমো ডেটা: বই আর নিশ্চিত হাদিস ===== */
+  const BOOKS = [
+    { id: 'b', ab: 'B', name: 'সহীহ বুখারী', by: 'ইমাম বুখারি', total: 7563, ch: 'ওহীর সূচনা', no: 1,
+      tr: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।', nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত' },
+    { id: 'm', ab: 'M', name: 'সহীহ মুসলিম', by: 'ইমাম মুসলিম', total: 7547, ch: 'পবিত্রতা', no: 223,
+      tr: 'পবিত্রতা ঈমানের অর্ধেক।', nar: 'আবু মালিক আশআরী (রা.) থেকে বর্ণিত' },
+  ];
+  const WD = ['র', 'সো', 'ম', 'বু', 'বৃ', 'শু', 'শ'];            // সপ্তাহের ছোট নাম (রবি থেকে)
+  const WD_FULL = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+  const MAX = 3;                                                     // একসাথে সর্বোচ্চ ফ্রিজ
+
+  /* ===== স্টেট: গতকাল মিস হয়েছিল, একটা ফ্রিজ খরচ হয়ে ৪৫ দিনের স্ট্রিক বেঁচেছে =====
+     week: শেষ ৭ দিন; st = read (পড়া) | ice (ফ্রিজে বাঁচানো) | miss (ভাঙা) | today (আজ, এখনো পড়া হয়নি)
+     toward: বোনাসের জন্য টানা পড়ার দিন (ফ্রিজের দিন গোনে না, ভাঙেও না) */
+  let S;
+  function seed() {
+    S = { streak: 45, best: 52, freezes: 2, toward: 6, todayRead: false, activeDays: 186, minutes: 2300, book: 'b',
+      week: [
+        { wd: 5, n: 6, min: 14, st: 'read' }, { wd: 6, n: 4, min: 9, st: 'read' }, { wd: 0, n: 8, min: 21, st: 'read' },
+        { wd: 1, n: 3, min: 7, st: 'read' }, { wd: 2, n: 5, min: 12, st: 'read' }, { wd: 3, n: 0, min: 0, st: 'ice' },
+        { wd: 4, n: 0, min: 0, st: 'today' },
+      ],
+      pending: 1 };                                                  // কয়টা ফ্রিজ খরচের খবর এখনো দেখানো হয়নি
+  }
+  seed();
+  const book = () => BOOKS.find((b) => b.id === S.book);
+  const fState = () => (S.freezes >= MAX ? 'full' : S.freezes === 0 ? 'empty' : 'some');
+  const fmtMin = (m) => (m < 60 ? `${N(m)} মি` : `${N(Math.floor(m / 60))} ঘ ${N(m % 60)} মি`);
+
+  /* ===== লেখা: শিটের নিয়ম, ভরা/খালি অবস্থা, "স্ট্রিক সেইফ" ===== */
+  const RULES = [
+    'কোনো দিন একটাও হাদিস না পড়লে একটা ফ্রিজ নিজে থেকেই খরচ হবে, স্ট্রিক ভাঙবে না।',
+    'প্রতি মাসের শুরুতে ২টা ফ্রিজ পাবেন, আর টানা ৭ দিন পড়লে ১টা বোনাস ফ্রিজ।',
+    'একসাথে সর্বোচ্চ ৩টা ফ্রিজ রাখা যায়।',
+  ];
+  const NOTE = {
+    full: 'আপনার ৩টা ফ্রিজই ভরা। একটা খরচ না হওয়া পর্যন্ত নতুন ফ্রিজ জমবে না।',
+    empty: 'এখন কোনো ফ্রিজ নেই। নতুন মাস শুরু হলে ২টা পাবেন, আর টানা ৭ দিন পড়লে ১টা বোনাস পাবেন।',
+  };
+  const leftText = () => (S.freezes ? `${N(S.freezes)}টা ফ্রিজ বাকি আছে` : 'কোনো ফ্রিজ বাকি নেই');
+  function safeText(used) {
+    return { title: 'স্ট্রিক সেইফ',
+      msg: `${used > 1 ? N(used) + 'টা' : 'একটা'} ফ্রিজ ব্যবহার হয়েছে, আপনার ${N(S.streak)} দিনের স্ট্রিক একদম সেইফ!`,
+      left: S.freezes ? `আর ${N(S.freezes)}টা ফ্রিজ বাকি আছে।` : 'আর কোনো ফ্রিজ বাকি নেই।' };
+  }
+  const BONUS = 'টানা ৭ দিন পড়েছেন, একটা বোনাস ফ্রিজ পেয়েছেন';
+
+  /* ===== কাজ: পড়া, দিন মিস, নতুন মাস ===== */
+  function readToday() {
+    const d = S.week[6];
+    if (S.todayRead) { d.n += 1; d.min += 2; S.minutes += 2; return; }
+    S.todayRead = true; d.st = 'read'; d.n = 1; d.min = 3; S.minutes += 3;
+    S.streak += 1; S.best = Math.max(S.best, S.streak); S.activeDays += 1; S.toward += 1;
+    if (S.toward >= 7) { S.toward = 0; if (S.freezes < MAX) { S.freezes += 1; UI.bonus(); } }
+  }
+  function nextDay() {
+    S.week.shift();
+    S.week.push({ wd: (S.week[5].wd + 1) % 7, n: 0, min: 0, st: 'today' });
+    S.todayRead = false;
+  }
+  // একটা পুরো দিন পড়া ছাড়া কাটল; পরের দিন অ্যাপ খোলা হলো
+  function missDay() {
+    if (S.todayRead) nextDay();
+    const d = S.week[6];
+    if (S.freezes > 0) { S.freezes -= 1; d.st = 'ice'; S.streak += 1; S.best = Math.max(S.best, S.streak); S.pending += 1; }
+    else { d.st = 'miss'; S.streak = 0; S.toward = 0; }
+    nextDay();
+  }
+
+  /* ===== হোম আর হাদিস পড়ার স্ক্রিন (ফিচারে পৌঁছানোর জন্য যতটুকু লাগে) ===== */
+  const NAV = (on) => `<nav class="bottom-nav">
+    <button data-go="home" class="${on === 'home' ? 'on' : ''}">${I.home}হোম</button>
+    <button aria-disabled="true">${I.book}বিষয়ভিত্তিক</button>
+    <button aria-disabled="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>কালেকশন</button>
+    <button data-go="profile" class="${on === 'profile' ? 'on' : ''}">${I.user}প্রোফাইল</button></nav>`;
+  function homeHTML() {
+    return `<header class="appbar"><h1 style="margin-left:10px">আল হাদিস</h1></header><div class="scroll" style="padding-top:12px">` +
+      BOOKS.map((b) => `<button class="brow" data-book="${b.id}"><span class="hex">${b.ab}</span><span class="bm"><b>${b.name}</b><small>${b.by}</small></span>` +
+        `<span class="bt"><b>${N(b.total)}</b><small>হাদিস</small></span></button>`).join('') + `</div>${NAV('home')}`;
+  }
+  function readerHTML() {
+    const b = book();
+    return `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="home">${I.back}</button><h1>${b.name}<small>${b.ch}</small></h1></header>
+      <div class="scroll" style="padding-top:12px"><article class="card"><div class="hadith-head"><span class="book-badge">${b.ab}</span>
+      <div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${N(b.no)}</span></div><span class="grade">সহিহ</span></div>
+      <p class="translation">${b.tr}</p><p class="narrator">${b.nar}</p></article></div>`;
+  }
+
+  /* ===== ওয়্যারিং: স্ক্রিনে এলে নতুন করে আঁকা, হোমে এলে জমে থাকা খবর, পড়ার পাতায় কিছুক্ষণ থাকলে দিনটা গোনা ===== */
+  const $s = (id) => document.querySelector(`.screen[data-screen="${id}"]`);
+  const R = { home: homeHTML, reader: readerHTML };
+  const paint = (id) => { const f = R[id] || UI[id]; if (f && $s(id)) $s(id).innerHTML = f(); };
+  const refresh = () => paint(Kit.current);
+  let readTimer, noticeTimer;
+  Kit.onScreen((id) => {
+    paint(id);
+    clearTimeout(readTimer); clearTimeout(noticeTimer);
+    if (id === 'home' && S.pending) {
+      noticeTimer = setTimeout(() => { const used = S.pending; S.pending = 0; UI.notice(safeText(used)); }, 380);
+    }
+    if (id === 'reader') readTimer = setTimeout(() => { if (Kit.current === 'reader') { readToday(); } }, 1300);
+  });
+  const EXTRA = '<button class="kit-chip" type="button" id="x-miss">একদিন মিস</button>' +
+    '<button class="kit-chip" type="button" id="x-month">নতুন মাস</button><button class="kit-chip" type="button" id="x-reset">শুরুর ডেটা</button>';
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#x-miss')) { const had = S.freezes; missDay(); Kit.show(had ? 'home' : 'profile'); }
+    if (e.target.closest('#x-month')) { S.freezes = Math.min(MAX, S.freezes + 2); Kit.show('profile'); }
+    if (e.target.closest('#x-reset')) { seed(); Kit.show('home'); }
+    const t = e.target.closest('[data-book]');
+    if (t) { S.book = t.dataset.book; Kit.show('reader'); }
+  });
+  /* ===== ডেমো ৩: চিপে চাপলে লাইফটাইম কার্ডের ভেতরেই ফ্রিজের অংশ খোলে ===== */
+  let fzOpen = false;
+  const stat = (ic, v, label, extra = '') => `<div class="st"><span class="tint-ic">${ic}</span><b>${v}</b><small>${label}</small>${extra}</div>`;
+  function panel() {
+    const st = fState();
+    return `<div class="panel" id="fz-panel"><div class="p-head"><b>স্ট্রিক ফ্রিজ</b><span>${leftText()}</span></div>
+      <div class="segs">${[0, 1, 2].map((i) => `<i class="${i < S.freezes ? '' : 'off'}"></i>`).join('')}</div>
+      ${st !== 'some' ? `<div class="note">${NOTE[st]}</div>` : ''}
+      <ul class="rl">${RULES.map((r) => `<li>${I.check}<span>${r}</span></li>`).join('')}</ul>
+      <div class="p-foot"><button class="btn text" data-fz-toggle>ঠিক আছে</button></div></div>`;
+  }
+  function strip() {
+    const mx = Math.max(1, ...S.week.map((d) => d.n));
+    return `<div class="strip">${S.week.map((d, i) => {
+      const h = d.st === 'read' ? 18 + 42 * d.n / mx : d.st === 'ice' ? 40 : 6;
+      const cls = d.st === 'read' ? '' : d.st === 'ice' ? 'ice' : 'off';
+      return `<div class="col"><small class="${i === 6 ? 'on' : ''}">${WD[d.wd]}</small><div class="well">${d.st === 'ice' ? snow(16) : ''}<span class="bar ${cls}" style="height:${h}px"></span></div>` +
+        (d.st === 'ice' ? `<b>${N(0)}</b><i class="ice">ফ্রিজ</i>` : `<b>${N(d.n)}</b><i>${fmtMin(d.min)}</i>`) + '</div>';
+    }).join('')}</div>`;
+  }
+  const UI = {
+    profile() {
+      const chip = `<button class="fz${S.freezes ? '' : ' zero'}" data-fz-toggle aria-expanded="${fzOpen}" aria-controls="fz-panel">${snow(13)}${N(S.freezes)}/${N(MAX)}${I.down}</button>`;
+      return `<header class="appbar"><h1 style="margin-left:10px">প্রোফাইল</h1></header><div class="scroll">
+        <h2 class="sec">লাইফটাইম অ্যাক্টিভিটি</h2>
+        <div class="pbox"><div class="stats">${stat(ICON.time, fmtMin(S.minutes), 'সময়')}${stat(ICON.days, N(S.activeDays), 'সক্রিয় দিন')}` +
+        `${stat(ICON.streak, N(S.streak), 'স্ট্রিক', chip)}${stat(ICON.best, N(S.best), 'সেরা স্ট্রিক')}</div>${fzOpen ? panel() : ''}</div>
+        <h2 class="sec">সাপ্তাহিক কার্যক্রম</h2>
+        <div class="pbox"><p class="desc">গত ৭ দিনে পড়া হাদিস ও পড়ার সময়</p>${strip()}</div>
+      </div>${NAV('profile')}`;
+    },
+    notice(t) {
+      document.getElementById('safe-t').textContent = t.title;
+      document.getElementById('safe-m').textContent = t.msg;
+      document.getElementById('safe-l').textContent = t.left;
+      Kit.open('sheet-safe');
+    },
+    bonus() { Kit.snack(BONUS); },
+  };
+  document.addEventListener('click', (e) => { if (e.target.closest('[data-fz-toggle]')) { fzOpen = !fzOpen; refresh(); } });
+
+  document.getElementById('safe-ic').innerHTML = snow(32);
+  Kit.init({ demo: 3, name: 'কার্ডের ভেতরে খোলে', extra: EXTRA, screens: [
+    { id: 'home', label: 'হোম' }, { id: 'reader', label: 'হাদিস পড়া' }, { id: 'profile', label: 'প্রোফাইল' },
+  ]});
+</script>
+</body>
+</html>

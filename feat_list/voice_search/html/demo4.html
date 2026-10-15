@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ভয়েস সার্চ — ডেমো ৪ · ভাসমান পিল</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): search page parts, results, live text ===== */
+.body{flex:1;min-height:0;overflow-y:auto;position:relative}
+.body::-webkit-scrollbar{width:0}
+.foot{flex:none;padding:8px 16px 14px;background:var(--scaffold)}
+.page{padding:14px 16px}
+.sc{background:var(--card);border-radius:12px;padding:14px;margin-bottom:16px}
+.st{margin:0;font-size:16px;font-weight:600;color:var(--title)}
+/* NewSearchField */
+.sf{display:flex;align-items:center;height:48px;border-radius:10px;border:.8px solid var(--divider);background:color-mix(in srgb,var(--primary) 4%,transparent);color:var(--hint)}
+.sf:focus-within{border-color:var(--primary);box-shadow:0 0 0 .4px var(--primary)}
+.sf .i{width:40px;display:grid;place-items:center;flex:none}
+.sf .i svg{width:18px;height:18px}
+.sf input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.sf input::placeholder{color:var(--hint)}
+.sf input::-webkit-search-cancel-button{display:none}
+.sf .icon-btn svg{width:20px;height:20px}
+/* SearchOptionCard (scope radios) */
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.opt{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 4px;border-radius:8px;font-size:15px;font-weight:500;color:var(--title);text-align:left}
+.opt[aria-checked="true"]{font-weight:700}
+.rd{width:20px;height:20px;border-radius:50%;border:2px solid var(--hint);flex:none;display:grid;place-items:center}
+[aria-checked="true"] .rd{border-color:var(--primary)}
+[aria-checked="true"] .rd::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--primary)}
+/* Results: SearchResultOverViewCard + HadithListItem */
+.ov{background:var(--card);border-radius:10px;padding:10px 14px;margin:14px 14px 7px}
+.ov p{margin:0}
+.ov .ql{font-size:16px;font-weight:600;color:var(--title)}
+.ov .q-t{color:var(--primary)}
+.ov .ct{font-size:13px;color:var(--body)}
+.bks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bks span{font-size:12.5px;padding:1px 10px;border-radius:20px;background:var(--surface-2);color:var(--body);border:1px solid var(--divider)}
+.bks .mt{background:var(--tint);color:var(--primary-dark);border-color:transparent;font-weight:700}
+:root[data-theme="dark"] .bks .mt{color:var(--primary)}
+.hc{margin:7px 14px}
+.hc .narrator{margin:12px 0 0}
+.none{padding:40px 24px;text-align:center;color:var(--title);font-size:17px;font-weight:600}
+mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-radius:4px;padding:0 2px}
+:root[data-theme="dark"] mark.hl{color:var(--primary)}
+.lnk{display:inline-flex;align-items:center;gap:4px;color:var(--primary);font-weight:700;font-size:13.5px}
+.lnk svg{width:16px;height:16px}
+/* Live transcript: words fade in, caret blinks while listening */
+.live .w.new{animation:wIn .4s ease-out}
+.live .hint{color:var(--hint);font-weight:400}
+.caret{display:inline-block;width:2px;height:1em;margin-left:3px;vertical-align:-.12em;background:var(--primary);animation:blink 1s steps(1) infinite}
+@keyframes wIn{from{opacity:0}to{opacity:1}}
+@keyframes blink{50%{opacity:0}}
+@keyframes ripple{from{transform:scale(1);opacity:.45}to{transform:scale(1.9);opacity:0}}
+@keyframes bar{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+.wave{display:flex;align-items:center;gap:3px;height:26px}
+.wave i{width:3px;height:100%;border-radius:3px;background:var(--primary);transform:scaleY(.2)}
+.phone[data-vs="wait"] .wave i{animation:bar 2.4s ease-in-out infinite;opacity:.5}
+.phone[data-vs="speak"] .wave i{animation:bar .8s ease-in-out infinite}
+.vstatus{font-size:14px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .vstatus{color:var(--primary)}
+/* ===== Demo 4: a floating pill instead of a sheet; the page stays visible ===== */
+.screen{background:var(--appbar)}
+.body{background:var(--scaffold);border-radius:20px 20px 0 0}
+.mic-c{width:36px;height:36px;margin-right:6px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.mic-c svg{width:20px!important;height:20px!important}
+/* Field while listening: words land straight in the box */
+.sf.listen{border:1.5px solid var(--primary);background:var(--card)}
+.sf .live{flex:1;min-width:0;font-size:15.5px;font-weight:700;color:var(--title);white-space:nowrap;overflow:hidden}
+.sf .live .hint{font-size:14px}
+/* Floating layer above the search button */
+.float{position:absolute;left:12px;right:12px;bottom:76px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:8px}
+.float:empty{display:none}
+.mini{display:flex;gap:6px}
+.mini button{height:30px;padding:0 12px;border-radius:20px;font-size:13px;background:var(--card);color:var(--body);border:1px solid var(--divider);box-shadow:var(--shadow)}
+.mini button.on{background:var(--primary);border-color:var(--primary);color:var(--on-appbar);font-weight:700}
+.pill{width:100%;height:60px;display:flex;align-items:center;gap:10px;padding:0 8px;border-radius:32px;background:var(--title);color:var(--scaffold);box-shadow:0 10px 28px rgba(0,0,0,.28);animation:up .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.pill .dot{position:relative;width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--primary);color:var(--on-appbar)}
+.pill .dot svg{position:relative;width:22px;height:22px}
+.pill .dot::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--primary);opacity:0}
+.phone[data-vs="wait"] .pill .dot::before,.phone[data-vs="speak"] .pill .dot::before{animation:ripple 1.4s ease-out infinite}
+.pill .wave{flex:1;justify-content:center;height:24px}
+.phone .pill .vstatus{color:var(--scaffold);font-size:14.5px}
+.pill .x{height:40px;padding:0 14px;border-radius:20px;font-size:14px;font-weight:700;color:var(--scaffold);background:color-mix(in srgb,var(--scaffold) 16%,transparent)}
+.fcard{width:100%;padding:14px;border-radius:16px;background:var(--card);box-shadow:0 10px 28px rgba(0,0,0,.22);animation:up .3s cubic-bezier(.2,.8,.2,1)}
+.fcard .h{display:flex;gap:12px;align-items:center}
+.fcard .ni{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.fcard .ni svg{width:21px;height:21px}
+.fcard b{display:block;color:var(--title);font-size:15px;line-height:1.4}
+.fcard p{margin:2px 0 0;font-size:13.5px;color:var(--body)}
+.fcard .acts{display:flex;justify-content:flex-end;gap:6px;margin-top:10px}
+.fcard .btn{height:38px;font-size:14px}
+/* Permission: a callout pointing at the mic */
+.callout{position:relative;margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--title);color:var(--scaffold);animation:up .3s ease-out}
+.callout::before{content:"";position:absolute;top:-6px;right:18px;width:12px;height:12px;background:inherit;transform:rotate(45deg)}
+.callout b{display:block;font-size:15px}
+.callout p{margin:2px 0 0;font-size:14px;opacity:.85}
+.callout .acts{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}
+.callout .btn{height:36px;font-size:14px}
+.callout .btn.text{color:var(--scaffold);opacity:.8}
+/* Results: the query as a tappable bar */
+.qbar{display:flex;align-items:center;gap:8px;width:calc(100% - 28px);margin:14px 14px 4px;height:46px;padding:0 12px;border-radius:10px;background:var(--card);border:.8px solid var(--divider);color:var(--hint);text-align:left}
+.qbar span{flex:1;min-width:0;color:var(--title);font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qbar svg{width:18px;height:18px;flex:none}
+.qbar .e{color:var(--primary)}
+.cnt{margin:6px 16px 2px;font-size:13px;color:var(--body)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Search page; the voice UI floats above the search button ===== -->
+      <section class="screen" data-screen="search">
+        <header class="appbar"><button class="icon-btn bk" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body host"></div>
+        <div class="float"></div>
+        <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
+      </section>
+      <section class="screen" data-screen="permission">
+        <header class="appbar"><button class="icon-btn bk" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body host"></div>
+        <div class="float"></div>
+        <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
+      </section>
+      <section class="screen" data-screen="listening">
+        <header class="appbar"><button class="icon-btn bk" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body host"></div>
+        <div class="float"></div>
+        <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
+      </section>
+      <section class="screen" data-screen="nohear">
+        <header class="appbar"><button class="icon-btn bk" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body host"></div>
+        <div class="float"></div>
+        <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
+      </section>
+      <section class="screen" data-screen="denied">
+        <header class="appbar"><button class="icon-btn bk" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body host"></div>
+        <div class="float"></div>
+        <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
+      </section>
+      <section class="screen" data-screen="offline">
+        <header class="appbar"><button class="icon-btn bk" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body host"></div>
+        <div class="float"></div>
+        <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
+      </section>
+      <!-- ===== Screen: SearchPage (results) ===== -->
+      <section class="screen" data-screen="results">
+        <header class="appbar"><button class="icon-btn bk" aria-label="পেছনে" data-go="search"></button><h1>সার্চ রেজাল্ট</h1></header>
+        <div class="body host"></div>
+      </section>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, scripted listening, search.
+   No real microphone: the "speech" is a timed script per language.
+   Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const sv = (d) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const XI = {
+  micOff: sv('<path d="M3 3l18 18"/><path d="M9 9v2a3 3 0 0 0 5.1 2.1M15 10V6a3 3 0 0 0-5.7-1.3"/><path d="M5 11a7 7 0 0 0 11.5 5.4M19 11a7 7 0 0 1-.6 2.8M12 18v3"/>'),
+  wifiOff: sv('<path d="M3 3l18 18"/><path d="M8.5 15.5a5 5 0 0 1 6.2-.6M5 12a10 10 0 0 1 4.3-2.4M2 8.5a15 15 0 0 1 4.6-2.8M12.5 6a15 15 0 0 1 9.5 2.5M16.5 10.5A10 10 0 0 1 19 12"/><circle cx="12" cy="19" r="1" fill="currentColor"/>'),
+  settings: sv('<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>'),
+  keyboard: sv('<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>'),
+  retry: sv('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'),
+};
+const ic = (k, w) => { const s = icons[k] || XI[k]; return w ? s.replace(/width="\d+" height="\d+"/, `width="${w}" height="${w}"`) : s; };
+
+/* ---------- Demo data (hadith text only from the safe list) ---------- */
+const BOOKS = { bukhari: { name: 'সহিহ বুখারি', abbr: 'বুখারী' }, muslim: { name: 'সহিহ মুসলিম', abbr: 'মুসলিম' } };
+const HADITHS = [
+  { book: 'bukhari', num: 1894, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'রোজা ঢালস্বরূপ।', keys: 'রোজা সিয়াম সাওম ফজিলত ফাদলুস fasting fast virtue' },
+  { book: 'bukhari', num: 1, nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত', bn: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।', keys: 'নিয়ত আমল intention deeds' },
+  { book: 'bukhari', num: 6018, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।', keys: 'কথা চুপ জবান speech silence' },
+  { book: 'bukhari', num: 6116, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'এক ব্যক্তি নবী (সাঃ)-কে বলল, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বলল, তিনি প্রতিবারই বললেন, রাগ করো না।', keys: 'রাগ ক্রোধ উপদেশ anger' },
+  { book: 'muslim', num: 223, nar: 'আবু মালিক আশআরি (রা.) থেকে বর্ণিত', bn: 'পবিত্রতা ঈমানের অর্ধেক।', keys: 'পবিত্রতা ঈমান অজু purity faith' },
+];
+/* What the user "says" in each language. Arabic speech is shown in Bangla
+   letters here because the demos never show Arabic script. */
+const LANGS = [{ id: 'bn', label: 'বাংলা' }, { id: 'en', label: 'English' }, { id: 'ar', label: 'আরবি' }];
+const SCRIPT = { bn: 'রোজার ফজিলত', en: 'virtue of fasting', ar: 'ফাদলুস সিয়াম' };
+const TX = {
+  hint: 'হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন',
+  sayHint: 'হাদিসের বিষয় বা নাম্বার বলুন',
+  listening: 'শুনছি…',
+  cancel: 'বাতিল করুন',
+  mic: 'বলে খুঁজুন',
+  permTitle: 'মাইকের অনুমতি দিন',
+  permMsg: 'কথা বলে হাদিস খুঁজতে মাইকের অনুমতি লাগবে।',
+  permNo: 'এখন না',
+  permYes: 'অনুমতি দিন',
+};
+const STATES = {
+  nohear: { icon: 'mic', title: 'কিছু শোনা যায়নি, আরেকবার বলুন', msg: '', act: 'retry', label: 'আবার চেষ্টা করুন', aicon: 'retry' },
+  denied: { icon: 'micOff', title: 'মাইকের অনুমতি দেওয়া নেই', msg: 'বলে খুঁজতে ফোনের সেটিংসে গিয়ে এই অ্যাপের মাইক চালু করুন।', act: 'settings', label: 'সেটিংস', aicon: 'settings' },
+  offline: { icon: 'wifiOff', title: 'ইন্টারনেট সংযোগ নেই', msg: 'কথা বুঝতে ইন্টারনেট লাগে। আপাতত টাইপ করে খুঁজুন।', act: 'type', label: 'টাইপ করে খুঁজুন', aicon: 'keyboard' },
+};
+const SCREENS = [
+  { id: 'search', label: 'সার্চ পেজ' },
+  { id: 'permission', label: 'অনুমতি চাওয়া' },
+  { id: 'listening', label: 'শুনছি' },
+  { id: 'results', label: 'সার্চ রেজাল্ট' },
+  { id: 'nohear', label: 'শোনা যায়নি' },
+  { id: 'denied', label: 'অনুমতি নেই' },
+  { id: 'offline', label: 'ইন্টারনেট নেই' },
+];
+const VOICE = ['permission', 'listening', 'nohear', 'denied', 'offline'];
+/* Toolbar: what the next mic tap does (the demo has no real microphone) */
+const SCEN = [{ id: 'speak', label: 'মাইকে: কথা বলবে' }, { id: 'silent', label: 'মাইকে: চুপ থাকবে' }, { id: 'offline', label: 'মাইকে: নেট নেই' }];
+const SCEN_HTML = SCEN.map((s) => `<button class="kit-chip" type="button" data-scen="${s.id}" aria-pressed="false">${s.label}</button>`).join('');
+
+/* ---------- State ---------- */
+const S = { text: '', scope: 'online', lang: 'bn', perm: 'ask', scen: 'speak', force: false, live: '', last: null, from: 'search', focus: false };
+
+/* ---------- Search: words match the translation or the topic keys ---------- */
+const SUFFIX = ['য়ের', 'ের', 'র', 'কে', 'তে'];
+function stem(w) {
+  w = w.toLowerCase();
+  for (const s of SUFFIX) if (w.endsWith(s) && w.length - s.length >= 2) return w.slice(0, -s.length);
+  return w;
+}
+const toLatinDigits = (s) => s.replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+function run(q) {
+  q = String(q).trim();
+  const n = toLatinDigits(q);
+  let list, ws = [];
+  if (/^\d+$/.test(n)) list = HADITHS.filter((h) => String(h.num) === n);
+  else {
+    ws = q.split(/\s+/).map(stem).filter((w) => w.length >= 2);
+    list = HADITHS.map((h) => ({ h, hit: ws.filter((w) => h.bn.includes(w) || h.keys.includes(w)).length }))
+      .filter((r) => r.hit).sort((a, b) => b.hit - a.hit).map((r) => r.h);
+  }
+  return { q, list, ws };
+}
+
+/* ---------- Scripted listening ---------- */
+let timers = [];
+const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+const stop = () => { timers.forEach(clearTimeout); timers = []; };
+const setVs = (v) => { const p = $('.phone'); if (p) p.dataset.vs = v; };
+function paintLive(final) {
+  const w = S.live ? S.live.split(' ') : [];
+  const html = w.length
+    ? w.map((x, i) => `<span class="w${i === w.length - 1 && !final ? ' new' : ''}">${esc(x)}</span>`).join(' ') + (final ? '' : '<i class="caret"></i>')
+    : `<span class="hint">${TX.sayHint}</span>`;
+  $$('[data-live]').forEach((el) => { el.innerHTML = html; });
+  D.live?.(S.live, final);
+}
+function listen() {
+  stop(); S.live = ''; setVs('wait'); paintLive(false);
+  const silent = S.scen === 'silent' && !S.force;
+  S.force = false;
+  if (silent) { later(() => Kit.show('nohear'), 3600); return; }
+  const words = SCRIPT[S.lang].split(' ');
+  words.forEach((_, i) => later(() => { S.live = words.slice(0, i + 1).join(' '); setVs('speak'); paintLive(false); }, 1200 + i * 650));
+  const end = 1200 + words.length * 650;
+  later(() => { setVs('done'); paintLive(true); }, end + 250);          // speech stopped
+  later(() => finish(S.live), end + 1100);
+}
+function finish(q) { if (D.confirm?.(q)) return; search(q); }
+function search(q) {
+  q = String(q || '').trim();
+  if (!q) { Kit.snack('সার্চ করার জন্য কিছু লিখুন'); return; }
+  S.text = q; S.last = run(q);
+  Kit.show('results');
+}
+const back = () => Kit.show(S.from === 'results' ? 'results' : 'search');
+function micTap() {
+  S.from = Kit.current === 'results' ? 'results' : 'search';
+  if (S.perm === 'ask') Kit.show('permission');
+  else if (S.perm === 'denied') Kit.show('denied');
+  else if (S.scen === 'offline') Kit.show('offline');
+  else Kit.show('listening');
+}
+function relisten() { S.force = true; render(Kit.current); listen(); }
+function setLang(l) { S.lang = l; markLang(); if (Kit.current === 'listening') listen(); }
+const markLang = () => $$('[data-lang]').forEach((b) => { const on = b.dataset.lang === S.lang; b.setAttribute('aria-pressed', on); b.classList.toggle('on', on); });
+const markScen = () => $$('[data-scen]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.scen === S.scen));
+function syncField() {
+  const has = !!S.text.trim();
+  $$('[data-clear]').forEach((b) => { b.hidden = !has; });
+  $$('[data-mic][data-swap]').forEach((b) => { b.hidden = has; });    // mic sits where clear (x) is when the box is empty
+}
+
+/* ---------- Shared render helpers ---------- */
+const langBtns = (cls = 'chip') => LANGS.map((l) => `<button class="${cls}${S.lang === l.id ? ' on' : ''}" type="button" data-lang="${l.id}" aria-pressed="${S.lang === l.id}">${l.label}</button>`).join('');
+const actBtn = (id, cls = 'btn') => { const s = STATES[id]; return `<button class="${cls}" type="button" data-${s.act}>${ic(s.aicon, 18)}${s.label}</button>`; };
+const wave = (n) => `<div class="wave" aria-hidden="true">${Array.from({ length: n }, (_, i) => `<i style="animation-delay:-${((i * 173) % 800) / 1000}s"></i>`).join('')}</div>`;
+const scopeName = () => (S.scope === 'online' ? 'অনলাইন' : 'অফলাইন');
+const scopeCard = () => `<div class="sc"><h3 class="st">কোথায় সার্চ করবেন</h3><div class="opts" role="radiogroup" aria-label="কোথায় সার্চ করবেন">${
+  ['online', 'offline'].map((k) => `<button class="opt" type="button" role="radio" data-scope="${k}" aria-checked="${S.scope === k}"><span class="rd"></span>${k === 'online' ? 'অনলাইন' : 'অফলাইন'}</button>`).join('')}</div></div>`;
+const clearBtn = () => `<button class="icon-btn" type="button" data-clear aria-label="ক্লিয়ার" hidden>${ic('close', 20)}</button>`;
+const fieldIn = () => `<input class="q" type="search" enterkeyhint="search" autocomplete="off" aria-label="হাদিস সার্চ ইনপুট" placeholder="${TX.hint}">`;
+function hl(text, ws) {
+  const ok = (ws || []).filter((w) => text.includes(w)).sort((a, b) => b.length - a.length);
+  if (!ok.length) return esc(text);
+  const re = new RegExp(ok.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
+  return esc(text).replace(re, (m) => `<mark class="hl">${m}</mark>`);
+}
+function cardHTML(h, ws) {
+  const b = BOOKS[h.book];
+  return `<article class="card hc"><div class="hadith-head"><span class="book-badge">${b.abbr}</span><div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${bn(h.num)}</span></div><span class="grade" style="background:var(--grade-sahih)">সহিহ হাদিস</span></div>
+    <p class="narrator">${h.nar}</p><p class="translation">${hl(h.bn, ws)}</p></article>`;
+}
+const countLine = (r) => `সর্বমোট ফলাফল পাওয়া গেছে : ${bn(r.list.length)} টি`;
+const byBook = (r) => Object.keys(BOOKS).map((k) => [k, r.list.filter((h) => h.book === k).length]).filter((x) => x[1]).map(([k, n]) => `<span>${BOOKS[k].name} · ${bn(n)}টি</span>`).join('');
+const cards = (r) => (r.list.length ? r.list.map((h) => cardHTML(h, r.ws)).join('') : '<p class="none">কোন সার্চ রেজাল্ট পাওয়া যায়নি</p>') + '<div style="height:16px"></div>';
+
+/* ---------- Render one screen ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  const host = $('.host', sec);
+  if (host) host.innerHTML = id === 'results' ? D.results(S.last) : D.page(id);
+  $$('.q', sec).forEach((q) => { q.value = S.text; });
+  syncField(); markLang();
+  D.after?.(id, sec);
+}
+
+/* ---------- Wiring ---------- */
+function boot(opts) {
+  document.addEventListener('click', (e) => {
+    if (e.target.classList?.contains('scrim') && VOICE.includes(Kit.current)) { back(); return; }
+    const x = e.target.closest('[data-x]');
+    if (x && D.click?.(x.dataset.x)) return;
+    const t = e.target.closest('[data-mic],[data-allow],[data-deny],[data-settings],[data-retry],[data-cancel],[data-type],[data-lang],[data-scope],[data-clear],[data-run],[data-edit],[data-scen]');
+    if (!t) return;
+    const d = t.dataset;
+    if ('mic' in d) micTap();
+    else if ('allow' in d) { S.perm = 'granted'; Kit.show(S.scen === 'offline' ? 'offline' : 'listening'); }
+    else if ('deny' in d) { S.perm = 'denied'; Kit.show('denied'); }
+    else if ('settings' in d) { S.perm = 'granted'; back(); Kit.snack('ফোনের সেটিংস খুলবে। মাইক চালু করে ফিরে এসে আবার চাপুন'); }
+    else if ('retry' in d) { S.force = true; Kit.show('listening'); }
+    else if ('cancel' in d) back();
+    else if ('type' in d) { S.focus = true; back(); }
+    else if (d.lang) setLang(d.lang);
+    else if (d.scope) { S.scope = d.scope; render(Kit.current); }
+    else if ('clear' in d) { S.text = ''; syncField(); $$('.screen.on .q').forEach((q) => { q.value = ''; q.focus(); }); }
+    else if ('run' in d) search(S.text);
+    else if ('edit' in d) { S.focus = true; Kit.show('search'); }
+    else if (d.scen) { S.scen = d.scen; markScen(); }
+  });
+  document.addEventListener('input', (e) => { if (e.target.matches('.q')) { S.text = e.target.value; syncField(); } });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.matches('.q')) { e.preventDefault(); e.target.blur(); search(S.text); }
+    if (e.key === 'Escape' && VOICE.includes(Kit.current)) back();
+  });
+  Kit.onScreen((id) => {
+    stop(); setVs('idle');
+    if (id === 'permission') S.perm = 'ask';
+    if (id === 'listening' || id === 'nohear') S.perm = 'granted';
+    if (id === 'denied') S.perm = 'denied';
+    if (id === 'results' && !S.last) { S.text = SCRIPT[S.lang]; S.last = run(S.text); }
+    render(id);
+    markScen(); markLang();
+    if (id === 'listening') listen();
+    if (S.focus) { S.focus = false; $('.screen.on .q')?.focus(); }
+  });
+  Kit.init({ ...opts, extra: SCEN_HTML, screens: SCREENS });
+}
+
+/* ======================================================================
+   DEMO 4 — ভাসমান পিল: nothing covers the page. While listening, a dark
+   pill floats above the search button (mic, wave, "বাতিল করুন") with
+   small language chips over it, and the words land straight in the box.
+   Problems turn the pill into a small floating card. Permission is a
+   callout pointing at the mic.
+   ====================================================================== */
+const micIn = () => `<button class="mic-c" type="button" data-mic data-swap aria-label="${TX.mic}">${ic('mic', 20)}</button>`;
+const mini = () => `<div class="mini" role="group" aria-label="কোন ভাষায় বলবেন">${langBtns('')}</div>`;
+const D = {
+  page(id) {
+    const field = id === 'listening'
+      ? `<div class="sf listen"><span class="i">${ic('mic', 18)}</span><div class="live" data-live></div></div>`
+      : `<label class="sf"><span class="i">${icons.search}</span>${fieldIn()}${clearBtn()}${micIn()}</label>`;
+    const callout = id === 'permission'
+      ? `<div class="callout" role="dialog" aria-label="মাইকের অনুমতি"><b>${TX.permTitle}</b><p>${TX.permMsg}</p>
+          <div class="acts"><button class="btn text" data-deny>${TX.permNo}</button><button class="btn" data-allow>${TX.permYes}</button></div></div>` : '';
+    return `<div class="page"><div class="sc">${field}${callout}</div>${scopeCard()}</div>`;
+  },
+  float(id) {
+    if (id === 'listening') {
+      return `${mini()}<div class="pill"><span class="dot">${ic('mic', 22)}</span><span class="vstatus">${TX.listening}</span>${wave(16)}
+        <button class="x" type="button" data-cancel>${TX.cancel}</button></div>`;
+    }
+    if (!STATES[id]) return '';
+    const s = STATES[id];
+    return `${id === 'nohear' ? mini() : ''}<div class="fcard" role="dialog" aria-label="${s.title}"><div class="h"><span class="ni">${ic(s.icon, 21)}</span><div><b>${s.title}</b>${s.msg ? `<p>${s.msg}</p>` : ''}</div></div>
+      <div class="acts"><button class="btn text" data-cancel>${TX.cancel}</button>${actBtn(id)}</div></div>`;
+  },
+  results(r) {
+    return `<button class="qbar" type="button" data-edit aria-label="লেখা ঠিক করুন">${icons.search}<span>${esc(r.q)}</span><i class="e">${icons.edit}</i></button>
+      <p class="cnt">${countLine(r)} · ${scopeName()} সার্চ</p>${cards(r)}`;
+  },
+  after(id, sec) {
+    const f = $('.float', sec);
+    if (f) f.innerHTML = D.float(id);
+  },
+};
+
+$$('.bk').forEach((b) => { b.innerHTML = icons.back; });
+boot({ demo: 4, name: 'ভাসমান পিল' });
+
+</script>
+</body>
+</html>

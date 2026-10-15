@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ভয়েস সার্চ — ডেমো ৩ · পুরো পাতায় শোনা</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): search page parts, results, live text ===== */
+.body{flex:1;min-height:0;overflow-y:auto;position:relative}
+.body::-webkit-scrollbar{width:0}
+.foot{flex:none;padding:8px 16px 14px;background:var(--scaffold)}
+.page{padding:14px 16px}
+.sc{background:var(--card);border-radius:12px;padding:14px;margin-bottom:16px}
+.st{margin:0;font-size:16px;font-weight:600;color:var(--title)}
+/* NewSearchField */
+.sf{display:flex;align-items:center;height:48px;border-radius:10px;border:.8px solid var(--divider);background:color-mix(in srgb,var(--primary) 4%,transparent);color:var(--hint)}
+.sf:focus-within{border-color:var(--primary);box-shadow:0 0 0 .4px var(--primary)}
+.sf .i{width:40px;display:grid;place-items:center;flex:none}
+.sf .i svg{width:18px;height:18px}
+.sf input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.sf input::placeholder{color:var(--hint)}
+.sf input::-webkit-search-cancel-button{display:none}
+.sf .icon-btn svg{width:20px;height:20px}
+/* SearchOptionCard (scope radios) */
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.opt{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 4px;border-radius:8px;font-size:15px;font-weight:500;color:var(--title);text-align:left}
+.opt[aria-checked="true"]{font-weight:700}
+.rd{width:20px;height:20px;border-radius:50%;border:2px solid var(--hint);flex:none;display:grid;place-items:center}
+[aria-checked="true"] .rd{border-color:var(--primary)}
+[aria-checked="true"] .rd::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--primary)}
+/* Results: SearchResultOverViewCard + HadithListItem */
+.ov{background:var(--card);border-radius:10px;padding:10px 14px;margin:14px 14px 7px}
+.ov p{margin:0}
+.ov .ql{font-size:16px;font-weight:600;color:var(--title)}
+.ov .q-t{color:var(--primary)}
+.ov .ct{font-size:13px;color:var(--body)}
+.bks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bks span{font-size:12.5px;padding:1px 10px;border-radius:20px;background:var(--surface-2);color:var(--body);border:1px solid var(--divider)}
+.bks .mt{background:var(--tint);color:var(--primary-dark);border-color:transparent;font-weight:700}
+:root[data-theme="dark"] .bks .mt{color:var(--primary)}
+.hc{margin:7px 14px}
+.hc .narrator{margin:12px 0 0}
+.none{padding:40px 24px;text-align:center;color:var(--title);font-size:17px;font-weight:600}
+mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-radius:4px;padding:0 2px}
+:root[data-theme="dark"] mark.hl{color:var(--primary)}
+.lnk{display:inline-flex;align-items:center;gap:4px;color:var(--primary);font-weight:700;font-size:13.5px}
+.lnk svg{width:16px;height:16px}
+/* Live transcript: words fade in, caret blinks while listening */
+.live .w.new{animation:wIn .4s ease-out}
+.live .hint{color:var(--hint);font-weight:400}
+.caret{display:inline-block;width:2px;height:1em;margin-left:3px;vertical-align:-.12em;background:var(--primary);animation:blink 1s steps(1) infinite}
+@keyframes wIn{from{opacity:0}to{opacity:1}}
+@keyframes blink{50%{opacity:0}}
+@keyframes ripple{from{transform:scale(1);opacity:.45}to{transform:scale(1.9);opacity:0}}
+@keyframes bar{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+.wave{display:flex;align-items:center;gap:3px;height:26px}
+.wave i{width:3px;height:100%;border-radius:3px;background:var(--primary);transform:scaleY(.2)}
+.phone[data-vs="wait"] .wave i{animation:bar 2.4s ease-in-out infinite;opacity:.5}
+.phone[data-vs="speak"] .wave i{animation:bar .8s ease-in-out infinite}
+.vstatus{font-size:14px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .vstatus{color:var(--primary)}
+/* ===== Demo 3: listening takes the whole screen ===== */
+.screen{background:var(--appbar)}
+.body{background:var(--scaffold);border-radius:20px 20px 0 0}
+/* "বলুন" pill inside the field */
+.mic-pill{display:inline-flex;align-items:center;gap:4px;height:36px;margin-right:6px;padding:0 12px 0 9px;border-radius:20px;flex:none;background:var(--tint);color:var(--primary-dark);font-size:14px;font-weight:700}
+:root[data-theme="dark"] .mic-pill{color:var(--primary)}
+.mic-pill svg{width:18px;height:18px}
+/* ===== Full-screen listening page ===== */
+.fs{flex:1;display:flex;flex-direction:column;padding:6px 14px 22px;background:var(--appbar);color:var(--on-appbar)}
+.fs-top{display:flex;align-items:center;gap:6px;min-height:52px}
+.fs-top h1{flex:1;margin:0 4px;font-size:19px;color:inherit}
+.seg-w{flex:1;display:flex;gap:4px;padding:3px;border-radius:12px;background:color-mix(in srgb,var(--on-appbar) 15%,transparent)}
+.seg-w button{flex:1;height:34px;border-radius:9px;font-size:14px;color:var(--on-appbar)}
+.seg-w button.on{background:var(--on-appbar);color:var(--primary-dark);font-weight:700}
+.fs-mid{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 10px}
+.fs-st{margin:0 0 10px;font-size:15px;font-weight:700;opacity:.85}
+.fs .live{margin:0;min-height:84px;font-size:30px;line-height:1.4;font-weight:700}
+.fs .live .hint{color:color-mix(in srgb,var(--on-appbar) 70%,transparent);font-size:21px}
+.fs .caret{background:var(--on-appbar)}
+.fs-bot{display:flex;flex-direction:column;align-items:center;gap:14px}
+.orb-w{position:relative;width:96px;height:96px;border-radius:50%;display:grid;place-items:center;background:var(--on-appbar);color:var(--primary)}
+.orb-w svg{position:relative;width:38px;height:38px}
+.orb-w::before,.orb-w::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--on-appbar);opacity:0}
+.phone[data-vs="wait"] .orb-w::before,.phone[data-vs="speak"] .orb-w::before{animation:ripple 1.6s ease-out infinite}
+.phone[data-vs="speak"] .orb-w::after{animation:ripple 1.6s ease-out .8s infinite}
+.fs .btn.w{background:var(--on-appbar);color:var(--primary-dark)}
+.fs .btn.ghost{background:transparent;color:var(--on-appbar);border:1.5px solid color-mix(in srgb,var(--on-appbar) 45%,transparent)}
+.fs .btn{min-width:220px;height:48px}
+.fs-ic{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;margin-bottom:18px;background:color-mix(in srgb,var(--on-appbar) 16%,transparent)}
+.fs-ic svg{width:38px;height:38px}
+.fs-mid.c{align-items:center;text-align:center}
+.fs-t{margin:0;font-size:22px;font-weight:700;line-height:1.4}
+.fs-m{margin:8px 0 0;font-size:15.5px;opacity:.88}
+.host.full{flex:1;display:flex;flex-direction:column;min-height:0}
+/* ===== Permission bottom sheet ===== */
+#perm-sheet .sheet-body{text-align:center;padding-top:8px}
+.perm-art{width:88px;height:88px;border-radius:50%;margin:8px auto 14px;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.perm-art svg{width:40px;height:40px}
+#perm-sheet h2{margin:0;font-size:19px;color:var(--title)}
+#perm-sheet p{margin:8px 0 0;color:var(--body)}
+#perm-sheet .sheet-foot{flex-direction:column;gap:4px;border-top:0}
+/* ===== Results: the field moves into the app bar ===== */
+.appbar .sf{flex:1;height:42px;margin-right:6px;background:var(--card);border-color:transparent}
+.appbar .sf .mic-pill{height:32px;padding:0 9px}
+.ov .ct{font-size:13.5px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screen: NewSearchPage with a "বলুন" pill in the field ===== -->
+      <section class="screen" data-screen="search">
+        <header class="appbar"><button class="icon-btn bk" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body host"></div>
+        <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
+      </section>
+      <section class="screen" data-screen="permission">
+        <header class="appbar"><button class="icon-btn bk" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body host"></div>
+        <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
+      </section>
+      <!-- ===== Full-screen listening page and its three states ===== -->
+      <section class="screen" data-screen="listening"><div class="host full"></div></section>
+      <section class="screen" data-screen="nohear"><div class="host full"></div></section>
+      <section class="screen" data-screen="denied"><div class="host full"></div></section>
+      <section class="screen" data-screen="offline"><div class="host full"></div></section>
+      <!-- ===== Screen: results, the heard text stays editable in the app bar ===== -->
+      <section class="screen" data-screen="results">
+        <header class="appbar"><button class="icon-btn bk" aria-label="পেছনে" data-go="search"></button>
+          <label class="sf"><span class="i"></span><input class="q" type="search" enterkeyhint="search" autocomplete="off" aria-label="হাদিস সার্চ ইনপুট" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন"><button class="icon-btn" type="button" data-clear aria-label="ক্লিয়ার" hidden></button><button class="mic-pill" type="button" data-mic data-swap aria-label="বলে খুঁজুন"></button></label></header>
+        <div class="body host"></div>
+      </section>
+
+      <!-- ===== Permission sheet (first mic tap) ===== -->
+      <div class="sheet" id="perm-sheet" role="dialog" aria-label="মাইকের অনুমতি">
+        <div class="sheet-body"><div class="perm-art" data-ic="mic"></div><h2>মাইকের অনুমতি দিন</h2><p>কথা বলে হাদিস খুঁজতে মাইকের অনুমতি লাগবে।</p></div>
+        <div class="sheet-foot"><button class="btn block" data-allow>অনুমতি দিন</button><button class="btn text block" data-deny>এখন না</button></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, scripted listening, search.
+   No real microphone: the "speech" is a timed script per language.
+   Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const sv = (d) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const XI = {
+  micOff: sv('<path d="M3 3l18 18"/><path d="M9 9v2a3 3 0 0 0 5.1 2.1M15 10V6a3 3 0 0 0-5.7-1.3"/><path d="M5 11a7 7 0 0 0 11.5 5.4M19 11a7 7 0 0 1-.6 2.8M12 18v3"/>'),
+  wifiOff: sv('<path d="M3 3l18 18"/><path d="M8.5 15.5a5 5 0 0 1 6.2-.6M5 12a10 10 0 0 1 4.3-2.4M2 8.5a15 15 0 0 1 4.6-2.8M12.5 6a15 15 0 0 1 9.5 2.5M16.5 10.5A10 10 0 0 1 19 12"/><circle cx="12" cy="19" r="1" fill="currentColor"/>'),
+  settings: sv('<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>'),
+  keyboard: sv('<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>'),
+  retry: sv('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'),
+};
+const ic = (k, w) => { const s = icons[k] || XI[k]; return w ? s.replace(/width="\d+" height="\d+"/, `width="${w}" height="${w}"`) : s; };
+
+/* ---------- Demo data (hadith text only from the safe list) ---------- */
+const BOOKS = { bukhari: { name: 'সহিহ বুখারি', abbr: 'বুখারী' }, muslim: { name: 'সহিহ মুসলিম', abbr: 'মুসলিম' } };
+const HADITHS = [
+  { book: 'bukhari', num: 1894, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'রোজা ঢালস্বরূপ।', keys: 'রোজা সিয়াম সাওম ফজিলত ফাদলুস fasting fast virtue' },
+  { book: 'bukhari', num: 1, nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত', bn: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।', keys: 'নিয়ত আমল intention deeds' },
+  { book: 'bukhari', num: 6018, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।', keys: 'কথা চুপ জবান speech silence' },
+  { book: 'bukhari', num: 6116, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'এক ব্যক্তি নবী (সাঃ)-কে বলল, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বলল, তিনি প্রতিবারই বললেন, রাগ করো না।', keys: 'রাগ ক্রোধ উপদেশ anger' },
+  { book: 'muslim', num: 223, nar: 'আবু মালিক আশআরি (রা.) থেকে বর্ণিত', bn: 'পবিত্রতা ঈমানের অর্ধেক।', keys: 'পবিত্রতা ঈমান অজু purity faith' },
+];
+/* What the user "says" in each language. Arabic speech is shown in Bangla
+   letters here because the demos never show Arabic script. */
+const LANGS = [{ id: 'bn', label: 'বাংলা' }, { id: 'en', label: 'English' }, { id: 'ar', label: 'আরবি' }];
+const SCRIPT = { bn: 'রোজার ফজিলত', en: 'virtue of fasting', ar: 'ফাদলুস সিয়াম' };
+const TX = {
+  hint: 'হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন',
+  sayHint: 'হাদিসের বিষয় বা নাম্বার বলুন',
+  listening: 'শুনছি…',
+  cancel: 'বাতিল করুন',
+  mic: 'বলে খুঁজুন',
+  permTitle: 'মাইকের অনুমতি দিন',
+  permMsg: 'কথা বলে হাদিস খুঁজতে মাইকের অনুমতি লাগবে।',
+  permNo: 'এখন না',
+  permYes: 'অনুমতি দিন',
+};
+const STATES = {
+  nohear: { icon: 'mic', title: 'কিছু শোনা যায়নি, আরেকবার বলুন', msg: '', act: 'retry', label: 'আবার চেষ্টা করুন', aicon: 'retry' },
+  denied: { icon: 'micOff', title: 'মাইকের অনুমতি দেওয়া নেই', msg: 'বলে খুঁজতে ফোনের সেটিংসে গিয়ে এই অ্যাপের মাইক চালু করুন।', act: 'settings', label: 'সেটিংস', aicon: 'settings' },
+  offline: { icon: 'wifiOff', title: 'ইন্টারনেট সংযোগ নেই', msg: 'কথা বুঝতে ইন্টারনেট লাগে। আপাতত টাইপ করে খুঁজুন।', act: 'type', label: 'টাইপ করে খুঁজুন', aicon: 'keyboard' },
+};
+const SCREENS = [
+  { id: 'search', label: 'সার্চ পেজ' },
+  { id: 'permission', label: 'অনুমতি চাওয়া' },
+  { id: 'listening', label: 'শুনছি' },
+  { id: 'results', label: 'সার্চ রেজাল্ট' },
+  { id: 'nohear', label: 'শোনা যায়নি' },
+  { id: 'denied', label: 'অনুমতি নেই' },
+  { id: 'offline', label: 'ইন্টারনেট নেই' },
+];
+const VOICE = ['permission', 'listening', 'nohear', 'denied', 'offline'];
+/* Toolbar: what the next mic tap does (the demo has no real microphone) */
+const SCEN = [{ id: 'speak', label: 'মাইকে: কথা বলবে' }, { id: 'silent', label: 'মাইকে: চুপ থাকবে' }, { id: 'offline', label: 'মাইকে: নেট নেই' }];
+const SCEN_HTML = SCEN.map((s) => `<button class="kit-chip" type="button" data-scen="${s.id}" aria-pressed="false">${s.label}</button>`).join('');
+
+/* ---------- State ---------- */
+const S = { text: '', scope: 'online', lang: 'bn', perm: 'ask', scen: 'speak', force: false, live: '', last: null, from: 'search', focus: false };
+
+/* ---------- Search: words match the translation or the topic keys ---------- */
+const SUFFIX = ['য়ের', 'ের', 'র', 'কে', 'তে'];
+function stem(w) {
+  w = w.toLowerCase();
+  for (const s of SUFFIX) if (w.endsWith(s) && w.length - s.length >= 2) return w.slice(0, -s.length);
+  return w;
+}
+const toLatinDigits = (s) => s.replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+function run(q) {
+  q = String(q).trim();
+  const n = toLatinDigits(q);
+  let list, ws = [];
+  if (/^\d+$/.test(n)) list = HADITHS.filter((h) => String(h.num) === n);
+  else {
+    ws = q.split(/\s+/).map(stem).filter((w) => w.length >= 2);
+    list = HADITHS.map((h) => ({ h, hit: ws.filter((w) => h.bn.includes(w) || h.keys.includes(w)).length }))
+      .filter((r) => r.hit).sort((a, b) => b.hit - a.hit).map((r) => r.h);
+  }
+  return { q, list, ws };
+}
+
+/* ---------- Scripted listening ---------- */
+let timers = [];
+const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+const stop = () => { timers.forEach(clearTimeout); timers = []; };
+const setVs = (v) => { const p = $('.phone'); if (p) p.dataset.vs = v; };
+function paintLive(final) {
+  const w = S.live ? S.live.split(' ') : [];
+  const html = w.length
+    ? w.map((x, i) => `<span class="w${i === w.length - 1 && !final ? ' new' : ''}">${esc(x)}</span>`).join(' ') + (final ? '' : '<i class="caret"></i>')
+    : `<span class="hint">${TX.sayHint}</span>`;
+  $$('[data-live]').forEach((el) => { el.innerHTML = html; });
+  D.live?.(S.live, final);
+}
+function listen() {
+  stop(); S.live = ''; setVs('wait'); paintLive(false);
+  const silent = S.scen === 'silent' && !S.force;
+  S.force = false;
+  if (silent) { later(() => Kit.show('nohear'), 3600); return; }
+  const words = SCRIPT[S.lang].split(' ');
+  words.forEach((_, i) => later(() => { S.live = words.slice(0, i + 1).join(' '); setVs('speak'); paintLive(false); }, 1200 + i * 650));
+  const end = 1200 + words.length * 650;
+  later(() => { setVs('done'); paintLive(true); }, end + 250);          // speech stopped
+  later(() => finish(S.live), end + 1100);
+}
+function finish(q) { if (D.confirm?.(q)) return; search(q); }
+function search(q) {
+  q = String(q || '').trim();
+  if (!q) { Kit.snack('সার্চ করার জন্য কিছু লিখুন'); return; }
+  S.text = q; S.last = run(q);
+  Kit.show('results');
+}
+const back = () => Kit.show(S.from === 'results' ? 'results' : 'search');
+function micTap() {
+  S.from = Kit.current === 'results' ? 'results' : 'search';
+  if (S.perm === 'ask') Kit.show('permission');
+  else if (S.perm === 'denied') Kit.show('denied');
+  else if (S.scen === 'offline') Kit.show('offline');
+  else Kit.show('listening');
+}
+function relisten() { S.force = true; render(Kit.current); listen(); }
+function setLang(l) { S.lang = l; markLang(); if (Kit.current === 'listening') listen(); }
+const markLang = () => $$('[data-lang]').forEach((b) => { const on = b.dataset.lang === S.lang; b.setAttribute('aria-pressed', on); b.classList.toggle('on', on); });
+const markScen = () => $$('[data-scen]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.scen === S.scen));
+function syncField() {
+  const has = !!S.text.trim();
+  $$('[data-clear]').forEach((b) => { b.hidden = !has; });
+  $$('[data-mic][data-swap]').forEach((b) => { b.hidden = has; });    // mic sits where clear (x) is when the box is empty
+}
+
+/* ---------- Shared render helpers ---------- */
+const langBtns = (cls = 'chip') => LANGS.map((l) => `<button class="${cls}${S.lang === l.id ? ' on' : ''}" type="button" data-lang="${l.id}" aria-pressed="${S.lang === l.id}">${l.label}</button>`).join('');
+const actBtn = (id, cls = 'btn') => { const s = STATES[id]; return `<button class="${cls}" type="button" data-${s.act}>${ic(s.aicon, 18)}${s.label}</button>`; };
+const wave = (n) => `<div class="wave" aria-hidden="true">${Array.from({ length: n }, (_, i) => `<i style="animation-delay:-${((i * 173) % 800) / 1000}s"></i>`).join('')}</div>`;
+const scopeName = () => (S.scope === 'online' ? 'অনলাইন' : 'অফলাইন');
+const scopeCard = () => `<div class="sc"><h3 class="st">কোথায় সার্চ করবেন</h3><div class="opts" role="radiogroup" aria-label="কোথায় সার্চ করবেন">${
+  ['online', 'offline'].map((k) => `<button class="opt" type="button" role="radio" data-scope="${k}" aria-checked="${S.scope === k}"><span class="rd"></span>${k === 'online' ? 'অনলাইন' : 'অফলাইন'}</button>`).join('')}</div></div>`;
+const clearBtn = () => `<button class="icon-btn" type="button" data-clear aria-label="ক্লিয়ার" hidden>${ic('close', 20)}</button>`;
+const fieldIn = () => `<input class="q" type="search" enterkeyhint="search" autocomplete="off" aria-label="হাদিস সার্চ ইনপুট" placeholder="${TX.hint}">`;
+function hl(text, ws) {
+  const ok = (ws || []).filter((w) => text.includes(w)).sort((a, b) => b.length - a.length);
+  if (!ok.length) return esc(text);
+  const re = new RegExp(ok.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
+  return esc(text).replace(re, (m) => `<mark class="hl">${m}</mark>`);
+}
+function cardHTML(h, ws) {
+  const b = BOOKS[h.book];
+  return `<article class="card hc"><div class="hadith-head"><span class="book-badge">${b.abbr}</span><div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${bn(h.num)}</span></div><span class="grade" style="background:var(--grade-sahih)">সহিহ হাদিস</span></div>
+    <p class="narrator">${h.nar}</p><p class="translation">${hl(h.bn, ws)}</p></article>`;
+}
+const countLine = (r) => `সর্বমোট ফলাফল পাওয়া গেছে : ${bn(r.list.length)} টি`;
+const byBook = (r) => Object.keys(BOOKS).map((k) => [k, r.list.filter((h) => h.book === k).length]).filter((x) => x[1]).map(([k, n]) => `<span>${BOOKS[k].name} · ${bn(n)}টি</span>`).join('');
+const cards = (r) => (r.list.length ? r.list.map((h) => cardHTML(h, r.ws)).join('') : '<p class="none">কোন সার্চ রেজাল্ট পাওয়া যায়নি</p>') + '<div style="height:16px"></div>';
+
+/* ---------- Render one screen ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  const host = $('.host', sec);
+  if (host) host.innerHTML = id === 'results' ? D.results(S.last) : D.page(id);
+  $$('.q', sec).forEach((q) => { q.value = S.text; });
+  syncField(); markLang();
+  D.after?.(id, sec);
+}
+
+/* ---------- Wiring ---------- */
+function boot(opts) {
+  document.addEventListener('click', (e) => {
+    if (e.target.classList?.contains('scrim') && VOICE.includes(Kit.current)) { back(); return; }
+    const x = e.target.closest('[data-x]');
+    if (x && D.click?.(x.dataset.x)) return;
+    const t = e.target.closest('[data-mic],[data-allow],[data-deny],[data-settings],[data-retry],[data-cancel],[data-type],[data-lang],[data-scope],[data-clear],[data-run],[data-edit],[data-scen]');
+    if (!t) return;
+    const d = t.dataset;
+    if ('mic' in d) micTap();
+    else if ('allow' in d) { S.perm = 'granted'; Kit.show(S.scen === 'offline' ? 'offline' : 'listening'); }
+    else if ('deny' in d) { S.perm = 'denied'; Kit.show('denied'); }
+    else if ('settings' in d) { S.perm = 'granted'; back(); Kit.snack('ফোনের সেটিংস খুলবে। মাইক চালু করে ফিরে এসে আবার চাপুন'); }
+    else if ('retry' in d) { S.force = true; Kit.show('listening'); }
+    else if ('cancel' in d) back();
+    else if ('type' in d) { S.focus = true; back(); }
+    else if (d.lang) setLang(d.lang);
+    else if (d.scope) { S.scope = d.scope; render(Kit.current); }
+    else if ('clear' in d) { S.text = ''; syncField(); $$('.screen.on .q').forEach((q) => { q.value = ''; q.focus(); }); }
+    else if ('run' in d) search(S.text);
+    else if ('edit' in d) { S.focus = true; Kit.show('search'); }
+    else if (d.scen) { S.scen = d.scen; markScen(); }
+  });
+  document.addEventListener('input', (e) => { if (e.target.matches('.q')) { S.text = e.target.value; syncField(); } });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.matches('.q')) { e.preventDefault(); e.target.blur(); search(S.text); }
+    if (e.key === 'Escape' && VOICE.includes(Kit.current)) back();
+  });
+  Kit.onScreen((id) => {
+    stop(); setVs('idle');
+    if (id === 'permission') S.perm = 'ask';
+    if (id === 'listening' || id === 'nohear') S.perm = 'granted';
+    if (id === 'denied') S.perm = 'denied';
+    if (id === 'results' && !S.last) { S.text = SCRIPT[S.lang]; S.last = run(S.text); }
+    render(id);
+    markScen(); markLang();
+    if (id === 'listening') listen();
+    if (S.focus) { S.focus = false; $('.screen.on .q')?.focus(); }
+  });
+  Kit.init({ ...opts, extra: SCEN_HTML, screens: SCREENS });
+}
+
+/* ======================================================================
+   DEMO 3 — পুরো পাতায় শোনা: the mic opens a full green page with a big
+   transcript, a language switch on top and a big mic at the bottom. The
+   three problem states use the same page. Results keep the heard text in
+   an editable field in the app bar.
+   ====================================================================== */
+const micPill = () => `<button class="mic-pill" type="button" data-mic data-swap aria-label="${TX.mic}">${ic('mic', 18)}বলুন</button>`;
+const fsTop = (withLangs) => `<div class="fs-top"><button class="icon-btn" type="button" data-cancel aria-label="বন্ধ করুন">${icons.close}</button>${
+  withLangs ? `<div class="seg-w" role="group" aria-label="কোন ভাষায় বলবেন">${langBtns('')}</div><span style="width:40px"></span>` : '<h1>ভয়েস সার্চ</h1>'}</div>`;
+const D = {
+  page(id) {
+    if (id === 'listening') {
+      return `<div class="fs">${fsTop(true)}<div class="fs-mid"><p class="fs-st">${TX.listening}</p><p class="live" data-live></p></div>
+        <div class="fs-bot"><div class="orb-w">${ic('mic', 38)}</div><button class="btn text" style="color:var(--on-appbar)" data-cancel>${TX.cancel}</button></div></div>`;
+    }
+    if (STATES[id]) {
+      const s = STATES[id];
+      return `<div class="fs">${fsTop(id === 'nohear')}<div class="fs-mid c"><span class="fs-ic">${ic(s.icon, 38)}</span><p class="fs-t">${s.title}</p>${s.msg ? `<p class="fs-m">${s.msg}</p>` : ''}</div>
+        <div class="fs-bot">${actBtn(id, 'btn w')}<button class="btn ghost" data-cancel>${TX.cancel}</button></div></div>`;
+    }
+    return `<div class="page"><div class="sc"><label class="sf"><span class="i">${icons.search}</span>${fieldIn()}${clearBtn()}${micPill()}</label></div>${scopeCard()}</div>`;
+  },
+  results(r) {
+    return `<div class="ov"><p class="ct">${countLine(r)}</p><div class="bks"><span class="mt">${scopeName()}</span>${byBook(r)}</div></div>${cards(r)}`;
+  },
+  after(id) {
+    if (id === 'permission') Kit.open('perm-sheet');
+  },
+};
+
+$$('.bk').forEach((b) => { b.innerHTML = icons.back; });
+$$('[data-ic]').forEach((b) => { b.innerHTML = ic(b.dataset.ic, 40); });
+$('.appbar .sf .i').innerHTML = icons.search;
+$('.appbar [data-clear]').innerHTML = ic('close', 20);
+$('.appbar .mic-pill').innerHTML = ic('mic', 18);
+boot({ demo: 3, name: 'পুরো পাতায় শোনা' });
+
+</script>
+</body>
+</html>

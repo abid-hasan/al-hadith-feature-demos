@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>শরাহ / ব্যাখ্যা — ডেমো ৫ · মিনিমাল পাঠ</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): reading size, hadith card, details page, card menu ===== */
+.viewport{--rf:16px}
+.appbar.np h1{margin-left:12px}
+.icon-btn svg,.btn svg{flex:none}
+.scroll{padding-top:12px}
+/* ===== Hadith card (HadithListItem): top bar, narrator in primary, translation ===== */
+.hc{padding:12px 14px 14px}
+.hc.tap{cursor:pointer}
+.hc .hadith-head{margin-right:-8px}
+.hc .book-badge{font-size:9.5px}
+.hc .narrator{color:var(--primary);font-size:calc(var(--rf) - 1px);margin:14px 0 6px}
+.hc .translation{font-size:var(--rf);line-height:1.75;color:var(--title)}
+.mb{color:var(--hint)}
+/* ===== Details page: HadithFancyAppBar over RoundedScaffoldBody ===== */
+.screen.rs{background:var(--appbar)}
+.rbody{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.rbody>.scroll{padding-top:16px}
+.in-r{animation:in-r .26s ease-out}
+.in-l{animation:in-l .26s ease-out}
+@keyframes in-r{from{opacity:0;transform:translateX(28px)}}
+@keyframes in-l{from{opacity:0;transform:translateX(-28px)}}
+/* ===== Explanation text follows the reading font size; verified line ===== */
+.rt{margin:0;font-size:var(--rf);line-height:1.8;color:var(--body)}
+.vf{display:flex;align-items:center;gap:6px;margin:0;font-size:12.5px;color:var(--hint)}
+.vf svg{flex:none}
+/* ===== Card menu (MoreOptionBottomSheet + MenuGrid): only this feature's item ===== */
+.mhead{display:flex;align-items:center;padding:18px 12px 8px 22px}
+.mhead div{flex:1;min-width:0}
+.mhead h2{margin:0;font-size:17px;font-weight:800;color:var(--title)}
+.mhead p{margin:0;font-size:12px;color:var(--hint)}
+.xbtn{width:36px;height:36px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;color:var(--title)}
+.xbtn svg{width:18px;height:18px}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:8px 16px 22px}
+.mtile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px 12px;border-radius:18px;background:var(--surface-2);font-size:13.5px;font-weight:700;color:var(--title)}
+.mi .a{fill:var(--primary)}.mi .b{fill:var(--primary-dark)}
+.mi .sw{stroke:var(--on-appbar);fill:none;stroke-width:2;stroke-linecap:round}
+/* ===== Demo 5 — মিনিমাল পাঠ: plain lines in the card, the details page reads
+   like an article straight on the page (no cards), text links at the end ===== */
+/* Card: "ব্যাখ্যা:" run-in, 2 lines, underlined link */
+.ix{margin-top:10px}
+.ix .rt{font-size:calc(var(--rf) - 1px);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ix .rt b{color:var(--title)}
+.il{margin-top:2px;font-size:calc(var(--rf) - 1.5px);font-weight:700;color:var(--primary);text-decoration:underline;text-underline-offset:3px}
+/* Details: article on the page */
+.a5{padding:0 22px}
+.a5 h3{display:flex;align-items:center;gap:12px;margin:18px 0 10px;font-size:calc(var(--rf) + 3px);font-weight:700;color:var(--title)}
+.a5 h3::after{content:"";flex:1;height:1px;background:var(--divider)}
+.a5 .p5{margin-bottom:12px}
+.a5 .p5 b{color:var(--title)}
+.a5 ol{list-style:none;margin:0;padding:0}
+.a5 li{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--divider)}
+.a5 li:last-child{border-bottom:0}
+.a5 li b{flex:none;width:26px;font-size:26px;line-height:1.1;font-weight:700;color:var(--primary)}
+.a5 .vf{margin-top:6px;padding-top:12px;border-top:1px solid var(--divider)}
+/* Text links: ‹ আগের … পরের › with the neighbour's number */
+.tn{display:flex;justify-content:space-between;gap:12px;margin:22px 22px 0;padding-top:14px;border-top:1px solid var(--divider)}
+.tn button{display:flex;flex-direction:column;gap:2px;font-size:var(--rf);font-weight:700;color:var(--primary)}
+.tn button span{display:flex;align-items:center;gap:2px}
+.tn button small{font-size:12px;font-weight:400;color:var(--hint)}
+.tn button.r{align-items:flex-end}
+.tn button:disabled,.tn button:disabled small{color:var(--divider);cursor:default}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos); the engine renders each one ===== -->
+      <section class="screen" data-screen="list"></section>
+      <section class="screen" data-screen="menu"></section>
+      <section class="screen rs" data-screen="detail"></section>
+      <section class="screen rs" data-screen="neighbour"></section>
+      <!-- ===== Sheet: the card's menu, only "বিস্তারিত" (MenuGridAction icMenuDetails) ===== -->
+      <div class="sheet" id="sh-menu" role="dialog" aria-label="অন্যান্য অপশন">
+        <div class="mhead"><div><h2>অন্যান্য অপশন</h2><p id="m-ref"></p></div><button class="xbtn" id="m-x" data-act="menu-close" aria-label="বন্ধ করুন"></button></div>
+        <div class="mgrid"><button class="mtile" data-act="menu-detail"><svg class="mi" width="34" height="34" viewBox="0 0 33 33" fill="none" aria-hidden="true"><rect class="b" x="10" y="2" width="19" height="24" rx="4"/><rect class="a" x="4" y="6" width="19" height="25" rx="4"/><path class="sw" d="M9 14h9M9 19h9M9 24h5"/></svg>বিস্তারিত</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, state, the flow and wiring.
+   Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const I = {
+  prev: (w = 18) => svg('<path d="m15 18-6-6 6-6"/>', w),
+  next: (w = 18) => svg('<path d="m9 18 6-6-6-6"/>', w),
+  down: (w = 20) => svg('<path d="m6 9 6 6 6-6"/>', w),
+  /* shield with a tick: the verified line */
+  ok: (w = 15) => svg('<path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m8.8 12 2.3 2.3 4.3-4.6"/>', w),
+  /* light bulb: the explanation label */
+  bulb: (w = 16) => svg('<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/>', w),
+};
+
+/* ---------- Data: one book's list. Hadith text only from the safe list, Bangla only.
+   The explanations are new content (the app has none yet), written plainly,
+   in the shape the feature asks for: plain meaning, context, daily life, lessons.
+   ex: null = no explanation made yet, so the card stays as it is today. ---------- */
+const BOOK = 'সহীহ বুখারী';
+const ABBR = 'বুখারী';
+const GRADE = 'সহিহ হাদিস';
+const H = [
+  { no: 1, nar: 'উমর ইবনুল খাত্তাব (রাঃ) থেকে বর্ণিত',
+    tr: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।',
+    ex: {
+      mean: 'কোনো কাজের মূল্য নির্ভর করে মনের উদ্দেশ্যের ওপর। বাইরে থেকে একই রকম দুটি কাজ শুধু নিয়তের কারণে আল্লাহর কাছে আলাদা হয়ে যেতে পারে। তাই কাজের আগে নিজের নিয়ত দেখে নেওয়া জরুরি।',
+      ctx: 'সহীহ বুখারী এই হাদিস দিয়েই শুরু হয়েছে। ইবাদত হোক বা দুনিয়ার কাজ, সব আমলের ভিত্তি হিসেবে নিয়তের এই কথাটি সবার আগে জানা দরকার।',
+      life: 'নামাজ, দান, পড়াশোনা বা পরিবারের জন্য উপার্জন, যেকোনো কাজ শুরুর আগে নিজেকে একবার জিজ্ঞেস করা: কাজটা আমি কার জন্য করছি?',
+      teach: ['প্রতিটি আমলের শুরুতে নিয়ত ঠিক করে নেওয়া।', 'যে কাজ মানুষকে দেখানোর জন্য করা হয়, তার প্রতিদানও সেই নিয়ত অনুযায়ীই হয়।', 'ভালো নিয়তে করা সাধারণ দৈনন্দিন কাজও সওয়াবের কাজ হতে পারে।'],
+    } },
+  { no: 1894, nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত', tr: 'রোজা ঢালস্বরূপ।', ex: null },
+  { no: 6018, nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত',
+    tr: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।',
+    ex: {
+      mean: 'আল্লাহ ও আখিরাতে বিশ্বাসের একটি চিহ্ন হলো মুখ সংযত রাখা। কথা বলার আগে ভেবে দেখা, কথাটি ভালো কি না। ভালো না হলে চুপ থাকাই উত্তম।',
+      ctx: 'হাদিসটি আচার-ব্যবহার বিষয়ক অধ্যায়ে এসেছে। এখানে মুখের কথাকে সরাসরি ঈমানের সাথে যুক্ত করা হয়েছে, তাই কথা বলা শুধু অভ্যাস নয়, দ্বীনেরও অংশ।',
+      life: 'রাগের মাথায় মেসেজ পাঠানো, কারো পেছনে সমালোচনা বা অকারণ তর্কে জড়ানোর আগে একটু থেমে ভাবা।',
+      teach: ['কথা বলার আগে ভেবে নেওয়া।', 'ভালো ও উপকারী কথা বলাও একটি নেক আমল।', 'যে কথায় কল্যাণ নেই, তার চেয়ে চুপ থাকা উত্তম।'],
+    } },
+  { no: 6116, nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত',
+    tr: 'এক ব্যক্তি নবী (সাঃ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বলল, নবী (সাঃ) প্রত্যেক বারেই বললেন: রাগ করো না।',
+    ex: {
+      mean: 'একজন মানুষ নবী (সাঃ)-এর কাছে উপদেশ চাইলে তিনি একটি কথাই বললেন: রাগ করো না। রাগের মুহূর্তে মানুষ এমন কথা বলে বা কাজ করে, যার জন্য পরে আফসোস করতে হয়।',
+      ctx: 'লোকটি কয়েকবার উপদেশ চেয়েছিলেন, প্রতিবারই একই উত্তর এসেছে। একই কথা বারবার বলায় বোঝা যায়, রাগ নিয়ন্ত্রণ কত গুরুত্বপূর্ণ।',
+      life: 'রাগ উঠলে সঙ্গে সঙ্গে কিছু না বলা বা না করা। একটু সময় নিয়ে শান্ত হওয়া, তারপর কথা বলা।',
+      teach: ['রাগ নিয়ন্ত্রণ করা একটি বড় গুণ।', 'ছোট একটি উপদেশও সারা জীবন মনে রাখার মতো হতে পারে।', 'কেউ উপদেশ চাইলে সংক্ষেপে ও পরিষ্কার করে বলা।'],
+    } },
+];
+const PARTS = [['mean', 'সহজ অর্থ'], ['ctx', 'প্রসঙ্গ'], ['life', 'রোজকার জীবনে']];
+const T = { exp: 'ব্যাখ্যা', teach: 'শিক্ষণীয় বিষয়', more: 'আরো পড়ুন', ok: 'আলেমদের যাচাই করা ব্যাখ্যা', prev: 'আগের', next: 'পরের' };
+
+/* ---------- Screens (same ids and labels in all 5 demos) ---------- */
+const SCREENS = [
+  { id: 'list', label: 'হাদিস লিস্ট' },
+  { id: 'menu', label: 'কার্ডের মেনু' },
+  { id: 'detail', label: 'পুরো ব্যাখ্যা' },
+  { id: 'neighbour', label: 'পাশের হাদিস' },
+];
+/* A toolbar chip opens a screen on this hadith (index in H) */
+const START = { detail: 2, neighbour: 3 };
+/* Reading font size (toolbar): the explanation grows and shrinks with it */
+const FS = [{ px: 14.5, t: 'লেখা ছোট' }, { px: 16, t: 'লেখা মাঝারি' }, { px: 18.5, t: 'লেখা বড়' }];
+const EXTRA = FS.map((f, k) => `<button class="kit-chip" type="button" data-fs="${k}">${f.t}</button>`).join('');
+
+/* ---------- State ---------- */
+const S = { cur: 2, menu: 0, fs: 1, dir: 0, own: false, listTop: 0 };
+const nb = () => ({ prev: S.cur > 0 ? H[S.cur - 1] : null, next: S.cur < H.length - 1 ? H[S.cur + 1] : null });
+
+/* ---------- Shared markup: hadith card, list page, details page ---------- */
+function cardHTML(i, inList) {
+  const h = H[i];
+  const tap = inList ? ` data-act="open" data-i="${i}" role="button" tabindex="0" aria-label="হাদিস ${bn(h.no)}-এর বিস্তারিত খুলুন"` : '';
+  const more = inList ? `<button class="icon-btn mb" data-act="menu" data-i="${i}" aria-label="অন্যান্য অপশন">${icons.more}</button>` : '';
+  return `<article class="card hc${inList ? ' tap' : ''}"${tap}>
+    <div class="hadith-head"><span class="book-badge">${ABBR}</span><div class="hadith-meta"><b>${BOOK}</b><span>হাদিস: ${bn(h.no)}</span></div><span class="grade">${GRADE}</span>${more}</div>
+    <p class="narrator">${h.nar}</p><p class="translation">${h.tr}</p>${inList && h.ex ? D.snippet(h, i) : ''}</article>`;
+}
+const teachHTML = (h, cls = 'tl') => `<ol class="${cls}">${h.ex.teach.map((t, j) => `<li><b>${bn(j + 1)}</b><span class="rt">${t}</span></li>`).join('')}</ol>`;
+function listHTML() {
+  return `<header class="appbar np"><h1>${BOOK}</h1></header>
+    <div class="scroll">${H.map((h, i) => cardHTML(i, true)).join('')}</div>`;
+}
+function detailHTML() {
+  const h = H[S.cur];
+  const anim = S.dir > 0 ? ' in-r' : S.dir < 0 ? ' in-l' : '';
+  return `<header class="appbar"><button class="icon-btn" data-act="back" aria-label="পেছনে">${icons.back}</button><h1>${BOOK}<small>হাদিস: ${bn(h.no)}</small></h1></header>
+    <div class="rbody ${D.cls || ''}"><div class="scroll${anim}">${cardHTML(S.cur, false)}${h.ex ? D.explain(h) : ''}${D.pinned ? '' : D.nav()}</div>${D.pinned ? D.nav() : ''}</div>`;
+}
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  const isList = id === 'list' || id === 'menu';
+  sec.innerHTML = isList ? listHTML() : detailHTML();
+  if (isList) $('.scroll', sec).scrollTop = S.listTop;
+  D.after?.(id, sec);
+}
+function openMenu() {
+  $('#m-ref').textContent = `${BOOK} · হাদিস: ${bn(H[S.menu].no)}`;
+  Kit.open('sh-menu');
+}
+function onScreen(id) {
+  // Opened from a toolbar chip (not from inside the phone): start fresh.
+  if (!S.own) { if (START[id] != null) S.cur = START[id]; S.dir = 0; S.listTop = 0; S.menu = 0; }
+  render(id);
+  syncFs();
+  if (id === 'menu') openMenu();
+}
+function go(id) { S.own = true; Kit.show(id); S.own = false; }
+function keepListTop() {
+  if (Kit.current !== 'list' && Kit.current !== 'menu') return;
+  const sc = $('.screen.on .scroll');
+  if (sc) S.listTop = sc.scrollTop;
+}
+// Kit.show() clears aria-pressed on every toolbar chip, so the size chips are re-synced.
+const syncFs = () => $$('[data-fs]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.fs === S.fs)));
+function setFs(k) {
+  S.fs = k;
+  $('.viewport').style.setProperty('--rf', `${FS[k].px}px`);
+  syncFs();
+}
+function step(d) {
+  const n = S.cur + d;
+  if (n < 0 || n >= H.length) return;
+  S.cur = n;
+  S.dir = d;
+  if (Kit.current === 'neighbour') render('neighbour'); else go('neighbour');
+}
+
+/* ---------- Wiring ---------- */
+const ACT = {
+  open: (el) => { keepListTop(); S.cur = +el.dataset.i; S.dir = 0; go('detail'); },
+  menu: (el) => { keepListTop(); S.menu = +el.dataset.i; go('menu'); },
+  'menu-detail': () => { S.cur = S.menu; S.dir = 0; go('detail'); },
+  'menu-close': () => go('list'),
+  back: () => go('list'),
+  prev: () => step(-1),
+  next: () => step(1),
+};
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('scrim')) { if (Kit.current === 'menu') go('list'); return; }
+  const f = e.target.closest('[data-fs]');
+  if (f) { setFs(+f.dataset.fs); return; }
+  const t = e.target.closest('[data-act]');
+  if (t && !t.disabled) ACT[t.dataset.act]?.(t, e);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && Kit.current === 'menu') go('list');
+  if (e.key === 'Enter' && e.target.matches('.hc[data-act="open"]')) ACT.open(e.target);
+});
+/* ======================================================================
+   DEMO 5 — মিনিমাল পাঠ: no boxes. The card adds two plain lines after
+   the translation with an underlined "আরো পড়ুন". The details page reads
+   like an article: run-in part names, big lesson numbers, hairlines, and
+   আগের / পরের as text links at the end.
+   ====================================================================== */
+const D = {
+  snippet: (h, i) => `<div class="ix"><p class="rt"><b>${T.exp}:</b> ${h.ex.mean}</p><button class="il" data-act="open" data-i="${i}">${T.more}</button></div>`,
+  explain: (h) => `<div class="a5"><h3>${T.exp}</h3>${PARTS.map(([k, t]) => `<p class="rt p5"><b>${t}:</b> ${h.ex[k]}</p>`).join('')}
+    <h3>${T.teach}</h3>${teachHTML(h, '')}<p class="vf">${I.ok()}${T.ok}</p></div>`,
+  nav: () => {
+    const n = nb();
+    return `<div class="tn"><button data-act="prev"${n.prev ? '' : ' disabled'}><span>${I.prev(16)}${T.prev}</span><small>${n.prev ? `হাদিস: ${bn(n.prev.no)}` : '&nbsp;'}</small></button>
+      <button class="r" data-act="next"${n.next ? '' : ' disabled'}><span>${T.next}${I.next(16)}</span><small>${n.next ? `হাদিস: ${bn(n.next.no)}` : '&nbsp;'}</small></button></div>`;
+  },
+};
+Object.assign(ACT, D.act || {});
+$('#m-x').innerHTML = icons.close;
+Kit.onScreen(onScreen);
+Kit.init({ demo: 5, name: 'মিনিমাল পাঠ', extra: EXTRA, screens: SCREENS });
+setFs(1);
+</script>
+</body>
+</html>
