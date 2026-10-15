@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সার্চ অবস্থা ধরে রাখা — ডেমো ৫ · রঙিন সারাংশ</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): scroll body, highlight, radio/check rows, back flash ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.body::-webkit-scrollbar{width:0}
+mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-radius:4px;padding:0 2px}
+:root[data-theme="dark"] mark.hl{color:var(--primary)}
+input[type=search]::-webkit-search-cancel-button{display:none}
+.rd,.cb{width:20px;height:20px;flex:none;display:grid;place-items:center;border:2px solid var(--hint)}
+.rd{border-radius:50%}
+.cb{border-radius:4px}
+[aria-checked="true"] .rd{border-color:var(--primary)}
+[aria-checked="true"] .rd::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--primary)}
+[aria-checked="true"] .cb{background:var(--primary);border-color:var(--primary)}
+[aria-checked="true"] .cb::after{content:"";width:5px;height:10px;margin-top:-2px;border:solid var(--on-appbar);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.opt-row{display:flex;align-items:center;gap:14px;width:100%;padding:10px 0;text-align:left}
+.opt-row .ot{flex:1;min-width:0}
+.opt-row b{display:block;font-size:16px;font-weight:600;color:var(--title);line-height:1.35}
+.opt-row small{display:block;font-size:14px;color:var(--body)}
+.gd{width:10px;height:10px;border-radius:50%;flex:none}
+.bm{display:grid;color:var(--primary);flex:none}
+.bm svg{width:20px;height:20px}
+@keyframes backhere{0%,35%{box-shadow:0 0 0 2px var(--primary)}100%{box-shadow:0 0 0 2px transparent}}
+.back-here{animation:backhere 1.8s ease-out}
+/* ===== Demo 5: a colour band carries the query and every choice ===== */
+.band{flex:none;padding:2px 14px 18px;color:var(--on-appbar);background:linear-gradient(160deg,var(--appbar),color-mix(in srgb,var(--primary) 82%,var(--appbar)));border-radius:0 0 24px 24px}
+.band .row{display:flex;align-items:center;gap:4px;margin-left:-6px;min-height:52px}
+.band h1{flex:1;margin:0;font-size:18px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.band .cap{margin:0 2px 8px;font-size:13px;opacity:.9}
+.foot{flex:none;padding:10px 16px 14px;background:var(--scaffold)}
+
+/* ===== Search: field in the band + list rows ===== */
+.bf{display:flex;align-items:center;gap:6px;height:50px;padding:0 4px 0 14px;border-radius:14px;background:var(--card);color:var(--primary)}
+.bf svg{width:20px;height:20px;flex:none}
+.bf input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:16px}
+.bf input::placeholder{color:var(--hint)}
+.bf input:placeholder-shown+.icon-btn{visibility:hidden}
+.bf .icon-btn{color:var(--hint)}
+.kept{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.kept span{padding:2px 10px;border-radius:999px;font-size:12.5px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35)}
+.lc{margin:16px 12px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+.lr{display:flex;align-items:center;gap:14px;width:100%;padding:14px 12px 14px 14px;text-align:left;border-bottom:1px solid var(--divider)}
+.lr:last-child{border-bottom:0}
+.lr .ti{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary);flex:none}
+.lr .tx{flex:1}
+.lr b{display:block;font-size:15.5px;color:var(--title)}
+.lr span[data-sum]{font-size:13.5px;color:var(--primary-dark)}
+:root[data-theme="dark"] .lr span[data-sum]{color:var(--primary)}
+.lr>svg{color:var(--hint)}
+
+/* ===== Results: big query + choice pills in the band ===== */
+.band .qb{margin:0 2px;font-size:24px;font-weight:700;line-height:1.3}
+.pills{display:flex;gap:8px;margin-top:12px}
+.pills button{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:var(--card);color:var(--title);font-size:13.5px;font-weight:600}
+.pills svg{width:16px;height:16px;color:var(--primary)}
+.list{padding:8px 0 4px}
+.hc{margin:8px 12px}
+.hc .mb{color:var(--hint);margin-right:-8px}
+.mark{display:flex;align-items:center;gap:8px;margin:14px 18px 2px;font-size:12.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .mark{color:var(--primary)}
+.mark::before,.mark::after{content:"";flex:1;height:1.5px;background:var(--primary);opacity:.5}
+.lm{display:flex;margin:10px auto 20px;height:44px;padding:0 22px;border-radius:999px}
+.lm svg{width:18px;height:18px}
+
+/* ===== Menu sheet: rows with a line of help ===== */
+.sheet-head small{display:block;font-size:12.5px;font-weight:400;color:var(--hint)}
+.mr{display:flex;align-items:center;gap:14px;width:100%;padding:12px var(--pad);text-align:left}
+.mr .ti{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--tint);color:var(--primary);flex:none}
+.mr b{display:block;font-size:16px;color:var(--title)}
+.mr small{font-size:13.5px;color:var(--body)}
+.sel-all{margin:2px 0 4px;color:var(--primary);font-weight:700;font-size:14px}
+
+/* ===== Hadith page ===== */
+.band .num{margin:0 2px;font-size:22px;font-weight:700}
+.hp .card{margin:16px 12px 10px}
+.hp .btn{display:flex;margin:0 auto}
+.hp .btn svg{width:20px;height:20px}
+.hp .btn[aria-pressed="true"]{background:var(--primary);color:var(--on-appbar)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screen: search page (step 1) ===== -->
+      <section class="screen" data-screen="search">
+        <header class="band"><div class="row"><button class="icon-btn back" aria-label="পেছনে" data-act="home"></button><h1>হাদিস সার্চ</h1></div><div class="slot"></div></header>
+        <div class="body"></div>
+        <div class="foot"><button class="btn block" data-act="run">সার্চ করুন</button></div>
+      </section>
+
+      <!-- ===== Screen: results right after the search ===== -->
+      <section class="screen" data-screen="results">
+        <header class="band"><div class="row"><button class="icon-btn back" aria-label="পেছনে" data-act="to-search"></button><h1>সার্চ রেজাল্ট</h1></div><div class="slot"></div></header>
+        <div class="body"></div>
+      </section>
+
+      <!-- ===== Screen: hadith opened from a result ===== -->
+      <section class="screen" data-screen="hadith">
+        <header class="band"><div class="row"><button class="icon-btn back" aria-label="পেছনে" data-act="to-results"></button><h1 class="hb"></h1></div><p class="num"></p></header>
+        <div class="body hp"></div>
+      </section>
+
+      <!-- ===== Screen: results after back — same card, pages, sort, filter ===== -->
+      <section class="screen" data-screen="restored">
+        <header class="band"><div class="row"><button class="icon-btn back" aria-label="পেছনে" data-act="to-search"></button><h1>সার্চ রেজাল্ট</h1></div><div class="slot"></div></header>
+        <div class="body"></div>
+      </section>
+
+      <!-- ===== Screen: search page after back — text, books, grade kept ===== -->
+      <section class="screen" data-screen="search-back">
+        <header class="band"><div class="row"><button class="icon-btn back" aria-label="পেছনে" data-act="home"></button><h1>হাদিস সার্চ</h1></div><div class="slot"></div></header>
+        <div class="body"></div>
+        <div class="foot"><button class="btn block" data-act="run">সার্চ করুন</button></div>
+      </section>
+
+      <!-- ===== Sheets ===== -->
+      <div class="sheet" id="sheet-more" role="dialog" aria-label="অন্যান্য অপশন">
+        <div class="sheet-head"><h2>অন্যান্য অপশন<small data-sum="ref"></small></h2><button class="icon-btn" data-close aria-label="বন্ধ করুন" data-ic="close"></button></div>
+        <div style="padding-bottom:16px">
+          <button class="mr" data-act="open" data-v="details"><span class="ti" data-ic="details"></span><span><b>বিস্তারিত</b><small>হাদিসের বিস্তারিত পেজ খুলবে</small></span></button>
+          <button class="mr" data-act="open" data-v="goto"><span class="ti" data-ic="goto"></span><span><b>হাদিসে যান</b><small>বইয়ের ভেতরে এই হাদিসে যাবে</small></span></button>
+        </div>
+      </div>
+      <div class="sheet" id="sheet-sort" role="dialog" aria-label="সাজান">
+        <div class="sheet-head"><h2>সাজান</h2><button class="icon-btn" data-close aria-label="বাতিল" data-ic="close"></button></div>
+        <div class="sheet-body" data-fill="sort" data-closes style="padding-bottom:20px"></div>
+      </div>
+      <div class="sheet" id="sheet-grade" role="dialog" aria-label="গ্রেড ফিল্টার">
+        <div class="sheet-head"><h2>গ্রেড ফিল্টার</h2><button class="btn text" data-act="grade-clear">ক্লিয়ার</button><button class="icon-btn" data-close aria-label="বাতিল" data-ic="close"></button></div>
+        <div class="sheet-body" data-fill="grade"></div>
+        <div class="sheet-foot"><button class="btn block" data-close>ঠিক আছে</button></div>
+      </div>
+      <div class="sheet" id="sheet-books" role="dialog" aria-label="বই সিলেক্ট">
+        <div class="sheet-head"><h2>বই সিলেক্ট</h2><button class="icon-btn" data-close aria-label="বন্ধ করুন" data-ic="close"></button></div>
+        <div class="sheet-body"><button class="sel-all" data-act="book-all">সব নির্বাচন করুন</button><div data-fill="book"></div></div>
+        <div class="sheet-foot"><button class="btn block" data-close>ঠিক আছে</button></div>
+      </div>
+      <div class="sheet" id="sheet-grades" role="dialog" aria-label="গ্রেড সিলেক্ট">
+        <div class="sheet-head"><h2>গ্রেড সিলেক্ট</h2><button class="icon-btn" data-close aria-label="বন্ধ করুন" data-ic="close"></button></div>
+        <div class="sheet-body" data-fill="grade"></div>
+        <div class="sheet-foot"><button class="btn block" data-close>ঠিক আছে</button></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, search state, paging, and
+   saving / restoring the list position. Each demo's own look lives in
+   the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const XI = {
+  details: svg('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>', 24),
+  goto: svg('<path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2 2 2 0 0 0 2 2h13"/><path d="m10 8 3 3-3 3"/>', 24),
+  bookmark: svg('<path d="M6 3h12v18l-6-4-6 4z"/>', 22),
+  books: svg('<path d="M4 5a2 2 0 0 1 2-2h5v18H6a2 2 0 0 1-2-2zM13 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5z"/>', 22),
+  grade: svg('<path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/>', 22),
+  chev: svg('<path d="m9 6 6 6-6 6"/>', 18),
+};
+
+/* ---------- Demo data (hadith text only from the safe list, no Arabic) ---------- */
+const BOOKS = [
+  { id: 'bukhari', name: 'সহিহ বুখারি', abbr: 'বুখারী' },
+  { id: 'muslim', name: 'সহিহ মুসলিম', abbr: 'মুসলিম' },
+  { id: 'abudawud', name: 'সুনানে আবু দাউদ', abbr: 'দাউদ' },
+  { id: 'tirmidhi', name: 'জামে আত-তিরমিজি', abbr: 'তিরমিজি' },
+  { id: 'nasai', name: 'সুনানে নাসায়ী', abbr: 'নাসায়ী' },
+  { id: 'ibnmajah', name: 'সুনানে ইবনে মাজাহ', abbr: 'মাজাহ' },
+];
+const BOOK = Object.fromEntries(BOOKS.map((b) => [b.id, b]));
+const GRADES = [
+  { id: 'sahih', name: 'সহিহ হাদিস', c: 'sahih' },
+  { id: 'hasan', name: 'হাসান হাদিস', c: 'sahih' },
+  { id: 'daif', name: 'যঈফ হাদিস', c: 'weak' },
+  { id: 'mawdu', name: 'জাল হাদিস', c: 'weak' },
+];
+const GRADE = Object.fromEntries(GRADES.map((g) => [g.id, g]));
+const HADITHS = [
+  { id: 'b1', book: 'bukhari', num: 1, nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত', bn: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' },
+  { id: 'b1894', book: 'bukhari', num: 1894, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'রোজা ঢালস্বরূপ।' },
+  { id: 'b6018', book: 'bukhari', num: 6018, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।' },
+  { id: 'b6116', book: 'bukhari', num: 6116, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'এক ব্যক্তি নবী (সা.)-কে বলল, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বলল, তিনি প্রতিবারই বললেন, রাগ করো না।' },
+  { id: 'm223', book: 'muslim', num: 223, nar: 'আবু মালিক আশআরি (রা.) থেকে বর্ণিত', bn: 'পবিত্রতা ঈমানের অর্ধেক।' },
+].map((h) => ({ ...h, grade: 'sahih', order: BOOKS.findIndex((b) => b.id === h.book) * 1e5 + h.num }));
+const PAGE = 20;          // one "আরও ফলাফল দেখুন" page
+const OPEN_DEMO = 31;     // card ৩২ when a screen is opened straight from the toolbar
+const SORTS = [
+  { id: 'best', name: 'সেরা মিল', d: 'বেশি মিল থাকা ফলাফল আগে।' },
+  { id: 'book', name: 'বই অনুযায়ী', d: 'বই ও হাদিস নম্বর অনুযায়ী।' },
+];
+const SCREENS = [
+  { id: 'search', label: 'সার্চ পেজ' },
+  { id: 'results', label: 'সার্চ রেজাল্ট' },
+  { id: 'hadith', label: 'হাদিস খোলা' },
+  { id: 'restored', label: 'রেজাল্টে ফেরা' },
+  { id: 'search-back', label: 'সার্চে ফেরা' },
+];
+const RESULT_SCREENS = ['results', 'restored'];
+const SEARCH_SCREENS = ['search', 'search-back'];
+
+/* ---------- State: what the search page and the result page keep ---------- */
+const S = {
+  text: 'ঈমান',                                      // search box
+  books: new Set(['bukhari', 'muslim', 'abudawud']),  // "৩টি বই সিলেক্টেড"
+  grades: new Set(['sahih']),                         // one set for the search page and the result filter
+  sort: 'best',
+  res: null,         // { q, books, rot, total, loaded }
+  menu: -1,          // card whose menu is open
+  open: -1,          // card opened last
+  scroll: null,      // saved list offset (null: centre the opened card)
+  marks: new Set(),  // bookmarked hadith ids
+};
+const hash = (s) => [...s].reduce((a, c) => a + c.codePointAt(0), 0);
+function totalFor(q, nBooks) {
+  const g = S.grades.size ? 0.85 + 0.1 * (S.grades.size - 1) : 1.2;
+  return Math.max(36, Math.round((70 + (hash(q) % 60)) * (0.6 + 0.14 * nBooks) * g));
+}
+function newRes(q) {
+  const res = { q, books: new Set(S.books), rot: hash(q) };
+  res.total = totalFor(q, res.books.size);
+  res.loaded = Math.min(PAGE, res.total);
+  return res;
+}
+/* The demo has five safe hadith, so the list repeats them; the app lists real matches. */
+function items() {
+  const r = S.res;
+  let p = HADITHS.filter((h) => r.books.has(h.book));
+  p = S.sort === 'book' ? p.sort((a, b) => a.order - b.order) : p.map((_, i) => p[(i + r.rot) % p.length]);
+  return Array.from({ length: r.loaded }, (_, i) => ({ i, h: p[i % p.length] }));
+}
+const current = () => items()[S.open];
+
+/* ---------- Text helpers ---------- */
+function hl(text, q) {
+  const words = String(q).split(/\s+/).filter((w) => w.length > 1).map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  return words.length ? esc(text).replace(new RegExp(words.join('|'), 'g'), (m) => `<mark class="hl">${m}</mark>`) : esc(text);
+}
+const bookSummary = () => (S.books.size === BOOKS.length ? 'সব সিলেক্টেড' : `${bn(S.books.size)}টি বই সিলেক্টেড`);
+const gradeSummary = () => (S.grades.size ? `${bn(S.grades.size)}টি গ্রেড সিলেক্টেড` : 'সব সিলেক্টেড');
+const gradeShort = () => (!S.grades.size ? 'সব গ্রেড' : S.grades.size === 1 ? GRADE[[...S.grades][0]].name.replace(' হাদিস', '') : `${bn(S.grades.size)}টি গ্রেড`);
+const countLine = () => `সর্বমোট ফলাফল পাওয়া গেছে : ${bn(S.res.total)} টি`;
+const youSearched = () => `আপনি ( <b class="q">${esc(S.res.q)}</b> ) লিখে সার্চ করেছেন`;
+const gradeTag = (h) => `<span class="grade" style="background:var(--grade-${GRADE[h.grade].c})">${GRADE[h.grade].name}</span>`;
+const markIcon = (h) => (S.marks.has(h.id) ? `<span class="bm" title="বুকমার্ক করা হাদিস">${icons.bookmarkFilled}</span>` : '');
+const menuBtn = (i) => `<button class="icon-btn mb" data-act="menu" data-v="${i}" aria-label="হাদিসের অপশন">${icons.more}</button>`;
+const moreBtn = (cls = 'btn text lm') => (S.res.loaded < S.res.total ? `<button class="${cls}" data-act="load">${icons.plus}আরও ফলাফল দেখুন</button>` : '');
+const SUM = {
+  books: bookSummary, grades: gradeSummary, gshort: gradeShort,
+  count: () => (S.res ? countLine() : ''),
+  total: () => (S.res ? `${bn(S.res.total)}টি ফলাফল` : ''),
+  q: () => (S.res ? S.res.q : ''),
+  sort: () => SORTS.find((s) => s.id === S.sort).name,
+  ref: () => { const it = S.res && items()[S.menu]; return it ? `${BOOK[it.h.book].name} · হাদিস: ${bn(it.h.num)}` : ''; },
+};
+
+/* ---------- Sheet rows (radio / checkbox), filled into [data-fill] ---------- */
+const optRow = (act, v, kind, title, sub = '', lead = '') => `<button class="opt-row" data-act="${act}" data-v="${v}" role="${kind === 'rd' ? 'radio' : 'checkbox'}" aria-checked="false"><span class="${kind}"></span>${lead}<span class="ot"><b>${title}</b>${sub ? `<small>${sub}</small>` : ''}</span></button>`;
+const FILL = {
+  sort: () => SORTS.map((s) => optRow('sort', s.id, 'rd', s.name, s.d)).join(''),
+  grade: () => GRADES.map((g) => optRow('grade', g.id, 'cb', g.name, '', `<i class="gd" style="background:var(--grade-${g.c})"></i>`)).join(''),
+  book: () => BOOKS.map((b) => optRow('book', b.id, 'cb', b.name)).join(''),
+};
+function renderSums() {
+  $$('[data-sum]').forEach((el) => { el.textContent = SUM[el.dataset.sum](); });
+  $$('[data-act="sort"]').forEach((el) => el.setAttribute('aria-checked', el.dataset.v === S.sort));
+  $$('[data-act="grade"]').forEach((el) => el.setAttribute('aria-checked', S.grades.has(el.dataset.v)));
+  $$('[data-act="book"]').forEach((el) => el.setAttribute('aria-checked', S.books.has(el.dataset.v)));
+  $$('[data-act="grade-clear"]').forEach((el) => { el.hidden = !S.grades.size; });
+  $$('[data-act="mark"]').forEach((el) => el.setAttribute('aria-pressed', !!(S.res && current() && S.marks.has(current().h.id))));
+  D.sums?.();
+}
+
+/* ---------- Render a screen; the list keeps its offset unless told otherwise ---------- */
+const secOf = (id) => $(`.screen[data-screen="${id}"]`);
+function render(id = Kit.current, keepScroll = true) {
+  const sec = secOf(id), sc = sec && $('.body', sec), st = sc ? sc.scrollTop : 0;
+  if (SEARCH_SCREENS.includes(id)) { D.search(sec, id === 'search-back'); $$('[data-q]', sec).forEach((i) => { i.value = S.text; }); }
+  if (RESULT_SCREENS.includes(id)) D.results(sec, id === 'restored');
+  if (id === 'hadith') D.hadith(sec, current());
+  if (sc) sc.scrollTop = keepScroll ? st : 0;
+  renderSums();
+}
+function ensureRes() {
+  if (S.res) return;
+  if (!S.text.trim()) S.text = 'ঈমান';
+  S.res = newRes(S.text.trim());
+}
+function ensureOpen() {   // a toolbar jump lands on card ৩২ with two pages loaded
+  if (S.open >= 0 && S.open < S.res.loaded) return;
+  S.res.loaded = Math.max(S.res.loaded, Math.min(PAGE * 2, S.res.total));
+  S.open = Math.min(OPEN_DEMO, S.res.loaded - 1);
+  S.scroll = null;
+}
+/* Back from a hadith: same offset, same pages, same sort and filter; the card flashes once. */
+function restore(sec) {
+  const sc = $('.body', sec), card = $(`[data-card="${S.open}"]`, sec);
+  if (!sc) return;
+  if (S.scroll != null) sc.scrollTop = S.scroll;
+  else if (card) sc.scrollTop = Math.max(0, card.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - sc.clientHeight * 0.25);
+  if (card) { card.classList.remove('back-here'); void card.offsetWidth; card.classList.add('back-here'); }
+  D.restored?.(sec, card);
+}
+
+/* ---------- Flow ---------- */
+function runSearch() {
+  const q = S.text.trim();
+  if (!q) { Kit.snack('সার্চ করার জন্য কিছু লিখুন'); return; }
+  if (!S.books.has('bukhari') && !S.books.has('muslim')) { Kit.snack('এই ডেমোতে শুধু বুখারি আর মুসলিমের হাদিস আছে, এর একটি রাখুন'); return; }
+  document.activeElement?.blur?.();
+  S.res = newRes(q); S.open = -1; S.scroll = 0;
+  Kit.show('results');   // a new search starts at the top
+}
+function refreshList() {   // sort or grade filter changed: list starts from the top again
+  S.open = -1; S.scroll = 0;
+  if (RESULT_SCREENS.includes(Kit.current)) render(Kit.current, false); else renderSums();
+}
+function openHadith(via) {
+  S.open = S.menu; S.via = via;
+  const sc = $('.body', secOf(Kit.current));
+  if (sc && RESULT_SCREENS.includes(Kit.current)) S.scroll = sc.scrollTop;
+  Kit.show('hadith');
+}
+function toggleGrade(id) {
+  const g = new Set(S.grades);
+  if (g.has(id)) g.delete(id); else g.add(id);
+  if (g.size && !g.has('sahih')) { Kit.snack('এই ডেমোর সব হাদিস সহিহ, তাই সহিহ বাদ দিলে দেখানোর কিছু থাকে না'); renderSums(); return; }
+  setGrades(g);
+}
+function setGrades(g) {
+  S.grades = g;
+  if (S.res && RESULT_SCREENS.includes(Kit.current)) {   // result filter: one re-run, first page again
+    S.res.total = totalFor(S.res.q, S.res.books.size);
+    S.res.loaded = Math.min(PAGE, S.res.total);
+    refreshList();
+  } else renderSums();
+}
+function toggleBook(id) {
+  if (S.books.has(id) && S.books.size === 1) { Kit.snack('অন্তত একটি বই সিলেক্ট করুন'); return; }
+  if (S.books.has(id)) S.books.delete(id); else S.books.add(id);
+  renderSums();
+}
+function toggleMark() {
+  const h = current().h;
+  if (S.marks.has(h.id)) { S.marks.delete(h.id); Kit.snack('বুকমার্ক সরানো হয়েছে'); } else { S.marks.add(h.id); Kit.snack('বুকমার্ক সেভ করা হয়েছে'); }
+  render('hadith');
+}
+function resetAll() {   // home, then search again: everything starts fresh
+  Object.assign(S, { text: '', books: new Set(BOOKS.map((b) => b.id)), grades: new Set(), sort: 'best', res: null, menu: -1, open: -1, scroll: null });
+  Kit.show('search');
+}
+const leaveSearch = () => Kit.snack('হোমে ফিরে যাবে। পরে সার্চ খুললে সব নতুন করে শুরু হবে', { label: 'আবার খুলুন', onClick: resetAll });
+
+/* ---------- Wiring ---------- */
+function onScreen(id) {
+  if (id !== 'search') ensureRes();
+  if (id === 'search-back' && !S.text.trim()) S.text = S.res.q;
+  if (id === 'hadith' || id === 'restored') ensureOpen();
+  render(id, false);
+  if (id === 'restored') restore(secOf(id));
+  D.onScreen?.(id);
+}
+function startEngine() {
+  $$('[data-fill]').forEach((el) => {
+    el.innerHTML = FILL[el.dataset.fill]();
+    if ('closes' in el.dataset) $$('.opt-row', el).forEach((r) => { r.dataset.close = ''; });
+  });
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-act]');
+    if (!t) return;
+    const v = t.dataset.v;
+    switch (t.dataset.act) {
+      case 'run': runSearch(); break;
+      case 'clear': S.text = ''; $$('[data-q]').forEach((i) => { i.value = ''; }); t.closest('.screen')?.querySelector('[data-q]')?.focus(); break;
+      case 'menu': S.menu = +v; renderSums(); Kit.open(D.menuId || 'sheet-more'); break;
+      case 'open': openHadith(v); break;
+      case 'load': S.res.loaded = Math.min(S.res.total, S.res.loaded + PAGE); render(); break;
+      case 'sort': S.sort = v; refreshList(); break;
+      case 'grade': toggleGrade(v); break;
+      case 'grade-clear': setGrades(new Set()); break;
+      case 'book': toggleBook(v); break;
+      case 'book-all': S.books = new Set(BOOKS.map((b) => b.id)); renderSums(); break;
+      case 'mark': toggleMark(); break;
+      case 'to-results': Kit.show('restored'); break;
+      case 'to-search': Kit.show('search-back'); break;
+      case 'home': leaveSearch(); break;
+      default: D.act?.(t);
+    }
+  });
+  document.addEventListener('input', (e) => { if (e.target.matches('[data-q]')) S.text = e.target.value; });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('[data-q]')) { e.preventDefault(); runSearch(); } });
+  Kit.onScreen(onScreen);
+  if (Kit.current) onScreen(Kit.current);
+}
+
+/* ======================================================================
+   DEMO 5 — রঙিন সারাংশ: a colour band holds the query and the choices.
+   Back on the search page the band lists what was kept; back on the
+   results a line marks where reading left off.
+   ====================================================================== */
+const D = {
+  search(sec, back) {
+    $('.slot', sec).innerHTML = `${back ? '<p class="cap">আগের সার্চ রাখা আছে, একটু বদলে আবার খুঁজুন</p>' : ''}
+      <label class="bf">${icons.search}
+        <input data-q type="search" enterkeyhint="search" autocomplete="off" aria-label="হাদিস সার্চ ইনপুট" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন">
+        <button class="icon-btn" type="button" data-act="clear" aria-label="ক্লিয়ার">${icons.close}</button></label>
+      ${back ? '<div class="kept"><span data-sum="books"></span><span data-sum="grades"></span></div>' : ''}`;
+    $('.body', sec).innerHTML = `<div class="lc">
+      <button class="lr" data-open="sheet-books"><span class="ti">${XI.books}</span><span class="tx"><b>বই সিলেক্ট</b><span data-sum="books"></span></span>${XI.chev}</button>
+      <button class="lr" data-open="sheet-grades"><span class="ti">${XI.grade}</span><span class="tx"><b>গ্রেড সিলেক্ট</b><span data-sum="grades"></span></span>${XI.chev}</button></div>`;
+  },
+  results(sec, back) {
+    $('.slot', sec).innerHTML = `<p class="qb" data-sum="q"></p><p class="cap" data-sum="count"></p>
+      <div class="pills"><button data-open="sheet-sort" aria-label="সাজান">${icons.sort}<span data-sum="sort"></span></button>
+        <button data-open="sheet-grade" aria-label="গ্রেড ফিল্টার">${icons.filter}<span data-sum="gshort"></span></button></div>`;
+    $('.body', sec).innerHTML = `<div class="list">${items().map((it) => {
+      const h = it.h, b = BOOK[h.book];
+      return `${back && it.i === S.open ? '<p class="mark">এখান থেকে খুলেছিলেন</p>' : ''}<article class="card hc" data-card="${it.i}">
+        <div class="hadith-head"><span class="book-badge">${b.abbr}</span><div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${bn(h.num)}</span></div>${markIcon(h)}${gradeTag(h)}${menuBtn(it.i)}</div>
+        <p class="translation">${hl(h.bn, S.res.q)}</p><p class="narrator">${h.nar}</p></article>`;
+    }).join('')}</div>${moreBtn('btn outline lm')}`;
+  },
+  hadith(sec, it) {
+    const h = it.h, b = BOOK[h.book], on = S.marks.has(h.id);
+    $('.hb', sec).textContent = b.name;
+    $('.num', sec).textContent = `হাদিস: ${bn(h.num)}`;
+    $('.body', sec).innerHTML = `<article class="card">
+        <div class="hadith-head"><span class="book-badge">${b.abbr}</span><div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${bn(h.num)}</span></div>${markIcon(h)}${gradeTag(h)}</div>
+        <p class="narrator">${h.nar}</p><p class="translation">${esc(h.bn)}</p></article>
+      <button class="btn tonal" data-act="mark" aria-pressed="${on}">${on ? icons.bookmarkFilled : XI.bookmark}বুকমার্ক / পিন</button>`;
+  },
+};
+
+$$('.back').forEach((b) => { b.innerHTML = icons.back; });
+$$('[data-ic]').forEach((el) => { el.insertAdjacentHTML('afterbegin', icons[el.dataset.ic] || XI[el.dataset.ic]); });
+Kit.init({ demo: 5, name: 'রঙিন সারাংশ', screens: SCREENS });
+startEngine();
+</script>
+</body>
+</html>
