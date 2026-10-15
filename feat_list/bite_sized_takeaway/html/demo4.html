@@ -38,7 +38,7 @@
 <body>
 <main class="kit-stage">
   <div class="phone">
-    <div class="viewport"><!-- screens, sheets and drawer come from common.js --></div>
+    <div class="viewport"><!-- screens and the menu sheet come from common.js --></div>
   </div>
 </main>
 <script src="../../_kit/kit.js"></script>
@@ -64,18 +64,14 @@
     hooks: {
       // List: band before the card's own head row
       card: (h, p, ctx) => (ctx === 'list' ? band(h) : '') + p.head + p.arabic + p.local,
-      // Details: band pinned at the top of the page body, then chapter, card, শিক্ষণীয় বিষয়
-      details: (h, p) => (h.points ? `<div class="kb-pin">${band(h)}</div>` : '') + p.sec + p.card + p.teach,
+      // Details: band pinned at the top of the page body, then card, শিক্ষণীয় বিষয়
+      details: (h, p) => (h.points ? `<div class="kb-pin">${band(h)}</div>` : '') + p.card + p.teach,
     },
     screens: [
       { id: 'list', label: 'হাদিস লিস্ট' },
       { id: 'collapsed', label: 'গোটানো' },
-      { id: 'menu', label: 'মেনু' },
       { id: 'details', label: 'হাদিসের বিস্তারিত' },
-      { id: 'settings', label: 'ফন্ট সাইজ' },
       { id: 'nobox', label: 'বক্স নেই' },
-      { id: 'loading', label: 'লোডিং' },
-      { id: 'offline', label: 'অফলাইন' },
     ],
   });
 })();

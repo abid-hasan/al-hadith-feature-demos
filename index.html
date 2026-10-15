@@ -12,7 +12,7 @@
   --primary:#1AA483; --primary-dark:#0D8C5C; --bar:#118C6E;
   --bg:#F4F4F4; --surface:#FFFFFF; --surface-2:#F8FAF9; --sunken:#E9EDEC;
   --text:#2B2F33; --body:#5D646F; --hint:rgba(0,0,0,.54); --line:rgba(0,0,0,.10);
-  --tint:#E8F6F3; --warn-bg:#FFF6E5; --warn:#8A5A00;
+  --tint:#E8F6F3; --warn-bg:#FFF6E5; --warn:#8A5A00; --fav:#D99A00;
   --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 16px rgba(16,24,40,.06);
   --radius:12px;
   color-scheme:light;
@@ -21,14 +21,14 @@
   :root:not([data-theme="light"]){
     --bar:#161C23; --bg:#0D1116; --surface:#161C23; --surface-2:#1B222A; --sunken:#05080B;
     --text:#ECEDEE; --body:#C6C3CA; --hint:rgba(255,255,255,.6); --line:rgba(104,112,121,.3);
-    --tint:rgba(26,164,131,.14); --warn-bg:rgba(255,183,77,.12); --warn:#FFCC80;
+    --tint:rgba(26,164,131,.14); --warn-bg:rgba(255,183,77,.12); --warn:#FFCC80; --fav:#FFC940;
     --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bar:#161C23; --bg:#0D1116; --surface:#161C23; --surface-2:#1B222A; --sunken:#05080B;
   --text:#ECEDEE; --body:#C6C3CA; --hint:rgba(255,255,255,.6); --line:rgba(104,112,121,.3);
-  --tint:rgba(26,164,131,.14); --warn-bg:rgba(255,183,77,.12); --warn:#FFCC80;
+  --tint:rgba(26,164,131,.14); --warn-bg:rgba(255,183,77,.12); --warn:#FFCC80; --fav:#FFC940;
   --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
 }
 
@@ -37,16 +37,16 @@ html,body{height:100%;margin:0}
 body{font-family:Kalpurush,"Noto Sans Bengali",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6}
 button{font:inherit;color:inherit;cursor:pointer}
 :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
-.app{display:grid;grid-template-columns:280px 1fr;height:100vh}
+.app{display:grid;grid-template-columns:300px 1fr;height:100vh}
 .scrim{display:none}
 
 /* ---------- Sidebar ---------- */
 aside{background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
-.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px}
+.brand{display:flex;align-items:center;gap:10px;padding:16px 14px 12px}
 .brand-mark{width:36px;height:36px;border-radius:10px;background:var(--bar);display:grid;place-items:center;flex:none}
 .brand b{display:block;font-size:17px;line-height:1.2}
 .brand small{color:var(--hint);font-size:12px}
-.search{margin:0 14px 10px;position:relative}
+.search{margin:0 10px 10px;position:relative}
 .search input{width:100%;font:inherit;padding:9px 12px 9px 34px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--text)}
 .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--hint)}
 .side-label{padding:6px 18px;font-size:12px;color:var(--hint)}
@@ -70,14 +70,17 @@ aside{background:var(--surface);border-right:1px solid var(--line);display:flex;
 .icon-btn:hover{background:var(--surface-2)}
 
 /* ---------- Main ---------- */
-main{display:flex;flex-direction:column;min-width:0;min-height:0}
-.topbar{display:flex;align-items:center;gap:14px;padding:14px 22px;background:var(--surface);border-bottom:1px solid var(--line)}
+/* Content on the left at full height; title, tabs and demo controls in the rail on the right. */
+main{display:flex;min-width:0;min-height:0}
+.content{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
+.rail{flex:none;width:290px;background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;overflow-y:auto}
+.rail-head{display:flex;align-items:flex-start;gap:10px;padding:16px 14px 10px}
 .menu-btn{display:none}
 .heading{flex:1;min-width:0}
-.heading h1{margin:0;font-size:21px;line-height:1.25}
-.heading p{margin:2px 0 0;font-size:12.5px;color:var(--hint);font-family:ui-monospace,Menlo,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);padding:4px;border-radius:12px;flex:none}
-.tab{border:0;background:none;border-radius:9px;padding:6px 14px;font-size:14.5px;color:var(--body);display:flex;gap:7px;align-items:center}
+.heading h1{margin:0;font-size:18px;line-height:1.3}
+.heading p{margin:2px 0 0;font-size:11.5px;color:var(--hint);font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere}
+.tabs{display:flex;flex-direction:column;gap:2px;margin:0 10px;background:var(--surface-2);border:1px solid var(--line);padding:4px;border-radius:12px;flex:none}
+.tab{border:0;background:none;border-radius:9px;padding:6px 12px;font-size:14.5px;color:var(--body);display:flex;gap:7px;align-items:center;justify-content:space-between;text-align:left}
 .tab[aria-selected="true"]{background:var(--bar);color:#fff}
 .tab .n{font-size:11.5px;background:rgba(127,127,127,.18);border-radius:20px;padding:0 7px}
 .tab[aria-selected="true"] .n{background:rgba(255,255,255,.22)}
@@ -111,40 +114,73 @@ main{display:flex;flex-direction:column;min-width:0;min-height:0}
 .doc a{color:var(--primary)}
 .doc hr{border:0;border-top:1px solid var(--line);margin:20px 0}
 
-/* ---------- UI preview ---------- */
-.ptools{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
-.demos{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
-.demo-btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;min-width:38px;height:34px;padding:0 10px;display:inline-flex;align-items:center;gap:6px;font-size:14.5px}
-.demo-btn:hover{border-color:var(--primary)}
-.demo-btn[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
-.demo-btn.empty{border-style:dashed;color:var(--hint)}
-.demo-name{font-size:13px;color:var(--hint);padding:0 4px;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.toggle{border:1px solid var(--line);background:var(--surface);border-radius:10px;height:34px;padding:0 12px;font-size:13.5px;display:inline-flex;align-items:center;gap:6px}
-.toggle[aria-pressed="true"]{background:var(--tint);border-color:var(--primary);color:var(--primary-dark)}
-:root[data-theme="dark"] .toggle[aria-pressed="true"]{color:var(--primary)}
+/* ---------- UI preview: demo fills the height, its controls sit on the right ---------- */
 .stage{flex:1;min-height:0;display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
 .stage.split{grid-template-columns:1fr 1fr}
 .pane[hidden]{display:none}
-.pane{position:relative;background:var(--sunken);min-width:0;min-height:0;display:flex;flex-direction:column}
-.pane-body{flex:1;min-height:0;display:flex;flex-direction:column}
+.pane{position:relative;background:var(--sunken);min-width:0;min-height:0;display:flex}
+.pane-body{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
 .pane-body iframe{flex:1;width:100%;border:0;background:var(--sunken)}
-/* Per-pane demo bar: only in side-by-side mode */
-.pane-bar{display:none;align-items:center;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
-.stage.split .pane-bar{display:flex}
-.stage.split .pane.active .pane-bar{box-shadow:inset 0 -2px 0 var(--primary)}
-.pane-side{font-size:12px;font-weight:700;color:var(--hint);padding:0 4px;min-width:30px}
-.pane.active .pane-side{color:var(--primary)}
-.pane-bar .demo-btn{min-width:32px;height:30px;font-size:13.5px;padding:0 8px}
-.pane-bar .pane-name{flex:1;min-width:0;font-size:12.5px;color:var(--hint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pane-bar .icon-btn{width:30px;height:30px}
-.ptools .split-hint{display:none;font-size:13px;color:var(--hint);flex:1}
-.ui-split .ptools .demos,.ui-split .ptools .demo-name,.ui-split .ptools #open{display:none}
-.ui-split .ptools .split-hint{display:block}
+/* Controls of the right-most demo live in the rail; in side-by-side mode the
+   left demo gets its own column between the two phones. */
+.pane-side,.rail-ctrl{flex-direction:column;gap:14px;padding:14px 12px 12px}
+.pane-side{display:none;flex:none;width:220px;background:var(--surface);border-left:1px solid var(--line);overflow-y:auto}
+.stage.split .pane-side{display:flex}
+.rail-ctrl{display:none;flex:1;border-top:1px solid var(--line);margin-top:12px}
+.tab-ui .rail-ctrl{display:flex}
+.stage.split .pane.active .pane-side,.rail-ctrl.active{box-shadow:inset 3px 0 0 var(--primary)}
+.ps-sec{display:flex;flex-direction:column;gap:6px}
+.ps-label{font-size:11.5px;font-weight:700;color:var(--hint)}
+.pane.active .ps-label.side,.rail-ctrl.active .ps-label.side{color:var(--primary)}
+.ps-demos{display:flex;flex-wrap:wrap;gap:6px}
+.demo-btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;min-width:34px;height:32px;padding:0 9px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;position:relative}
+.demo-btn:hover{border-color:var(--primary)}
+.demo-btn[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
+.demo-btn.empty{border-style:dashed;color:var(--hint)}
+.demo-btn.has-fav::after{content:"";position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--fav);border:2px solid var(--surface)}
+.ps-name{display:flex;align-items:flex-start;gap:4px;font-size:14.5px;line-height:1.4;color:var(--text);font-weight:700}
+.ps-name span{flex:1;min-width:0;padding-top:3px}
+.ps-screens{display:flex;flex-direction:column;gap:2px}
+.scr{display:flex;align-items:center;gap:2px}
+.scr-go{flex:1;min-width:0;text-align:left;border:0;background:none;border-radius:8px;padding:5px 8px;font-size:14px;color:var(--body)}
+.scr-go:hover{background:var(--surface-2)}
+.scr-go[aria-current="true"]{background:var(--tint);color:var(--primary-dark);font-weight:700}
+:root[data-theme="dark"] .scr-go[aria-current="true"]{color:var(--primary)}
+.star{border:0;background:none;width:30px;height:30px;border-radius:8px;display:inline-grid;place-items:center;color:var(--hint);flex:none}
+.star:hover{background:var(--surface-2);color:var(--fav)}
+.star[aria-pressed="true"]{color:var(--fav)}
+.readonly .star[aria-pressed="false"]{display:none}
+.readonly .star{pointer-events:none}
+.ps-muted{font-size:12.5px;color:var(--hint)}
+.ps-tools{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:4px}
+.ps-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.toggle{border:1px solid var(--line);background:var(--surface);border-radius:10px;height:34px;padding:0 12px;font-size:13.5px;display:inline-flex;align-items:center;gap:6px}
+.toggle[aria-pressed="true"]{background:var(--tint);border-color:var(--primary);color:var(--primary-dark)}
+:root[data-theme="dark"] .toggle[aria-pressed="true"]{color:var(--primary)}
 .blank{flex:1;display:grid;place-items:center;text-align:center;color:var(--hint);padding:30px}
 .blank b{display:block;color:var(--text);font-size:17px;margin:10px 0 4px}
 .blank code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
 .kbd{font-size:12px;color:var(--hint)}
 kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--surface)}
+
+/* ---------- Favorites ---------- */
+#fav{overflow:auto}
+.fav-intro{color:var(--hint);font-size:13.5px;margin:0 0 14px}
+.fav-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+.fav-row{display:flex;align-items:center;gap:6px;padding:4px 8px 4px 4px;border-top:1px solid var(--line)}
+.fav-row:first-child{border-top:0}
+.fav-open{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;border:0;background:none;border-radius:10px;padding:10px 12px}
+.fav-open:hover{background:var(--surface-2)}
+.fav-open b{font-size:15.5px;color:var(--text)}
+.fav-open .sub{font-size:14px;color:var(--body)}
+.fav-open .tag{font-size:11.5px;color:var(--hint);border:1px solid var(--line);border-radius:20px;padding:0 8px;flex:none}
+.fav-head{background:var(--surface-2)}
+.fav-screen .fav-open{padding-left:28px}
+.fav-star{color:var(--fav);flex:none;display:inline-grid}
+.fav-x{border:0;background:none;width:30px;height:30px;border-radius:8px;color:var(--hint);display:inline-grid;place-items:center;flex:none}
+.fav-x:hover{background:var(--surface-2);color:var(--text)}
+.readonly .fav-x{display:none}
+.f-fav{font-size:11.5px;color:var(--fav);flex:none}
 
 /* ---------- Narrow screens ---------- */
 @media (max-width:860px){
@@ -154,13 +190,19 @@ kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;border:1px solid var
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:15}
   body.drawer .scrim{display:block}
   .menu-btn{display:inline-grid}
-  .topbar{padding:10px 16px;flex-wrap:wrap}
-  .tabs{order:3;width:100%}
+  main{flex-direction:column}
+  .rail{order:-1;width:auto;border-left:0;border-bottom:1px solid var(--line);max-height:50vh}
+  .rail-head{padding:10px 14px 8px}
+  .tabs{flex-direction:row;margin:0 12px 8px}
   .tab{flex:1;justify-content:center}
+  .rail-ctrl{flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px;margin-top:0}
   .doc-wrap{padding:16px 16px 40px}
   .doc{padding:20px 18px}
   .stage.split{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
-  .kbd,.demo-name{display:none}
+  .pane{flex-direction:column}
+  .stage.split .pane-side{order:-1;width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px;border-left:0;border-bottom:1px solid var(--line);max-height:45%}
+  .ps-tools{margin-top:0;flex-direction:row}
+  .kbd{display:none}
 }
 </style>
 </head>
@@ -189,46 +231,40 @@ kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;border:1px solid var
   <div class="scrim" id="scrim"></div>
 
   <main>
-    <header class="topbar">
-      <button class="icon-btn menu-btn" id="menu" aria-label="ফিচারের তালিকা খুলুন">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      </button>
-      <div class="heading"><h1 id="title">লোড হচ্ছে…</h1><p id="path"></p></div>
+    <div class="content">
+      <section class="panel on" id="req" role="tabpanel" aria-labelledby="tab-req">
+        <div class="doc-wrap">
+          <div class="doc-meta" id="doc-meta"></div>
+          <article class="doc" id="doc"></article>
+        </div>
+      </section>
+
+      <section class="panel" id="ui" role="tabpanel" aria-labelledby="tab-ui">
+        <div class="stage" id="stage">
+          <div class="pane active" id="pane-a" data-side="a"><div class="pane-body" id="body-a"></div><div class="pane-side" id="side-a"></div></div>
+          <div class="pane" id="pane-b" data-side="b" hidden><div class="pane-body" id="body-b"></div></div>
+        </div>
+      </section>
+
+      <section class="panel" id="fav" role="tabpanel" aria-labelledby="tab-fav">
+        <div class="doc-wrap"><div id="fav-list"></div></div>
+      </section>
+    </div>
+
+    <aside class="rail" aria-label="ফিচার আর ডেমোর কন্ট্রোল">
+      <div class="rail-head">
+        <button class="icon-btn menu-btn" id="menu" aria-label="ফিচারের তালিকা খুলুন">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div class="heading"><h1 id="title">লোড হচ্ছে…</h1><p id="path"></p></div>
+      </div>
       <div class="tabs" role="tablist" aria-label="ভিউ">
         <button class="tab" role="tab" id="tab-req" aria-controls="req" aria-selected="true">রিকোয়ারমেন্টস</button>
         <button class="tab" role="tab" id="tab-ui" aria-controls="ui" aria-selected="false">UI প্রিভিউ <span class="n" id="demo-n">০</span></button>
+        <button class="tab" role="tab" id="tab-fav" aria-controls="fav" aria-selected="false">ফেভারিট <span class="n" id="fav-n">০</span></button>
       </div>
-    </header>
-
-    <section class="panel on" id="req" role="tabpanel" aria-labelledby="tab-req">
-      <div class="doc-wrap">
-        <div class="doc-meta" id="doc-meta"></div>
-        <article class="doc" id="doc"></article>
-      </div>
-    </section>
-
-    <section class="panel" id="ui" role="tabpanel" aria-labelledby="tab-ui">
-      <div class="ptools">
-        <div class="demos" id="demos" aria-label="ডেমো বেছে নিন"></div>
-        <span class="demo-name" id="demo-name"></span>
-        <span class="split-hint">দুই পাশের বার থেকে আলাদা করে ডেমো বাছুন</span>
-        <button class="toggle" id="compare" aria-pressed="false" title="দুটো ডেমো পাশাপাশি দেখুন">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></svg>
-          পাশাপাশি
-        </button>
-        <button class="icon-btn" id="reload" aria-label="ডেমো রিলোড করুন" title="রিলোড">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
-        </button>
-        <button class="icon-btn" id="open" aria-label="নতুন ট্যাবে খুলুন" title="নতুন ট্যাবে খুলুন">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
-        </button>
-        <span class="kbd"><kbd>←</kbd> <kbd>→</kbd> ডেমো</span>
-      </div>
-      <div class="stage" id="stage">
-        <div class="pane active" id="pane-a" data-side="a"><div class="pane-bar" id="bar-a"></div><div class="pane-body" id="body-a"></div></div>
-        <div class="pane" id="pane-b" data-side="b" hidden><div class="pane-bar" id="bar-b"></div><div class="pane-body" id="body-b"></div></div>
-      </div>
-    </section>
+      <div class="rail-ctrl" id="side-rail"></div>
+    </aside>
   </main>
 </div>
 
@@ -322,6 +358,9 @@ function renderMarkdown(md) {
 /* ---------- State ---------- */
 let features = [];
 const state = { feature: null, tab: 'req', demo: 0, compare: false, demoB: 1, side: 'a' };
+// What each pane's demo reported over postMessage (kit demos only).
+const frames = { a: null, b: null };
+let canSave = false;      // true on the local server; GitHub Pages is read-only
 const mtimes = { md: 0, a: 0, b: 0 };
 
 function current() { return features.find((f) => f.id === state.feature) || null; }
@@ -330,7 +369,7 @@ function readHash() {
   // #/<feature>/<tab>/<demo>[/<right demo>] — a 4th part means side-by-side.
   const [, id, tab, demo, demoB] = decodeURIComponent(location.hash).match(/^#\/?([^/]*)\/?([^/]*)\/?(\d*)\/?(\d*)/) || [];
   if (id) state.feature = id;
-  if (tab === 'ui' || tab === 'req') state.tab = tab;
+  if (tab === 'ui' || tab === 'req' || tab === 'fav') state.tab = tab;
   if (demo) state.demo = Math.max(0, Number(demo) - 1);
   state.compare = Boolean(demoB);
   if (demoB) state.demoB = Math.max(0, Number(demoB) - 1);
@@ -352,6 +391,7 @@ function renderSidebar() {
     return `<li><button class="feature" data-id="${esc(f.id)}" aria-current="${f.id === state.feature}">
       <span class="f-dot"></span>
       <span class="f-text"><span class="f-title">${esc(f.title)}</span><span class="f-id">${esc(f.id)}/</span></span>
+      ${favsOf(f).length ? `<span class="f-fav" title="ফেভারিট">★${bn(favsOf(f).length)}</span>` : ''}
       <span class="f-count" title="ডেমো">${bn(ready)}/${bn(f.demos.length)}</span>
     </button></li>`;
   }).join('') || '<li class="side-label">কিছু পাওয়া যায়নি</li>';
@@ -376,12 +416,24 @@ function renderDoc() {
     : `<div class="blank"><div><b>রিকোয়ারমেন্ট ফাইল নেই</b><code>feat_list/${esc(f.id)}/${esc(f.id)}.md</code> তৈরি করুন।</div></div>`;
 }
 
-/* ---------- UI preview ---------- */
-function paneHtml(f, idx) {
+/* ---------- UI preview ----------
+   Each pane = the demo (left, full height) + its controls (right): demo
+   numbers, name, the demo's screens and tools. Kit demos run with
+   ?embed=1, hide their own side panel and report their screens. */
+const ICONS = {
+  star: (on) => `<svg width="17" height="17" viewBox="0 0 24 24" fill="${on ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9z"/></svg>`,
+  reload: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>',
+  open: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+  split: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></svg>',
+  close: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+};
+
+function paneHtml(f, idx, screen) {
   const d = f.demos[idx];
   if (!d) return `<div class="blank"><div><b>এখনো কোনো ডেমো নেই</b><code>feat_list/${esc(f.id)}/html/demo1.html</code> যোগ করুন।</div></div>`;
   if (d.empty) return `<div class="blank"><div><b>${esc(d.file)} এখনো খালি</b>ফাইলটায় HTML লিখলে এখানে আপনা থেকে দেখাবে।</div></div>`;
-  return `<iframe src="${d.url}?v=${d.mtime}&theme=${currentTheme()}" title="${esc(d.title || d.file)}"></iframe>`;
+  const sc = screen ? `&screen=${encodeURIComponent(screen)}` : '';
+  return `<iframe src="${d.url}?v=${d.mtime}&theme=${currentTheme()}&embed=1${sc}" title="${esc(d.title || d.file)}"></iframe>`;
 }
 
 const demoIndex = (side) => (side === 'b' ? state.demoB : state.demo);
@@ -389,28 +441,79 @@ const shortName = (d) => (d && d.title ? d.title.split('·').pop().trim() : (d ?
 
 function demoButtons(f, selected) {
   return f.demos.map((d, i) =>
-    `<button class="demo-btn${d.empty ? ' empty' : ''}" data-i="${i}" aria-pressed="${i === selected}"
+    `<button class="demo-btn${d.empty ? ' empty' : ''}${favsOf(f).some((x) => x.demo === d.file) ? ' has-fav' : ''}" data-i="${i}" aria-pressed="${i === selected}"
       title="${esc(d.title || d.file)}${d.empty ? ' (খালি)' : ''}">${bn(i + 1)}</button>`).join('');
 }
 
-function renderPaneBar(side) {
-  const f = current();
-  const idx = demoIndex(side);
-  const d = f.demos[idx];
-  $(`bar-${side}`).innerHTML = `
-    <span class="pane-side">${side === 'a' ? 'বাঁয়ে' : 'ডানে'}</span>
-    ${demoButtons(f, idx)}
-    <span class="pane-name" title="${esc(d ? (d.title || d.file) : '')}">${esc(shortName(d))}</span>
-    <button class="icon-btn pane-open" aria-label="নতুন ট্যাবে খুলুন" title="নতুন ট্যাবে খুলুন" ${!d || d.empty ? 'disabled' : ''}>
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
-    </button>`;
+function starBtn(on, attrs, what) {
+  return `<button class="star" ${attrs} aria-pressed="${on}" title="${on ? `${what} ফেভারিট থেকে সরান` : `${what} ফেভারিট করুন`}">${ICONS.star(on)}</button>`;
 }
 
-function mountPane(side, idx) {
+function renderScreens(side) {
+  const box = $(`scr-${side}`);
+  if (!box) return;
+  const f = current();
+  const d = f && f.demos[demoIndex(side)];
+  const info = frames[side];
+  if (!d || d.empty) { box.innerHTML = ''; return; }
+  if (!info) { box.innerHTML = '<span class="ps-muted">লোড হচ্ছে…</span>'; return; }
+  if (!info.screens.length) { box.innerHTML = '<span class="ps-muted">এই ডেমোতে স্ক্রিনের তালিকা নেই</span>'; return; }
+  renderExtras(side);
+  box.innerHTML = info.screens.map((sc) => `<div class="scr">
+      <button class="scr-go" data-screen="${esc(sc.id)}" aria-current="${sc.id === info.current}">${esc(sc.label)}</button>
+      ${starBtn(isFav(f, d.file, sc.id), `data-fav-screen="${esc(sc.id)}" data-label="${esc(sc.label)}"`, 'স্ক্রিনটা')}
+    </div>`).join('');
+}
+
+// Right-most demo -> the rail; the left demo in side-by-side mode -> its own column.
+const sideEl = (side) => (side === 'a' && state.compare ? $('side-a') : $('side-rail'));
+
+// The demo's own controls (e.g. "অ্যাপ আবার খুলুন"), clicked inside the demo for us.
+function renderExtras(side) {
+  const box = $(`ext-${side}`);
+  const list = frames[side]?.extras || [];
+  if (!box) return;
+  box.hidden = !list.length;
+  box.innerHTML = list.length ? `<span class="ps-label">ডেমোর কন্ট্রোল</span><div class="ps-row">${list.map((x) =>
+    `<button class="toggle" data-extra="${x.i}" ${x.pressed ? `aria-pressed="${esc(x.pressed)}"` : ''}>${esc(x.label)}</button>`).join('')}</div>` : '';
+}
+
+function renderSide(side) {
+  const f = current();
+  const el = sideEl(side);
+  el.dataset.side = side;
+  if (!f) { el.innerHTML = ''; return; }
+  const idx = demoIndex(side);
+  const d = f.demos[idx];
+  const ready = d && !d.empty;
+  const last = state.compare ? 'b' : 'a';
+  el.innerHTML = `
+    <div class="ps-sec">
+      ${state.compare ? `<span class="ps-label side">${side === 'a' ? 'বাঁ পাশ' : 'ডান পাশ'}</span>` : ''}
+      <span class="ps-label">ডেমো</span>
+      <div class="ps-demos">${demoButtons(f, idx)}</div>
+    </div>
+    ${d ? `<div class="ps-name"><span title="${esc(d.title || d.file)}">${esc(shortName(d))}</span>
+      ${ready ? starBtn(isFav(f, d.file, null), 'data-fav-demo', 'ডেমোটা') : ''}</div>` : ''}
+    <div class="ps-sec"><span class="ps-label">স্ক্রিন</span><div class="ps-screens" id="scr-${side}"></div></div>
+    <div class="ps-sec" id="ext-${side}" hidden></div>
+    <div class="ps-tools">
+      ${side === last ? `<button class="toggle" data-act="compare" aria-pressed="${state.compare}" title="${state.compare ? 'একটা ডেমোতে ফিরে যান' : 'দুটো ডেমো পাশাপাশি দেখুন'}">${ICONS.split} পাশাপাশি</button>` : ''}
+      <div class="ps-row">
+        <button class="icon-btn" data-act="reload" aria-label="ডেমো রিলোড করুন" title="রিলোড" ${ready ? '' : 'disabled'}>${ICONS.reload}</button>
+        <button class="icon-btn" data-act="open" aria-label="নতুন ট্যাবে খুলুন" title="নতুন ট্যাবে খুলুন" ${ready ? '' : 'disabled'}>${ICONS.open}</button>
+      </div>
+      ${side === last ? '<span class="kbd"><kbd>←</kbd> <kbd>→</kbd> ডেমো · <kbd>↑</kbd> <kbd>↓</kbd> ফিচার</span>' : ''}
+    </div>`;
+  renderScreens(side);
+}
+
+function mountPane(side, idx, screen) {
   const f = current();
   writeDemoThemeKeys(currentTheme());
+  frames[side] = null;
   const body = $(`body-${side}`);
-  body.innerHTML = paneHtml(f, idx);
+  body.innerHTML = paneHtml(f, idx, screen);
   const d = f.demos[idx];
   mtimes[side] = d ? d.mtime : 0;
   const frame = body.querySelector('iframe');
@@ -421,19 +524,16 @@ function setActiveSide(side) {
   state.side = state.compare ? side : 'a';
   $('pane-a').classList.toggle('active', state.side === 'a');
   $('pane-b').classList.toggle('active', state.side === 'b');
+  $('side-rail').classList.toggle('active', state.compare && state.side === 'b');
 }
 
-function renderDemoBar() {
+function renderSides() {
   const f = current();
   $('demo-n').textContent = bn(f.demos.filter((d) => !d.empty).length);
-  $('demos').innerHTML = demoButtons(f, state.demo);
-  const d = f.demos[state.demo];
-  $('demo-name').textContent = d ? (d.title || d.file) : '';
-  $('open').disabled = !d || d.empty;
-  $('compare').setAttribute('aria-pressed', state.compare);
-  $('compare').title = state.compare ? 'একটা ডেমোতে ফিরে যান' : 'দুটো ডেমো পাশাপাশি দেখুন';
-  $('ui').classList.toggle('ui-split', state.compare);
-  if (state.compare) { renderPaneBar('a'); renderPaneBar('b'); }
+  $('fav-n').textContent = bn(favsOf(f).length);
+  if (!state.compare) $('side-a').innerHTML = '';
+  renderSide('a');
+  if (state.compare) renderSide('b');
 }
 
 function renderPreview() {
@@ -445,9 +545,91 @@ function renderPreview() {
   $('stage').classList.toggle('split', state.compare);
   $('pane-b').hidden = !state.compare;
   setActiveSide(state.side);
-  renderDemoBar();
   mountPane('a', state.demo);
   if (state.compare) mountPane('b', state.demoB);
+  renderSides();
+}
+
+/* Kit demos report their screens and the screen on show. */
+window.addEventListener('message', (e) => {
+  const m = e.data || {};
+  if (!['kit-ready', 'kit-screen', 'kit-extras'].includes(m.type)) return;
+  const side = ['a', 'b'].find((s) => $(`body-${s}`).querySelector('iframe')?.contentWindow === e.source);
+  if (!side) return;
+  if (m.type === 'kit-ready') {
+    frames[side] = { screens: Array.isArray(m.screens) ? m.screens : [], extras: Array.isArray(m.extras) ? m.extras : [], current: null };
+  } else if (frames[side] && m.type === 'kit-extras') {
+    frames[side].extras = Array.isArray(m.extras) ? m.extras : [];
+    renderExtras(side);
+    return;
+  } else if (frames[side]) frames[side].current = m.id;
+  renderScreens(side);
+});
+
+function showScreen(side, id) {
+  $(`body-${side}`).querySelector('iframe')?.contentWindow?.postMessage({ type: 'screen', id }, '*');
+}
+
+/* ---------- Favorites ----------
+   Saved per feature in feat_list/<feature>/favorites.json by the local
+   server; the static GitHub Pages copy shows them read-only. */
+const favsOf = (f) => (f && Array.isArray(f.favorites) ? f.favorites : []);
+const isFav = (f, file, screen) => favsOf(f).some((x) => x.demo === file && (x.screen || null) === (screen || null));
+let favSaving = 0;
+
+async function toggleFav(file, screen, label) {
+  const f = current();
+  if (!f || !canSave) return;
+  const list = favsOf(f).slice();
+  const at = list.findIndex((x) => x.demo === file && (x.screen || null) === (screen || null));
+  if (at >= 0) list.splice(at, 1); else list.push({ demo: file, screen: screen || null, label: label || null });
+  f.favorites = list;
+  renderSides();
+  renderFavs();
+  renderSidebar();
+  favSaving++;
+  try {
+    const res = await fetch('api/favorites', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ feature: f.id, favorites: list }),
+    });
+    if (!res.ok) throw new Error(res.status);
+  } catch {
+    alert('ফেভারিট সেভ হয়নি। ভিউয়ার সার্ভার চালু আছে কিনা দেখুন।');
+  } finally {
+    favSaving--;
+  }
+}
+
+function renderFavs() {
+  const f = current();
+  if (!f) return;
+  $('fav-n').textContent = bn(favsOf(f).length);
+  const groups = f.demos.map((d, i) => ({ d, i, items: favsOf(f).filter((x) => x.demo === d.file) }))
+    .filter((g) => g.items.length);
+  const intro = canSave
+    ? 'পছন্দের ডেমো বা স্ক্রিন এখানে জমা হয়। UI প্রিভিউর ডান পাশের তারা চেপে যোগ করুন, এখানে চাপলে সেখানে চলে যাবে।'
+    : 'টিমের বেছে রাখা ডেমো আর স্ক্রিন। চাপলে সেটা খুলবে।';
+  if (!groups.length) {
+    $('fav-list').innerHTML = `<p class="fav-intro">${intro}</p><div class="blank"><div><b>এখনো কোনো ফেভারিট নেই</b>${canSave ? 'UI প্রিভিউতে ডেমোর নাম বা স্ক্রিনের পাশের তারা চাপুন।' : ''}</div></div>`;
+    return;
+  }
+  const star = `<span class="fav-star">${ICONS.star(true)}</span>`;
+  const x = (file, screen) => `<button class="fav-x" data-x-demo="${esc(file)}" data-x-screen="${esc(screen || '')}" aria-label="ফেভারিট থেকে সরান" title="ফেভারিট থেকে সরান">${ICONS.close}</button>`;
+  $('fav-list').innerHTML = `<p class="fav-intro">${intro}</p>` + groups.map(({ d, i, items }) => {
+    const whole = items.some((it) => !it.screen);
+    const screens = items.filter((it) => it.screen);
+    return `<section class="fav-card">
+      <div class="fav-row fav-head">
+        <button class="fav-open" data-go-demo="${i}">${whole ? star : ''}<b>ডেমো ${bn(i + 1)} · ${esc(shortName(d))}</b>${whole ? '<span class="tag">পুরো ডেমো</span>' : ''}</button>
+        ${whole ? x(d.file, null) : ''}
+      </div>
+      ${screens.map((it) => `<div class="fav-row fav-screen">
+        <button class="fav-open" data-go-demo="${i}" data-go-screen="${esc(it.screen)}">${star}<span class="sub">${esc(it.label || it.screen)}</span></button>
+        ${x(d.file, it.screen)}
+      </div>`).join('')}
+    </section>`;
+  }).join('');
 }
 
 /* ---------- Page ---------- */
@@ -460,15 +642,17 @@ function renderAll() {
   renderSidebar();
   renderDoc();
   renderPreview();
+  renderFavs();
   setTab(state.tab);
 }
 
 function setTab(tab) {
   state.tab = tab;
-  for (const [name, el] of [['req', $('tab-req')], ['ui', $('tab-ui')]]) {
+  for (const [name, el] of [['req', $('tab-req')], ['ui', $('tab-ui')], ['fav', $('tab-fav')]]) {
     el.setAttribute('aria-selected', name === tab);
     $(name).classList.toggle('on', name === tab);
   }
+  document.body.classList.toggle('tab-ui', tab === 'ui');
   writeHash();
 }
 
@@ -479,13 +663,18 @@ function selectFeature(id) {
   renderAll();
 }
 
-function selectDemo(i, side = state.side) {
+function selectDemo(i, side = state.side, screen = null) {
   const f = current();
   if (!f || i < 0 || i >= f.demos.length) return;
-  if (side === 'b' && state.compare) { state.demoB = i; mountPane('b', i); }
-  else { state.demo = i; mountPane('a', i); }
+  if (side === 'b' && !state.compare) side = 'a';
+  if (demoIndex(side) === i && screen && frames[side]) {
+    showScreen(side, screen);   // same demo already open: just switch screen
+  } else {
+    if (side === 'b') state.demoB = i; else state.demo = i;
+    mountPane(side, i, screen);
+  }
   setActiveSide(side);
-  renderDemoBar();
+  renderSides();
   writeHash();
 }
 
@@ -546,7 +735,12 @@ async function fetchFeatures() {
   for (const url of ['api/features', 'features.json']) {
     try {
       const res = await fetch(url, { cache: 'no-store' });
-      if (res.ok) return res.json();
+      if (res.ok) {
+        const data = await res.json();
+        canSave = url === 'api/features';
+        document.body.classList.toggle('readonly', !canSave);
+        return data;
+      }
     } catch { /* try the next source */ }
   }
   throw new Error('no feature list');
@@ -558,11 +752,14 @@ async function poll() {
     $('live').classList.remove('off');
     const prevIds = features.map((f) => f.id + ':' + f.demos.map((d) => d.file + (d.empty ? '0' : '1')).join()).join('|');
     const nextIds = next.map((f) => f.id + ':' + f.demos.map((d) => d.file + (d.empty ? '0' : '1')).join()).join('|');
+    if (favSaving) next.forEach((n) => { const o = features.find((x) => x.id === n.id); if (o) n.favorites = o.favorites; });
+    const favChanged = JSON.stringify(features.map((x) => x.favorites)) !== JSON.stringify(next.map((x) => x.favorites));
     features = next;
     const f = current();
     if (!f) { state.feature = features[0]?.id ?? null; renderAll(); return; }
     if (prevIds !== nextIds) { renderAll(); return; }
     if (f.mdMtime !== mtimes.md) { renderDoc(); $('title').textContent = f.title; renderSidebar(); }
+    if (favChanged) { renderSides(); renderFavs(); renderSidebar(); }
     if (f.demos[state.demo] && f.demos[state.demo].mtime !== mtimes.a) mountPane('a', state.demo);
     if (state.compare && f.demos[state.demoB] && f.demos[state.demoB].mtime !== mtimes.b) mountPane('b', state.demoB);
   } catch {
@@ -577,34 +774,40 @@ $('features').addEventListener('click', (e) => {
 $('q').addEventListener('input', renderSidebar);
 $('tab-req').addEventListener('click', () => setTab('req'));
 $('tab-ui').addEventListener('click', () => setTab('ui'));
-$('demos').addEventListener('click', (e) => {
-  const b = e.target.closest('.demo-btn'); if (b) selectDemo(Number(b.dataset.i), 'a');
-});
-['a', 'b'].forEach((side) => {
-  $(`bar-${side}`).addEventListener('click', (e) => {
-    const b = e.target.closest('.demo-btn');
-    if (b) { selectDemo(Number(b.dataset.i), side); return; }
-    if (e.target.closest('.pane-open')) {
-      const d = current()?.demos[demoIndex(side)];
-      if (d && !d.empty) window.open(`${d.url}?theme=${currentTheme()}`, '_blank', 'noopener');
-      return;
-    }
+$('tab-fav').addEventListener('click', () => setTab('fav'));
+['side-a', 'side-rail'].forEach((id) => {
+  $(id).addEventListener('click', (e) => {
+    const side = $(id).dataset.side || 'a';
+    const f = current();
+    const d = f && f.demos[demoIndex(side)];
+    const t = e.target.closest('button');
     setActiveSide(side);
+    if (!t) return;
+    if (t.matches('.demo-btn')) selectDemo(Number(t.dataset.i), side);
+    else if (t.matches('.scr-go')) showScreen(side, t.dataset.screen);
+    else if (t.dataset.extra !== undefined) $(`body-${side}`).querySelector('iframe')?.contentWindow?.postMessage({ type: 'extra', i: Number(t.dataset.extra) }, '*');
+    else if (t.matches('[data-fav-demo]') && d) toggleFav(d.file, null, null);
+    else if (t.matches('[data-fav-screen]') && d) toggleFav(d.file, t.dataset.favScreen, t.dataset.label);
+    else if (t.dataset.act === 'reload') { frames[side] = null; renderScreens(side); $(`body-${side}`).querySelector('iframe')?.contentWindow?.location.reload(); }
+    else if (t.dataset.act === 'open' && d && !d.empty) {
+      const sc = frames[side]?.current ? `&screen=${encodeURIComponent(frames[side].current)}` : '';
+      window.open(`${d.url}?theme=${currentTheme()}${sc}`, '_blank', 'noopener');
+    } else if (t.dataset.act === 'compare') {
+      state.compare = !state.compare;
+      if (state.compare && state.demoB === state.demo) state.demoB = (state.demo + 1) % Math.max(1, f.demos.length);
+      state.side = 'a';
+      renderPreview();
+      writeHash();
+    }
   });
 });
-$('compare').addEventListener('click', () => {
-  state.compare = !state.compare;
-  if (state.compare && state.demoB === state.demo) state.demoB = (state.demo + 1) % Math.max(1, current().demos.length);
-  state.side = 'a';
-  renderPreview();
-  writeHash();
-});
-$('reload').addEventListener('click', () => {
-  document.querySelectorAll('.pane-body iframe').forEach((fr) => fr.contentWindow?.location.reload());
-});
-$('open').addEventListener('click', () => {
-  const d = current()?.demos[state.demo];
-  if (d && !d.empty) window.open(`${d.url}?theme=${currentTheme()}`, '_blank', 'noopener');
+$('fav-list').addEventListener('click', (e) => {
+  const x = e.target.closest('.fav-x');
+  if (x) { toggleFav(x.dataset.xDemo, x.dataset.xScreen || null, null); return; }
+  const o = e.target.closest('.fav-open');
+  if (!o) return;
+  setTab('ui');
+  selectDemo(Number(o.dataset.goDemo), state.side, o.dataset.goScreen || null);
 });
 $('theme').addEventListener('click', () => setTheme(currentTheme() === 'dark' ? 'light' : 'dark'));
 $('menu').addEventListener('click', () => document.body.classList.add('drawer'));

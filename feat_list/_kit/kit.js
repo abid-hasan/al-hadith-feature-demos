@@ -7,6 +7,10 @@
 
   const BN = '০১২৩৪৫৬৭৮৯';
   const qs = new URLSearchParams(location.search);
+  // Inside the feature viewer: it shows the controls, so tell it what we have.
+  const embedded = qs.get('embed') === '1' && window.parent !== window;
+  const post = (m) => { if (embedded) window.parent.postMessage(m, '*'); };
+  if (embedded) document.documentElement.classList.add('kit-embed');
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
@@ -78,6 +82,7 @@
     const sb = $('.statusbar');
     if (sb) sb.classList.toggle('light', el.dataset.status === 'light');
     current = id;
+    post({ type: 'kit-screen', id });
     const sc = el.querySelector('.scroll'); if (sc && el.dataset.keepScroll === undefined) sc.scrollTop = 0;
     listeners.forEach((fn) => fn(id));
   }
@@ -113,17 +118,50 @@
     snackTimer = setTimeout(() => el.classList.remove('on'), 2600);
   }
 
+  /* ---------- Fit the phone to the window ----------
+     Phones take the full height (only the phone scrolls); wide tablet
+     frames keep their size and are scaled down when they don't fit. */
+  function fit() {
+    const phone = $('.phone');
+    const stage = $('.kit-stage');
+    if (!phone || !stage) return;
+    phone.style.zoom = '';
+    phone.style.height = '';
+    const cs = getComputedStyle(stage);
+    const w = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const h = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const frame = matchMedia('(max-width:480px)').matches && !embedded ? 0 : 22;
+    const pw = phone.offsetWidth;
+    const ph = phone.offsetHeight;
+    let z;
+    if (pw <= 480) {
+      z = Math.min(1, (w - frame) / pw);
+      phone.style.height = `${Math.max(320, (h - frame) / z)}px`;
+    } else {
+      z = Math.min(1, (w - frame) / pw, (h - frame) / ph);
+    }
+    if (z > 0 && z < 1) phone.style.zoom = z;
+  }
+
+  /* ---------- Demo-specific toolbar controls ---------- */
+  const extraButtons = () => $$('.kit-extra button');
+  const extrasInfo = () => extraButtons().map((b, i) => ({
+    i, label: (b.textContent || b.getAttribute('aria-label') || '').trim(),
+    pressed: b.getAttribute('aria-pressed'),
+  }));
+
   /* ---------- Build shell ---------- */
   function init(opts) {
     screens = opts.screens || [];
-    const bar = document.createElement('header');
-    bar.className = 'kit-bar';
-    bar.innerHTML = `<span class="kit-name">ডেমো ${bn(opts.demo)} · ${opts.name}</span>
+    const side = document.createElement('aside');
+    side.className = 'kit-side';
+    side.innerHTML = `<div class="kit-name"><small>ডেমো ${bn(opts.demo)}</small>${opts.name}</div>
+      <div class="kit-label">স্ক্রিন</div>
       <nav class="kit-chips" aria-label="স্ক্রিন">${screens.map((sc) =>
         `<button class="kit-chip" type="button" data-go="${sc.id}" aria-pressed="false">${sc.label}</button>`).join('')}</nav>
       <div class="kit-extra">${opts.extra || ''}</div>
-      <button class="kit-btn" type="button" data-kit-theme aria-label="লাইট/ডার্ক মোড">${icons.theme}</button>`;
-    document.body.prepend(bar);
+      <button class="kit-btn" type="button" data-kit-theme aria-label="লাইট/ডার্ক মোড">${icons.theme}লাইট/ডার্ক</button>`;
+    document.body.append(side);
 
     const phone = $('.phone');
     if (phone && !$('.statusbar', phone)) {
@@ -145,6 +183,7 @@
         if (t.matches('[data-kit-theme]')) setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
         if (t.dataset.close !== undefined) t.dataset.close ? close(t.dataset.close) : close(t.closest('.sheet,.dialog'));
         if (t.dataset.go) show(t.dataset.go);
+        if (t.dataset.go && t.matches('.kit-chip')) post({ type: 'kit-screen', id: t.dataset.go });
         if (t.dataset.open) open(t.dataset.open);
         if (t.dataset.snack) snack(t.dataset.snack);
       }
@@ -154,9 +193,26 @@
 
     window.addEventListener('message', (e) => {
       const m = e.data || {};
-      if (m.type === 'screen' && m.id) show(m.id);
+      if (m.type === 'screen' && m.id) {
+        // Go through the chip so demo-specific chips (a sheet, a state on the
+        // same screen) run their own handlers too.
+        const chip = $(`.kit-chip[data-go="${m.id}"]`);
+        if (chip) chip.click(); else show(m.id);
+      }
       if (m.type === 'theme' && m.id) setTheme(m.id);
+      if (m.type === 'extra') extraButtons()[m.i]?.click();
     });
+
+    fit();
+    window.addEventListener('resize', fit);
+    document.fonts?.ready.then(fit);
+    post({ type: 'kit-ready', demo: opts.demo, name: opts.name, screens: screens.map(({ id, label }) => ({ id, label })), extras: extrasInfo() });
+    // The demo's own toolbar controls (opts.extra) are mirrored in the viewer.
+    const extra = $('.kit-extra');
+    if (embedded && extra) {
+      new MutationObserver(() => post({ type: 'kit-extras', extras: extrasInfo() }))
+        .observe(extra, { subtree: true, childList: true, attributes: true, characterData: true });
+    }
 
     const first = qs.get('screen') && screens.some((sc) => sc.id === qs.get('screen'))
       ? qs.get('screen') : (screens[0] && screens[0].id);

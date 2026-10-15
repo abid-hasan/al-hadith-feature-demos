@@ -6,36 +6,31 @@
 <title>দোয়া ট্যাব — ডেমো ২ · ছোট তালিকা আর বটম শিট</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
-/* ===== Toolbar toggles (outside the phone) ===== */
-.kit-extra .kit-chip{padding:4px 9px;font-size:12px}
-
 /* ===== Home quick-action card (HomeSmallDashboard) ===== */
-.qa{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin:14px 12px 30px;padding:12px 0 22px;position:relative}
+.qa{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin:14px 12px;padding:12px 0 10px}
 .qa-row{display:grid;grid-template-columns:repeat(4,1fr)}
 .qa-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px 8px;border-radius:10px;font-size:14px;font-weight:700;color:var(--body);line-height:1.25}
 .qa-tile.new{outline:2px dashed var(--primary);outline-offset:-4px}
-.qa-more{overflow:hidden;transition:max-height .25s}
-.qa-exp{position:absolute;left:50%;bottom:-22px;transform:translateX(-50%);width:44px;height:44px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--primary)}
-.qa-exp[aria-expanded="true"] svg{transform:rotate(180deg)}
 
-/* ===== Dua page: plain scaffold, search box, underline tabs (Material TabBar) ===== */
-.top{background:var(--card);border-bottom:1px solid var(--divider)}
-.top .field{margin:10px 12px 4px;background:var(--surface-2);border-color:transparent}
-.utabs{display:flex;overflow-x:auto;scrollbar-width:none;padding:0 6px}
-.utabs::-webkit-scrollbar{display:none}
-.utabs button{flex:none;padding:12px 12px 10px;font-size:14.5px;color:var(--body);border-bottom:3px solid transparent;white-space:nowrap}
-.utabs button[aria-selected="true"]{color:var(--primary);border-color:var(--primary);font-weight:700}
-.offbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface-2);font-size:13px;color:var(--body);border-bottom:1px solid var(--divider)}
-.offbar svg{width:18px;height:18px;color:var(--hint)}
+/* ===== Category page: plain scaffold, search box on a white strip ===== */
+.top{flex:none;background:var(--card);border-bottom:1px solid var(--divider);padding:10px 12px}
+.top .field{background:var(--surface-2);border-color:transparent}
+.ghead{display:flex;justify-content:space-between;margin:14px 16px 6px;font-size:13.5px;font-weight:700;color:var(--hint)}
 
-/* ===== Grouped list: one card, many rows ===== */
+/* ===== Compact category list: one card, thin rows, count pill on the right ===== */
 .group{padding:0;overflow:hidden}
-.ghead{margin:14px 16px 6px;font-size:13.5px;font-weight:700;color:var(--hint)}
-.drow{display:flex;align-items:center;gap:12px;padding:12px 10px 12px 14px;border-bottom:1px solid var(--divider);cursor:pointer}
+.crow{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:8px 10px 8px 16px;text-align:left;border-bottom:1px solid var(--divider)}
+.crow:last-child{border-bottom:0}
+.crow:hover{background:var(--surface-2)}
+.crow b{flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.35;color:var(--title)}
+.cnt{flex:none;min-width:30px;padding:0 8px;height:24px;border-radius:12px;display:grid;place-items:center;font-size:13px;font-weight:700;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .cnt{color:var(--primary)}
+.crow>svg{flex:none;width:18px;height:18px;color:var(--hint)}
+
+/* ===== Search result rows (title + one-line meaning) ===== */
+.drow{display:flex;align-items:center;gap:12px;padding:10px 10px 10px 14px;border-bottom:1px solid var(--divider);cursor:pointer}
 .drow:last-child{border-bottom:0}
 .drow:hover{background:var(--surface-2)}
-.num{width:30px;height:30px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;background:var(--tint);color:var(--primary-dark)}
-:root[data-theme="dark"] .num{color:var(--primary)}
 .dmeta{flex:1;min-width:0}
 .dmeta b{display:block;color:var(--title);font-size:15px;line-height:1.35}
 .dmeta span{display:block;font-size:13.5px;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -43,17 +38,25 @@
 .play[aria-pressed="true"]{background:var(--primary);color:#fff}
 .play svg{width:16px;height:16px}
 
-/* ===== Dua sheet (full dua) ===== */
-#sheet-dua{max-height:90%}
-#sheet-dua .arabic{font-size:24px;margin:4px 0 10px}
-.lbl{display:block;margin-top:10px;font-size:13px;font-weight:700;color:var(--primary-dark)}
+/* ===== Tall bottom sheet: one category's duas as cards ===== */
+#sheet-cat{height:92%;max-height:92%;background:var(--scaffold)}
+#sheet-cat .grab{width:40px;height:4px;border-radius:2px;background:var(--divider);margin:8px auto 0}
+#sheet-cat .sheet-head{padding-top:8px}
+#sheet-cat .sheet-head small{display:block;font-size:13px;font-weight:400;color:var(--hint)}
+#sheet-cat .sheet-body{flex:1;padding:4px 0 18px}
+.dua{padding:12px 14px 4px;transition:box-shadow .3s}
+.dua.focus{box-shadow:0 0 0 2px var(--primary)}
+.dua-head{display:flex;align-items:flex-start;gap:10px}
+.dua-head h3{flex:1;margin:6px 0 0;font-size:16px;line-height:1.4;color:var(--title)}
+.dua .arabic{font-size:23px;margin:10px 0 8px}
+.lbl{display:block;margin-top:8px;font-size:13px;font-weight:700;color:var(--primary-dark)}
 :root[data-theme="dark"] .lbl{color:var(--primary)}
 .txt{margin:2px 0 0;color:var(--title);font-size:15px;line-height:1.65}
-.ref{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--surface-2);font-size:13.5px;color:var(--body)}
+.ref{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:var(--surface-2);font-size:13.5px;color:var(--body)}
 .ref-link{color:var(--primary);font-weight:700;text-decoration:underline;text-underline-offset:3px}
-.sfoot{display:flex;gap:8px;padding:10px var(--pad) 18px;border-top:1px solid var(--divider)}
-.sfoot .btn{flex:1;padding:0 8px}
-.sfoot svg{width:18px;height:18px}
+.acts{display:flex;gap:8px;margin:10px 0 10px}
+.acts .btn{height:36px;padding:0 14px;font-size:14px}
+.acts svg{width:17px;height:17px}
 
 /* ===== Small text link to the Dua & Ruqyah app ===== */
 .applink{display:flex;align-items:center;justify-content:center;gap:4px;margin:18px auto 8px;font-size:14px;color:var(--primary);font-weight:700}
@@ -66,11 +69,9 @@
 .abar .btn{height:34px;margin-top:6px;padding:0 4px}
 .abar .icon-btn{width:32px;height:32px}
 
-/* ===== Empty, loading, hadith page ===== */
+/* ===== Empty, hadith page ===== */
 .empty .ring{width:72px;height:72px;border-radius:50%;background:var(--tint);display:grid;place-items:center;color:var(--primary)}
 .empty .ring svg{width:34px;height:34px}
-.loading{min-height:300px;display:grid;place-items:center}
-.loading canvas{transform:translateY(-16.5px)}
 .rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
 .panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
 .sec{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:0 12px 10px;padding:12px var(--pad);font-size:15px;font-weight:700;color:var(--title)}
@@ -91,16 +92,15 @@
 
       <!-- ===== Screen: home ===== -->
       <section class="screen" data-screen="home">
-        <header class="appbar"><button class="icon-btn" data-i="filter" aria-label="মেনু" data-snack="ড্রয়ার খুলবে — এই ফিচারের অংশ নয়"></button><h1>আল হাদিস</h1><button class="icon-btn" data-i="search" aria-label="সার্চ" data-snack="সার্চ খুলবে — এই ফিচারের অংশ নয়"></button></header>
+        <header class="appbar"><h1>আল হাদিস</h1></header>
         <div class="scroll" id="home-body"></div>
       </section>
 
-      <!-- ===== Dua page states (#pg moves between them) ===== -->
-      <section class="screen" data-screen="duas"></section>
+      <!-- ===== Category page states (#pg moves between them; "duas" = the list with a category's sheet open) ===== -->
+      <section class="screen" data-screen="cats" data-keep-scroll></section>
+      <section class="screen" data-screen="duas" data-keep-scroll></section>
       <section class="screen" data-screen="search"></section>
       <section class="screen" data-screen="empty"></section>
-      <section class="screen" data-screen="loading"></section>
-      <section class="screen" data-screen="offline"></section>
 
       <!-- ===== Screen: original hadith ===== -->
       <section class="screen" data-screen="hadith">
@@ -108,11 +108,11 @@
         <div class="rbody"><div class="panel"><div class="scroll" id="h-body" style="padding-top:14px"></div></div></div>
       </section>
 
-      <!-- ===== Bottom sheet: one dua in full ===== -->
-      <div class="sheet" id="sheet-dua" role="dialog" aria-label="দোয়া">
-        <div class="sheet-head"><h2 id="sd-title"></h2><button class="icon-btn" data-close data-i="close" aria-label="বন্ধ করুন"></button></div>
-        <div class="sheet-body" id="sd-body"></div>
-        <div class="sfoot" id="sd-foot"></div>
+      <!-- ===== Tall bottom sheet: one category's duas ===== -->
+      <div class="sheet" id="sheet-cat" role="dialog" aria-labelledby="sc-title">
+        <div class="grab"></div>
+        <div class="sheet-head"><h2 id="sc-title"></h2><button class="icon-btn" data-close data-i="close" aria-label="বন্ধ করুন"></button></div>
+        <div class="sheet-body" id="sc-body"></div>
       </div>
 
       <!-- ===== Dialog: Dua & Ruqyah app not installed ===== -->
@@ -131,12 +131,10 @@
 
 <template id="pg-tpl">
   <div id="pg" style="display:flex;flex-direction:column;flex:1;min-height:0">
-    <header class="appbar"><button class="icon-btn" data-go="home" data-i="back" aria-label="পেছনে"></button><h1>দোয়া</h1></header>
+    <header class="appbar"><button class="icon-btn" id="pg-back" data-i="back" aria-label="পেছনে"></button><h1>দোয়া</h1></header>
     <div class="top">
       <label class="field"><span data-i="search"></span><input id="q" type="search" placeholder="সার্চ করুন" aria-label="দোয়ার নাম বা অর্থ দিয়ে সার্চ"><button class="icon-btn" id="q-clr" data-i="close" aria-label="মুছুন" style="width:30px;height:30px" hidden></button></label>
-      <div class="utabs" role="tablist" id="tabs" aria-label="দোয়ার ভাগ"></div>
     </div>
-    <div id="off"></div>
     <div class="scroll" id="list"></div>
   </div>
 </template>
@@ -149,94 +147,82 @@
   const paintIcons = (root = document) => $$('[data-i]', root).forEach((b) => { b.innerHTML = ic(b.dataset.i, b.classList.contains('icon-btn') ? 0 : 20); });
 
   /* ---------- State ---------- */
-  const S = { tab: 0, q: '', online: true, installed: false, loading: false, playing: null, open: null, hk: 'tirmidhi:3446', back: 'duas' };
+  const START_CAT = 17; // সফর — the example in the user flow
+  // cat/focus = the category in the sheet and the dua to scroll to; reopen = sheet to bring back after the hadith page
+  const S = { cat: START_CAT, catsTop: 0, focus: null, q: '', installed: false, playing: null, hk: 'tirmidhi:3446', back: 'duas', reopen: null };
   const norm = (s) => s.normalize('NFD').replace(/্‌/g, '').replace(/[‌‍]/g, '');
-  const catOf = (id) => D.cats.find((c) => c.duas.includes(+id));
+  const catById = (id) => D.cats.find((c) => c.id === +id);
   const plain = (d) => `${d.t}\n\n${d.ar}\n\nউচ্চারণ: ${d.tr}\n\nঅর্থ: ${d.m}\n\nরেফারেন্স: ${d.ref}`;
   const results = () => { const q = norm(S.q.trim()); return D.cats.flatMap((c) => c.duas).filter((id) => norm(D.duas[id].t + ' ' + D.duas[id].m).includes(q)); };
 
   /* ---------- Home ---------- */
-  const QA = [['latest', 'সর্বশেষ'], ['goTo', 'জাম্প'], ['prayer', 'ওয়াক্ত'], ['sadaqa', 'সাদাকা'], ['dua', 'দোয়া'], ['feed', 'ফিড'], ['reels', 'রিলস'], ['quiz', 'কুইজ'],
-    ['flash', 'ফ্ল্যাশকার্ড'], ['planner', 'পরিকল্পনা'], ['tahkik', 'তাহকিক'], ['daily', 'দৈনিক'], ['qibla', 'কিবলা'], ['mosque', 'মসজিদ'], ['calendar', 'ক্যালেন্ডার'], ['apps', 'অ্যাপস']];
+  const QA = [['latest', 'সর্বশেষ'], ['goTo', 'জাম্প'], ['prayer', 'ওয়াক্ত'], ['sadaqa', 'সাদাকা'], ['dua', 'দোয়া'], ['feed', 'ফিড'], ['reels', 'রিলস'], ['quiz', 'কুইজ']];
   const DUA_ICON = '<svg width="30" height="30" viewBox="0 0 33 33" fill="none"><path d="M5.5 30.5c-1.6-5.2-2-11 .2-16.6.9-2.2 3.8-1.8 4 .6l.5 5.6 2.6-9.4c.7-2.3 4-1.8 3.9.6l-.2 19.2z" fill="#1AA483"/><path d="M27.5 30.5c1.6-5.2 2-11-.2-16.6-.9-2.2-3.8-1.8-4 .6l-.5 5.6-2.6-9.4c-.7-2.3-4-1.8-3.9.6l.2 19.2z" fill="#118C6E"/><path d="M16.5 1.8l1.4 2.9 3.1.4-2.3 2.1.6 3.1-2.8-1.6-2.8 1.6.6-3.1-2.3-2.1 3.1-.4z" fill="#FFB84D"/></svg>';
   function renderHome() {
     const tile = ([k, label]) => (k === 'dua' ? `<button class="qa-tile new" id="qa-dua">${DUA_ICON}${label}</button>`
       : `<button class="qa-tile" data-snack="${label} খুলবে — এই ফিচারের অংশ নয়">${D.homeIcons[k]}${label}</button>`);
     const rows = []; for (let i = 0; i < QA.length; i += 4) rows.push(`<div class="qa-row">${QA.slice(i, i + 4).map(tile).join('')}</div>`);
-    $('#home-body').innerHTML = `<div class="qa">${rows.slice(0, 2).join('')}<div class="qa-more" id="qa-more" style="max-height:0">${rows.slice(2).join('')}</div>
-      <button class="qa-exp" id="qa-exp" aria-expanded="false" aria-label="আরও দেখুন">${ic('down')}</button></div>`;
-    $('#qa-exp').onclick = (e) => { const b = e.currentTarget, o = b.getAttribute('aria-expanded') !== 'true'; b.setAttribute('aria-expanded', o); $('#qa-more').style.maxHeight = o ? '400px' : '0'; };
-    $('#qa-dua').onclick = () => { S.q = ''; S.tab = 0; S.loading = true; go('loading'); setTimeout(() => { if (Kit.current === 'loading') { S.loading = false; go('duas'); } }, 700); };
+    $('#home-body').innerHTML = `<div class="qa">${rows.join('')}</div>`;
+    $('#qa-dua').onclick = () => { S.q = ''; go('cats'); $('#list', pg).scrollTop = 0; };
   }
 
-  /* ---------- Loading indicator (InkDropLoading) ---------- */
-  const LOADER = '<div class="loading" role="status" aria-label="লোড হচ্ছে"><canvas class="inkdrop"></canvas></div>';
-  (function inkDrop() {
-    const Z = 33, P = 6, W = Z + P * 2, HT = Z * 2 + P * 2, PI = Math.PI;
-    const iv = (t, a, b) => Math.min(1, Math.max(0, (t - a) / (b - a))), lerp = (a, b, k) => a + (b - a) * k;
-    function frame(now) {
-      $$('canvas.inkdrop').forEach((c) => {
-        if (!c.offsetParent) return;
-        const dpr = window.devicePixelRatio || 1;
-        if (c.width !== W * dpr) { c.width = W * dpr; c.height = HT * dpr; c.style.width = W + 'px'; c.style.height = HT + 'px'; }
-        const g = c.getContext('2d'), cs = getComputedStyle(c), col = cs.getPropertyValue('--primary-dark').trim(), ring = cs.getPropertyValue('--divider').trim();
-        g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, HT); g.lineWidth = Z / 5; g.lineCap = 'round';
-        const cx = W / 2, cy = P + Z * 1.5, r = Z / 2, t = (now % 1400) / 1400;
-        const arc = (s, w, cl, dy = 0) => { g.strokeStyle = cl; g.beginPath(); g.arc(cx, cy + dy, r, s, s + w, w < 0); g.stroke(); };
-        arc(PI / 2, 2 * PI, ring);
-        if (t <= 0.9) { const dy = lerp(-Z, 0, Math.pow(iv(t, 0.05, 0.4), 3)), k = iv(t, 0.38, 0.9); arc(-3 * PI / 2, lerp(PI / (Z * Z), PI / 1.13, k), col, dy); arc(-3 * PI / 2, lerp(PI / (Z * Z), -PI / 1.13, k), col, dy); }
-        else { const k1 = iv(t, 0.9, 0.96), k2 = iv(t, 0.9, 1); arc(-PI / 4, lerp(-PI / 7.4, -PI / 4, k1), col); arc(-3 * PI / 4, lerp(PI / 7.4, PI / 4, k1), col); arc(-PI / 3.5, lerp(PI / 1.273, PI / 28, k2), col); arc(PI / 0.778, lerp(-PI / 1.273, -PI / 27, k2), col); }
-      });
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  })();
-
-  /* ---------- Row (title + one-line meaning + play in the corner) ---------- */
-  const row = (id, i) => { const d = D.duas[id], on = S.playing === id;
-    return `<div class="drow" role="button" tabindex="0" data-dua="${id}"><span class="num">${bn(i + 1)}</span>
-      <span class="dmeta"><b>${d.t}</b><span>${d.m}</span></span>
-      <button class="play" data-play="${id}" aria-pressed="${on}" aria-label="${on ? 'থামান' : 'শুনুন'}">${ic(on ? 'pause' : 'play')}</button></div>`; };
   function refHtml(d) {
     let h = d.ref.replace(/\n/g, '<br>');
     d.links.forEach(([txt, key]) => { h = h.replace(txt, `<button class="ref-link" data-h="${key}">${txt}</button>`); });
     return h;
   }
 
-  /* ---------- Dua page render ---------- */
+  /* ---------- Category page: compact list, or search results grouped by category ---------- */
   const pg = $('#pg-tpl').content.firstElementChild.cloneNode(true);
   paintIcons(pg);
+  const link = () => `<button class="applink" data-applink>আরও দোয়া দেখুন: দোয়া ও রুকিয়াহ ${ic('chevron')}</button>`;
+  const crow = (c) => `<button class="crow" data-cat="${c.id}"><b>${c.name}</b><span class="cnt">${bn(c.count)}</span>${ic('chevron')}</button>`;
+  const drow = (id) => { const d = D.duas[id], on = S.playing === id;
+    return `<div class="drow" role="button" tabindex="0" data-dua="${id}"><span class="dmeta"><b>${d.t}</b><span>${d.m}</span></span>
+      <button class="play" data-play="${id}" aria-pressed="${on}" aria-label="${on ? 'থামান' : 'শুনুন'}">${ic(on ? 'pause' : 'play')}</button></div>`; };
   function renderPage() {
     const q = $('#q', pg); if (q.value !== S.q) q.value = S.q;
     $('#q-clr', pg).hidden = !S.q;
-    const searching = !!S.q.trim();
-    $('#tabs', pg).hidden = searching;
-    $('#tabs', pg).innerHTML = D.cats.map((c, i) => `<button role="tab" aria-selected="${i === S.tab}" data-tab="${i}">${c.name}</button>`).join('');
-    $('#off', pg).innerHTML = S.online ? '' : `<div class="offbar">${ic('info')}ইন্টারনেট সংযোগ নেই · দোয়া পড়া যাবে</div>`;
     const list = $('#list', pg);
-    const link = `<button class="applink" id="applink">আরও দোয়া দেখুন: দোয়া ও রুকিয়াহ ${ic('chevron')}</button>`;
-    if (S.loading) { list.innerHTML = LOADER; return; }
-    if (!searching) { list.innerHTML = `<div class="ghead">${D.cats[S.tab].name} · ${bn(D.cats[S.tab].duas.length)} টি দোয়া</div><div class="card group">${D.cats[S.tab].duas.map(row).join('')}</div>${link}`; return; }
+    if (!S.q.trim()) {
+      list.innerHTML = `<div class="ghead"><span>সব ক্যাটাগরি</span><span>${bn(D.cats.length)} টি</span></div><div class="card group">${D.cats.map(crow).join('')}</div>${link()}`;
+      return;
+    }
     const r = results();
     if (!r.length) { list.innerHTML = `<div class="empty"><span class="ring">${ic('search')}</span><h3>কোন সার্চ রেজাল্ট পাওয়া যায়নি</h3></div>`; return; }
-    list.innerHTML = D.cats.map((c) => { const ids = r.filter((id) => c.duas.includes(id)); return ids.length ? `<div class="ghead">${c.name} · ${bn(ids.length)} টি</div><div class="card group">${ids.map(row).join('')}</div>` : ''; }).join('') + link;
+    list.innerHTML = D.cats.map((c) => { const ids = r.filter((id) => c.duas.includes(id));
+      return ids.length ? `<div class="ghead"><span>${c.name}</span><span>${bn(ids.length)} টি</span></div><div class="card group">${ids.map(drow).join('')}</div>` : ''; }).join('') + link();
   }
 
-  /* ---------- Dua sheet ---------- */
-  function openDua(id) {
-    const d = D.duas[id]; S.open = id;
-    $('#sd-title').textContent = d.t;
-    $('#sd-body').innerHTML = `<p class="arabic">${d.ar}</p><span class="lbl">উচ্চারণ</span><p class="txt">${d.tr}</p>
-      <span class="lbl">অর্থ</span><p class="txt">${d.m}</p><p class="ref">রেফারেন্স: ${refHtml(d)}</p>`;
-    $('#sd-foot').innerHTML = `<button class="btn" data-play="${id}" data-wide></button><button class="btn tonal" data-copy="${id}">${ic('copy')}কপি</button><button class="btn tonal" data-share="${id}">${ic('share')}শেয়ার</button>`;
-    paintAudio(); Kit.open('sheet-dua');
+  /* ---------- Sheet: the category's duas as cards; optionally scrolled to one dua ---------- */
+  function card(id) {
+    const d = D.duas[id], on = S.playing === id;
+    return `<article class="card dua${id === S.focus ? ' focus' : ''}" data-id="${id}">
+      <div class="dua-head"><h3>${d.t}</h3><button class="play" data-play="${id}" aria-pressed="${on}" aria-label="${on ? 'থামান' : 'শুনুন'}">${ic(on ? 'pause' : 'play')}</button></div>
+      <p class="arabic">${d.ar}</p><span class="lbl">উচ্চারণ</span><p class="txt">${d.tr}</p>
+      <span class="lbl">অর্থ</span><p class="txt">${d.m}</p><p class="ref">রেফারেন্স: ${refHtml(d)}</p>
+      <div class="acts"><button class="btn tonal" data-copy="${id}">${ic('copy')}কপি</button><button class="btn tonal" data-share="${id}">${ic('share')}শেয়ার</button></div></article>`;
   }
+  function openCat(catId, focus = null) {
+    const c = catById(catId); S.cat = c.id; S.focus = focus;
+    $('#sc-title').innerHTML = `${c.name}<small>${bn(c.count)} টি দোয়া</small>`;
+    const body = $('#sc-body');
+    body.innerHTML = c.duas.map(card).join('');
+    Kit.open('sheet-cat');
+    body.scrollTop = 0;
+    if (focus) requestAnimationFrame(() => { const el = $(`.dua[data-id="${focus}"]`, body); if (el) body.scrollTop = el.offsetTop - body.offsetTop - 8; });
+  }
+  // Closing the sheet on the "দোয়ার পেজ" state goes back to the plain list state
+  new MutationObserver(() => { if (!$('#sheet-cat').classList.contains('on') && Kit.current === 'duas') go('cats'); })
+    .observe($('#sheet-cat'), { attributes: true, attributeFilter: ['class'] });
 
   /* ---------- Audio + message bar ---------- */
+  // Demo only: dua 321 (সফর) fails on its first play (no internet) so the message with "আবার চেষ্টা করুন" can be seen
+  const failed = new Set();
+  const failsNow = (id) => id === 321 && !failed.has(id) && failed.add(id);
   let timer;
   function paintAudio() {
-    $$('[data-play]').forEach((b) => { const on = S.playing === +b.dataset.play; b.setAttribute('aria-pressed', on); b.setAttribute('aria-label', on ? 'থামান' : 'শুনুন');
-      b.innerHTML = ic(on ? 'pause' : 'play') + (b.dataset.wide !== undefined ? (on ? 'থামান' : 'শুনুন') : ''); });
+    $$('[data-play]').forEach((b) => { const on = S.playing === +b.dataset.play; b.setAttribute('aria-pressed', on); b.setAttribute('aria-label', on ? 'থামান' : 'শুনুন'); b.innerHTML = ic(on ? 'pause' : 'play'); });
   }
   function stop() { clearTimeout(timer); S.playing = null; paintAudio(); }
   function msg(text, retryId) {
@@ -251,7 +237,7 @@
     if (S.playing === id) return stop();
     stop(); $('#abar').hidden = true;
     if (!d.audio) return msg('এই দোয়ার অডিও এখনো যোগ হয়নি।');
-    if (!S.online) return msg('ইন্টারনেট সংযোগ নেই। সংযোগ চালু করে আবার চেষ্টা করুন।', id);
+    if (failsNow(id)) return msg('ইন্টারনেট সংযোগ নেই। সংযোগ চালু করে আবার চেষ্টা করুন।', id);
     S.playing = id; paintAudio();
     timer = setTimeout(stop, Math.min(10, Math.max(3, d.ar.length / 14)) * 1000);
   }
@@ -266,57 +252,61 @@
         <p class="arabic">${h.ar}</p><p class="narrator">${h.nar} থেকে বর্ণিত:</p>${h.tr.split(/\n+/).map((p) => `<p class="translation">${p}</p>`).join('')}</article>`;
   }
 
-  /* ---------- Navigation between page states ---------- */
-  const STATES = { duas: {}, search: { q: 'আশ্রয়' }, empty: { q: 'যাকাত' }, loading: { loading: true }, offline: { online: false } };
+  /* ---------- Navigation (the list keeps its scroll between "cats" and "duas") ---------- */
+  const STATES = { cats: {}, duas: {}, search: { q: 'আশ্রয়' }, empty: { q: 'যাকাত' } };
   let internal = false;
+  let from = null; // the screen we are leaving
   function go(id) { internal = true; Kit.show(id); internal = false; }
   Kit.onScreen((id) => {
     stop(); $('#abar').hidden = true;
     if (STATES[id]) {
       $(`.screen[data-screen="${id}"]`).appendChild(pg);
-      if (!internal) { const st = STATES[id]; S.q = st.q || ''; S.loading = !!st.loading; S.online = st.online !== false; if (!st.q) S.tab = 0; syncBar(); }
-      renderPage(); $('#list', pg).scrollTop = 0;
+      if (!internal) S.q = STATES[id].q || '';
+      renderPage();
+      // Opening/closing a category's sheet (or coming back from the hadith) keeps the list where it was
+      const list = $('#list', pg);
+      list.scrollTop = internal && ['cats', 'duas', 'hadith'].includes(from) && !S.q.trim() ? S.catsTop : 0;
     }
-    if (id === 'hadith') { if (!internal) S.back = 'duas'; renderHadith(); }
+    if (id === 'duas') { if (!internal) { S.cat = START_CAT; S.focus = null; } openCat(S.cat, S.focus); }
+    if (id === 'hadith') { if (!internal) { S.back = 'duas'; S.cat = START_CAT; S.focus = null; S.reopen = null; S.q = ''; S.hk = 'tirmidhi:3446'; } renderHadith(); }
+    from = id;
   });
 
   /* ---------- Events ---------- */
   pg.addEventListener('input', (e) => {
     if (e.target.id !== 'q') return;
     S.q = e.target.value;
-    const want = !S.q.trim() ? 'duas' : results().length ? 'search' : 'empty';
+    const want = !S.q.trim() ? 'cats' : results().length ? 'search' : 'empty';
     if (want !== Kit.current) { go(want); const q = $('#q', pg); q.focus(); q.setSelectionRange(q.value.length, q.value.length); } else renderPage();
   });
   document.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-tab],[data-play],[data-copy],[data-share],[data-h],[data-dua],#q-clr,#applink');
+    const t = e.target.closest('[data-cat],[data-play],[data-copy],[data-share],[data-h],[data-dua],[data-applink],#q-clr,#pg-back');
     if (!t || !t.closest('.phone')) return;
-    if (t.dataset.tab) { stop(); S.tab = +t.dataset.tab; renderPage(); $('#list', pg).scrollTop = 0; t.scrollIntoView({ inline: 'nearest', block: 'nearest' }); }
+    if (t.dataset.cat) { S.catsTop = $('#list', pg).scrollTop; S.cat = +t.dataset.cat; S.focus = null; go('duas'); }
     else if (t.dataset.play) play(+t.dataset.play);
     else if (t.dataset.copy) { Promise.resolve().then(() => navigator.clipboard.writeText(plain(D.duas[t.dataset.copy]))).catch(() => { /* not allowed in this frame */ }); Kit.snack('কপি হয়েছে'); }
     else if (t.dataset.share) Kit.snack('ফোনের শেয়ার মেনু খুলবে');
-    else if (t.dataset.h) { S.hk = t.dataset.h; S.back = Kit.current; go('hadith'); }
-    else if (t.dataset.dua) openDua(+t.dataset.dua);
-    else if (t.id === 'q-clr') { S.q = ''; go('duas'); }
-    else if (t.id === 'applink') S.installed ? Kit.snack('দোয়া ও রুকিয়াহ অ্যাপ খুলছে') : Kit.open('dlg-app');
+    else if (t.dataset.h) { S.hk = t.dataset.h; S.back = Kit.current; S.reopen = { cat: S.cat, focus: S.focus }; go('hadith'); }
+    else if (t.dataset.dua) { const id = +t.dataset.dua; openCat(D.cats.find((c) => c.duas.includes(id)).id, id); }
+    else if (t.dataset.applink !== undefined) S.installed ? Kit.snack('দোয়া ও রুকিয়াহ অ্যাপ খুলছে') : Kit.open('dlg-app');
+    else if (t.id === 'q-clr') { S.q = ''; go('cats'); }
+    else if (t.id === 'pg-back') go('home');
   });
-  $('#h-back').onclick = () => { go(S.back); if (S.open && D.duas[S.open].links.some((l) => l[1] === S.hk)) openDua(S.open); };
-  $('#btn-dl').onclick = () => { Kit.close('dlg-app'); Kit.snack(S.online ? 'প্লে স্টোরে দোয়া ও রুকিয়াহ খুলবে' : 'আপনার মোবাইলের ইন্টারনেট অন করা আছে কিনা দেখুন।'); };
+  $('#h-back').onclick = () => { const re = S.reopen; go(S.back); if (re && Kit.current !== 'duas') openCat(re.cat, re.focus); };
+  $('#btn-dl').onclick = () => { Kit.close('dlg-app'); Kit.snack('প্লে স্টোরে দোয়া ও রুকিয়াহ খুলবে'); };
   $('#app-ic').src = D.appIcon;
 
-  /* ---------- Toolbar toggles ---------- */
+  /* ---------- Toolbar toggle: is the Dua & Ruqyah app installed? ---------- */
   function syncBar() {
-    const n = $('#tg-net'), a = $('#tg-app');
-    if (n) { n.textContent = S.online ? 'নেট চালু' : 'নেট বন্ধ'; n.title = 'ইন্টারনেট চালু/বন্ধ'; n.setAttribute('aria-pressed', !S.online); }
-    if (a) { a.textContent = S.installed ? 'রুকিয়াহ অ্যাপ আছে' : 'রুকিয়াহ অ্যাপ নেই'; a.title = 'দোয়া ও রুকিয়াহ অ্যাপ ইনস্টল করা আছে কি না'; a.setAttribute('aria-pressed', S.installed); }
+    const a = $('#tg-app');
+    a.textContent = S.installed ? 'রুকিয়াহ অ্যাপ আছে' : 'রুকিয়াহ অ্যাপ নেই'; a.title = 'দোয়া ও রুকিয়াহ অ্যাপ ইনস্টল করা আছে কি না'; a.setAttribute('aria-pressed', S.installed);
   }
 
   paintIcons();
   renderHome();
   Kit.init({ demo: 2, name: 'ছোট তালিকা আর বটম শিট',
-    extra: '<button class="kit-chip" id="tg-net" type="button"></button><button class="kit-chip" id="tg-app" type="button"></button>',
-    screens: [{ id: 'home', label: 'হোম' }, { id: 'loading', label: 'লোডিং' }, { id: 'duas', label: 'দোয়ার পেজ' }, { id: 'search', label: 'সার্চ' },
-      { id: 'empty', label: 'খালি' }, { id: 'offline', label: 'অফলাইন' }, { id: 'hadith', label: 'মূল হাদিস' }] });
-  $('#tg-net').onclick = () => { S.online = !S.online; stop(); syncBar(); if (STATES[Kit.current]) renderPage(); };
+    extra: '<button class="kit-chip" id="tg-app" type="button"></button>',
+    screens: [{ id: 'home', label: 'হোম' }, { id: 'cats', label: 'ক্যাটাগরি' }, { id: 'duas', label: 'দোয়ার শিট' }, { id: 'search', label: 'সার্চ' }, { id: 'empty', label: 'খালি' }, { id: 'hadith', label: 'মূল হাদিস' }] });
   $('#tg-app').onclick = () => { S.installed = !S.installed; syncBar(); };
   syncBar();
 </script>

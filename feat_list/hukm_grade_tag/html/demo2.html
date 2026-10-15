@@ -6,11 +6,9 @@
 <title>হুকম / গ্রেড ট্যাগ — ডেমো ২ · বটম শিটে দুই ট্যাব</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
-/* ===== Hadith card (HadithListItem): top bar, Arabic, narrator, translation ===== */
-.hc{cursor:pointer}
+/* ===== Hadith card (HadithListItem): top bar, narrator, translation ===== */
 .hc .hadith-head{margin-right:-4px}
-.hc .narrator{color:var(--primary);font-size:14.5px;margin:4px 0 2px}
-.hc .arabic{font-size:21px;margin:10px 0 2px}
+.hc .narrator{color:var(--primary);font-size:14.5px;margin:10px 0 2px}
 .meta-b{display:flex;align-items:center;gap:6px}
 .sample-tag{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:20px;border:1px dashed var(--hint);color:var(--hint);font-size:11px;font-weight:500;line-height:1;white-space:nowrap}
 .sample-note{margin:10px 0 0;font-size:14px;line-height:1.6;color:var(--hint)}
@@ -39,23 +37,11 @@
 .why .sec-h{margin:0 0 2px}
 .why p{margin:0;font-size:14.5px;line-height:1.6;color:var(--body)}
 .verify{display:flex;align-items:center;gap:6px;margin:14px 0 0;font-size:13px;color:var(--hint)}
-.verify svg,.net-note svg,.net-bar svg{width:16px;height:16px;flex:none}
-.net-note{display:flex;align-items:center;gap:6px;margin:10px 0 0;padding:8px 10px;border-radius:10px;background:var(--surface-2);font-size:13px;color:var(--hint)}
-.net-bar{display:flex;align-items:center;gap:8px;margin:10px 12px 0;padding:8px 12px;border-radius:10px;border:1px solid var(--divider);background:var(--surface-2);font-size:13px;color:var(--hint)}
-.loading{display:grid;place-items:center;min-height:200px}
-.spin{width:34px;height:34px;border-radius:50%;border:3.5px solid var(--divider);border-top-color:var(--primary-dark);animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.count{margin:12px 16px 2px;font-size:13px;color:var(--hint)}
+.verify svg{width:16px;height:16px;flex:none}
 
-/* ===== Offline toggle in the demo toolbar (outside the phone) ===== */
-.net-tg{flex:none;font-size:13px;padding:4px 12px;border-radius:20px;border:1px solid var(--page-line);color:var(--page-text)}
-.net-tg[aria-pressed="true"]{background:var(--page-text);color:var(--page)}
-
-/* ===== Tahkik page (TahkikListTab): rounded body, search, grouped cards ===== */
+/* ===== Tahkik page (TahkikListTab): rounded body, grouped cards ===== */
 .screen.tk{background:var(--appbar)}
 .rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0}
-.tk-search{padding:15px 14px}
-.tk-search .field{height:48px}
 .tk-h{position:sticky;top:0;z-index:1;margin:0;padding:14px 18px 8px;font-size:15px;font-weight:700;color:var(--title);background:var(--scaffold)}
 .tk-card{margin:0 14px;border-radius:10px;background:var(--card);overflow:hidden}
 .tk-row{display:block;width:100%;padding:12px 14px;border-bottom:1px solid var(--divider);text-align:left;transition:background .4s}
@@ -94,26 +80,13 @@
     <div class="viewport">
       <!-- ===== Chapter list (HadithVerticalList) ===== -->
       <section class="screen" data-screen="chapter">
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-icon="back" data-snack="এটা ডেমোর প্রথম স্ক্রিন"></button><h1>সহীহ বুখারী<small>অধ্যায়ের হাদিস</small></h1><button class="icon-btn" data-go="search" aria-label="সার্চ" data-icon="search"></button></header>
-        <div class="scroll" id="chapList" data-cards style="padding-top:10px"></div>
-      </section>
-      <!-- ===== Search results ===== -->
-      <section class="screen" data-screen="search">
-        <header class="appbar"><button class="icon-btn" data-go="chapter" aria-label="পেছনে" data-icon="back"></button><h1>সার্চ</h1></header>
-        <div style="padding:12px 12px 0"><label class="field"><span data-icon="search"></span><input id="q" placeholder="হাদিস সার্চ করুন" aria-label="হাদিস সার্চ"></label></div>
-        <div class="chip-row" style="padding-top:10px" id="qChips"><button class="chip on" data-q="">সব</button><button class="chip" data-q="নিয়ত">নিয়ত</button><button class="chip" data-q="রাগ">রাগ</button><button class="chip" data-q="দুর্বল">দুর্বল</button><button class="chip" data-q="জাকাত">জাকাত</button></div>
-        <div class="scroll" id="searchList" data-cards></div>
-      </section>
-      <!-- ===== Hadith details page ===== -->
-      <section class="screen" data-screen="detail">
-        <header class="appbar"><button class="icon-btn" data-back="list" aria-label="পেছনে" data-icon="back"></button><h1>হাদিসের বিস্তারিত</h1><button class="icon-btn" aria-label="শেয়ার" data-icon="share" data-snack="শেয়ার করার অপশন খুলবে"></button></header>
-        <div class="scroll" id="detailBody" style="padding-top:10px"></div>
+        <header class="appbar"><h1 style="margin-left:12px">সহীহ বুখারী<small>অধ্যায়ের হাদিস</small></h1></header>
+        <div class="scroll" id="chapList" style="padding-top:10px"></div>
       </section>
       <!-- ===== Home → তাহকিক page (TahkikListTab) ===== -->
       <section class="screen tk" data-screen="tahkik">
         <header class="appbar"><button class="icon-btn" data-back aria-label="পেছনে" data-icon="back"></button><h1>তাহকিক</h1></header>
-        <div class="rbody"><div class="tk-search"><label class="field"><input id="tkq" placeholder="তাহকিক সার্চ করুন" aria-label="তাহকিক সার্চ করুন" maxlength="40"><span data-icon="search"></span></label></div>
-        <div class="scroll" id="tkList"></div></div>
+        <div class="rbody"><div class="scroll" id="tkList"></div></div>
       </section>
       <!-- ===== Grade details bottom sheet: head (illustration + name + reference), tabs, body, footer ===== -->
       <div class="sheet" id="info" role="dialog" aria-label="মানের বিস্তারিত"></div>
@@ -151,16 +124,13 @@
   /* ---------- Data: hadiths (safe list only) + neutral sample cards for the other grades ---------- */
   const B = { book: 'সহীহ বুখারী', ab: 'বুখারী' };
   const REAL = [
-    { id: 'b1', ...B, no: 1, ch: 'ওহীর সূচনা অধ্যায়', g: 2, op: 's', ar: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ', nar: '‘উমর ইবনুল খাত্তাব (রাঃ) থেকে বর্ণিত', tr: 'আমল (এর প্রাপ্য হবে) নিয়ত অনুযায়ী। আর মানুষ তার নিয়ত অনুযায়ী প্রতিফল পাবে।' },
-    { id: 'b1894', ...B, no: 1894, ch: 'সাওম', g: 2, op: 's', ar: 'الصِّيَامُ جُنَّةٌ', nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত', tr: 'আল্লাহর রসূল (ﷺ) বলেছেনঃ সিয়াম ঢাল স্বরূপ।' },
-    { id: 'b6018', ...B, no: 6018, ch: 'আচার-ব্যবহার', g: 2, op: 's', ar: 'فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ', nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত', tr: 'যে আল্লাহ এবং কেয়ামতের দিনে বিশ্বাস রাখে, সে যেন ভাল কথা বলে অথবা চুপ থাকে।' },
-    { id: 'b6116', ...B, no: 6116, ch: 'আচার-ব্যবহার', g: 2, op: null, ar: 'لاَ تَغْضَبْ', nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত', tr: 'এক ব্যক্তি নবী (ﷺ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বললেন, নবী (ﷺ) প্রত্যেক বারেই বললেন: রাগ করো না।' },
+    { id: 'b1', ...B, no: 1, ch: 'ওহীর সূচনা অধ্যায়', g: 2, op: 's', nar: '‘উমর ইবনুল খাত্তাব (রাঃ) থেকে বর্ণিত', tr: 'আমল (এর প্রাপ্য হবে) নিয়ত অনুযায়ী। আর মানুষ তার নিয়ত অনুযায়ী প্রতিফল পাবে।' },
+    { id: 'b6116', ...B, no: 6116, ch: 'আচার-ব্যবহার', g: 2, op: null, nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত', tr: 'এক ব্যক্তি নবী (ﷺ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বললেন, নবী (ﷺ) প্রত্যেক বারেই বললেন: রাগ করো না।' },
   ];
-  const M223 = { id: 'm223', book: 'সহীহ মুসলিম', ab: 'মুসলিম', no: 223, ch: 'পবিত্রতা', g: 2, op: 's', ar: 'الطُّهُورُ شَطْرُ الإِيمَانِ', nar: 'আবূ মালিক আল আশ’আরী (রাঃ) থেকে বর্ণিত', tr: 'রাসূলুল্লাহ (ﷺ) বলেছেন: পবিত্রতা হল ঈমানের অর্ধেক অংশ।' };
   const SAMPLE_TEXT = 'এই কার্ডটা শুধু ব্যাজ দেখানোর নমুনা। এতে কোনো আসল হাদিসের লেখা রাখা হয়নি।';
   const SAMPLES = [[3, 'h'], [4, 'w'], [5, 'j'], [1, null], [6, null]].map(([g, op], i) =>
     ({ id: 's' + (i + 1), book: 'নমুনা কিতাব', ab: 'নমুনা', no: 101 + i, ch: 'নমুনা', g, op, sample: true, tr: SAMPLE_TEXT }));
-  const ALL = [...REAL, M223, ...SAMPLES];
+  const ALL = [...REAL, ...SAMPLES];
   const byId = (id) => ALL.find((h) => h.id === id);
 
   /* ---------- Data: muhaddith opinions + "কেন দুর্বল" — NOT in the app yet, so every row is a নমুনা ---------- */
@@ -177,17 +147,15 @@
   const opsOf = (h) => (h.op ? OPS[h.op] : null);
 
   /* ---------- State ---------- */
-  const S = { hid: null, net: true, q: '', tkQ: '', tkExp: null, prev: 'chapter', listFrom: 'chapter', detail: 'b1', seen: {}, busy: false };
+  const S = { hid: null, tkExp: null, prev: 'chapter', busy: false };
 
   /* ---------- Small views ---------- */
   const ic = (d) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
   const IC = {
-    wifiOff: ic('<path d="M2 8.5a15 15 0 0 1 4.6-2.8M10.3 5A15 15 0 0 1 22 8.5M5 12a10 10 0 0 1 3.2-1.9M15 10.5A10 10 0 0 1 19 12M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18"/>'),
     verified: ic('<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>'),
     book: ic('<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>'),
     down: ic('<path d="M6 9l6 6 6-6"/>'),
   };
-  const SPIN = '<div class="loading"><span class="spin" role="progressbar" aria-label="লোড হচ্ছে"></span></div>';
 
   // Grade illustration (same drawing as assets/images/svg/dialog/tahkik_*.svg, tinted by the grade colour)
   function illo(c, size) {
@@ -211,81 +179,58 @@
   const opsHTML = (ops, title = 'তাহকিক') => `<div class="sec-h">${title} <span class="sample-tag">নমুনা</span></div><div class="mlist">${ops.map(mrow).join('')}</div>`;
   const whyHTML = (h) => (WHY[h.op] ? `<div class="why"><div class="sec-h">কেন দুর্বল <span class="sample-tag">নমুনা</span></div><p>${WHY[h.op]}</p></div>` : '');
   const verifyHTML = (h) => (opsOf(h) ? `<p class="verify">${IC.verified}আলেমদের যাচাই করা তথ্য</p>` : '');
-  const netHTML = () => (S.net ? '' : `<p class="net-note">${IC.wifiOff}ইন্টারনেট ছাড়া দেখানো হচ্ছে · বইটি ডাউনলোড করা আছে</p>`);
   const ref = (h) => `${h.book} · হাদিস: ${bn(h.no)}`;
 
-  /* ---------- Hadith card (same badge on chapter, search and details) ---------- */
+  /* ---------- Hadith card (the same badge on every card) ---------- */
   function card(h) {
     const cls = typeof cardCls === 'function' ? cardCls(h) : '';
     const after = typeof cardAfter === 'function' ? cardAfter(h) : '';
     return `<article class="card hc ${cls}" data-hid="${h.id}" style="--gc:${GV[GR[h.g].c]}">
       <div class="hadith-head"><span class="book-badge">${h.ab}</span>
         <div class="hadith-meta"><b class="meta-b">${h.book}${h.sample ? ' <span class="sample-tag">নমুনা</span>' : ''}</b><span>হাদিস: ${bn(h.no)}</span></div>${chip(h)}</div>
-      ${h.sample ? `<p class="sample-note">${h.tr}</p>` : `<p class="arabic">${h.ar}</p><p class="narrator">${h.nar}</p><p class="translation">${h.tr}</p>`}${after}</article>`;
+      ${h.sample ? `<p class="sample-note">${h.tr}</p>` : `<p class="narrator">${h.nar}</p><p class="translation">${h.tr}</p>`}${after}</article>`;
   }
-  const netBar = () => (S.net ? '' : `<div class="net-bar">${IC.wifiOff}আপনি অফলাইনে আছেন · ডাউনলোড করা বই দেখানো হচ্ছে</div>`);
 
   function renderChapter() {
     const el = $('#chapList'); if (!el) return;
-    el.innerHTML = netBar() + REAL.map(card).join('') +
+    el.innerHTML = REAL.map(card).join('') +
       '<h3 class="section-title meta-b">অন্য মানের ব্যাজ <span class="sample-tag">নমুনা</span></h3>' + SAMPLES.map(card).join('');
   }
-  function renderSearch() {
-    const el = $('#searchList'); if (!el) return;
-    const q = S.q.trim();
-    const hits = ALL.filter((h) => !q || [h.tr, h.book, h.ch, GR[h.g].t].join(' ').includes(q));
-    el.innerHTML = netBar() + (hits.length
-      ? `<p class="count">${bn(hits.length)}টি হাদিস</p>` + hits.map(card).join('')
-      : '<div class="empty"><h3>কোন সার্চ রেজাল্ট পাওয়া যায়নি</h3><p>অন্য শব্দ দিয়ে আবার সার্চ করুন</p></div>');
-  }
-  function renderDetail() {
-    const el = $('#detailBody'); if (!el) return;
-    const h = byId(S.detail);
-    el.innerHTML = netBar() + card(h) + (h.sample ? '' : `<div class="card"><p class="muted" style="margin:0">অধ্যায়: ${h.ch}</p></div>`);
-  }
 
-  /* ---------- Tahkik page: search + grouped, expandable rows ---------- */
+  /* ---------- Tahkik page: grouped, expandable rows ---------- */
   function renderTahkik() {
     const el = $('#tkList'); if (!el) return;
-    const q = S.tkQ.trim();
-    const secs = GROUPS.map(([name, ids]) => [name, ids.filter((id) => !q || GR[id].t.includes(q))]).filter((s) => s[1].length);
-    el.innerHTML = secs.length ? secs.map(([name, ids]) => `<section class="tk-sec"><h3 class="tk-h">${name}</h3><div class="tk-card">${ids.map((id) => {
+    el.innerHTML = GROUPS.map(([name, ids]) => `<section class="tk-sec"><h3 class="tk-h">${name}</h3><div class="tk-card">${ids.map((id) => {
       const g = GR[id];
       return `<button class="tk-row" data-tk="${id}" aria-expanded="${S.tkExp === id}" style="--gc:${GV[g.c]}"><span class="tk-top"><span class="tk-dot"></span><span class="tk-t">${g.t}</span><span class="tk-chev">${IC.down}</span></span><span class="tk-d">${g.d}</span></button>`;
-    }).join('')}</div></section>`).join('') + '<div style="height:16px"></div>'
-      : '<div class="empty"><h3>কোন সার্চ রেজাল্ট পাওয়া যায়নি</h3></div>';
-    const inp = $('#tkq'); if (inp && inp.value !== S.tkQ) inp.value = S.tkQ;
+    }).join('')}</div></section>`).join('') + '<div style="height:16px"></div>';
     if (typeof afterTahkik === 'function') afterTahkik();
   }
   function goTahkik(gid) {
-    S.tkExp = gid ?? null; S.tkQ = '';
+    S.tkExp = gid ?? null;
     Kit.closeAll(); Kit.show('tahkik');
     const row = gid && $(`.tk-row[data-tk="${gid}"]`);
     if (row) { row.scrollIntoView({ block: 'center' }); row.classList.add('flash'); setTimeout(() => row.classList.remove('flash'), 900); }
   }
-  function showDetail(hid) { S.detail = hid; renderDetail(); Kit.show('detail'); }
 
-  function renderAll() { renderChapter(); renderSearch(); renderDetail(); renderTahkik(); if (typeof renderExtra === 'function') renderExtra(); }
+  function renderAll() { renderChapter(); renderTahkik(); if (typeof renderExtra === 'function') renderExtra(); }
 
   /* ---------- Toolbar states: open a screen, then the grade details in a given state ---------- */
   const PSEUDO = {
-    'o-sahih': ['chapter', 'b1'], 'o-hasan': ['chapter', 's1'], 'o-weak': ['chapter', 's2'], 'o-jal': ['chapter', 's3'],
-    'o-none': ['chapter', 'b6116'], 'o-load': ['chapter', 'b1894', true],
+    'o-sahih': ['chapter', 'b1'], 'o-weak': ['chapter', 's2'], 'o-none': ['chapter', 'b6116'],
   };
   function markChip(id) { $$('.kit-chip').forEach((c) => c.setAttribute('aria-pressed', c.dataset.go === id)); }
   Kit.onScreen((id) => {
     if (S.busy) return;
-    if (PSEUDO[id] || id === 'o-empty') {
+    if (PSEUDO[id]) {
       setTimeout(() => {
         S.busy = true;
-        if (id === 'o-empty') { S.tkExp = null; Kit.show('tahkik'); S.tkQ = 'জাকাত'; renderTahkik(); }
-        else { const [base, hid, slow] = PSEUDO[id]; S.prev = S.listFrom = base; Kit.show(base); openInfo(hid, { slow, state: id }); }
+        const [base, hid] = PSEUDO[id]; S.prev = base; Kit.show(base); openInfo(hid, { state: id });
         S.busy = false; markChip(id);
       });
       return;
     }
-    if (id === 'chapter' || id === 'search') S.listFrom = id;
-    if (id === 'tahkik') { S.tkQ = ''; renderTahkik(); } else S.prev = id;
+    if (id === 'tahkik') renderTahkik(); else S.prev = id;
     if (typeof onScreenExtra === 'function') onScreenExtra(id);
   });
 
@@ -299,45 +244,17 @@
     const tk = t.closest('[data-tk]');
     if (tk) { const id = +tk.dataset.tk; S.tkExp = S.tkExp === id ? null : id; renderTahkik(); return; }
     const back = t.closest('[data-back]');
-    if (back) { Kit.show(back.dataset.back === 'list' ? S.listFrom : S.prev); return; }
+    if (back) { Kit.show(S.prev); return; }
     const chip = t.closest('.grade[data-hid]');
-    if (chip) { openInfo(chip.dataset.hid, {}); return; }
-    const hc = t.closest('.hc[data-hid]');
-    if (hc && !t.closest('.gpanel') && hc.closest('[data-cards]')) showDetail(hc.dataset.hid);
-  });
-  document.addEventListener('input', (e) => {
-    if (e.target.id === 'q') { S.q = e.target.value; renderSearch(); $$('#qChips .chip').forEach((x) => x.classList.toggle('on', x.dataset.q === S.q)); }
-    if (e.target.id === 'tkq') { S.tkQ = e.target.value; renderTahkik(); }
-  });
-  const NET = '<button class="net-tg" id="netTg" type="button" aria-pressed="false">অফলাইন</button>';
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('#netTg')) return;
-    S.net = !S.net; e.target.closest('#netTg').setAttribute('aria-pressed', !S.net);
-    renderAll(); if (typeof refreshInfo === 'function') refreshInfo();
-    Kit.snack(S.net ? 'আবার অনলাইনে' : 'অফলাইন — ডাউনলোড করা বই থেকে দেখানো হচ্ছে');
+    if (chip) openInfo(chip.dataset.hid, {});
   });
   // Empty sections that the toolbar state chips point at
-  Object.keys(PSEUDO).concat('o-empty').forEach((id) => $('.viewport').insertAdjacentHTML('afterbegin', `<section class="screen" data-screen="${id}"></section>`));
+  Object.keys(PSEUDO).forEach((id) => $('.viewport').insertAdjacentHTML('afterbegin', `<section class="screen" data-screen="${id}"></section>`));
   $$('[data-icon]').forEach((b) => { b.innerHTML = icons[b.dataset.icon]; });
-  // Loading: the first open of each hadith reads from the book database
-  function load(hid, o, fill) {
-    const first = !S.seen[hid] || o.slow; S.seen[hid] = 1;
-    clearTimeout(S.timer);
-    if (!first) { fill(); return false; }
-    S.timer = setTimeout(fill, o.slow ? 2400 : 550);
-    return true;
-  }
-  // Search quick chips
-  document.addEventListener('click', (e) => {
-    const c = e.target.closest('[data-q]'); if (!c) return;
-    S.q = c.dataset.q; $('#q').value = S.q; renderSearch();
-    $$('#qChips .chip').forEach((x) => x.classList.toggle('on', x === c));
-  });
   // Toolbar chips: real screens + the grade-details states
   const SCREENS = [
-    { id: 'chapter', label: 'অধ্যায়' }, { id: 'search', label: 'সার্চ' }, { id: 'detail', label: 'বিস্তারিত পেজ' },
-    { id: 'o-sahih', label: 'সহিহ · মতসহ' }, { id: 'o-hasan', label: 'হাসান' }, { id: 'o-weak', label: 'দুর্বল' }, { id: 'o-jal', label: 'জাল' },
-    { id: 'o-none', label: 'মত নেই' }, { id: 'o-load', label: 'লোডিং' }, { id: 'tahkik', label: 'তাহকিক পেজ' }, { id: 'o-empty', label: 'খালি সার্চ' },
+    { id: 'chapter', label: 'অধ্যায়' }, { id: 'o-sahih', label: 'সহিহ · মতসহ' }, { id: 'o-weak', label: 'দুর্বল' },
+    { id: 'o-none', label: 'মত নেই' }, { id: 'tahkik', label: 'তাহকিক পেজ' },
   ];
   // "আরো পড়ুন" only when the meaning really overflows its clamp
   new MutationObserver(() => $$('[data-more]').forEach((b) => {
@@ -352,9 +269,8 @@
   }
   /* ---------- Demo 2: bottom sheet. Tabs only when opinions exist; otherwise the meaning alone ---------- */
   function openInfo(hid, o) {
-    S.hid = hid; S.tab = o.state === 'o-weak' || o.state === 'o-jal' ? 'op' : 'def';
-    Kit.open('info');
-    if (load(hid, o, fill)) $('#info').innerHTML = '<div class="grab"></div>' + SPIN;
+    S.hid = hid; S.tab = o.state === 'o-weak' ? 'op' : 'def';
+    Kit.open('info'); fill();
   }
   function fill() {
     const h = byId(S.hid), g = GR[h.g], ops = opsOf(h);
@@ -368,14 +284,13 @@
     $('#info').innerHTML = `<div class="grab"></div>
       <div class="sheet-head"><span class="hi" style="--gc:${GV[g.c]}">${illo(g.c, 48)}</span><div class="ht"><h2>${g.t}</h2><small>${ref(h)}</small></div>
         <button class="icon-btn" data-close aria-label="বন্ধ করুন">${icons.close}</button></div>
-      ${tabs}<div class="sheet-body">${body}${netHTML()}</div>
+      ${tabs}<div class="sheet-body">${body}</div>
       <div class="sheet-foot"><button class="btn text" data-all>সব মান দেখুন</button><span style="flex:1"></span><button class="btn" data-close>ঠিক আছে</button></div>`;
   }
-  function refreshInfo() { if ($('#info.on') && S.hid && !$('#info .spin')) fill(); }
   document.addEventListener('click', (e) => { const t = e.target.closest('[data-tab]'); if (t) { S.tab = t.dataset.tab; fill(); } });
 
   renderAll();
-  Kit.init({ demo: 2, name: 'বটম শিটে দুই ট্যাব', screens: SCREENS, extra: NET });
+  Kit.init({ demo: 2, name: 'বটম শিটে দুই ট্যাব', screens: SCREENS });
 })();
 </script>
 </body>

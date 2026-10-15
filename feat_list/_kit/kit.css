@@ -40,19 +40,27 @@ input,textarea{font:inherit;color:inherit}
 svg{display:block}
 [hidden]{display:none!important}
 
-/* ---------- Page shell: toolbar outside the phone ---------- */
-.kit-bar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--page);border-bottom:1px solid var(--page-line);color:var(--page-text)}
-.kit-name{font-size:13.5px;white-space:nowrap;font-weight:700}
-.kit-chips{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none;padding:2px}
-.kit-chips::-webkit-scrollbar{display:none}
-.kit-chip{flex:none;font-size:13px;padding:4px 12px;border-radius:20px;border:1px solid var(--page-line);background:transparent;color:var(--page-text)}
+/* ---------- Page shell: phone at full height, controls on the right ----------
+   Only the phone scrolls. kit.js sizes the phone to the window (and scales
+   wide tablet frames down to fit). Inside the viewer (?embed=1) the side
+   panel is hidden: the viewer shows the same controls itself. */
+html,body{overflow:hidden}
+body{display:flex;height:100vh;height:100dvh}
+.kit-stage{flex:1;min-width:0;min-height:0;display:grid;place-items:center;padding:14px 16px;overflow:hidden}
+.kit-side{flex:none;width:220px;display:flex;flex-direction:column;gap:12px;padding:18px 14px;border-left:1px solid var(--page-line);color:var(--page-text);overflow-y:auto}
+.kit-name{font-size:14.5px;font-weight:700;line-height:1.35}
+.kit-name small{display:block;font-size:12px;font-weight:400;opacity:.7}
+.kit-label{font-size:11.5px;font-weight:700;opacity:.6;margin-bottom:-4px}
+.kit-chips{display:flex;flex-direction:column;gap:4px}
+.kit-chip{text-align:left;font-size:13.5px;padding:6px 12px;border-radius:10px;border:1px solid var(--page-line);background:transparent;color:var(--page-text)}
 .kit-chip[aria-pressed="true"]{background:var(--page-text);color:var(--page);border-color:var(--page-text)}
-.kit-btn{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid var(--page-line);display:grid;place-items:center;color:var(--page-text)}
-.kit-extra{display:flex;gap:6px;flex:none}
-.kit-stage{display:grid;place-items:start center;padding:24px 16px 48px}
+.kit-extra{display:flex;flex-wrap:wrap;gap:6px}
+.kit-extra:empty{display:none}
+.kit-btn{margin-top:auto;align-self:flex-start;height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--page-line);display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--page-text)}
+.kit-embed .kit-side{display:none}
 
 /* ---------- Phone frame ---------- */
-.phone{position:relative;width:390px;height:844px;border-radius:44px;background:var(--scaffold);overflow:hidden;
+.phone{position:relative;flex:none;width:390px;height:844px;border-radius:44px;background:var(--scaffold);overflow:hidden;
   box-shadow:0 0 0 10px #101418,0 0 0 11px #2a3138,0 24px 60px rgba(0,0,0,.25);display:flex;flex-direction:column}
 .statusbar{flex:none;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px 0 30px;font-size:14px;font-weight:700;color:var(--on-appbar);background:var(--appbar)}
 .statusbar.light{background:var(--scaffold);color:var(--title)}
@@ -63,8 +71,17 @@ svg{display:block}
 .scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:24px}
 .scroll::-webkit-scrollbar{width:0}
 @media (max-width:480px){
-  .kit-stage{padding:0}
-  .phone{width:100%;height:calc(100vh - 49px);border-radius:0;box-shadow:none}
+  /* Standalone on a phone: controls on top, phone fills the screen. In the
+     viewer (.kit-embed) a narrow pane keeps the frame and scales instead. */
+  :root:not(.kit-embed) body{flex-direction:column}
+  .kit-side{order:-1;width:auto;flex-direction:row;align-items:center;gap:10px;padding:8px 12px;border-left:0;border-bottom:1px solid var(--page-line);overflow-x:auto;overflow-y:hidden}
+  .kit-label,.kit-name small{display:none}
+  .kit-name{white-space:nowrap;font-size:13.5px}
+  .kit-chips{flex-direction:row}
+  .kit-chip{flex:none;white-space:nowrap;border-radius:20px;padding:4px 12px}
+  .kit-btn{margin-top:0;flex:none}
+  :root:not(.kit-embed) .kit-stage{padding:0}
+  :root:not(.kit-embed) .phone:not(.tab):not(.tablet){width:100%;border-radius:0;box-shadow:none}
 }
 
 /* ---------- App bar ---------- */

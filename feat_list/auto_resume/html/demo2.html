@@ -3,47 +3,46 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>অটো রিজিউম — ডেমো ২ · মিনিমাল স্ট্রিপ</title>
+<title>অটো রিজিউম — ডেমো ২ · স্লিম স্ট্রিপ</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
-/* ===== Home (HadithBookListTab): green band, quick-action grid, book tabs ===== */
+/* ===== Home (HadithBookListTab): green band, quick-action card, book list ===== */
+.phone{--float:0 10px 28px color-mix(in srgb,var(--scrim) 38%,transparent),0 2px 6px color-mix(in srgb,var(--scrim) 22%,transparent)}
 .home .scroll{position:relative}
-.band{position:absolute;left:0;right:0;top:0;height:230px;background:linear-gradient(var(--appbar),var(--primary-dark));opacity:.95}
+.home.has-dock .scroll{padding-bottom:var(--dock-pad)}
+.band{position:absolute;left:0;right:0;top:0;height:110px;background:linear-gradient(var(--appbar),var(--primary-dark))}
 :root[data-theme="dark"] .band{background:var(--appbar)}
 .home .scroll>:not(.band){position:relative}
 .home-bar h1{text-align:center}
-.note{display:flex;gap:8px;align-items:center;margin:10px 12px 0;padding:9px 12px;border-radius:10px;background:var(--card);font-size:13px;color:var(--body);box-shadow:var(--shadow)}
-.note svg{flex:none;width:18px;height:18px;color:var(--hint)}
-.slot{display:grid;grid-template-rows:1fr;grid-template-columns:minmax(0,1fr);transition:grid-template-rows .28s ease,opacity .28s ease}
-.slot>div{min-height:0}
-.slot.bye{grid-template-rows:0fr;opacity:0}
-.dash{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin:12px 12px 30px;padding:12px 0 20px}
-.qa{display:grid;grid-template-columns:repeat(4,1fr)}
+.dash{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin:12px;padding:10px 0 6px}
+.qa{display:grid;grid-template-columns:repeat(4,1fr);row-gap:4px}
 .qa button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;font-size:13.5px;font-weight:700;color:var(--body);border-radius:10px}
 .qi{width:36px;height:36px;border-radius:50%;background:var(--tint);color:var(--primary);display:grid;place-items:center}
 .qi svg{width:18px;height:18px}
-.qa.more{display:none}.dash.open .qa.more{display:grid}
-.xp{position:absolute;left:50%;bottom:-20px;margin-left:-20px;width:40px;height:40px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);color:var(--primary);display:grid;place-items:center}
-.xp svg{transition:transform .25s}.dash.open .xp svg{transform:rotate(180deg)}
-.tabs{display:flex;margin:0 12px 12px;border-bottom:1px solid var(--divider)}
-.tabs button{flex:1;height:44px;font-weight:700;color:var(--hint);border-bottom:2px solid transparent}
-.tabs button.on{color:var(--primary);border-color:var(--primary)}
-.bk{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:10px;box-shadow:var(--shadow);margin:0 12px 12px;padding:12px 14px;width:calc(100% - 24px);text-align:left}
+.book-badge{font-size:13px}
+.bk{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:10px;box-shadow:var(--shadow);margin:0 12px 10px;padding:12px 14px;width:calc(100% - 24px);text-align:left}
+.bk>div{flex:1;min-width:0}
 .bk b{display:block;color:var(--title);font-size:15.5px;line-height:1.35}
 .bk small{color:var(--hint);font-size:13px}
-.bk .n{margin-left:auto;text-align:center;font-size:12.5px;color:var(--hint);line-height:1.3}
-.book-badge{font-size:13px}
+.bk .n{flex:none;text-align:center;font-size:12.5px;color:var(--hint);line-height:1.3}
 
-/* ===== Hadith list (HadithListPage): section header + HadithListItem ===== */
+/* ===== Floating resume card host: inside the home .screen, over the scroll area, pinned to the bottom ===== */
+.dock{position:absolute;left:0;right:0;bottom:0;z-index:6;pointer-events:none;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .25s}
+.dock>*{pointer-events:auto}
+.dock.enter{animation:dock-in .42s cubic-bezier(.2,.8,.2,1) backwards}
+.dock.gone{transform:translateY(calc(100% + 24px));opacity:0}
+@keyframes dock-in{from{transform:translateY(48px);opacity:0}}
+/* Snackbar rises above the card while it is on screen */
+.snack{bottom:calc(18px + var(--lift,0px));transition:transform .25s,opacity .2s,visibility .25s}
+.snack:not(.on){opacity:0;visibility:hidden}
+
+/* ===== Hadith list (HadithListPage): section header + HadithListItem (Bangla only) ===== */
 #r-body{position:relative;padding-top:4px}
 .sec{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:12px 12px 10px;padding:12px var(--pad);font-size:15px;font-weight:700;color:var(--title)}
 .sec b{color:var(--primary)}
 .hcard{transition:background-color 1.2s ease,box-shadow 1.2s ease}
-.hcard .hadith-head{margin-right:-10px}
-.hcard .narrator{color:var(--primary);font-size:15px;margin:8px 0 2px}
+.hcard .narrator{color:var(--primary);font-size:15px;margin:12px 0 2px}
 .hcard .translation{line-height:1.7}
-.fnote{margin-top:12px;padding-top:10px;border-top:1px solid var(--divider);font-size:13.5px;color:var(--title);opacity:.7}
-.loading{min-height:calc(100% - 24px);display:grid;place-items:center}
 
 /* ===== সর্বশেষ page (LastReadPage + LastReadListItem) ===== */
 .rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
@@ -51,28 +50,24 @@
 .lr{display:flex;align-items:center;gap:15px;width:calc(100% - 32px);margin:7px 16px;padding:15px;border-radius:10px;background:var(--card);text-align:left;box-shadow:var(--shadow)}
 .lr b{display:block;color:var(--title);font-size:16px;font-weight:700}
 .lr span{font-size:13px;color:var(--body);opacity:.75}
-.empty svg{color:var(--primary)}
 
-/* ===== Download dialog progress ===== */
-.dlg-p{margin-top:12px}
-.dlg-p .progress>i{transition:width .2s linear}
-
-/* ===== Demo 2: one-line strip as the top row of the quick-action card (HomeSmallDashboard) ===== */
-.strip{margin:-4px 14px 10px;padding-bottom:10px;border-bottom:1px solid var(--divider);cursor:pointer}
-.st-h{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--hint)}
-.st-h span{flex:1}
-.st-h button{color:var(--primary);font-weight:700;font-size:13px;padding:4px 2px}
-.st-h .x{color:var(--hint);width:28px;height:28px;display:grid;place-items:center}
-.st-r{display:flex;align-items:center;gap:10px;margin-top:2px}
-.st-r .book-badge{width:30px;height:30px;font-size:10.5px}
+/* ===== Demo 2: slim strip docked flush at the bottom, thin reading-progress line on its top edge ===== */
+.home{--dock-pad:92px}
+.strip{position:relative;display:flex;align-items:center;gap:10px;padding:11px 6px 16px 16px;background:var(--card);border-top:1px solid var(--divider);box-shadow:var(--float);cursor:pointer}
+.st-bar{position:absolute;left:0;right:0;top:-1px;height:3px;background:var(--divider)}
+.st-bar i{display:block;height:100%;background:var(--primary);border-radius:0 3px 3px 0}
+.strip .book-badge{width:32px;height:32px;font-size:10.5px}
 .st-t{flex:1;min-width:0}
-.st-t b{display:block;font-size:14.5px;color:var(--title);line-height:1.3}
+.st-l1{display:flex;align-items:center;gap:8px}
+.st-l1 b{flex:1;min-width:0;font-size:14.5px;line-height:1.35;color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-l1 button{flex:none;font-size:12.5px;font-weight:700;color:var(--primary);padding:2px 0}
 .st-t span{display:block;font-size:13px;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.st-go{flex:none;height:32px;padding:0 12px;border-radius:16px;background:var(--primary);color:var(--on-appbar);font-size:13px;font-weight:700}
+.st-t span em{font-style:normal;color:var(--hint)}
+.strip .st-go{flex:none;height:34px;padding:0 12px;border-radius:17px;font-size:13px}
+.strip .icon-btn{width:32px;height:32px;color:var(--hint)}
 /* Highlight: a primary bar on the card's start edge, fading after ~3 s */
 .hcard{box-shadow:var(--shadow),inset 0 0 0 0 var(--primary)}
 .hcard.hl{box-shadow:var(--shadow),inset 4px 0 0 0 var(--primary);background:var(--surface-2)}
-
 </style>
 </head>
 <body>
@@ -84,29 +79,48 @@
 <script src="../../_kit/kit.js"></script>
 <script>
 (function () {
-  /* ---------- Data: real hadiths from the app's book databases (muslim_bn, bukhari_bn, riyadus-salihin_bn);
-     book names, colours, writers and grade names from hadith.db ---------- */
-  const BOOKS = {"m": {"name": "সহীহ মুসলিম", "color": "#2d91c2", "abbr": "M", "count": "7547", "by": "ইমাম মুসলিম"}, "b": {"name": "সহীহ বুখারী", "color": "#70bb65", "abbr": "B", "count": "7563", "by": "ইমাম বুখারি"}, "rs": {"name": "রিয়াদুস সালেহীন", "color": "#ef5090", "abbr": "RS", "count": "1905", "by": "ইমাম নববী"}, "n": {"name": "সুনানে আন-নাসায়ী", "color": "#27b5e5", "abbr": "N", "count": "5758", "by": "ইমাম নাসায়ী"}, "ad": {"name": "সুনানে আবূ দাউদ", "color": "#8e44ad", "abbr": "AD", "count": "5274", "by": "ইমাম আবু দাউদ"}};
+  /* ---------- Data: real hadiths from the app's book databases (muslim_bn, bukhari_bn, riyadus-salihin_bn), Bangla only;
+     book names, colours, short codes, writers and hadith counts from hadith.db (books, writers) ---------- */
+  const BOOKS = {"m": {"name": "সহীহ মুসলিম", "short": "মুসলিম", "color": "#2d91c2", "abbr": "M"}, "b": {"name": "সহীহ বুখারী", "short": "বুখারী", "color": "#70bb65", "abbr": "B"}, "rs": {"name": "রিয়াদুস সালেহীন", "short": "রিয়াদুস সালেহীন", "color": "#ef5090", "abbr": "RS"}};
+  const SHELF = [
+    ['সহীহ বুখারী', '#70bb65', 'B', '7563', 'ইমাম বুখারি'], ['সহীহ মুসলিম', '#2d91c2', 'M', '7547', 'ইমাম মুসলিম'],
+    ['সুনানে আন-নাসায়ী', '#27b5e5', 'N', '5758', 'ইমাম নাসায়ী'], ['সুনানে আবূ দাউদ', '#8e44ad', 'AD', '5274', 'ইমাম আবু দাউদ'],
+    ['জামে‘ আত-তিরমিযী', '#4570e5', 'T', '3956', 'ইমাম তিরমিজি'], ['সুনানে ইবনে মাজাহ', '#ea622e', 'IM', '4341', 'ইমাম ইবনে মাজাহ'],
+    ['মুয়াত্তা ইমাম মালিক', '#6eb6f0', 'MI', '1830', 'ইমাম মালিক'], ['রিয়াদুস সালেহীন', '#ef5090', 'RS', '1905', 'ইমাম নববী'],
+    ['বুলুগুল মারাম', '#ff9e80', 'BM', '1568', 'ইবনে হাজার আসকালানী'], ['আল-লু\'লু ওয়াল মারজান', '#bedc1a', 'LM', '1906', 'আল্লামা ফুয়াদ আল বাকী'],
+    ['হাদীস সম্ভার', '#4db6ac', 'HS', '2013', 'আব্দুল হামিদ ফাইযি'], ['মিশকাতুল মাসাবীহ', '#616161', 'MM', '6294', 'আল্লামা খতীব তাবরেযী'],
+  ];
   const H = {
-    m420: {"bk": "m", "no": "৪২০", "ch": "ঈমান", "sec": "মহান আল্লাহ আদাম (‘আঃ)-কে বলবেন : “যারা জাহান্নামে প্রেরিত হয়েছে তাদের প্রত্যেক এক হাজারের মধ্যে নয়শত নিরানব্বই জনকে বের করে আনো”", "sn": "১/৯৬. অধ্যায়ঃ", "nar": "আবূ সা’ঈদ (রাঃ)", "ar": "حَدَّثَنَا عُثْمَانُ بْنُ أَبِي شَيْبَةَ الْعَبْسِيُّ، حَدَّثَنَا جَرِيرٌ، عَنِ الأَعْمَشِ، عَنْ أَبِي صَالِحٍ، عَنْ أَبِي سَعِيدٍ، قَالَ قَالَ رَسُولُ اللَّهِ صلى الله عليه وسلم \" يَقُولُ اللَّهُ عَزَّ وَجَلَّ يَا آدَمُ فَيَقُولُ لَبَّيْكَ وَسَعْدَيْكَ وَالْخَيْرُ فِي يَدَيْكَ - قَالَ - يَقُولُ أَخْرِجْ بَعْثَ النَّارِ . قَالَ وَمَا بَعْثُ النَّارِ قَالَ مِنْ كُلِّ أَلْفٍ تِسْعَمِائَةٍ وَتِسْعَةً وَتِسْعِينَ . قَالَ فَذَاكَ حِينَ يَشِيبُ الصَّغِيرُ وَتَضَعُ كُلُّ ذَاتِ حَمْلٍ حَمْلَهَا وَتَرَى النَّاسَ سُكَارَى وَمَا هُمْ بِسُكَارَى وَلَكِنَّ عَذَابَ اللَّهِ شَدِيدٌ \" . قَالَ فَاشْتَدَّ ذَلِكَ عَلَيْهِمْ . قَالُوا يَا رَسُولَ اللَّهِ أَيُّنَا ذَلِكَ الرَّجُلُ فَقَالَ \" أَبْشِرُوا فَإِنَّ مِنْ يَأْجُوجَ وَمَأْجُوجَ أَلْفًا وَمِنْكُمْ رَجُلٌ \" . قَالَ ثُمَّ قَالَ \" وَالَّذِي نَفْسِي بِيَدِهِ إِنِّي لأَطْمَعُ أَنْ تَكُونُوا رُبُعَ أَهْلِ الْجَنَّةِ \" . فَحَمِدْنَا اللَّهَ وَكَبَّرْنَا ثُمَّ قَالَ \" وَالَّذِي نَفْسِي بِيَدِهِ إِنِّي لأَطْمَعُ أَنْ تَكُونُوا ثُلُثَ أَهْلِ الْجَنَّةِ \" . فَحَمِدْنَا اللَّهَ وَكَبَّرْنَا ثُمَّ قَالَ \" وَالَّذِي نَفْسِي بِيَدِهِ إِنِّي لأَطْمَعُ أَنْ تَكُونُوا شَطْرَ أَهْلِ الْجَنَّةِ إِنَّ مَثَلَكُمْ فِي الأُمَمِ كَمَثَلِ الشَّعْرَةِ الْبَيْضَاءِ فِي جِلْدِ الثَّوْرِ الأَسْوَدِ أَوْ كَالرَّقْمَةِ فِي ذِرَاعِ الْحِمَارِ \" .", "tr": "রসূলুল্লাহ (ﷺ) বলেছেনঃ মহামহিম আল্লাহ (কেয়ামত দিবসে) আহ্বান করবেন, হে আদম! তিনি উত্তরে বলবেন, আমি আপনার সামনে উপস্থিত, আপনার কাছে শুভ কামনা করি এবং সকল কল্যাণ আপনারই হাতে। মহান আল্লাহ বলবেন : জাহান্নামি দলকে বের কর। আদম (আঃ) জিজ্ঞেস করবেন : জাহান্নামি দল কতজনে? মহান আল্লাহ বলবেন : প্রতি হাজার থেকে নয়শ নিরানব্বই।\n\nরসূলুল্লাহ (ﷺ) বলেনঃ এটাই সে মুহূর্ত যখন বালক হয়ে যাবে বৃদ্ধ, সকল গর্ভবতী তাদের গর্ভপাত করে ফেলবে আর মানুষকে দেখবে মাতাল সদৃশ যদিও তারা নেশাগ্রস্ত নয়, বস্তুতঃ আল্লাহর ‘আজাব বড়ই কঠিন।\n\nরাবী বলেন, কথাগুলো সাহাবীদের কঠিন মনে হলো। তাঁরা বললেন, ইয়া রসূলুল্লাহ (ﷺ)! আমাদের মধ্যে কে সে ব্যক্তি? তিনি (ﷺ) বললেনঃ আনন্দিত হও। ইয়াজূজ ও মাজূজের সংখ্যা এক হাজার হলে তোমাদের সংখ্যা হবে একজন।\n\nতারপর রসূলুল্লাহ (ﷺ) বললেনঃ কসম সে সত্তার যাঁর হাতে আমার প্রাণ! অবশ্যই আমি আশা রাখি যে, তোমরা জান্নাতীদের এক চতুর্থাংশ হবে। (সাহাবা বলেন,) আমরা আল্লাহর প্রশংসা করলাম এবং ‘আল্লাহু আকবার’ ধ্বনি দিলাম।\n\nতারপর আবার তিনি বললেন, শপথ সে সত্তার, যাঁর হাতে আমার জীবন! অবশ্যই আমি আশা রাখি, জান্নাতীদের মধ্যে তোমরা তাদের এক তৃতীয়াংশ হবে। সাহাবা বলেন, আমরা বললাম ‘আলহামদুলিল্লাহ’ এবং ‘আল্লাহু আকবার’ ধ্বনি দিলাম।\n\nতারপর আবার রসূলুল্লাহ (ﷺ) বললেনঃ কসম সে সত্তার, যাঁর হাতে আমার প্রাণ! আমি আশা রাখি যে, তোমরা জান্নাতীদের অর্ধেক হবে এবং তোমরা অন্যান্য উম্মতের মধ্যে কালো ষাঁড়ের গায়ে একটি সাদা পশমের ন্যায় অথবা গাধার পায়ের চিহ্নের সদৃশ।", "fn": "ইসলামী ফাউন্ডেশনঃ ৪২৫, ইসলামীক সেন্টারঃ ৪৩৯", "gr": "সহিহ হাদিস"},
-    m421: {"bk": "m", "no": "৪২১", "ch": "ঈমান", "sec": "মহান আল্লাহ আদাম (‘আঃ)-কে বলবেন : “যারা জাহান্নামে প্রেরিত হয়েছে তাদের প্রত্যেক এক হাজারের মধ্যে নয়শত নিরানব্বই জনকে বের করে আনো”", "sn": "১/৯৬. অধ্যায়ঃ", "nar": "আ’মাশ (রাঃ)", "ar": "حَدَّثَنَا أَبُو بَكْرِ بْنُ أَبِي شَيْبَةَ، حَدَّثَنَا وَكِيعٌ، ح وَحَدَّثَنَا أَبُو كُرَيْبٍ، حَدَّثَنَا أَبُو مُعَاوِيَةَ، كِلاَهُمَا عَنِ الأَعْمَشِ، بِهَذَا الإِسْنَادِ غَيْرَ أَنَّهُمَا قَالاَ \" مَا أَنْتُمْ يَوْمَئِذٍ فِي النَّاسِ إِلاَّ كَالشَّعْرَةِ الْبَيْضَاءِ فِي الثَّوْرِ الأَسْوَدِ أَوْ كَالشَّعْرَةِ السَّوْدَاءِ فِي الثَّوْرِ الأَبْيَضِ \" . وَلَمْ يَذْكُرَا \" أَوْ كَالرَّقْمَةِ فِي ذِرَاعِ الْحِمَارِ \" .", "tr": "উক্ত সানাদে হাদিসটি বর্ণনা করেছেন। তাঁরা উভয়ে বর্ণনা করেন, “তোমরা সকল মানুষের মধ্যে কালো ষাঁড়ের গায়ে একটি সাদা পশমের মতো হবে অথবা সাদা ষাঁড়ের গায়ে কালো পশমের মতো হবে।” তাঁরা “গাধার পায়ের চিহ্নের মতো” এ কথা উল্লেখ করেননি।", "fn": "ইসলামী ফাউন্ডেশনঃ ৪২৬, ইসলামীক সেন্টারঃ ৪৪০", "gr": "সহিহ হাদিস"},
-    b6116: {"bk": "b", "no": "৬১১৬", "ch": "আচার-ব্যবহার", "sec": "ক্রোধ থেকে বেঁচে থাকা।", "sn": "৭৮/৭৬. অধ্যায়ঃ", "nar": "আবূ হুরায়রা (রাঃ)", "ar": "حَدَّثَنِي يَحْيَى بْنُ يُوسُفَ، أَخْبَرَنَا أَبُو بَكْرٍ ـ هُوَ ابْنُ عَيَّاشٍ ـ عَنْ أَبِي حَصِينٍ، عَنْ أَبِي صَالِحٍ، عَنْ أَبِي هُرَيْرَةَ ـ رضى الله عنه ـ أَنَّ رَجُلاً، قَالَ لِلنَّبِيِّ صلى الله عليه وسلم أَوْصِنِي. قَالَ \" لاَ تَغْضَبْ \". فَرَدَّدَ مِرَارًا، قَالَ \" لاَ تَغْضَبْ \".", "tr": "এক ব্যক্তি নবী (ﷺ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বললেন, নবী (ﷺ) প্রত্যেক বারেই বললেন: রাগ করো না।", "fn": "আধুনিক প্রকাশনী- ৫৬৭৬, ইসলামিক ফাউন্ডেশন- ৫৫৭৩", "gr": "সহিহ হাদিস"},
-    rs3: {"bk": "rs", "no": "৩/৩", "ch": "বিবিধ", "sec": "ইখলাস প্রসঙ্গে - প্রকাশ্য ও গোপনীয় আমল (কর্ম) কথা ও অবস্থায় আন্তরিকতা ও বিশুদ্ধ নিয়ত জরুরী", "sn": "১/১. অধ্যায়ঃ", "nar": "আয়েশা (রাঃ)", "ar": "وعَنْ عَائِشَة رَضِيَ االله عنْهَا قَالَت قالَ النَّبِيُّ صَلّى االلهُ عَلَيْهِ وسَلَّم : »لا هِجْرَةَ بَعْدَ الْفَتْح،ِ وَلكنْ جِهَادٌ وَنِيَّةٌ ، وَإِذَا اسْتُنْفرِتُمْ فانْفِرُوا« مُتَّفَقٌ عَلَيْهِ . وَمَعْنَاهُ : لا هِجْرَةَ مِنْ مَكَّةَ لأَنَّهَا صَارَتْ دَارَ إِسْلامٍ", "tr": "নবী (ﷺ) বলেছেন, ’’মক্কা বিজয়ের পর (মক্কা থেকে) হিজরত নেই; বরং বাকী রয়েছে জিহাদ ও নিয়ত। সুতরাং যদি তোমাদেরকে জিহাদের জন্য ডাক দেওয়া হয়, তাহলে তোমরা (জিহাদে) বেরিয়ে পড়।’’[১]\n’মক্কা বিজয়ের পর আর হিজরত নেই’ এর অর্থ এই যে, মক্কা এখন ইসলামী রাষ্ট্রে পরিণত হল। ফলে এখান থেকে মুসলিমরা আর হিজরত করতে পারবে না।", "fn": "সহীহুল বুখারী ৩০৮০, ৩৯০০, মুসলিম ১৮৬৪", "gr": "সহিহ হাদিস"}
+    m420: {"bk": "m", "no": "৪২০", "ch": "ঈমান", "sec": "মহান আল্লাহ আদাম (‘আঃ)-কে বলবেন : “যারা জাহান্নামে প্রেরিত হয়েছে তাদের প্রত্যেক এক হাজারের মধ্যে নয়শত নিরানব্বই জনকে বের করে আনো”", "sn": "১/৯৬. অধ্যায়ঃ", "nar": "আবূ সা’ঈদ (রাঃ)", "tr": "রসূলুল্লাহ (ﷺ) বলেছেনঃ মহামহিম আল্লাহ (কেয়ামত দিবসে) আহ্বান করবেন, হে আদম! তিনি উত্তরে বলবেন, আমি আপনার সামনে উপস্থিত, আপনার কাছে শুভ কামনা করি এবং সকল কল্যাণ আপনারই হাতে। মহান আল্লাহ বলবেন : জাহান্নামি দলকে বের কর। আদম (আঃ) জিজ্ঞেস করবেন : জাহান্নামি দল কতজনে? মহান আল্লাহ বলবেন : প্রতি হাজার থেকে নয়শ নিরানব্বই।\n\nরসূলুল্লাহ (ﷺ) বলেনঃ এটাই সে মুহূর্ত যখন বালক হয়ে যাবে বৃদ্ধ, সকল গর্ভবতী তাদের গর্ভপাত করে ফেলবে আর মানুষকে দেখবে মাতাল সদৃশ যদিও তারা নেশাগ্রস্ত নয়, বস্তুতঃ আল্লাহর ‘আজাব বড়ই কঠিন।\n\nরাবী বলেন, কথাগুলো সাহাবীদের কঠিন মনে হলো। তাঁরা বললেন, ইয়া রসূলুল্লাহ (ﷺ)! আমাদের মধ্যে কে সে ব্যক্তি? তিনি (ﷺ) বললেনঃ আনন্দিত হও। ইয়াজূজ ও মাজূজের সংখ্যা এক হাজার হলে তোমাদের সংখ্যা হবে একজন।\n\nতারপর রসূলুল্লাহ (ﷺ) বললেনঃ কসম সে সত্তার যাঁর হাতে আমার প্রাণ! অবশ্যই আমি আশা রাখি যে, তোমরা জান্নাতীদের এক চতুর্থাংশ হবে। (সাহাবা বলেন,) আমরা আল্লাহর প্রশংসা করলাম এবং ‘আল্লাহু আকবার’ ধ্বনি দিলাম।\n\nতারপর আবার তিনি বললেন, শপথ সে সত্তার, যাঁর হাতে আমার জীবন! অবশ্যই আমি আশা রাখি, জান্নাতীদের মধ্যে তোমরা তাদের এক তৃতীয়াংশ হবে। সাহাবা বলেন, আমরা বললাম ‘আলহামদুলিল্লাহ’ এবং ‘আল্লাহু আকবার’ ধ্বনি দিলাম।\n\nতারপর আবার রসূলুল্লাহ (ﷺ) বললেনঃ কসম সে সত্তার, যাঁর হাতে আমার প্রাণ! আমি আশা রাখি যে, তোমরা জান্নাতীদের অর্ধেক হবে এবং তোমরা অন্যান্য উম্মতের মধ্যে কালো ষাঁড়ের গায়ে একটি সাদা পশমের ন্যায় অথবা গাধার পায়ের চিহ্নের সদৃশ।", "gr": "সহিহ হাদিস"},
+    m421: {"bk": "m", "no": "৪২১", "ch": "ঈমান", "sec": "মহান আল্লাহ আদাম (‘আঃ)-কে বলবেন : “যারা জাহান্নামে প্রেরিত হয়েছে তাদের প্রত্যেক এক হাজারের মধ্যে নয়শত নিরানব্বই জনকে বের করে আনো”", "sn": "১/৯৬. অধ্যায়ঃ", "nar": "আ’মাশ (রাঃ)", "tr": "উক্ত সানাদে হাদিসটি বর্ণনা করেছেন। তাঁরা উভয়ে বর্ণনা করেন, “তোমরা সকল মানুষের মধ্যে কালো ষাঁড়ের গায়ে একটি সাদা পশমের মতো হবে অথবা সাদা ষাঁড়ের গায়ে কালো পশমের মতো হবে।” তাঁরা “গাধার পায়ের চিহ্নের মতো” এ কথা উল্লেখ করেননি।", "gr": "সহিহ হাদিস"},
+    b6116: {"bk": "b", "no": "৬১১৬", "ch": "আচার-ব্যবহার", "sec": "ক্রোধ থেকে বেঁচে থাকা।", "sn": "৭৮/৭৬. অধ্যায়ঃ", "nar": "আবূ হুরায়রা (রাঃ)", "tr": "এক ব্যক্তি নবী (ﷺ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বললেন, নবী (ﷺ) প্রত্যেক বারেই বললেন: রাগ করো না।", "gr": "সহিহ হাদিস"},
+    rs3: {"bk": "rs", "no": "৩/৩", "ch": "বিবিধ", "sec": "ইখলাস প্রসঙ্গে - প্রকাশ্য ও গোপনীয় আমল (কর্ম) কথা ও অবস্থায় আন্তরিকতা ও বিশুদ্ধ নিয়ত জরুরী", "sn": "১/১. অধ্যায়ঃ", "nar": "আয়েশা (রাঃ)", "tr": "নবী (ﷺ) বলেছেন, ’’মক্কা বিজয়ের পর (মক্কা থেকে) হিজরত নেই; বরং বাকী রয়েছে জিহাদ ও নিয়ত। সুতরাং যদি তোমাদেরকে জিহাদের জন্য ডাক দেওয়া হয়, তাহলে তোমরা (জিহাদে) বেরিয়ে পড়।’’[১]\n’মক্কা বিজয়ের পর আর হিজরত নেই’ এর অর্থ এই যে, মক্কা এখন ইসলামী রাষ্ট্রে পরিণত হল। ফলে এখান থেকে মুসলিমরা আর হিজরত করতে পারবে না।", "gr": "সহিহ হাদিস"}
   };
 
-  /* ---------- Demo 2 resume strip: label row (সব দেখুন, ✕) → small badge, "বই · হাদিস নং", chapter — first line → চালিয়ে যান ---------- */
+  /* ---------- Helpers ---------- */
+  const { bn, icons, $, $$ } = Kit;
+  const ic = (k, w) => (w ? icons[k].replace(/width="24" height="24"/, `width="${w}" height="${w}"`) : icons[k]);
+  const badge = (b, cls = '') => `<span class="book-badge ${cls}" style="background:${b.color}" aria-hidden="true">${b.abbr}</span>`; // colour_code + abvr_code from books table
+  const firstLine = (k) => H[k].tr.split('\n')[0];
+  const paras = (k) => H[k].tr.split(/\n+/).length;
+  const label = (h, b) => `চালিয়ে যান: ${b.name}, হাদিস ${h.no}`;
+
+  /* ---------- Demo 2 slim strip docked at the bottom edge with a thin reading-progress line ---------- */
+  // Strip: progress line → small badge | "বই, হাদিস নং" + সব দেখুন / chapter · first line | চালিয়ে যান | ✕
+  // Progress = how far into the hadith the reader stopped (paragraph / paragraphs)
   const D = {
-    home: () => `${noteHTML()}${dashHTML('<div class="slot"><div></div></div>')}${shelfHTML()}`,
-    card: (t, h, b) => `<div class="strip" data-act="resume" role="button" aria-label="চালিয়ে যান: ${b.name}, হাদিস ${h.no}">
-      <div class="st-h"><span>যেখানে ছেড়েছিলেন</span><button data-act="all">সব দেখুন</button><button class="x" data-act="hide" aria-label="কার্ড লুকান">${ic('close', 16)}</button></div>
-      <div class="st-r">${badge(b)}<div class="st-t"><b>${b.name} · হাদিস ${h.no}</b><span>${h.ch} — ${firstLine(t.id)}</span></div>
-      <button class="st-go" data-act="resume">চালিয়ে যান</button></div></div>`,
+    card: (t, h, b) => {
+      const pct = Math.max(6, Math.round((t.p / paras(t.id)) * 100));
+      return `<div class="strip" data-act="resume" role="button" tabindex="0" aria-label="${label(h, b)}">
+      <div class="st-bar" role="progressbar" aria-label="হাদিসের ${bn(pct)}% পড়া হয়েছে" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+      ${badge(b)}<div class="st-t"><div class="st-l1"><b>${b.name}, হাদিস ${h.no}</b><button data-act="all">সব দেখুন</button></div>
+        <span><em>${h.ch} ·</em> ${firstLine(t.id)}</span></div>
+      <button class="btn st-go" data-act="resume">চালিয়ে যান</button>
+      <button class="icon-btn" data-act="hide" aria-label="কার্ড লুকান">${ic('close', 18)}</button></div>`;
+    },
   };
 
   /* ---------- Shared app logic: history, resume, hadith list, সর্বশেষ, dialogs ---------- */
-  const { bn, icons, $, $$ } = Kit;
-  const ic = (k, w) => (w ? icons[k].replace(/width="24" height="24"/, `width="${w}" height="${w}"`) : icons[k]);
-  const MENU = '<svg width="24" height="14" viewBox="0 0 24 14"><path d="M1 1h22M1 7h22M1 13h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
   const OUT = (n) => `${n} খুলবে — এই ফিচারের অংশ নয়`;
 
   // Hadith list shown around each saved hadith (same chapter, in book order)
@@ -115,112 +129,61 @@
   const ONLINE_OK = { m: true, b: true, rs: false };
   // Each toolbar chip that shows home starts from its own saved history (p = paragraph where reading stopped)
   const SC = {
-    home: { hist: [['m420', 3], ['b6116', 0], ['rs3', 0]], online: true },
-    nobook: { hist: [['rs3', 0], ['m420', 3], ['b6116', 0]], online: true },
-    offline: { hist: [['b6116', 0], ['m420', 3], ['rs3', 0]], online: false },
-    empty: { hist: [], online: true },
+    home: [['m420', 3], ['b6116', 0], ['rs3', 0]],
+    nobook: [['rs3', 0], ['m420', 3], ['b6116', 0]],
   };
   const HOMES = Object.keys(SC);
   let S;
   function reset(id) {
-    S = { home: id, back: id, hist: SC[id].hist.map(([k, p]) => ({ id: k, p })), online: SC[id].online,
-      dl: { m: true, b: false, rs: false }, hidden: false, hiddenId: null };
+    S = { home: id, back: id, hist: SC[id].map(([k, p]) => ({ id: k, p })), dl: { m: true, b: false, rs: false }, hidden: false };
   }
   reset('home');
 
   const bookOf = (k) => BOOKS[H[k].bk];
-  const badge = (b, cls = '') => `<span class="book-badge ${cls}" style="background:${b.color}" aria-hidden="true">${b.abbr}</span>`; // colour_code + abvr_code from books table
-  const firstLine = (k) => H[k].tr.split('\n')[0];
+  // ✕ hides the card for this session only; "অ্যাপ আবার খুলুন" (next launch) brings it back
   const top = () => (S.hidden ? null : S.hist[0] || null);
 
-  /* ---------- Loading: the app's LoadingIndicator (InkDropLoading), drawn on a canvas ---------- */
-  const LOADER = '<div class="loading" role="status" aria-label="লোড হচ্ছে"><canvas class="inkdrop"></canvas></div>';
-  (function inkDrop() {
-    const Z = 33, P = 6, W = Z + P * 2, HT = Z * 2 + P * 2, PI = Math.PI;
-    const iv = (t, a, b) => Math.min(1, Math.max(0, (t - a) / (b - a)));
-    const lerp = (a, b, k) => a + (b - a) * k;
-    function frame(now) {
-      $$('canvas.inkdrop').forEach((c) => {
-        if (!c.offsetParent) return;
-        const dpr = window.devicePixelRatio || 1;
-        if (c.width !== W * dpr) { c.width = W * dpr; c.height = HT * dpr; c.style.width = W + 'px'; c.style.height = HT + 'px'; }
-        const g = c.getContext('2d'), cs = getComputedStyle(c);
-        const col = cs.getPropertyValue('--primary-dark').trim(), ring = cs.getPropertyValue('--divider').trim();
-        g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, HT); g.lineWidth = Z / 5; g.lineCap = 'round';
-        const cx = W / 2, cy = P + Z * 1.5, r = Z / 2;
-        const arc = (s, w, cl, dy = 0) => { g.strokeStyle = cl; g.beginPath(); g.arc(cx, cy + dy, r, s, s + w, w < 0); g.stroke(); };
-        const t = (now % 1400) / 1400;
-        arc(PI / 2, 2 * PI, ring);
-        if (t <= 0.9) {
-          const dy = lerp(-Z, 0, Math.pow(iv(t, 0.05, 0.4), 3)), k = iv(t, 0.38, 0.9);
-          arc(-3 * PI / 2, lerp(PI / (Z * Z), PI / 1.13, k), col, dy);
-          arc(-3 * PI / 2, lerp(PI / (Z * Z), -PI / 1.13, k), col, dy);
-        } else {
-          const k1 = iv(t, 0.9, 0.96), k2 = iv(t, 0.9, 1);
-          arc(-PI / 4, lerp(-PI / 7.4, -PI / 4, k1), col); arc(-3 * PI / 4, lerp(PI / 7.4, PI / 4, k1), col);
-          arc(-PI / 3.5, lerp(PI / 1.273, PI / 28, k2), col); arc(PI / 0.778, lerp(-PI / 1.273, -PI / 27, k2), col);
-        }
-      });
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  })();
-
-  /* ---------- Markup: home pieces ---------- */
-  const QA = [['সর্বশেষ', 'clock'], ['জাম্প', 'chevron'], ['ওয়াক্ত', 'sun'], ['সাদাকা', 'plus'], ['ফিড', 'grid'], ['রিলস', 'play'], ['কুইজ', 'info'], ['ফ্ল্যাশকার্ড', 'copy'],
-    ['পরিকল্পনা', 'edit'], ['তাহকিক', 'check'], ['দৈনিক', 'book'], ['কিবলা', 'share'], ['মসজিদ', 'home'], ['ক্যালেন্ডার', 'grid'], ['অ্যাপস', 'menu']];
-  const qaBtn = ([n, i]) => `<button data-act="${n === 'সর্বশেষ' ? 'all' : 'qa'}" data-name="${n}"><span class="qi">${i === 'menu' ? ic('grid', 18) : ic(i, 18)}</span>${n}</button>`;
-  function dashHTML(inner = '') {
-    return `<div class="dash">${inner}<div class="qa">${QA.slice(0, 8).map(qaBtn).join('')}</div>
-      <div class="qa more">${QA.slice(8).map(qaBtn).join('')}</div>
-      <button class="xp" data-act="xp" aria-label="আরও দেখুন">${ic('down', 20)}</button></div>`;
-  }
-  function shelfHTML() {
-    const tab = S.tab || 'on';
-    const dlKeys = ['m', 'rs'].filter((k) => S.dl[k]);
-    const keys = tab === 'dl' ? dlKeys : ['b', 'n', 'ad'];
-    return `<div class="tabs"><button data-act="tab" data-tab="on" class="${tab === 'on' ? 'on' : ''}">অনলাইনে আছে</button><button data-act="tab" data-tab="dl" class="${tab === 'dl' ? 'on' : ''}">ডাউনলোড করা</button></div>
-      ${keys.map((k) => { const b = BOOKS[k]; return `<button class="bk" data-act="qa" data-name="${b.name}">${badge(b)}<div><b>${b.name}</b><small>${b.by}</small></div><span class="n">${bn(b.count)}<br>হাদিস</span></button>`; }).join('')}
-      <button class="bk" data-act="qa" data-name="ডাউনলোড ম্যানেজার"><span class="qi">${ic('down', 18)}</span><div><b>ডাউনলোড ম্যানেজার</b><small>নতুন বই ডাউনলোড করুন অথবা পুরাতন বইগুলো ডিলিট করুন।</small></div></button>`;
-  }
-  const noteHTML = () => (S.online ? '' : `<div class="note">${ic('info')}ইন্টারনেট পাওয়া যায়নি — এই ডিভাইসে সংরক্ষিত বই দেখানো হচ্ছে।</div>`);
+  /* ---------- Markup: home ---------- */
+  const QA = [['সর্বশেষ', 'clock'], ['জাম্প', 'chevron'], ['ওয়াক্ত', 'sun'], ['সাদাকা', 'plus'],
+    ['ফিড', 'grid'], ['কুইজ', 'check'], ['ফ্ল্যাশকার্ড', 'copy'], ['দৈনিক', 'book']];
+  const qaBtn = ([n, i]) => `<button data-act="${n === 'সর্বশেষ' ? 'all' : 'qa'}" data-name="${n}"><span class="qi">${ic(i, 18)}</span>${n}</button>`;
+  const bookRow = ([n, c, a, cnt, by]) => `<button class="bk" data-act="qa" data-name="${n}">${badge({ color: c, abbr: a })}<div><b>${n}</b><small>${by}</small></div><span class="n">${bn(cnt)}<br>হাদিস</span></button>`;
   function homeSection(id) {
     return `<section class="screen home" data-screen="${id}">
-      <header class="appbar home-bar"><button class="icon-btn" aria-label="মেনু" data-snack="${OUT('ড্রয়ার')}">${MENU}</button><h1>আল হাদিস</h1><button class="icon-btn" aria-label="সার্চ" data-snack="${OUT('সার্চ')}">${ic('search')}</button></header>
-      <div class="scroll"><div class="band"></div><div class="hb"></div></div></section>`;
+      <header class="appbar home-bar"><h1>আল হাদিস</h1></header>
+      <div class="scroll"><div class="band"></div>
+        <div class="dash"><div class="qa">${QA.map(qaBtn).join('')}</div></div>
+        <h2 class="section-title">হাদিসের বই</h2>
+        <div class="books">${SHELF.map(bookRow).join('')}</div></div>
+      <div class="dock"></div></section>`;
   }
 
-  /* ---------- Markup: hadith card (HadithListItem order: head → Arabic → narrator → translation → footnote) ---------- */
+  /* ---------- Markup: hadith card (HadithListItem: head → narrator → Bangla translation) ---------- */
   function cardHTML(k) {
     const h = H[k], b = bookOf(k);
     return `<article class="card hcard" data-id="${k}">
       <div class="hadith-head">${badge(b)}<div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${h.no}</span></div>
-        <span class="grade">${h.gr}</span><button class="icon-btn" aria-label="অন্যান্য অপশন" data-snack="${OUT('অন্যান্য অপশন')}">${ic('more')}</button></div>
-      <p class="arabic">${h.ar}</p><p class="narrator">${h.nar} থেকে বর্ণিত:</p>
-      ${h.tr.split(/\n+/).map((p) => `<p class="translation">${p}</p>`).join('')}
-      ${h.fn ? `<div class="fnote">ফুটনোট: ${h.fn}</div>` : ''}</article>`;
+        <span class="grade">${h.gr}</span></div>
+      <p class="narrator">${h.nar} থেকে বর্ণিত:</p>
+      ${h.tr.split(/\n+/).map((p) => `<p class="translation">${p}</p>`).join('')}</article>`;
   }
 
-  /* ---------- Render: home, সর্বশেষ, hadith list ---------- */
-  function renderHome() {
-    const sec = D.tablet ? $('.lpane') : $(`.screen[data-screen="${S.home}"]`);
+  /* ---------- Render: floating card, সর্বশেষ, hadith list ---------- */
+  const homeSec = () => $(`.screen[data-screen="${S.home}"]`);
+  function renderDock(anim) {
+    const sec = homeSec();
     if (!sec) return;
-    $('.hb', sec).innerHTML = D.home ? D.home() : `${noteHTML()}<div class="slot"><div></div></div>${dashHTML()}${D.tablet ? '' : shelfHTML()}`;
-    if (D.tablet) { const s = $(`.screen[data-screen="${S.home}"] .hb`); if (s) s.innerHTML = shelfHTML(); }
-    renderSlot(sec);
-  }
-  function renderSlot(sec = D.tablet ? $('.lpane') : $(`.screen[data-screen="${S.home}"]`)) {
-    const t = top();
-    $$('.slot', sec).forEach((sl) => { sl.classList.remove('bye'); sl.firstElementChild.innerHTML = t ? D.card(t, H[t.id], bookOf(t.id)) : ''; });
-    D.afterSlot && D.afterSlot(sec, t);
+    const dock = $('.dock', sec), t = top();
+    sec.classList.toggle('has-dock', !!t);
+    dock.classList.remove('gone', 'enter');
+    dock.innerHTML = t ? D.card(t, H[t.id], bookOf(t.id)) : '';
+    if (t && anim) { void dock.offsetWidth; dock.classList.add('enter'); }
+    D.afterDock && D.afterDock(sec, dock, t);
   }
   function renderLatest() {
-    $('#l-body').innerHTML = S.hist.length
-      ? S.hist.map((e) => { const b = bookOf(e.id); return `<button class="lr" data-act="open" data-id="${e.id}">${badge(b)}<div><b>${b.name}</b><span>হাদিসের নাম্বার: ${H[e.id].no}</span></div></button>`; }).join('')
-      : `<div class="empty" style="padding-top:110px"><svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h3>কোন হাদিস পড়া হয়নি</h3></div>`;
-    $('[data-screen="latest"] .lt-del').hidden = !S.hist.length;
+    $('#l-body').innerHTML = S.hist.map((e) => { const b = bookOf(e.id); return `<button class="lr" data-act="open" data-id="${e.id}">${badge(b)}<div><b>${b.name}</b><span>হাদিসের নাম্বার: ${H[e.id].no}</span></div></button>`; }).join('');
   }
-  let hlTimer, saveTimer, current = null;
+  let hlTimer, saveTimer;
   function renderReader(k, p) {
     const h = H[k], body = $('#r-body');
     $('#r-title').innerHTML = `${bookOf(k).name}<small>${h.ch}</small>`;
@@ -232,7 +195,7 @@
     body.scrollTop = target.offsetTop - 10;
     card.classList.add('hl');
     clearTimeout(hlTimer); hlTimer = setTimeout(() => card.classList.remove('hl'), 3000);
-    current = k; save(k, p);
+    save(k, p);
   }
   // Auto-save: whatever hadith + paragraph sits at the top of the list becomes the resume point
   function trackScroll() {
@@ -254,101 +217,99 @@
     const i = S.hist.findIndex((e) => e.id === k);
     if (i >= 0) S.hist.splice(i, 1);
     S.hist.unshift({ id: k, p });
-    if (S.hidden && S.hiddenId !== k) S.hidden = false; // something new was read → card comes back
-    D.onSave && D.onSave();
   }
 
   /* ---------- Actions ---------- */
-  let pending = null, dlTimer;
+  let pending = null;
   function openHadith(k, p, from) {
     const bk = H[k].bk;
     if (!S.dl[bk] && !ONLINE_OK[bk]) { pending = { k, p, from }; showDl(); return; }
-    if (!S.dl[bk] && !S.online) { Kit.snack('ইন্টারনেট সংযোগ নেই'); return; }
-    S.back = from; Kit.show('reader');
-    $('#r-title').innerHTML = `${bookOf(k).name}<small>${H[k].ch}</small>`;
-    $('#r-body').innerHTML = LOADER;
-    setTimeout(() => { if (Kit.current === 'reader') renderReader(k, p); }, 700);
+    S.back = from; Kit.show('reader'); renderReader(k, p);
   }
   function showDl() {
-    const b = bookOf(pending.k);
-    $('#dl-t').textContent = b.name;
-    $('#dl-p').hidden = true; $('#dl-go').hidden = false; $('#dl-p i').style.width = '0%';
+    $('#dl-t').textContent = bookOf(pending.k).name;
     Kit.open('dlg-dl');
   }
+  // Download is out of scope: mark the book downloaded and open the hadith right away
   function startDl() {
-    let pct = 0; $('#dl-go').hidden = true; $('#dl-p').hidden = false;
-    clearInterval(dlTimer);
-    dlTimer = setInterval(() => {
-      if (!$('#dlg-dl').classList.contains('on')) { clearInterval(dlTimer); return; }
-      pct = Math.min(100, pct + 12);
-      $('#dl-p i').style.width = pct + '%'; $('#dl-pct').textContent = `ডাউনলোড হচ্ছে: ${bn(pct)}%`;
-      if (pct === 100) {
-        clearInterval(dlTimer); S.dl[H[pending.k].bk] = true;
-        setTimeout(() => { Kit.close('dlg-dl'); openHadith(pending.k, pending.p, pending.from); }, 250);
-      }
-    }, 160);
+    S.dl[H[pending.k].bk] = true;
+    openHadith(pending.k, pending.p, pending.from);
   }
-  function hideCard(btn) {
-    const t = top(); if (!t) return;
-    const sl = btn.closest('.slot');
-    sl && sl.classList.add('bye');
-    setTimeout(() => {
-      S.hidden = true; S.hiddenId = t.id; renderSlot();
-      Kit.snack('কার্ডটি লুকানো হয়েছে', { label: 'ফিরিয়ে আনুন', onClick: () => { S.hidden = false; renderSlot(); } });
-    }, sl ? 280 : 0);
+  // ✕: the card animates out, then stays hidden until the next app launch (no undo snackbar)
+  function hideCard() {
+    const dock = $('.dock', homeSec());
+    if (!top() || !dock) return;
+    dock.classList.remove('enter');
+    dock.classList.add('gone');
+    setTimeout(() => { S.hidden = true; renderDock(false); }, 320);
+  }
+  // Next launch: back to home, scrolled to the top, card shown again (reading history is kept)
+  let launch = false;
+  function relaunch() {
+    S.hidden = false; S.back = S.home; launch = true;
+    Kit.show(S.home);
+  }
+  // Snackbar sits above the floating card while the card is on screen
+  function snack(text) {
+    const sec = homeSec(), vp = $('.viewport');
+    let lift = 0;
+    if (sec && sec.classList.contains('on') && sec.classList.contains('has-dock')) {
+      let el = D.box ? D.box(sec) : $('.dock', sec), y = 0;
+      while (el && el !== sec) { y += el.offsetTop; el = el.offsetParent; }
+      lift = Math.max(0, sec.clientHeight - y - 8);
+    }
+    vp.style.setProperty('--lift', `${lift}px`);
+    Kit.snack(text);
   }
   document.addEventListener('click', (e) => {
+    if (e.target.closest('#kit-relaunch')) { relaunch(); return; }
     const t = e.target.closest('[data-act]');
     if (!t) return;
     const a = t.dataset.act, entry = top();
     if (a === 'resume' && entry) openHadith(entry.id, entry.p, S.home);
     if (a === 'all') Kit.show('latest');
-    if (a === 'hide') hideCard(t);
+    if (a === 'hide') hideCard();
     if (a === 'open') { const e2 = S.hist.find((x) => x.id === t.dataset.id); openHadith(e2.id, e2.p, 'latest'); }
     if (a === 'home') Kit.show(S.home);
-    if (a === 'back') { clearTimeout(dlTimer); Kit.show(S.back); }
-    if (a === 'qa') Kit.snack(OUT(t.dataset.name));
-    if (a === 'xp') t.closest('.dash').classList.toggle('open');
-    if (a === 'tab') { S.tab = t.dataset.tab; renderHome(); }
+    if (a === 'back') Kit.show(S.back);
+    if (a === 'qa') snack(OUT(t.dataset.name));
     if (a === 'dl') startDl();
-    if (a === 'dl-x') { clearInterval(dlTimer); Kit.close('dlg-dl'); }
+    if (D.acts && D.acts[a]) D.acts[a](t, homeSec());
+  });
+  document.addEventListener('keydown', (e) => {
+    const t = e.target.closest && e.target.closest('[role="button"][data-act]');
+    if (t && (e.key === 'Enter' || e.key === ' ') && e.target === t) { e.preventDefault(); t.click(); }
   });
 
-  /* ---------- Build shared screens, then route chip / in-phone navigation ---------- */
-  const host = $(D.host || '.viewport');
-  host.insertAdjacentHTML('beforeend', HOMES.map(homeSection).join('') + `
+  /* ---------- Build screens, then route chip / in-phone navigation ---------- */
+  $('.viewport').insertAdjacentHTML('beforeend', HOMES.map(homeSection).join('') + `
     <section class="screen" data-screen="reader">
-      <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="back">${ic('back')}</button><h1 id="r-title"></h1><button class="icon-btn" aria-label="সার্চ" data-snack="${OUT('সার্চ')}">${ic('search')}</button></header>
+      <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="back">${ic('back')}</button><h1 id="r-title"></h1></header>
       <div class="scroll" id="r-body"></div></section>
-    <section class="screen" data-screen="loading">
-      <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="home">${ic('back')}</button><h1>সহীহ মুসলিম<small>ঈমান</small></h1></header>
-      <div class="scroll">${LOADER}</div></section>
     <section class="screen" data-screen="latest">
-      <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="home">${ic('back')}</button><h1>সর্বশেষ</h1><button class="icon-btn lt-del" aria-label="ডিলিট করুন" data-snack="${OUT('নির্বাচন মোড')}">${ic('trash')}</button></header>
-      <div class="rbody"><div class="scroll" id="l-body"></div></div></section>`);
-  $('.viewport').insertAdjacentHTML('beforeend', `<div class="dialog" id="dlg-dl" role="dialog" aria-label="বই ডাউনলোড করুন">
+      <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="home">${ic('back')}</button><h1>সর্বশেষ</h1></header>
+      <div class="rbody"><div class="scroll" id="l-body"></div></div></section>
+    <div class="dialog" id="dlg-dl" role="dialog" aria-label="বই ডাউনলোড করুন">
       <h2 id="dl-t"></h2><p>এই হাদিসের বইটি ডাউনলোড করা নেই। বইটি আগে ডাউনলোড করুন।</p>
-      <div class="dlg-p" id="dl-p" hidden><div class="progress"><i></i></div><p class="muted" id="dl-pct"></p></div>
-      <div class="actions"><button class="btn text" data-act="dl-x">বাতিল করুন</button><button class="btn" id="dl-go" data-act="dl">বই ডাউনলোড করুন</button></div></div>`);
+      <div class="actions"><button class="btn text" data-close>বাতিল করুন</button><button class="btn" data-act="dl">বই ডাউনলোড করুন</button></div></div>`);
   trackScroll();
 
   let viaChip = true;
-  document.addEventListener('click', (e) => { if (e.target.closest('.kit-chip')) viaChip = true; }, true);
+  document.addEventListener('click', (e) => { if (e.target.closest('.kit-chip[data-go]')) viaChip = true; }, true);
   Kit.onScreen((id) => {
-    const chip = viaChip; viaChip = false;
+    const chip = viaChip, fresh = chip || launch; viaChip = false; launch = false;
     if (HOMES.includes(id)) {
       if (chip) reset(id);
-      S.home = id; renderHome();
+      S.home = id; renderDock(fresh);
       if (chip && id === 'nobook') { pending = { k: 'rs3', p: 0, from: id }; showDl(); }
     }
     if (id === 'latest') renderLatest();
     if (id === 'reader' && chip) { reset('home'); renderReader('m420', 3); }
-    D.onScreen && D.onScreen(id, chip);
   });
-  const SCREENS = [{ id: 'home', label: 'হোম' }, { id: 'reader', label: 'হাদিসে ফেরা' }, { id: 'latest', label: 'সর্বশেষ' },
-    { id: 'loading', label: 'লোডিং' }, { id: 'nobook', label: 'বই নেই' }, { id: 'offline', label: 'অফলাইন' }, { id: 'empty', label: 'প্রথমবার' }];
 
-  Kit.init({ demo: 2, name: 'মিনিমাল স্ট্রিপ', screens: SCREENS });
+  Kit.init({ demo: 2, name: 'স্লিম স্ট্রিপ', extra: '<button class="kit-chip" id="kit-relaunch" type="button">অ্যাপ আবার খুলুন</button>', screens: [
+    { id: 'home', label: 'হোম' }, { id: 'reader', label: 'হাদিসে ফেরা' }, { id: 'latest', label: 'সর্বশেষ' }, { id: 'nobook', label: 'বই নেই' },
+  ]});
 })();
 </script>
 </body>

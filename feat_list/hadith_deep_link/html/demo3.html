@@ -6,27 +6,8 @@
 <title>হাদিস ডিপ লিংক — ডেমো ৩ · শেয়ার সারি</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
-/* ===== Toolbar toggles (demo only): is the app installed, is there internet ===== */
-.tg{flex:none;display:inline-flex;align-items:center;gap:5px;font-size:12.5px;padding:4px 10px;border-radius:20px;border:1px solid var(--page-line);color:var(--page-text)}
-.tg::before{content:"";width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor}
-.tg[aria-pressed="true"]::before{background:currentColor}
-
-/* ===== Home (HadithBookList + HomeSmallDashboard + bottom nav) ===== */
-.qa{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 4px;padding:14px 6px}
-.qa button{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12.5px;color:var(--title)}
-.qa i{width:44px;height:44px;border-radius:14px;background:var(--tint);color:var(--primary);display:grid;place-items:center}
-.qa svg{width:22px;height:22px}
-.tabs{display:flex;gap:8px;padding:6px 12px 10px}
-.brow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 4px;border-bottom:1px solid var(--divider)}
-.brow:last-child{border-bottom:0}
-.brow div{flex:1;min-width:0}
-.brow b{display:block;color:var(--title);font-size:15.5px}
-.brow small{color:var(--hint);font-size:12.5px}
-.book-badge.alt{background:var(--primary-dark)}
-.dm{display:flex;align-items:center;gap:12px;width:calc(100% - 24px);text-align:left}
-.dm div{flex:1}.dm b{display:block;color:var(--title)}
-
 /* ===== Hadith card (HadithListItem) + highlight when opened from a link ===== */
+.book-badge.alt{background:var(--primary-dark)}
 .sec{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:12px 12px 10px;padding:12px var(--pad);font-weight:700;color:var(--title)}
 .sec b{color:var(--primary)}
 .hcard .hadith-head{margin-right:-10px}
@@ -42,22 +23,20 @@
 @keyframes up{from{transform:translateY(100%)}}
 @keyframes fade{from{opacity:0}}
 
-/* ===== More-options sheet (MoreOptionBottomSheet + MenuGrid, 3 columns) ===== */
+/* ===== More-options sheet (MoreOptionBottomSheet head) ===== */
 .mhead{display:flex;align-items:center;padding:18px 12px 8px 22px}
 .mhead div{flex:1;min-width:0}
 .mhead h2{margin:0;font-size:17px;font-weight:800;color:var(--title)}
 .mhead p{margin:0;font-size:12px;color:var(--hint)}
 .xbtn{width:36px;height:36px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;color:var(--title)}
 .xbtn svg{width:18px;height:18px}
-.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:8px 16px 22px}
-.mtile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px 12px;border-radius:18px;background:var(--surface-2);font-size:13.5px;font-weight:700;color:var(--title);line-height:1.3}
-.mi .a{fill:var(--primary)}.mi .b{fill:var(--primary-dark)}.mi .w{fill:var(--on-appbar)}
+.mi .a{fill:var(--primary)}.mi .b{fill:var(--primary-dark)}
 .mi .sw{stroke:var(--on-appbar);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.mi .sb{stroke:var(--primary-dark);fill:none;stroke-width:3}.mi .so{stroke:var(--primary-dark);fill:none;stroke-width:2.6;stroke-linecap:round}
+.mi .sb{stroke:var(--primary-dark);fill:none;stroke-width:3}
 
-/* ===== Menu: "শেয়ার" row (4 round buttons) above the other actions ===== */
+/* ===== Menu: "শেয়ার" row (3 round buttons) ===== */
 .mlab{margin:10px 22px 6px;font-size:13px;font-weight:700;color:var(--hint)}
-.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 12px 14px;border-bottom:1px solid var(--divider)}
+.srow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 12px 24px}
 .sbtn{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--title);line-height:1.3}
 .sbtn i{width:58px;height:58px;border-radius:50%;background:var(--tint);display:grid;place-items:center}
 
@@ -65,10 +44,6 @@
 .rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
 .rbody>.scroll{background:var(--scaffold);border-radius:20px 20px 0 0;padding-top:14px}
 .rbody .sec{margin-top:0}
-.nbar{display:flex;gap:10px;padding:4px 14px 8px}
-.nbar button{flex:1;height:44px;border-radius:10px;border:1px solid var(--divider);background:var(--card);color:var(--title);font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px}
-.nbar button:disabled{color:var(--disabled);opacity:.6;cursor:default}
-.nbar svg{width:18px;height:18px}
 .pin{flex:none;padding:12px 16px 20px;background:var(--scaffold)}
 
 /* ===== Phone's share list (system sheet) ===== */
@@ -87,7 +62,7 @@
 .newl{display:block;margin-top:2px;padding:2px 6px;border-radius:6px;background:var(--tint)}
 
 /* ===== Messaging app (receiving side, not part of Al Hadith) ===== */
-.ctop{flex:none;display:flex;align-items:center;gap:10px;min-height:56px;padding:0 8px;background:var(--card);border-bottom:1px solid var(--divider);color:var(--title)}
+.ctop{flex:none;display:flex;align-items:center;gap:10px;min-height:56px;padding:0 16px;background:var(--card);border-bottom:1px solid var(--divider);color:var(--title)}
 .av{width:36px;height:36px;border-radius:50%;background:var(--tint);color:var(--primary);display:grid;place-items:center;font-weight:700}
 .ctop b{flex:1;font-size:16px}
 .msgs{display:flex;flex-direction:column;gap:8px;padding:12px}
@@ -100,8 +75,7 @@
 .composer{flex:none;display:flex;gap:8px;align-items:center;padding:8px 10px 14px;background:var(--scaffold)}
 .composer span{flex:1;height:42px;border-radius:21px;background:var(--card);border:1px solid var(--divider);padding:0 16px;display:flex;align-items:center;color:var(--hint);font-size:14px}
 
-/* ===== Full-page states: loading, offline, not found ===== */
-.loading{min-height:calc(100% - 24px);display:grid;place-items:center}
+/* ===== Not found (old or wrong link) ===== */
 .state{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:72px 28px 24px}
 .state .ic{width:76px;height:76px;border-radius:50%;background:var(--tint);color:var(--primary);display:grid;place-items:center}
 .state .ic svg{width:34px;height:34px}
@@ -116,13 +90,6 @@
 .site .ex{color:var(--on-appbar);border-color:currentColor;opacity:.8}
 .crumb{font-size:12.5px;color:var(--hint);padding:12px 16px 8px}
 .wfoot{font-size:12.5px;color:var(--hint);text-align:center;padding:8px 24px}
-
-/* ===== Download manager ===== */
-.dl-row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--divider)}
-.dl-row:last-child{border-bottom:0}
-.dl-row div{flex:1;min-width:0}
-.dl-row b{display:block;color:var(--title)}
-.btn.sm{height:34px;padding:0 14px;font-size:13.5px}
 </style>
 </head>
 <body>
@@ -130,25 +97,18 @@
   <div class="phone">
     <div class="viewport">
 
-      <!-- ===== Screen: home ===== -->
-      <section class="screen" data-screen="home">
-        <header class="appbar"><h1 style="margin-left:12px">আল হাদিস</h1><button class="icon-btn" aria-label="সার্চ" data-i="search" data-snack="সার্চ খুলবে — এই ফিচারের অংশ নয়"></button></header>
-        <div class="scroll" id="home-body"></div>
-        <nav class="bottom-nav" id="nav"></nav>
-      </section>
-
       <!-- ===== Screen: hadith list (sender side) ===== -->
       <section class="screen" data-screen="list">
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="home" data-i="back"></button><h1>সহীহ বুখারী</h1><button class="icon-btn" aria-label="সার্চ" data-i="search" data-snack="সার্চ খুলবে — এই ফিচারের অংশ নয়"></button></header>
+        <header class="appbar"><h1 style="margin-left:12px">সহীহ বুখারী</h1></header>
         <div class="scroll" id="list-body"></div>
       </section>
 
-      <!-- ===== Overlay: অন্যান্য অপশন (menu with the two new link tiles) ===== -->
+      <!-- ===== Overlay: অন্যান্য অপশন (only the share row) ===== -->
       <section class="screen" data-screen="menu">
         <div class="bg" aria-hidden="true"></div><div class="ov" data-back></div>
         <div class="osheet" role="dialog" aria-label="অন্যান্য অপশন">
           <div class="mhead"><div><h2>অন্যান্য অপশন</h2><p id="m-ref"></p></div><button class="xbtn" data-back aria-label="বন্ধ করুন" data-i="close"></button></div>
-          <p class="mlab">শেয়ার</p><div class="srow" id="m-share"></div><p class="mlab">অন্যান্য</p><div class="mgrid" id="m-grid"></div>
+          <p class="mlab">শেয়ার</p><div class="srow" id="m-share"></div>
         </div>
       </section>
 
@@ -166,53 +126,31 @@
 
       <!-- ===== Screen: messaging app — friend taps the link ===== -->
       <section class="screen" data-screen="chat" data-status="light">
-        <header class="ctop"><button class="icon-btn" aria-label="পেছনে" data-go="home" data-i="back"></button><span class="av">র</span><b>রাশেদ</b></header>
+        <header class="ctop"><span class="av">র</span><b>রাশেদ</b></header>
         <div class="scroll" id="chat-body"></div>
         <div class="composer"><span>মেসেজ লিখুন</span></div>
       </section>
 
-      <!-- ===== Screen: opened from link — loading ===== -->
-      <section class="screen" data-screen="loading">
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="home" data-i="back"></button><h1 class="t-book"></h1></header>
-        <div class="rbody"><div class="scroll"><div class="loading" role="status" aria-label="লোড হচ্ছে"><canvas class="inkdrop"></canvas></div></div></div>
-      </section>
-
       <!-- ===== Screen: opened from link — the hadith, highlighted ===== -->
       <section class="screen" data-screen="hadith">
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="home" data-i="back"></button><h1 id="h-title"></h1></header>
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-snack="অ্যাপের হোমে ফিরবে, অ্যাপ বন্ধ হবে না" data-i="back"></button><h1 id="h-title"></h1></header>
         <div class="rbody"><div class="scroll" id="h-body"></div></div>
-      </section>
-
-      <!-- ===== Screen: opened from link — offline, book not downloaded ===== -->
-      <section class="screen" data-screen="offline">
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="home" data-i="back"></button><h1 class="t-book"></h1></header>
-        <div class="rbody"><div class="scroll"><div class="state">
-          <span class="ic" data-i="cloudOff"></span>
-          <h3>ইন্টারনেট সংযোগ নেই</h3>
-          <p>আপনি অফলাইনে আছেন, তাই হাদিসটি আনা যাচ্ছে না। ইন্টারনেট কানেক্ট করুন, অথবা অফলাইনে পড়তে বইটি ডাউনলোড করে নিন।</p>
-          </div></div><div class="pin"><button class="btn block" data-go="downloads">ডাউনলোডে যান</button></div></div>
       </section>
 
       <!-- ===== Screen: opened from link — old or wrong link ===== -->
       <section class="screen" data-screen="notfound">
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="home" data-i="back"></button><h1>আল হাদিস</h1></header>
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-snack="অ্যাপের হোমে ফিরবে, অ্যাপ বন্ধ হবে না" data-i="back"></button><h1>আল হাদিস</h1></header>
         <div class="rbody"><div class="scroll"><div class="state">
           <span class="ic" data-i="search"></span>
           <h3>হাদিস খুঁজে পাওয়া যায়নি</h3>
           <p>লিংকটি পুরনো বা ভুল হতে পারে।</p>
-          </div></div><div class="pin"><button class="btn block" data-go="home">হোমে ফিরুন</button></div></div>
+          </div></div><div class="pin"><button class="btn block" data-snack="অ্যাপের হোম খুলবে">হোমে ফিরুন</button></div></div>
       </section>
 
       <!-- ===== Screen: browser — app not installed ===== -->
       <section class="screen" data-screen="web" data-status="light">
         <header class="btop"><button class="icon-btn" aria-label="পেছনে" data-go="chat" data-i="back"></button><div class="url"><span data-i="lock"></span><span class="lk" style="text-decoration:none;color:var(--title)">link.example/hadith/…</span><span class="ex">উদাহরণ</span></div></header>
         <div class="scroll" id="web-body"></div>
-      </section>
-
-      <!-- ===== Screen: ডাউনলোড ম্যানেজার ===== -->
-      <section class="screen" data-screen="downloads">
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="home" data-i="back"></button><h1>ডাউনলোড ম্যানেজার</h1></header>
-        <div class="scroll"><div class="card" style="margin-top:12px" id="dl-body"></div></div>
       </section>
 
     </div>
@@ -223,30 +161,28 @@
 (function () {
   const { bn, icons, $, $$ } = Kit;
   const ext = (d) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
-  icons.cloudOff = ext('<path d="M3 3l18 18M8 7.3A6 6 0 0 1 17.7 10H18a4 4 0 0 1 2.3 7.3M16 19H7a4.5 4.5 0 0 1-1.6-8.7"/>');
   icons.lock = ext('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>');
 
   /* ---------- Demo state ---------- */
-  const S = { app: true, net: true, dl: { b: true, m: false, d: false }, link: 'b6116', from: 'list', cur: 'b6116', tab: 'dl', sent: [] };
+  const S = { link: 'b6116', from: 'list', cur: 'b6116', sent: [] };
   const LINK = 'link.example/hadith/…';   // placeholder: real address not decided yet
 
   /* ---------- Data: safe-list hadiths, text as in the app's book database ---------- */
   const BOOK = {
-    b: { name: 'সহীহ বুখারী', abbr: 'B', by: 'ইমাম বুখারী (রহঃ)' },
-    m: { name: 'সহীহ মুসলিম', abbr: 'M', by: 'ইমাম মুসলিম (রহঃ)', alt: 1 },
-    d: { name: 'সুনানে আবু দাউদ', abbr: 'D', by: 'ইমাম আবু দাউদ (রহঃ)', alt: 1 },
+    b: { name: 'সহীহ বুখারী', abbr: 'B' },
+    m: { name: 'সহীহ মুসলিম', abbr: 'M', alt: 1 },
   };
   const GRADE = 'সহিহ হাদিস';
   const H = {
     b6018: { bk: 'b', no: '6018', sec: 'আচার-ব্যবহার', nar: 'আবূ হুরায়রা (রাঃ)', tr: 'রসূলুল্লাহ (ﷺ) বলেছেন: যে ব্যক্তি আল্লাহ এবং কেয়ামতের দিনে বিশ্বাস রাখে, সে যেন তার প্রতিবেশীকে কষ্ট না দেয়। যে আল্লাহ এবং কেয়ামতের দিনে বিশ্বাস রাখে, সে যেন তার মেহমানকে সম্মান করে। যে আল্লাহ এবং কেয়ামতের দিনে বিশ্বাস রাখে, সে যেন ভাল কথা বলে অথবা চুপ থাকে।' },
-    b6116: { bk: 'b', no: '6116', sec: 'আচার-ব্যবহার', nar: 'আবূ হুরায়রা (রাঃ)', ar: 'أَنَّ رَجُلاً قَالَ لِلنَّبِيِّ ﷺ أَوْصِنِي. قَالَ: «لاَ تَغْضَبْ». فَرَدَّدَ مِرَارًا، قَالَ: «لاَ تَغْضَبْ».', tr: 'এক ব্যক্তি নবী (ﷺ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বললেন, নবী (ﷺ) প্রত্যেক বারেই বললেন: রাগ করো না।' },
+    b6116: { bk: 'b', no: '6116', sec: 'আচার-ব্যবহার', nar: 'আবূ হুরায়রা (রাঃ)', tr: 'এক ব্যক্তি নবী (ﷺ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বললেন, নবী (ﷺ) প্রত্যেক বারেই বললেন: রাগ করো না।' },
     m223: { bk: 'm', no: '223', sec: 'তাহারাত (পবিত্রতা)', nar: 'আবূ মালিক আল আশ’আরী (রাঃ)', tr: 'রাসূলুল্লাহ (ﷺ) বলেছেন: পবিত্রতা হল ঈমানের অর্ধেক অংশ। ‘আলহামদুলিল্লাহ’ মীজানের পরিমাপকে পরিপূর্ণ করে দিবে এবং “সুবহানাল্লাহ ওয়াল হামদুলিল্লাহ” আসমান ও জমীনের মধ্যবর্তী স্থানকে পরিপূর্ণ করে দিবে। …' },
   };
   const LIST = ['b6018', 'b6116'];
   const ref = (id) => `${BOOK[H[id].bk].name}, হাদিস নং ${bn(H[id].no)}`;
   const linkHTML = (cls = '') => `<span class="lk ${cls}">${LINK}</span><span class="ex">উদাহরণ</span>`;
 
-  /* ---------- Hadith card: head → Arabic → narrator → translation ---------- */
+  /* ---------- Hadith card: head → narrator → translation ---------- */
   function card(id, cls = '') {
     const h = H[id], b = BOOK[h.bk];
     return `<article class="card hcard ${cls}">
@@ -254,89 +190,31 @@
         <div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${bn(h.no)}</span></div>
         <span class="grade">${GRADE}</span>
         <button class="icon-btn" data-more="${id}" aria-label="${ref(id)} এর আরও অপশন খুলুন">${icons.more}</button></div>
-      ${h.ar ? `<p class="arabic">${h.ar}</p>` : ''}
       <p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${h.tr}</p></article>`;
   }
 
   /* ---------- Share text: same footer as convertHadithToShareableString + link line ---------- */
   const shareText = (id) => `${H[id].nar} থেকে বর্ণিত:\n\n${H[id].tr}\n\n${ref(id)}\nহাদিসের মান: ${GRADE}\nসোর্স: আল হাদিস অ্যাপ, irdfoundation․com`;
 
-  /* ---------- Loading: the app's LoadingIndicator (InkDropLoading, 33px) ---------- */
-  (function inkDrop() {
-    const SZ = 33, PAD = 6, W = SZ + PAD * 2, HT = SZ * 2 + PAD * 2, PI = Math.PI;
-    const iv = (t, a, b) => Math.min(1, Math.max(0, (t - a) / (b - a)));
-    const lerp = (a, b, k) => a + (b - a) * k;
-    function frame(now) {
-      $$('canvas.inkdrop').forEach((c) => {
-        if (!c.offsetParent) return;
-        const dpr = window.devicePixelRatio || 1;
-        if (c.width !== W * dpr) { c.width = W * dpr; c.height = HT * dpr; c.style.width = W + 'px'; c.style.height = HT + 'px'; }
-        const g = c.getContext('2d'), cs = getComputedStyle(c);
-        const color = cs.getPropertyValue('--primary-dark').trim(), ring = cs.getPropertyValue('--divider').trim();
-        g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, HT); g.lineWidth = SZ / 5; g.lineCap = 'round';
-        const cx = W / 2, cy = PAD + SZ * 1.5, r = SZ / 2;
-        const arc = (st, sw, col, dy = 0) => { g.strokeStyle = col; g.beginPath(); g.arc(cx, cy + dy, r, st, st + sw, sw < 0); g.stroke(); };
-        const t = (now % 1400) / 1400;
-        arc(PI / 2, 2 * PI, ring);
-        if (t <= 0.9) {
-          const dy = lerp(-SZ, 0, Math.pow(iv(t, 0.05, 0.4), 3)), k = iv(t, 0.38, 0.9);
-          arc(-3 * PI / 2, lerp(PI / (SZ * SZ), PI / 1.13, k), color, dy);
-          arc(-3 * PI / 2, lerp(PI / (SZ * SZ), -PI / 1.13, k), color, dy);
-        } else {
-          const k1 = iv(t, 0.9, 0.96), k2 = iv(t, 0.9, 1);
-          arc(-PI / 4, lerp(-PI / 7.4, -PI / 4, k1), color); arc(-3 * PI / 4, lerp(PI / 7.4, PI / 4, k1), color);
-          arc(-PI / 3.5, lerp(PI / 1.273, PI / 28, k2), color); arc(PI / 0.778, lerp(-PI / 1.273, -PI / 27, k2), color);
-        }
-      });
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  })();
-
-  /* ---------- Home ---------- */
-  const QA = [['clock', 'সর্বশেষ'], ['chevron', 'জাম্প'], ['sun', 'ওয়াক্ত'], ['plus', 'সাদাকা'], ['grid', 'ফিড'], ['play', 'রিলস'], ['info', 'কুইজ'], ['book', 'ফ্ল্যাশকার্ড']];
-  function renderHome() {
-    const ids = Object.keys(BOOK).filter((k) => (S.tab === 'dl') === !!S.dl[k]);
-    $('#home-body').innerHTML = `
-      <div class="card" style="margin-top:12px;padding:0"><div class="qa">${QA.map(([i, t]) => `<button data-snack="${t} খুলবে — এই ফিচারের অংশ নয়"><i>${icons[i]}</i>${t}</button>`).join('')}</div></div>
-      <div class="tabs"><button class="chip" data-tab="dl" aria-pressed="${S.tab === 'dl'}">ডাউনলোড করা</button><button class="chip" data-tab="on" aria-pressed="${S.tab === 'on'}">অনলাইনে আছে</button></div>
-      <div class="card" style="padding:2px 12px">${ids.map((k) => `<button class="brow" data-book="${k}"><span class="book-badge${BOOK[k].alt ? ' alt' : ''}">${BOOK[k].abbr}</span><div><b>${BOOK[k].name}</b><small>${BOOK[k].by}</small></div>${icons.chevron}</button>`).join('') || '<p class="muted" style="padding:12px 4px;margin:0">সব বই ডাউনলোড করা হয়েছে</p>'}</div>
-      <button class="card dm" data-go="downloads"><span class="book-badge">${icons.down}</span><div><b>ডাউনলোড ম্যানেজার</b><span class="muted">নতুন বই ডাউনলোড করুন অথবা পুরাতন বইগুলো ডিলিট করুন।</span></div></button>`;
-  }
-  $('#nav').innerHTML = [['home', 'হোম'], ['book', 'বিষয়ভিত্তিক হাদিস'], ['bookmarkFilled', 'কালেকশন'], ['user', 'প্রোফাইল']].map(([i, t], n) =>
-    `<button class="${n ? '' : 'on'}" ${n ? `data-snack="${t} খুলবে — এই ফিচারের অংশ নয়"` : ''}>${icons[i]}${t}</button>`).join('');
-
   /* ---------- Hadith list (sender side) ---------- */
   function renderList() { $('#list-body').innerHTML = `<div class="sec"><b>অধ্যায়:</b> ${H[LIST[0]].sec}</div>` + LIST.map((id) => card(id)).join(''); }
 
-  /* ---------- More-options sheet: MenuGrid icons (two-tone, like the app's SVGs) ---------- */
+  /* ---------- More-options sheet: share row icons (two-tone, like the app's SVGs) ---------- */
   const MI = {
-    details: '<path class="a" d="M3 7.5a2 2 0 0 1 2-2h7a4 4 0 0 1 4 4V28a2.5 2.5 0 0 0-2.5-2.5H5a2 2 0 0 1-2-2z"/><path class="b" d="M30 7.5a2 2 0 0 0-2-2h-7a4 4 0 0 0-4 4V28a2.5 2.5 0 0 1 2.5-2.5H28a2 2 0 0 0 2-2z"/>',
-    collection: '<path class="a" d="M5 5.5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3V29l-9-5.5L5 29z"/><path class="b" d="M5 5.5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3V9H5z"/><circle class="b" cx="24.5" cy="23.5" r="7"/><path class="sw" d="M24.5 20v7M21 23.5h7"/>',
-    note: '<rect class="a" x="3.5" y="4" width="21" height="25" rx="4"/><path class="b" d="M3.5 8a4 4 0 0 1 4-4h13a4 4 0 0 1 4 4v2h-21z"/><rect class="w" x="7.5" y="15" width="12" height="2.4" rx="1.2"/><rect class="w" x="7.5" y="20" width="8" height="2.4" rx="1.2"/>',
-    copyTr: '<rect class="b" x="10" y="3" width="19" height="22" rx="4"/><rect class="a" x="4" y="8" width="19" height="22" rx="4"/><rect class="w" x="8" y="14" width="11" height="2.4" rx="1.2"/><rect class="w" x="8" y="19" width="7" height="2.4" rx="1.2"/>',
-    copyAr: '<rect class="b" x="10" y="3" width="19" height="22" rx="4"/><rect class="a" x="4" y="8" width="19" height="22" rx="4"/><path class="sw" d="M18 15c-1-1-3.5-.8-3.5 1 0 1.4 1.8 1.8 3.6 1.3-2.5.7-4.3 1.9-3.9 3.6"/>',
-    copyFull: '<path class="a" d="M4 17c0-6 3.5-10 9-11v4c-2.5.8-4 2.6-4.3 5H13v10H4z"/><path class="b" d="M18 17c0-6 3.5-10 9-11v4c-2.5.8-4 2.6-4.3 5H27v10h-9z"/>',
-    shot: '<path class="so" d="M3 10V7a4 4 0 0 1 4-4h3M23 3h3a4 4 0 0 1 4 4v3M30 23v3a4 4 0 0 1-4 4h-3M10 30H7a4 4 0 0 1-4-4v-3"/><rect class="a" x="8" y="9" width="17" height="15" rx="2.5"/><circle class="w" cx="13" cy="13.5" r="2"/>',
     share: '<path class="sb" d="M10 16.5 23 9M10 16.5 23 24"/><circle class="a" cx="8" cy="16.5" r="5"/><circle class="b" cx="24.5" cy="8" r="5"/><circle class="a" cx="24.5" cy="25" r="5"/>',
     linkShare: '<circle class="a" cx="14" cy="16.5" r="11.5"/><path class="sw" d="M12 18.5l4-4M10.4 16.1l-1.2 1.2a2.8 2.8 0 0 0 4 4l1.2-1.2M17.6 16.9l1.2-1.2a2.8 2.8 0 0 0-4-4l-1.2 1.2"/><circle class="b" cx="25" cy="24" r="6.5"/><path class="sw" d="M22.5 26.5l5-5M23.5 21.5h4v4"/>',
     linkCopy: '<rect class="b" x="10" y="3" width="19" height="22" rx="4"/><rect class="a" x="4" y="8" width="19" height="22" rx="4"/><path class="sw" d="M11.5 21.5l4-4M10.1 19.1l-1 1a2.5 2.5 0 0 0 3.5 3.5l1-1M16.9 19.9l1-1a2.5 2.5 0 0 0-3.5-3.5l-1 1"/>',
-    report: '<circle class="a" cx="16.5" cy="16.5" r="13.5"/><rect class="w" x="15" y="8.5" width="3" height="10.5" rx="1.5"/><circle class="w" cx="16.5" cy="23.5" r="2.1"/>',
   };
-  const ACTIONS = [['details', 'বিস্তারিত'], ['collection', 'বুকমার্ক / পিন'], ['note', 'নোট'], ['copyTr', 'অনুবাদ কপি'], ['copyAr', 'আরবি কপি'], ['copyFull', 'হাদিস কপি'],
-    ['shot', 'স্ক্রিনশট'], ['share', 'টেক্সট শেয়ার'], ['linkShare', 'লিংক শেয়ার'], ['linkCopy', 'লিংক কপি'], ['report', 'রিপোর্ট']];
+  const ACTIONS = [['linkCopy', 'লিংক কপি'], ['linkShare', 'লিংক শেয়ার'], ['share', 'টেক্সট শেয়ার']];
   function renderMenu() {
     $('#m-ref').textContent = `${BOOK[H[S.cur].bk].name} · হাদিস: ${bn(H[S.cur].no)}`;
-    const SH = ['linkCopy', 'linkShare', 'share', 'shot'];
-    $('#m-share').innerHTML = SH.map((k) => `<button class="sbtn" data-act="${k}"><i><svg class="mi" width="30" height="30" viewBox="0 0 33 33" fill="none">${MI[k]}</svg></i>${ACTIONS.find((a) => a[0] === k)[1]}</button>`).join('');
-    $('#m-grid').innerHTML = ACTIONS.filter(([k]) => !SH.includes(k)).map(([k, t]) => `<button class="mtile" data-act="${k}"><svg class="mi" width="34" height="34" viewBox="0 0 33 33" fill="none">${MI[k]}</svg>${t}</button>`).join('');
+    $('#m-share').innerHTML = ACTIONS.map(([k, t]) => `<button class="sbtn" data-act="${k}"><i><svg class="mi" width="30" height="30" viewBox="0 0 33 33" fill="none">${MI[k]}</svg></i>${t}</button>`).join('');
   }
-  const SNACK = { details: 'হাদিসের বিস্তারিত খুলবে — এই ফিচারের অংশ নয়', collection: 'বুকমার্ক শিট খুলবে — এই ফিচারের অংশ নয়', note: 'নোট লেখার শিট খুলবে — এই ফিচারের অংশ নয়', copyTr: 'বাংলা অনুবাদ কপি হয়েছে', copyAr: 'আরবি কপি হয়েছে', copyFull: 'সম্পূর্ণ হাদিস কপি হয়েছে', shot: 'স্ক্রিনশট শেয়ার হবে — এই ফিচারের অংশ নয়', report: 'রিপোর্ট শিট খুলবে — এই ফিচারের অংশ নয়' };
   function act(k) {
     if (k === 'share') return Kit.show('sharetext');
     if (k === 'linkShare') return Kit.show('sharelink');
     Kit.show(S.from);
-    Kit.snack(k === 'linkCopy' ? 'কপি হয়েছে' : SNACK[k]);
+    Kit.snack('কপি হয়েছে');
   }
 
   /* ---------- Phone share list: preview + targets ---------- */
@@ -377,90 +255,52 @@
     const sc = $('#chat-body'); if (S.sent.length) sc.scrollTop = sc.scrollHeight;
   }
 
-  /* ---------- Opening a link: app → loading → hadith / offline / not found; no app → browser ---------- */
-  let timer;
-  function openLink(id) {
-    S.link = id; clearTimeout(timer);
-    if (!S.app) return Kit.show('web');
-    const h = H[id];
-    Kit.show('loading');
-    const next = !h ? 'notfound' : (S.dl[h.bk] || S.net) ? 'hadith' : 'offline';
-    timer = setTimeout(() => { if (Kit.current === 'loading') Kit.show(next); }, !h ? 700 : S.dl[h.bk] ? 450 : 1500);
-  }
+  /* ---------- Opening a link in the app: the hadith, or not found ---------- */
+  function openLink(id) { S.link = id; Kit.show(H[id] ? 'hadith' : 'notfound'); }
   const linkId = () => (H[S.link] ? S.link : 'b6116');
   function renderLinked(hl) {
     const id = linkId(), h = H[id];
-    $$('.t-book').forEach((e) => { e.textContent = H[S.link] ? BOOK[H[S.link].bk].name : 'আল হাদিস'; });
     $('#h-title').innerHTML = `${BOOK[h.bk].name}<small>হাদিস: ${bn(h.no)}</small>`;
-    const ids = Object.keys(H).filter((k) => H[k].bk === h.bk), i = ids.indexOf(id);
-    $('#h-body').innerHTML = `<div class="sec"><b>অধ্যায়:</b> ${h.sec}</div>${card(id, hl ? 'hl' : '')}
-      <div class="nbar"><button data-nav="${ids[i - 1] || ''}" ${i <= 0 ? 'disabled' : ''}>${icons.back}আগের</button><button data-nav="${ids[i + 1] || ''}" ${i >= ids.length - 1 ? 'disabled' : ''}>পরের${icons.chevron}</button></div>`;
+    $('#h-body').innerHTML = `<div class="sec"><b>অধ্যায়:</b> ${h.sec}</div>${card(id, hl ? 'hl' : '')}`;
   }
 
-  /* ---------- Browser: the same hadith on the website ---------- */
+  /* ---------- Browser (app not installed): the same hadith on the website ---------- */
   function renderWeb() {
-    const h = H[S.link];
-    $('#web-body').innerHTML = `<div class="site">আল হাদিস<span class="ex">নমুনা ওয়েবসাইট</span></div>` + (h
-      ? `<div class="crumb">${BOOK[h.bk].name} › ${h.sec} › হাদিস নং ${bn(h.no)}</div>${card(S.link).replace(/<button class="icon-btn"[\s\S]*?<\/button>/, '')}
-         <p class="wfoot">লিংক কোন ওয়েবসাইটে যাবে, তা এখনো ঠিক হয়নি।</p>`
-      : `<div class="state"><span class="ic">${icons.search}</span><h3>হাদিস খুঁজে পাওয়া যায়নি</h3><p>লিংকটি পুরনো বা ভুল হতে পারে।</p></div>`);
-  }
-
-  /* ---------- Download manager ---------- */
-  function renderDownloads() {
-    $('#dl-body').innerHTML = Object.keys(BOOK).map((k) => `<div class="dl-row"><span class="book-badge${BOOK[k].alt ? ' alt' : ''}">${BOOK[k].abbr}</span>
-      <div><b>${BOOK[k].name}</b><span class="muted" id="dlp-${k}">${S.dl[k] ? 'ডাউনলোডকৃত' : BOOK[k].by}</span></div>
-      ${S.dl[k] ? `<button class="icon-btn" data-del="${k}" aria-label="${BOOK[k].name} মুছুন">${icons.trash}</button>` : `<button class="btn sm" data-dl="${k}">ডাউনলোড</button>`}</div>`).join('');
-  }
-  function download(k, btn) {
-    btn.disabled = true; let p = 0;
-    const iv = setInterval(() => {
-      p += 20; const el = $(`#dlp-${k}`); if (el) el.textContent = `ডাউনলোড হচ্ছে: ${bn(p)}%`;
-      if (p >= 100) { clearInterval(iv); S.dl[k] = true; renderDownloads(); Kit.snack('ডাউনলোড সফলভাবে সম্পন্ন হয়েছে'); }
-    }, 260);
+    const id = linkId(), h = H[id];
+    $('#web-body').innerHTML = `<div class="site">আল হাদিস<span class="ex">নমুনা ওয়েবসাইট</span></div>
+      <div class="crumb">${BOOK[h.bk].name} › ${h.sec} › হাদিস নং ${bn(h.no)}</div>${card(id).replace(/<button class="icon-btn"[\s\S]*?<\/button>/, '')}
+      <p class="wfoot">লিংক কোন ওয়েবসাইটে যাবে, তা এখনো ঠিক হয়নি।</p>`;
   }
 
   /* ---------- Wiring ---------- */
   $$('[data-i]').forEach((el) => { el.innerHTML = icons[el.dataset.i]; });
-  renderList(); renderHome();
+  renderList();
   let prev = null;
   Kit.onScreen((id) => {
-    if (id !== 'loading') clearTimeout(timer);
     if (id === 'list' || id === 'hadith') S.from = id;
-    if (id === 'home') renderHome();
     if (id === 'menu') { renderMenu(); overlay(id); }
     if (id === 'sharetext' || id === 'sharelink') { renderShare(); overlay(id); }
     if (id === 'chat') renderChat();
-    if (['loading', 'offline', 'notfound', 'hadith'].includes(id)) renderLinked(id === 'hadith' && !['menu', 'sharetext', 'sharelink'].includes(prev));
+    if (id === 'hadith') renderLinked(!['menu', 'sharetext', 'sharelink'].includes(prev));
     if (id === 'web') renderWeb();
-    if (id === 'downloads') renderDownloads();
     prev = id;
   });
 
   document.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-nav],[data-more],[data-act],[data-back],[data-target],[data-link],[data-tab],[data-book],[data-dl],[data-del],[data-tg]');
+    const t = e.target.closest('[data-more],[data-act],[data-back],[data-target],[data-link]');
     if (!t) return;
     const d = t.dataset;
-    if (d.nav) { S.link = d.nav; renderLinked(false); }
-    else if (d.more) { S.cur = d.more; S.from = Kit.current; S.scroll = $('.screen.on .scroll')?.scrollTop || 0; Kit.show('menu'); }
+    if (d.more) { S.cur = d.more; S.from = Kit.current; S.scroll = $('.screen.on .scroll')?.scrollTop || 0; Kit.show('menu'); }
     else if (d.act) act(d.act);
     else if (d.back !== undefined) Kit.show(S.from);
     else if (d.target) target(d.target);
     else if (d.link) openLink(d.link);
-    else if (d.tab) { S.tab = d.tab; renderHome(); }
-    else if (d.book) d.book === 'b' ? Kit.show('list') : Kit.snack('বইয়ের অধ্যায় খুলবে — এই ফিচারের অংশ নয়');
-    else if (d.dl) download(d.dl, t);
-    else if (d.del) { S.dl[d.del] = false; renderDownloads(); Kit.snack('বইটি মুছে ফেলা হয়েছে'); }
-    else if (d.tg) { S[d.tg] = !S[d.tg]; t.setAttribute('aria-pressed', S[d.tg]); Kit.snack(d.tg === 'app' ? (S.app ? 'ফোনে আল হাদিস অ্যাপ আছে' : 'ফোনে আল হাদিস অ্যাপ নেই') : (S.net ? 'ইন্টারনেট চালু' : 'ইন্টারনেট বন্ধ')); }
   });
 
   Kit.init({ demo: 3, name: 'শেয়ার সারি',
-    extra: '<button class="tg" data-tg="app" aria-pressed="true">অ্যাপ আছে</button><button class="tg" data-tg="net" aria-pressed="true">ইন্টারনেট</button>',
     screens: [
-      { id: 'home', label: 'হোম' }, { id: 'list', label: 'হাদিসের তালিকা' }, { id: 'menu', label: 'মেনু' },
-      { id: 'sharetext', label: 'টেক্সট শেয়ার' }, { id: 'sharelink', label: 'লিংক শেয়ার' }, { id: 'chat', label: 'বন্ধুর মেসেজ' },
-      { id: 'loading', label: 'লোডিং' }, { id: 'hadith', label: 'লিংক থেকে খোলা' }, { id: 'offline', label: 'অফলাইন' },
-      { id: 'notfound', label: 'পাওয়া যায়নি' }, { id: 'web', label: 'ওয়েবসাইট' }, { id: 'downloads', label: 'ডাউনলোড' },
+      { id: 'list', label: 'হাদিসের তালিকা' }, { id: 'chat', label: 'বন্ধুর মেসেজ' }, { id: 'hadith', label: 'লিংক থেকে খোলা' },
+      { id: 'notfound', label: 'পাওয়া যায়নি' }, { id: 'web', label: 'ওয়েবসাইট (অ্যাপ নেই)' },
     ] });
 })();
 </script>

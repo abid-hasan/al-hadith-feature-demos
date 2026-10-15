@@ -1,0 +1,17 @@
+[
+  {
+    "demo": "demo2.html",
+    "screen": "card",
+    "label": "হাদিস কার্ড"
+  },
+  {
+    "demo": "demo3.html",
+    "screen": null,
+    "label": null
+  },
+  {
+    "demo": "demo1.html",
+    "screen": "details",
+    "label": "ফোল্ডারের ভেতরে"
+  }
+]

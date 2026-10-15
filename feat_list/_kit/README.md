@@ -1,8 +1,6 @@
 # Demo kit
 
-Every feature demo in `feat_list/<feature>/html/` links this kit, so all demos share the same phone frame, toolbar, colours and controls. A demo file then holds only its own feature markup, styles and logic, which makes it easy to read when implementing in Flutter.
-
-(The bookmark demos were built before the kit and are fully self-contained. Leave them as they are.)
+Every feature demo in `feat_list/<feature>/html/` links this kit, so all demos share the same phone frame, side panel, colours and controls. A demo file then holds only its own feature markup, styles and logic, which makes it easy to read when implementing in Flutter.
 
 ## Skeleton
 
@@ -49,8 +47,10 @@ Every feature demo in `feat_list/<feature>/html/` links this kit, so all demos s
 
 ## What the kit gives you
 
-- **Shell:** `Kit.init` builds the toolbar outside the phone (screen chips plus a light/dark toggle), the status bar, a scrim and a snackbar.
-- **Navigation:** `?screen=<id>` and `?theme=dark` in the URL open a screen or theme directly. A parent page can do the same with `postMessage({type:'screen', id})`.
+- **Shell:** `Kit.init` builds a side panel to the right of the phone (demo name, screen list, light/dark toggle), the status bar, a scrim and a snackbar.
+- **Layout:** the page never scrolls; only the phone does. The phone takes the full window height. A wide tablet frame (`.phone.tab` / `.phone.tablet` with its own width and height) is scaled down to fit. On a phone-sized window the side panel moves to a strip on top. Do not add CSS for `.kit-side`, `.kit-stage`, `body` or page scrolling.
+- **Navigation:** `?screen=<id>` and `?theme=dark` in the URL open a screen or theme directly. A parent page can do the same with `postMessage({type:'screen', id})` and `{type:'theme', id}`.
+- **Inside the viewer:** with `?embed=1` the side panel is hidden and the kit posts `{type:'kit-ready', demo, name, screens}` and `{type:'kit-screen', id}` to the parent, which shows the screen list itself.
 - **Declarative attributes:** these work without writing any JS.
 
   | Attribute | Does |

@@ -6,7 +6,7 @@
 <title>শেখার প্রোগ্রেস বার — ডেমো ৩ · শিটে অধ্যায়</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
-  /* ---------- শেয়ার করা অংশ: বার, টিক, রিং, লোডার ---------- */
+  /* ---------- শেয়ার করা অংশ: বার, টিক, রিং ---------- */
   :root{--pd:var(--primary-dark);--track:var(--tint)}
   :root[data-theme="dark"]{--pd:var(--primary)}
   .bar{height:6px;border-radius:8px;background:var(--track);overflow:hidden;flex:1;min-width:0}
@@ -19,15 +19,6 @@
   .ring circle{fill:none}
   .ring .rt{stroke:var(--track)}
   .ring .rf{stroke:var(--primary);transition:stroke-dashoffset .4s ease}
-  .spin{width:34px;height:34px;border-radius:50%;border:3.5px solid var(--track);border-top-color:var(--pd);animation:sp .8s linear infinite;margin:48px auto}
-  @keyframes sp{to{transform:rotate(360deg)}}
-  .hacts{display:flex;gap:4px;margin-top:8px;padding-top:6px;border-top:1px solid var(--divider);color:var(--hint)}
-  .hacts .icon-btn{width:36px;height:36px}
-  .hacts svg{width:19px;height:19px}
-  .note{display:flex;gap:10px;align-items:flex-start;margin:12px 12px 4px;padding:12px 14px;border-radius:10px;background:var(--card);color:var(--body);font-size:13.5px;box-shadow:var(--shadow)}
-  .note svg{flex:none;color:var(--hint);margin-top:2px}
-  .note b{display:block;color:var(--title);font-size:14.5px}
-  .kit-extra .kit-chip{font-size:12.5px}
   .snack:not(.on){visibility:hidden;transition:transform .25s,visibility 0s .25s}
 
   /* ---------- হোম: এক কার্ডে বইয়ের তালিকা, সারির নিচের কিনারায় বার ---------- */
@@ -76,14 +67,8 @@
       <section class="screen" data-screen="chapters"></section>
       <section class="screen" data-screen="reader"></section>
       <section class="screen" data-screen="plan"></section>
-      <section class="screen" data-screen="loading"></section>
-      <section class="screen" data-screen="offline"></section>
-      <section class="screen" data-screen="fresh"></section>
       <div class="sheet" id="sheet-ch" role="dialog" aria-label="অধ্যায়"></div>
-      <div class="sheet" id="sheet-more" role="dialog" aria-label="অন্যান্য অপশন">
-        <div class="sheet-head"><h2>অন্যান্য অপশন</h2><button class="icon-btn" data-close aria-label="বন্ধ করুন"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-        <div class="sheet-body"><button class="list-row" data-close data-snack="কপি করা হয়েছে">অনুবাদ কপি</button><button class="list-row" data-close data-snack="বুকমার্ক করা হয়েছে">বুকমার্ক করুন</button><button class="list-row" data-close data-snack="শেয়ার করার জন্য প্রস্তুত">শেয়ার করুন</button></div>
-          </div>
+    </div>
   </div>
 </main>
 <script src="../../_kit/kit.js"></script>
@@ -99,16 +84,16 @@
       ch: [['ইখলাস ও নিয়ত', 1, 12, 0], ['তওবা', 13, 24, 0], ['সবর', 25, 53, 0], ['সত্যবাদিতা', 54, 59, 0]] },
     { id: 'n40', name: 'আন্-নওয়াবীর চল্লিশ হাদীস', ab: '40', by: 'ইমাম নববী', total: 42, prior: 42, dl: true,
       ch: [['চল্লিশ হাদিস', 1, 42, 42]] },
-    { id: 't', name: 'জামে‘ আত-তিরমিযী', ab: 'T', by: 'ইমাম তিরমিজি', total: 3956, prior: 412, knownOffline: true,
+    { id: 't', name: 'জামে‘ আত-তিরমিযী', ab: 'T', by: 'ইমাম তিরমিজি', total: 3956, prior: 412,
       ch: [['পবিত্রতা', 1, 148, 148], ['সালাত', 149, 424, 180], ['বিতর', 452, 487, 0]] },
-    { id: 'im', name: 'সুনানে ইবনে মাজাহ', ab: 'IM', by: 'ইমাম ইবনে মাজাহ', total: 4341, prior: 9, knownOffline: false,
+    { id: 'im', name: 'সুনানে ইবনে মাজাহ', ab: 'IM', by: 'ইমাম ইবনে মাজাহ', total: 4341, prior: 9,
       ch: [['সুন্নাহর অনুসরণ', 1, 266, 9], ['পবিত্রতা', 267, 666, 0]] },
-    { id: 'ad', name: 'সুনানে আবূ দাউদ', ab: 'AD', by: 'ইমাম আবু দাউদ', total: 5274, prior: 0, knownOffline: true,
+    { id: 'ad', name: 'সুনানে আবূ দাউদ', ab: 'AD', by: 'ইমাম আবু দাউদ', total: 5274, prior: 0,
       ch: [['পবিত্রতা', 1, 390, 0], ['সালাত', 391, 1160, 0]] },
-    { id: 'n', name: 'সুনানে আন-নাসায়ী', ab: 'N', by: 'ইমাম নাসায়ী', total: 5758, prior: 0, knownOffline: true,
+    { id: 'n', name: 'সুনানে আন-নাসায়ী', ab: 'N', by: 'ইমাম নাসায়ী', total: 5758, prior: 0,
       ch: [['পবিত্রতা', 1, 325, 0], ['গোসল ও তায়াম্মুম', 326, 448, 0]] },
   ];
-  const NIYYAH = { ar: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ', tr: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।', by: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত' };
+  const NIYYAH = { tr: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।', by: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত' };
   const SAFE = { 'b:1': NIYYAH, 'rs:1': NIYYAH, 'n40:1': NIYYAH,
     'm:223': { tr: 'পবিত্রতা ঈমানের অর্ধেক।', by: 'আবু মালিক আশআরী (রা.) থেকে বর্ণিত' } };
   const PLANS = [
@@ -118,24 +103,18 @@
 
   /* ===== স্টেট: কোন হাদিস পড়া হয়েছে (বই ধরে সেট, তাই একই হাদিস একবারই গোনা) ===== */
   const N = (v) => Kit.bn(v);
-  const I = Object.assign({}, Kit.icons, {
-    menu: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
-    dl: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
-    wifiOff: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l18 18M8.5 16.5a5 5 0 0 1 7 0M5 12.6a10 10 0 0 1 5-2.5M14 10.1a10 10 0 0 1 5 2.5M2 8.8a15 15 0 0 1 4.3-2.6M10.5 5.1A15 15 0 0 1 22 8.8"/><circle cx="12" cy="20" r=".8" fill="currentColor"/></svg>',
-  });
-  const S = { sets: {}, base: {}, offline: false, tab: 'dl', book: 'b', chap: 0, planTab: 'active', q: '' };
-  function seed(empty) {
+  const I = Kit.icons;
+  const S = { sets: {}, base: {}, tab: 'dl', book: 'b', chap: 0 };
+  function seed() {
     BOOKS.forEach((b) => {
       const s = new Set();
-      if (!empty) {
-        b.ch.forEach((c) => { for (let i = 0; i < c[3]; i++) s.add(c[1] + i); });
-        if (b.id === 'b') for (let n = 1891; n <= 1920; n++) s.add(n);
-      }
+      b.ch.forEach((c) => { for (let i = 0; i < c[3]; i++) s.add(c[1] + i); });
+      if (b.id === 'b') for (let n = 1891; n <= 1920; n++) s.add(n);
       S.sets[b.id] = s;
-      S.base[b.id] = empty ? 0 : b.prior - s.size;
+      S.base[b.id] = b.prior - s.size;
     });
   }
-  seed(false);
+  seed();
   const bookOf = (id) => BOOKS.find((b) => b.id === id);
   const readOf = (b) => S.base[b.id] + S.sets[b.id].size;
   const inRange = (id, a, z) => { let k = 0; S.sets[id].forEach((n) => { if (n >= a && n <= z) k++; }); return k; };
@@ -145,8 +124,6 @@
   const planTotal = (p) => p.to - p.from + 1;
   // শতকরা: পড়া থাকলে কমপক্ষে ১%, পুরো শেষ না হলে সর্বোচ্চ ৯৯%
   function pct(r, t) { if (!t) return 0; let p = Math.round(r * 100 / t); if (r > 0 && p === 0) p = 1; if (r < t && p === 100) p = 99; return p; }
-  // অনলাইনের বইয়ে অফলাইনে মোট সংখ্যা জানা না থাকলে বার লুকানো
-  const totalKnown = (b) => b.dl || !S.offline || b.knownOffline;
   function markRead(id, n) {
     const s = S.sets[id]; if (s.has(n)) return false;
     const before = PLANS.filter((p) => p.book === id && planRead(p) === planTotal(p)).length;
@@ -156,7 +133,7 @@
     return true;
   }
 
-  /* ===== ছোট টুকরো: বার, টিক, রিং, লোডার ===== */
+  /* ===== ছোট টুকরো: বার, টিক, রিং ===== */
   const barHTML = (r, t) => `<div class="bar" role="progressbar" aria-valuenow="${pct(r, t)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${r * 100 / t}%"></i></div>`;
   const doneHTML = (label = 'সম্পন্ন') => `<span class="done"><span class="tk">${I.check}</span>${label}</span>`;
   function ringHTML(p, size, sw) {
@@ -164,21 +141,15 @@
     return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle class="rt" cx="${c}" cy="${c}" r="${r}" stroke-width="${sw}"/>` +
       `<circle class="rf" cx="${c}" cy="${c}" r="${r}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${(C * (1 - p / 100)).toFixed(2)}" transform="rotate(-90 ${c} ${c})"/></svg>`;
   }
-  const spinHTML = () => '<div class="spin" role="progressbar" aria-label="লোড হচ্ছে"></div>';
-  const offlineNote = () => `<div class="note">${I.wifiOff}<div><b>ইন্টারনেট সংযোগ নেই</b>ডাউনলোড করা বইয়ের হিসাব ঠিক আছে। অনলাইনের বই পড়তে সংযোগ লাগবে।</div></div>`;
   const rangeText = (c) => `হাদিসের রেঞ্জ: ${N(c[1])}–${N(c[2])}`;
 
-  /* ===== হাদিস কার্ড (লেখা শুধু নিশ্চিত তালিকা থেকে; বাকিগুলোয় হেডার আর অ্যাকশন) ===== */
+  /* ===== হাদিস কার্ড (লেখা শুধু নিশ্চিত তালিকা থেকে; বাকিগুলোয় শুধু হেডার) ===== */
   function hadithCard(b, n) {
     const h = SAFE[b.id + ':' + n];
     const grade = b.sahih || h ? '<span class="grade">সহিহ</span>' : '';
-    const body = h ? `${h.ar ? `<p class="arabic">${h.ar}</p>` : ''}<p class="translation">${h.tr}</p><p class="narrator">${h.by}</p>` : '';
+    const body = h ? `<p class="translation">${h.tr}</p><p class="narrator">${h.by}</p>` : '';
     return `<article class="card hcard" data-h="${n}"><div class="hadith-head"><span class="book-badge">${b.ab}</span>` +
-      `<div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${N(n)}</span></div>${grade}` +
-      `<button class="icon-btn" data-open="sheet-more" aria-label="অন্যান্য অপশন">${I.more}</button></div>${body}` +
-      `<div class="hacts"><button class="icon-btn" aria-label="কপি" data-snack="কপি করা হয়েছে">${I.copy}</button>` +
-      `<button class="icon-btn" aria-label="শেয়ার" data-snack="শেয়ার করার জন্য প্রস্তুত">${I.share}</button>` +
-      `<button class="icon-btn" aria-label="বুকমার্ক" data-snack="বুকমার্ক করা হয়েছে">${I.bookmarkFilled}</button></div></article>`;
+      `<div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${N(n)}</span></div>${grade}</div>${body}</article>`;
   }
   // স্ক্রল করে কার্ড উপরে পেরিয়ে গেলে (বা অধ্যায়ের শেষে পৌঁছালে) হাদিসটা পড়া ধরা হয়
   function trackReading(scrollEl, b, onChange) {
@@ -208,78 +179,54 @@
     }
     return 0;
   }
-  // অনলাইনের বই অফলাইনে খোলা যায় না (অ্যাপের আসল লেখা)
-  function blockedOffline(b) {
-    if (!b.dl && S.offline) { Kit.snack(`${b.name} ডাউনলোড করা নেই, আর এখন অনলাইনে পড়া যাচ্ছে না। পড়তে হলে বইটি ডাউনলোড করুন।`); return true; }
-    return false;
-  }
-  const filterCh = (b) => b.ch.map((c, i) => [c, i]).filter(([c, i]) => !S.q || c[0].includes(S.q) || N(i + 1).includes(S.q) || String(i + 1).includes(S.q));
   const planStats = (p) => { const r = planRead(p), t = planTotal(p); return { r, t, p: pct(r, t), done: r === t }; };
 
-  /* ===== ওয়্যারিং: টুলবারের চিপ = ডেমোর অবস্থা, ফোনের ভেতরের চাপ = একটানা ফ্লো ===== */
+  /* ===== ওয়্যারিং: স্ক্রিনে এলে নতুন করে আঁকা; "শুরুর ডেটা" চাপলে ডেমো আগের অবস্থায় ===== */
   function wire(render, homeId = 'home') {
     document.addEventListener('click', (e) => {
-      const chip = e.target.closest('.kit-chip[data-go]');
-      if (chip) {
-        const go = chip.dataset.go;
-        if (go !== 'offline') S.offline = false;
-        if (go !== 'fresh' && S.fresh) { seed(false); S.fresh = false; }
-      }
-      if (e.target.closest('#kit-reset')) {
-        seed(false); S.fresh = false; S.offline = false;
-        Kit.show(homeId); Kit.snack('শুরুর ডেমো ডেটা ফিরে এসেছে');
-      }
-    }, true);
-    Kit.onScreen((id) => {
-      if (id === 'offline') S.offline = true;
-      if (id === 'fresh' && !S.fresh) { seed(true); S.fresh = true; }
-      if (render[id]) render[id]();
+      if (e.target.closest('#kit-reset')) { seed(); Kit.show(homeId); Kit.snack('শুরুর ডেমো ডেটা ফিরে এসেছে'); }
     });
+    Kit.onScreen((id) => { if (render[id]) render[id](); });
   }
-  const homeScreen = () => (S.offline ? 'offline' : S.fresh ? 'fresh' : 'home');
   const RESET_BTN = '<button class="kit-chip" id="kit-reset" type="button">শুরুর ডেটা</button>';
-  function openPlan(id) {
+  function openPlan(id, to = 'reader') {
     const p = PLANS.find((x) => x.id === id);
     if (planStats(p).done) { Kit.snack('নির্বাচিত সব হাদিস পড়া হয়েছে'); return; }
-    S.book = p.book; S.chap = planChapter(p); Kit.show('reader');
+    S.book = p.book; S.chap = planChapter(p); Kit.show(to);
   }
 
   const $s = (id) => document.querySelector(`.screen[data-screen="${id}"]`);
-  const appbar = (title, sub, back, extra = '') => `<header class="appbar">${back ? `<button class="icon-btn" aria-label="পেছনে" data-back="${back}">${I.back}</button>` : ''}<h1 style="${back ? '' : 'margin-left:10px'}">${title}${sub ? `<small>${sub}</small>` : ''}</h1>${extra}</header>`;
+  const appbar = (title, sub, back) => `<header class="appbar">${back ? `<button class="icon-btn" aria-label="পেছনে" data-back="${back}">${I.back}</button>` : ''}<h1 style="${back ? '' : 'margin-left:10px'}">${title}${sub ? `<small>${sub}</small>` : ''}</h1></header>`;
   const pill = (key, val, opts) => `<div class="pill" role="tablist">${opts.map(([v, l]) => `<button role="tab" data-${key}="${v}" aria-selected="${val === v}">${l}</button>`).join('')}</div>`;
 
   /* ---------- বইয়ের সারি: ডানে শতকরা বা টিক, নিচের কিনারায় বার ---------- */
   function bookRow(b) {
-    const r = readOf(b), show = r && totalKnown(b), done = r >= b.total;
-    const side = !show ? '' : done ? doneHTML() : `<span class="big">${N(pct(r, b.total))}%</span>`;
-    const edge = show && !done ? `<span class="edge">${barHTML(r, b.total)}</span>` : '';
+    const r = readOf(b), done = r >= b.total;
+    const side = !r ? '' : done ? doneHTML() : `<span class="big">${N(pct(r, b.total))}%</span>`;
+    const edge = r && !done ? `<span class="edge">${barHTML(r, b.total)}</span>` : '';
     return `<button class="brow" data-book="${b.id}"><span class="hex">${b.ab}</span><span class="main"><b>${b.name}</b><small>${b.by} · ${N(b.total)} হাদিস</small></span>${side}${edge}</button>`;
   }
-  function homeHTML(loading) {
+  function homeHTML() {
     const list = BOOKS.filter((b) => (S.tab === 'dl' ? b.dl : !b.dl));
-    return appbar('আল হাদিস') + `<div class="scroll">${S.offline ? offlineNote() : ''}` +
+    return appbar('আল হাদিস') + '<div class="scroll">' +
       `<button class="entry" data-go="plan"><i>${I.book}</i>হাদিস পড়ার প্ল্যান${I.chevron}</button>` +
       pill('tab', S.tab, [['on', 'অনলাইনে আছে'], ['dl', 'ডাউনলোড করা']]) +
-      (loading ? spinHTML() : `<div class="group">${list.map(bookRow).join('')}</div>`) + '</div>';
+      `<div class="group">${list.map(bookRow).join('')}</div></div>`;
   }
 
-  /* ---------- অধ্যায়ের শিট: সার্চ + সারি, ডানে "১২/৪০" ---------- */
+  /* ---------- অধ্যায়ের শিট: সারি, ডানে "১২/৪০" ---------- */
   function chapRows(b) {
-    const rows = filterCh(b);
-    if (!rows.length) return `<div class="empty"><h3>কোনো অধ্যায় পাওয়া যায়নি</h3><p>অন্য নাম বা নম্বর দিয়ে সার্চ করুন</p></div>`;
-    return rows.map(([c, i]) => {
+    return b.ch.map((c, i) => {
       const r = chRead(b, c), t = chTotal(c);
       const side = !r ? '' : r >= t ? doneHTML() : `<span class="cside"><span class="cnt">${N(r)}/${N(t)}</span>${barHTML(r, t)}</span>`;
       return `<button class="crow" data-chap="${i}"><span class="cno">${N(i + 1)}</span><span class="main"><b>${c[0]}</b><small>${rangeText(c)}</small></span>${side}</button>`;
     }).join('');
   }
-  function openSheet(wait) {
+  function openSheet() {
     const b = bookOf(S.book), el = document.getElementById('sheet-ch');
     el.innerHTML = `<div class="grab"></div><div class="sheet-head"><h2>${b.name}<small class="cnt" style="display:block;font-weight:400">${N(b.ch.length)}টি অধ্যায়</small></h2>` +
       `<button class="icon-btn" data-back="home" aria-label="বন্ধ করুন">${I.close}</button></div>` +
-      `<div style="padding:0 16px 8px"><label class="field">${I.search}<input id="chq" placeholder="অধ্যায় সার্চ করুন" value="${S.q}"></label></div>` +
-      `<div class="sheet-body" id="chl">${wait ? spinHTML() : chapRows(b)}</div>`;
-    el.querySelector('#chq').oninput = (e) => { S.q = e.target.value.trim(); el.querySelector('#chl').innerHTML = chapRows(b); };
+      `<div class="sheet-body">${chapRows(b)}</div>`;
     Kit.open('sheet-ch');
   }
 
@@ -288,56 +235,40 @@
     const st = planStats(p), b = bookOf(p.book);
     const inner = st.done ? `<span class="tk">${I.check}</span>` : `${N(st.p)}%`;
     return `<button class="plan" data-plan="${p.id}"><span class="main"><span class="ph">${p.name}</span><span class="src">${b.name} · হাদিসের রেঞ্জ ${N(p.from)}–${N(p.to)}</span>` +
-      `<span class="lbl">মোট পড়েছেন</span><span class="frac">${N(st.r)}/${N(st.t)}</span><span class="lbl">বাকি আছে: ${st.done ? 'সম্পন্ন' : p.left}</span></span>` +
+      `<span class="lbl">মোট পড়েছেন</span><span class="frac">${N(st.r)}/${N(st.t)}</span></span>` +
       `<span class="rside"><span class="rbox">${ringHTML(st.p, 84, 8)}<span class="in">${inner}</span></span>${st.done ? '<span class="done">সম্পন্ন হয়েছে</span>' : ''}</span></button>`;
   }
 
   /* ---------- রেন্ডার ---------- */
   const render = {
     home: () => { $s('home').innerHTML = homeHTML(); },
-    offline: () => { $s('offline').innerHTML = homeHTML(); },
-    fresh: () => { $s('fresh').innerHTML = homeHTML(); },
-    loading: () => {
-      $s('loading').innerHTML = homeHTML(true);
-      setTimeout(() => { if (Kit.current === 'loading') $s('loading').innerHTML = homeHTML(); }, 1800);
-    },
     // অধ্যায় = হোমের ওপর খোলা শিট
-    chapters: (wait) => { $s('chapters').innerHTML = homeHTML(); openSheet(wait); },
+    chapters: () => { $s('chapters').innerHTML = homeHTML(); openSheet(); },
     reader: () => {
       const b = bookOf(S.book), c = b.ch[S.chap];
       $s('reader').innerHTML = appbar(b.name, c[0], 'chapters') + `<div class="scroll" style="padding-top:12px">${readerHTML(b, c)}</div>`;
       trackReading($s('reader').querySelector('.scroll'), b);
     },
     plan: () => {
-      const list = PLANS.filter((p) => planStats(p).done === (S.planTab === 'done'));
-      const empty = S.planTab === 'done' ? ['এখনও কোনো প্ল্যান সম্পন্ন হয়নি', 'আপনার শেষ করা প্ল্যানগুলো এখানে থাকবে'] : ['এখন কোনো চলমান প্ল্যান নেই', 'অল্প অল্প পড়ে গড়ে তুলুন নিয়মিত পড়ার অভ্যাস'];
-      $s('plan').innerHTML = appbar('হাদিস পড়ার প্ল্যান', '', 'home', `<button class="icon-btn" aria-label="নতুন প্ল্যান তৈরি" data-snack="নতুন প্ল্যান তৈরি">${I.plus}</button>`) +
-        `<div class="scroll">${pill('ptab', S.planTab, [['active', 'চলমান'], ['done', 'সম্পন্ন']])}` +
-        `${list.length ? list.map(planCard).join('') : `<div class="empty"><h3>${empty[0]}</h3><p>${empty[1]}</p></div>`}</div>`;
+      $s('plan').innerHTML = appbar('হাদিস পড়ার প্ল্যান', '', 'home') + `<div class="scroll">${PLANS.map(planCard).join('')}</div>`;
     },
   };
 
   /* ---------- ফোনের ভেতরের চাপ ---------- */
   document.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-book],[data-chap],[data-back],[data-tab],[data-ptab],[data-plan]');
+    const t = e.target.closest('[data-book],[data-chap],[data-back],[data-tab],[data-plan]');
     if (!t) return;
     const d = t.dataset;
-    if (d.book) {
-      const b = bookOf(d.book); if (blockedOffline(b)) return;
-      S.book = b.id; S.q = ''; openSheet(!b.dl);
-      if (!b.dl) setTimeout(() => document.getElementById('sheet-ch').classList.contains('on') && openSheet(), 700);
-    }
+    if (d.book) { S.book = d.book; openSheet(); }
     if (d.chap) { S.chap = +d.chap; Kit.show('reader'); }
-    if (d.back) Kit.show(d.back === 'home' ? homeScreen() : d.back);
-    if (d.tab) { S.tab = d.tab; Kit.current === 'chapters' ? $s('chapters').innerHTML = homeHTML() : render[Kit.current](); }
-    if (d.ptab) { S.planTab = d.ptab; render.plan(); }
+    if (d.back) Kit.show(d.back);
+    if (d.tab) { S.tab = d.tab; $s(Kit.current).innerHTML = homeHTML(); }
     if (d.plan) openPlan(d.plan);
   });
 
   wire(render);
   Kit.init({ demo: 3, name: 'শিটে অধ্যায়', extra: RESET_BTN, screens: [
-    { id: 'home', label: 'হোম' }, { id: 'chapters', label: 'অধ্যায়ের শিট' }, { id: 'reader', label: 'হাদিস পড়া' },
-    { id: 'plan', label: 'প্ল্যান' }, { id: 'loading', label: 'লোডিং' }, { id: 'offline', label: 'অফলাইন' }, { id: 'fresh', label: 'কিছুই পড়া হয়নি' },
+    { id: 'home', label: 'হোম' }, { id: 'chapters', label: 'অধ্যায়ের শিট' }, { id: 'reader', label: 'হাদিস পড়া' }, { id: 'plan', label: 'প্ল্যান' },
   ]});
 </script>
 </body>

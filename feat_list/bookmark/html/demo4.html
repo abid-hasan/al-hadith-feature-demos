@@ -2,126 +2,57 @@
 <html lang="bn">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>বুকমার্ক — ডেমো ৪ · চিপ ফিল্টার ও হাদিস ফিড</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../_kit/kit.css">
 <style>
 /* =========================================================
-   FONTS
-   ========================================================= */
-@font-face{font-family:Kalpurush;src:url("../../../assets/fonts/font_kalpurush.ttf") format("truetype");font-display:swap}
-@font-face{font-family:KFGQ;src:url("../../../assets/fonts/font_kfgq.ttf") format("truetype");font-display:swap}
-
-/* =========================================================
-   TOKENS (light / dark)
+   DEMO TOKENS — the collection hero (gradient + glass)
    ========================================================= */
 :root{
-  --page:#E9EDEC; --tb-bg:rgba(255,255,255,.78); --tb-text:#2B2F33; --tb-chip:#FFFFFF; --tb-line:rgba(0,0,0,.10);
-  --primary:#1AA483; --primaryDark:#0D8C5C; --appbar:#118C6E; --scaffold:#F4F4F4; --card:#FFFFFF;
-  --divider:rgba(0,0,0,.12); --hint:rgba(0,0,0,.54); --body:#5D646F; --title:#2B2F33; --disabled:#788A95;
-  --error:#F95B53; --soft:#E8F6F3; --grade:#46B891; --field:#F4F4F4;
-  --hdr1:#118C6E; --hdr2:#1AA483; --hdr-ink:#FFFFFF;
-  --glass:rgba(255,255,255,.16); --glass-line:rgba(255,255,255,.22);
-  --seg-on-bg:#FFFFFF; --seg-on-ink:#118C6E; --chip-on-bg:#FFFFFF; --chip-on-ink:#0D8C5C;
-  --shadow:0 1px 2px rgba(16,24,32,.04),0 6px 18px rgba(16,24,32,.05);
-  --scrim:rgba(8,12,16,.48); --snack:#2B2F33; --snack-ink:#FFFFFF; --bezel:#11161B;
-  --frame-shadow:0 30px 70px rgba(15,35,30,.18),0 6px 18px rgba(15,35,30,.10);
+  --hdr2:var(--primary); --glass:rgba(255,255,255,.16); --glass-line:rgba(255,255,255,.22);
+  --seg-on-bg:#FFFFFF; --seg-on-ink:#118C6E; --chip-on-bg:#FFFFFF; --chip-on-ink:var(--primary-dark);
 }
-[data-theme=dark]{
-  --page:#05080B; --tb-bg:rgba(13,17,22,.85); --tb-text:#ECEDEE; --tb-chip:#161C23; --tb-line:rgba(104,112,121,.3);
-  --appbar:#161C23; --scaffold:#0D1116; --card:#161C23;
-  --divider:rgba(104,112,121,.3); --hint:rgba(255,255,255,.6); --body:#C6C3CA; --title:#ECEDEE;
-  --soft:rgba(26,164,131,.12); --field:#0D1116;
-  --hdr1:#161C23; --hdr2:#17322C;
-  --glass:rgba(255,255,255,.07); --glass-line:rgba(255,255,255,.10);
-  --seg-on-bg:#1AA483; --seg-on-ink:#FFFFFF; --chip-on-bg:#1AA483; --chip-on-ink:#FFFFFF;
-  --shadow:none; --scrim:rgba(0,0,0,.6); --snack:#ECEDEE; --snack-ink:#161C23; --bezel:#1E252D;
-  --frame-shadow:0 30px 70px rgba(0,0,0,.6);
+:root[data-theme="dark"]{
+  --hdr2:#17322C; --glass:rgba(255,255,255,.07); --glass-line:rgba(255,255,255,.10);
+  --seg-on-bg:var(--primary); --seg-on-ink:#FFFFFF; --chip-on-bg:var(--primary); --chip-on-ink:#FFFFFF;
 }
 
 /* =========================================================
-   BASE
+   VIEW + ICON BUTTONS
    ========================================================= */
-*{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{background:var(--page);color:var(--body);font-family:Kalpurush,"Noto Sans Bengali",sans-serif;-webkit-font-smoothing:antialiased}
-button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
-input{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:8px}
-.hero :focus-visible{outline-color:#fff}
-svg{display:block}
+.pg{flex:1;min-height:0;display:flex;flex-direction:column}
 .grow{flex:1}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-
-/* =========================================================
-   PAGE SHELL — toolbar + phone frame
-   ========================================================= */
-.tb{position:sticky;top:0;z-index:5;height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;
-  background:var(--tb-bg);backdrop-filter:blur(10px);border-bottom:1px solid var(--tb-line);color:var(--tb-text)}
-.tb-name{font-size:14px;font-weight:700;white-space:nowrap}
-.tb-chips{flex:1;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:4px 0}
-.tb-chips::-webkit-scrollbar{display:none}
-.tb-chip{white-space:nowrap;font-size:13px;padding:5px 11px;border-radius:999px;background:var(--tb-chip);border:1px solid var(--tb-line);color:var(--tb-text)}
-.tb-chip.on{background:var(--tb-text);color:var(--page);border-color:transparent}
-.tb-theme{width:32px;height:32px;border-radius:50%;border:1px solid var(--tb-line);background:var(--tb-chip);font-size:17px;line-height:1}
-.stage{display:flex;justify-content:center;padding:22px 12px 40px}
-.phone{position:relative;width:390px;height:844px;border-radius:44px;overflow:hidden;background:var(--scaffold);
-  border:7px solid var(--bezel);box-shadow:var(--frame-shadow);isolation:isolate}
-.status{position:absolute;inset:0 0 auto 0;height:44px;z-index:3;display:flex;align-items:center;justify-content:space-between;
-  padding:0 26px 0 30px;color:#fff;font-size:15px;font-weight:600;background:var(--sb,var(--appbar));transition:background .2s}
-.status .glyphs{display:flex;gap:6px;align-items:center}
-.screen{position:absolute;inset:44px 0 0 0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
-.screen::-webkit-scrollbar{display:none}
-.homebar{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);width:128px;height:5px;border-radius:9px;background:var(--title);opacity:.28;z-index:60;pointer-events:none}
-@media (max-width:479px){
-  .stage{padding:0}
-  .phone{width:100%;height:calc(100dvh - 44px);border-radius:0;border:0;box-shadow:none}
-  .homebar{display:none}
-}
-
-/* =========================================================
-   APP BAR (hadith list page)
-   ========================================================= */
-.appbar{position:sticky;top:0;z-index:2;height:56px;display:flex;align-items:center;gap:4px;padding:0 6px;background:var(--appbar);color:#fff}
-.appbar h1{margin:0;font-size:19px;font-weight:600;flex:1;padding-left:4px}
 .ib{width:40px;height:40px;display:inline-grid;place-items:center;border-radius:50%;flex:none;color:var(--hint)}
 .ib svg{width:22px;height:22px}
 .appbar .ib,.hero .ib{color:#fff}
 .ib:hover{background:rgba(127,127,127,.12)}
+.hero :focus-visible{outline-color:#fff}
 
 /* =========================================================
-   HADITH CARD
+   HADITH CARD (translation only)
    ========================================================= */
 .list{padding:16px;display:flex;flex-direction:column;gap:14px}
-.hc{background:var(--card);border-radius:10px;padding:14px 16px 16px;box-shadow:var(--shadow)}
+.hc{background:var(--card);border-radius:var(--r-card);padding:14px 16px 16px;box-shadow:var(--shadow)}
 .hc-top{display:flex;align-items:center;gap:8px;margin:-4px -8px 4px 0}
 .hc-ref{font-size:14px;font-weight:600;color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hc-ref .sep{color:var(--hint);margin:0 4px}
-.grade{flex:none;font-size:12px;font-weight:600;color:#fff;background:var(--grade);padding:1px 9px 2px;border-radius:999px}
+.hc-top .grade{font-weight:600}
 .hc-bm{width:24px;height:24px;flex:none;color:var(--primary)}
 .hc-bm svg{width:24px;height:24px}
-.hc-ar{font-family:KFGQ,"Amiri",serif;direction:rtl;text-align:right;font-size:23px;line-height:1.9;color:var(--title);margin:6px 0 10px}
-.hc-bn{font-size:15.5px;line-height:1.7;color:var(--body);margin:0;padding-top:10px;border-top:1px dashed var(--divider)}
+.hc-bn{font-size:15.5px;line-height:1.7;color:var(--body);margin:2px 0 0}
 .hc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.tag{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--hint);background:var(--field);padding:3px 9px;border-radius:999px}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--hint);background:var(--scaffold);padding:3px 9px;border-radius:999px}
 .tag i,.cdot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
 /* book-not-downloaded placeholder */
-.miss{display:flex;gap:12px;align-items:flex-start;margin-top:6px;padding:14px;border-radius:10px;background:var(--field)}
-.miss-ic{width:44px;height:44px;border-radius:12px;background:var(--soft);display:grid;place-items:center;flex:none}
+.miss{display:flex;gap:12px;align-items:flex-start;margin-top:6px;padding:14px;border-radius:10px;background:var(--scaffold)}
+.miss-ic{width:44px;height:44px;border-radius:12px;background:var(--tint);display:grid;place-items:center;flex:none}
 .miss h4{margin:0 0 4px;font-size:15px;color:var(--title);font-weight:700}
 .miss p{margin:0 0 10px;font-size:13.5px;line-height:1.6;color:var(--body)}
 
 /* =========================================================
-   BUTTONS / FIELDS
+   BUTTONS / FIELDS (on top of the kit .btn)
    ========================================================= */
-.btn{height:44px;border-radius:10px;padding:0 18px;font-size:15px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-.btn.fill{background:var(--primary);color:#fff}
-.btn.out{border:1.5px solid var(--primary);color:var(--primary)}
-.btn.tonal{background:var(--soft);color:var(--primaryDark)}
-[data-theme=dark] .btn.tonal{color:var(--primary)}
-.btn.text{color:var(--hint)}
-.btn.danger{background:var(--error);color:#fff}
 .btn.sm{height:34px;font-size:13.5px;padding:0 14px;border-radius:8px}
 .btn svg{width:18px;height:18px}
 .search{display:flex;align-items:center;gap:8px;height:46px;padding:0 12px;border-radius:10px;background:var(--card);border:1px solid var(--divider);flex:1}
@@ -132,17 +63,17 @@ svg{display:block}
 .srow{display:flex;gap:8px;align-items:center}
 .sqbtn{width:46px;height:46px;border-radius:10px;background:var(--card);border:1px solid var(--divider);display:grid;place-items:center;color:var(--title);flex:none}
 .sqbtn svg{width:22px;height:22px}
-.field{width:100%;height:48px;border-radius:10px;border:1px solid var(--divider);background:var(--field);padding:0 14px;font-size:15px;color:var(--title);outline:0}
-.field:focus{border-color:var(--primary)}
-.field::placeholder{color:var(--hint)}
-.err{color:var(--error);font-size:12.5px;margin-top:6px;min-height:0}
+.tfield{width:100%;height:48px;border-radius:10px;border:1px solid var(--divider);background:var(--scaffold);padding:0 14px;font-size:15px;color:var(--title);outline:0}
+.tfield:focus{border-color:var(--primary)}
+.tfield::placeholder{color:var(--hint)}
+.err{color:var(--error);font-size:12.5px;margin-top:6px}
 
 /* =========================================================
    COLLECTION PAGE — gradient hero
    ========================================================= */
-.hero{position:relative;color:var(--hdr-ink);padding:6px 0 18px;border-radius:0 0 26px 26px;
-  background:linear-gradient(160deg,var(--hdr1) 0%,var(--hdr2) 100%)}
-.hero::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:1;
+.hero{position:relative;color:#fff;padding:6px 0 18px;border-radius:0 0 26px 26px;
+  background:linear-gradient(160deg,var(--appbar) 0%,var(--hdr2) 100%)}
+.hero::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='.055' stroke-width='1'%3E%3Crect x='21' y='21' width='22' height='22'/%3E%3Crect x='21' y='21' width='22' height='22' transform='rotate(45 32 32)'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3Cpath d='M0 0l10 10M64 0L54 10M0 64l10-10M64 64L54 54M32 0v8M32 64v-8M0 32h8M64 32h-8'/%3E%3C/g%3E%3C/svg%3E");
   background-size:64px 64px;mask-image:linear-gradient(180deg,#000 30%,transparent 100%);-webkit-mask-image:linear-gradient(180deg,#000 30%,transparent 100%)}
 .hero>*{position:relative}
@@ -165,8 +96,8 @@ svg{display:block}
 .fchip .cnt{font-size:12px;font-weight:600;opacity:.8;background:rgba(255,255,255,.18);padding:0 7px;border-radius:999px;line-height:18px}
 .fchip .cdot{box-shadow:0 0 0 2px rgba(255,255,255,.55)}
 .fchip.on{background:var(--chip-on-bg);color:var(--chip-on-ink);border-color:transparent;box-shadow:0 4px 12px rgba(0,0,0,.12)}
-.fchip.on .cnt{background:var(--soft);opacity:1}
-[data-theme=dark] .fchip.on .cnt{background:rgba(255,255,255,.2)}
+.fchip.on .cnt{background:var(--tint);opacity:1}
+:root[data-theme="dark"] .fchip.on .cnt{background:rgba(255,255,255,.2)}
 .fchip.on .cdot{box-shadow:none}
 .fchip.on .fchip-main{padding-right:4px}
 .fchip-more{width:32px;height:32px;margin-right:3px;border-radius:50%;display:grid;place-items:center}
@@ -179,7 +110,7 @@ svg{display:block}
    ========================================================= */
 .cbody{padding:16px;display:flex;flex-direction:column;gap:14px}
 .login{display:flex;gap:12px;background:var(--card);border-radius:10px;padding:14px;box-shadow:var(--shadow);border-left:3px solid var(--primary)}
-.login-ic{width:40px;height:40px;border-radius:50%;background:var(--soft);display:grid;place-items:center;color:var(--primary);flex:none}
+.login-ic{width:40px;height:40px;border-radius:50%;background:var(--tint);display:grid;place-items:center;color:var(--primary);flex:none}
 .login-ic svg{width:22px;height:22px}
 .login p{margin:0 0 10px;font-size:14px;line-height:1.6;color:var(--body)}
 .fhead{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:10px;padding:10px 6px 10px 14px;box-shadow:var(--shadow)}
@@ -197,21 +128,15 @@ svg{display:block}
 .flist{display:flex;flex-direction:column;gap:10px}
 .frow{display:flex;align-items:center;background:var(--card);border-radius:10px;box-shadow:var(--shadow);padding-right:4px}
 .frow-main{flex:1;display:flex;align-items:center;gap:14px;padding:14px 4px 14px 16px;min-width:0;border-radius:10px}
-.frow-chev{color:var(--hint)}
-/* empty state */
-.empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:36px 20px 20px}
+/* empty state (kit .empty + illustration) */
+.empty{padding:36px 20px 20px;gap:0}
 .empty svg{width:150px;height:auto}
-.empty h3{margin:18px 0 6px;font-size:18px;font-weight:700;color:var(--title)}
-.empty p{margin:0;font-size:14px;color:var(--hint);line-height:1.6}
+.empty h3{margin:18px 0 6px;font-size:18px;font-weight:700}
+.empty p{line-height:1.6}
 
 /* =========================================================
-   BOTTOM SHEET + DIALOG + SNACKBAR
+   SHEETS + DIALOG (kit .sheet / .dialog hosts)
    ========================================================= */
-.scrim{position:absolute;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
-.scrim.open{opacity:1;pointer-events:auto}
-.sheet{position:absolute;left:0;right:0;bottom:0;z-index:21;background:var(--card);border-radius:20px 20px 0 0;max-height:86%;
-  display:flex;flex-direction:column;transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);box-shadow:0 -8px 30px rgba(0,0,0,.12)}
-.sheet.open{transform:none}
 .grab{width:42px;height:4px;border-radius:9px;background:var(--divider);margin:10px auto 2px;flex:none}
 .sh-head{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 20px;flex:none}
 .sh-head h3{margin:0;flex:1;font-size:19px;font-weight:700;color:var(--title)}
@@ -219,24 +144,17 @@ svg{display:block}
 .sh-body{overflow-y:auto;padding:4px 20px 16px;flex:1;scrollbar-width:thin}
 .sh-foot{display:flex;gap:10px;padding:12px 20px 24px;border-top:1px solid var(--divider);flex:none;background:var(--card)}
 .sh-foot .btn{flex:1}
-.dscrim{z-index:30}
-.dlg{position:absolute;left:24px;right:24px;top:50%;z-index:31;background:var(--card);border-radius:20px;padding:22px 20px 16px;
-  transform:translateY(-46%) scale(.96);opacity:0;pointer-events:none;transition:.2s}
-.dlg.open{transform:translateY(-50%);opacity:1;pointer-events:auto}
-.dlg h3{margin:0 0 8px;font-size:19px;font-weight:700;color:var(--title)}
-.dlg p{margin:0 0 18px;font-size:15px;line-height:1.6;color:var(--body)}
+.dialog{border-radius:20px;padding:22px 20px 16px}
+.dialog h3{margin:0 0 8px;font-size:19px;font-weight:700;color:var(--title)}
+.dialog p{margin:0 0 18px;font-size:15px;line-height:1.6;color:var(--body)}
 .dlg-act{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
 .dlg-act .btn{min-width:96px}
-.snack{position:absolute;left:16px;right:16px;bottom:28px;z-index:50;background:var(--snack);color:var(--snack-ink);border-radius:10px;
-  padding:13px 16px;font-size:14.5px;display:flex;align-items:center;gap:10px;transform:translateY(140%);opacity:0;transition:.25s;pointer-events:none}
-.snack.show{transform:none;opacity:1}
-.snack svg{width:20px;height:20px;color:var(--primary);flex:none}
 
 /* menu sheet grid */
 .mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:6px 0 8px}
 .mitem{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px;border-radius:12px;font-size:13.5px;color:var(--title);text-align:center;line-height:1.35}
-.mitem:hover{background:var(--field)}
-.mitem .mic{width:54px;height:54px;border-radius:16px;background:var(--soft);display:grid;place-items:center}
+.mitem:hover{background:var(--scaffold)}
+.mitem .mic{width:54px;height:54px;border-radius:16px;background:var(--tint);display:grid;place-items:center}
 .mitem .mic svg{width:30px;height:30px}
 .mitem.rm{color:var(--error)}
 
@@ -247,14 +165,14 @@ svg{display:block}
 .vsw{display:flex;border:1px solid var(--divider);border-radius:10px;overflow:hidden;flex:none;height:46px}
 .vsw button{width:40px;display:grid;place-items:center;color:var(--hint)}
 .vsw button svg{width:19px;height:19px}
-.vsw button[aria-pressed=true]{background:var(--soft);color:var(--primary)}
+.vsw button[aria-pressed=true]{background:var(--tint);color:var(--primary)}
 .picks{display:flex;flex-wrap:wrap;gap:8px;padding-top:14px}
 .pick{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px 0 10px;border-radius:999px;border:1.5px solid var(--divider);font-size:14.5px;color:var(--title);transition:.15s}
 .pick .fic svg{width:20px;height:17px}
 .pick small{font-size:12px;color:var(--hint)}
 .pick .ck{width:18px;height:18px;border-radius:50%;background:var(--primary);color:#fff;display:none;place-items:center}
 .pick .ck svg{width:12px;height:12px}
-.pick[aria-pressed=true]{border-color:var(--primary);background:var(--soft)}
+.pick[aria-pressed=true]{border-color:var(--primary);background:var(--tint)}
 .pick[aria-pressed=true] .ck{display:grid}
 .plist{display:flex;flex-direction:column;padding-top:8px}
 .prow{display:flex;align-items:center;gap:14px;padding:12px 2px;border-bottom:1px solid var(--divider);text-align:left;width:100%}
@@ -269,14 +187,14 @@ svg{display:block}
 .lbl{font-size:14.5px;font-weight:600;color:var(--title);margin:16px 0 10px}
 .types{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .type{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;border-radius:12px;border:1.5px solid var(--divider);text-align:left;position:relative}
-.type .tic{width:36px;height:36px;border-radius:10px;background:var(--soft);display:grid;place-items:center;color:var(--primary)}
+.type .tic{width:36px;height:36px;border-radius:10px;background:var(--tint);display:grid;place-items:center;color:var(--primary)}
 .type .tic svg{width:22px;height:22px}
 .type b{font-size:15px;color:var(--title)}
 .type small{font-size:12.5px;color:var(--hint);line-height:1.4}
 .type .rad{position:absolute;top:12px;right:12px;width:20px;height:20px;border-radius:50%;border:2px solid var(--disabled)}
-.type[aria-checked=true]{border-color:var(--primary);background:var(--soft)}
+.type[aria-checked=true]{border-color:var(--primary);background:var(--tint)}
 .type[aria-checked=true] .rad{border-color:var(--primary);box-shadow:inset 0 0 0 4px var(--card);background:var(--primary)}
-[data-theme=dark] .type[aria-checked=true] .rad{box-shadow:inset 0 0 0 4px #1d2a2a}
+:root[data-theme="dark"] .type[aria-checked=true] .rad{box-shadow:inset 0 0 0 4px #1d2a2a}
 .sw{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;justify-items:center}
 .swb{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;transition:transform .12s}
 .swb svg{width:16px;height:16px;opacity:0}
@@ -284,7 +202,7 @@ svg{display:block}
 .swb[aria-checked=true] svg{opacity:1}
 /* manage sheet rows */
 .orow{display:flex;align-items:center;gap:14px;width:100%;padding:14px 4px;font-size:15.5px;color:var(--title);border-bottom:1px solid var(--divider);text-align:left}
-.orow .oic{width:40px;height:40px;border-radius:12px;background:var(--soft);display:grid;place-items:center;color:var(--primary)}
+.orow .oic{width:40px;height:40px;border-radius:12px;background:var(--tint);display:grid;place-items:center;color:var(--primary)}
 .orow .oic svg{width:20px;height:20px}
 .orow.del{color:var(--error)}
 .orow.del .oic{background:rgba(249,91,83,.12);color:var(--error)}
@@ -296,38 +214,21 @@ svg{display:block}
 </style>
 </head>
 <body>
-
-<!-- ======================= TOOLBAR (outside phone) ======================= -->
-<header class="tb">
-  <span class="tb-name">ডেমো ৪ · চিপ ফিল্টার ও হাদিস ফিড</span>
-  <nav class="tb-chips" id="tbChips" aria-label="স্ক্রিন"></nav>
-  <button class="tb-theme" id="themeBtn" aria-label="লাইট/ডার্ক মোড">◐</button>
-</header>
-
-<!-- ======================= PHONE ======================= -->
-<main class="stage">
-  <div class="phone" id="phone">
-    <div class="status" aria-hidden="true">
-      <span>৯:৪১</span>
-      <span class="glyphs">
-        <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
-        <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0"/><circle cx="8" cy="10" r="1.2" fill="#fff" stroke="none"/></svg>
-        <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x=".7" y=".7" width="21.6" height="10.6" rx="3" stroke="#fff" stroke-opacity=".6" stroke-width="1.2"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.6" fill="#fff"/><path d="M24 4v4" stroke="#fff" stroke-opacity=".6" stroke-width="1.6" stroke-linecap="round"/></svg>
-      </span>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- One rendered view moves into whichever chip screen is shown -->
+      <section class="screen" data-screen="card"><div class="pg" id="view"></div></section>
+      <section class="screen" data-screen="collection"></section>
+      <section class="screen" data-screen="folders"></section>
+      <section class="screen" data-screen="details"></section>
+      <section class="screen" data-screen="manage"></section>
+      <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="শিট"></div>
+      <div class="dialog" id="dlg" role="alertdialog" aria-modal="true"></div>
     </div>
-    <div class="screen" id="screen"></div>
-
-    <div class="scrim" id="scrim"></div>
-    <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="শিট"></section>
-
-    <div class="scrim dscrim" id="dscrim"></div>
-    <section class="dlg" id="dlg" role="alertdialog" aria-modal="true"></section>
-
-    <div class="snack" id="snack" role="status" aria-live="polite"></div>
-    <div class="homebar"></div>
   </div>
 </main>
-
+<script src="../../_kit/kit.js"></script>
 <script>
 /* =========================================================
    ICONS
@@ -339,9 +240,6 @@ const I = {
   mCollection:'<svg viewBox="0 0 33 33" fill="none"><path d="M5 5.5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3V29l-9-5.5L5 29z" fill="#1AA483"/><path d="M5 5.5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3V9H5z" fill="#118C6E"/><circle cx="24.5" cy="23.5" r="7" fill="#FFB84D"/><path d="M24.5 20v7M21 23.5h7" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/></svg>',
   mRemove:'<svg viewBox="0 0 33 33" fill="none"><path d="M7 10h19l-1.5 17.5a3 3 0 0 1-3 2.5h-10a3 3 0 0 1-3-2.5z" fill="#1AA483"/><rect x="4.5" y="6.5" width="24" height="4" rx="2" fill="#118C6E"/><path d="M12.5 6.5V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1.5" stroke="#FFB84D" stroke-width="2.4"/><rect x="12" y="14" width="2.4" height="11" rx="1.2" fill="#E6F7F1"/><rect x="18.6" y="14" width="2.4" height="11" rx="1.2" fill="#E6F7F1"/></svg>',
   mNote:'<svg viewBox="0 0 33 33" fill="none"><rect x="6" y="3.5" width="18" height="25" rx="3" fill="#1AA483"/><rect x="6" y="3.5" width="18" height="6" rx="3" fill="#118C6E"/><path d="M10 14h10M10 18.5h10M10 23h5" stroke="#E6F7F1" stroke-width="2" stroke-linecap="round"/><path d="M21.5 27.5l7-7 2.5 2.5-7 7h-2.5z" fill="#FFB84D"/></svg>',
-  mCopyTr:'<svg viewBox="0 0 33 33" fill="none"><rect x="10" y="3" width="18" height="21" rx="3" fill="#118C6E"/><rect x="5" y="8" width="18" height="22" rx="3" fill="#1AA483"/><path d="M9 15h10M9 19.5h10M9 24h6" stroke="#E6F7F1" stroke-width="2" stroke-linecap="round"/><circle cx="26" cy="26" r="5.5" fill="#FFB84D"/><path d="M23.6 26h4.8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>',
-  mCopyAr:'<svg viewBox="0 0 33 33" fill="none"><rect x="10" y="3" width="18" height="21" rx="3" fill="#118C6E"/><rect x="5" y="8" width="18" height="22" rx="3" fill="#1AA483"/><path d="M19 15c0 3-2 4.5-5 4.5s-5-1.5-5-3.5M13 12.5v.1M19 24H9" stroke="#E6F7F1" stroke-width="2" stroke-linecap="round"/><circle cx="26" cy="26" r="5.5" fill="#FFB84D"/><path d="M26 23.6v4.8M23.6 26h4.8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>',
-  mCopyAll:'<svg viewBox="0 0 33 33" fill="none"><rect x="10" y="3" width="18" height="21" rx="3" fill="#118C6E"/><rect x="5" y="8" width="18" height="22" rx="3" fill="#1AA483"/><path d="M9 14h10M9 18h10M9 22h10M9 26h5" stroke="#E6F7F1" stroke-width="1.8" stroke-linecap="round"/><circle cx="26" cy="26" r="5.5" fill="#FFB84D"/><path d="M23.7 26.2l1.6 1.6 3-3.2" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   mInfo:'<svg viewBox="0 0 33 33" fill="none"><circle cx="15.5" cy="16.5" r="12.5" fill="#1AA483"/><path d="M4 16.5A11.5 11.5 0 0 1 27 14H4z" fill="#118C6E" opacity=".55"/><path d="M15.5 15v8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="15.5" cy="10.5" r="1.7" fill="#fff"/><circle cx="26.5" cy="7" r="3.5" fill="#FFB84D"/></svg>',
   back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
   search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>',
@@ -359,11 +257,10 @@ const I = {
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12.5a1.5 1.5 0 0 0 1.5 1.5h7a1.5 1.5 0 0 0 1.5-1.5L18 7M9 7V4.5h6V7"/></svg>',
   pin:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 2.5l6 6-2 1.2-3.4 3.4.6 4.4-1.8 1.8-4-4L5 21.2 3 21l-.2-2 5.9-5.9-4-4L6.5 7.3l4.4.6 3.4-3.4z"/></svg>',
   bookDl:'<svg viewBox="0 0 28 28" fill="none"><path d="M5 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v19H7a2 2 0 0 1-2-2z" fill="#1AA483"/><path d="M5 22a2 2 0 0 1 2-2h14v4H7a2 2 0 0 1-2-2z" fill="#118C6E"/><circle cx="21" cy="20" r="5.5" fill="#FFB84D"/><path d="M21 17.3v5M18.8 20.3l2.2 2.2 2.2-2.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  chev:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>'
 };
 const EMPTY_ART = `<svg viewBox="0 0 160 130" fill="none" aria-hidden="true">
   <ellipse cx="80" cy="118" rx="58" ry="7" fill="var(--primary)" opacity=".12"/>
-  <circle cx="80" cy="62" r="54" fill="var(--soft)"/>
+  <circle cx="80" cy="62" r="54" fill="var(--tint)"/>
   <path d="M40 46a6 6 0 0 1 6-6h22l8 8h38a6 6 0 0 1 6 6v44a6 6 0 0 1-6 6H46a6 6 0 0 1-6-6z" fill="#118C6E"/>
   <path d="M36 60a6 6 0 0 1 6-6h76a6 6 0 0 1 6 6l-4 38a6 6 0 0 1-6 6H46a6 6 0 0 1-6-6z" fill="#1AA483"/>
   <path d="M92 50h16v30l-8-5-8 5z" fill="#FFB84D"/>
@@ -376,8 +273,7 @@ const EMPTY_ART = `<svg viewBox="0 0 160 130" fill="none" aria-hidden="true">
    DATA + STATE
    ========================================================= */
 const COLORS = ['#66BB6A','#7986CB','#4FC3F7','#4DB6AC','#9CCC65','#DCE775','#FFB74D','#FF8A65','#BA68C8','#F06292','#E57373','#BCAAA4','#90A4AE'];
-const BND = '০১২৩৪৫৬৭৮৯';
-const bn = n => String(n).replace(/\d/g, d => BND[d]);
+const bn = Kit.bn;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let clock = 100, uid = 10;
 
@@ -390,25 +286,20 @@ const S = {
     {id:5,name:'পরে পড়ব',color:'#F06292',count:0,type:'bm',created:5,modified:5}
   ],
   hadiths:[
-    {id:'b1',book:'সহিহ বুখারি',no:1,ar:'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ',tr:'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।',in:[1,2,3]},
-    {id:'m223',book:'সহিহ মুসলিম',no:223,ar:'الطُّهُورُ شَطْرُ الإِيمَانِ',tr:'পবিত্রতা ঈমানের অর্ধেক।',in:[1]},
-    {id:'b6018',book:'সহিহ বুখারি',no:6018,ar:'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ',tr:'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।',in:[]},
+    {id:'b1',book:'সহিহ বুখারি',no:1,tr:'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।',in:[1,2,3]},
+    {id:'m223',book:'সহিহ মুসলিম',no:223,tr:'পবিত্রতা ঈমানের অর্ধেক।',in:[1]},
+    {id:'b6018',book:'সহিহ বুখারি',no:6018,tr:'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।',in:[]},
     {id:'ad4985',book:'সুনানে আবু দাউদ',no:4985,missing:true,in:[1,4]}
   ],
   page:'card',        // 'card' (hadith list) | 'coll' (collection page)
   mode:'feed',        // collection page: 'feed' (chips + hadiths) | 'list' (classic folder list)
   sel:null,           // selected folder chip id (null = "সব")
-  tab:0, q:'', dq:'', sort:'name', empty:false, login:true,
+  tab:0, q:'', dq:'', sort:'name', login:true,
   sheet:null, dialog:null, ctx:{},
   cTab:0, cQ:'', cView:'chip', picks:new Set(),
   create:{type:'bm',name:'',color:0,err:'',ret:null},
   edit:{name:'',color:0}, sortTmp:'name'
 };
-
-const SCREENS = [
-  ['card','হাদিস কার্ড'],['menu','মেনু শিট'],['collection','কালেকশন শিট'],['create','নতুন ফোল্ডার'],
-  ['folders','ফোল্ডার লিস্ট'],['details','ফোল্ডারের ভেতরে'],['manage','এডিট ও ডিলিট'],['sort','সাজানো'],['empty','খালি অবস্থা']
-];
 
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
@@ -422,11 +313,11 @@ function sorted(list){
   else a.sort((x,y) => y.modified - x.modified);
   return a;
 }
-const folders = type => S.empty ? [] : sorted(S.folders.filter(f => f.type === type));
+const folders = type => sorted(S.folders.filter(f => f.type === type));
 const bmTotal = () => folders('bm').reduce((s,f) => s + f.count, 0);
-const hMatch = (h,q) => !q || [h.book, h.tr||'', h.ar||'', 'হাদিস '+bn(h.no)].join(' ').toLowerCase().includes(q.toLowerCase());
+const hMatch = (h,q) => !q || [h.book, h.tr||'', 'হাদিস '+bn(h.no)].join(' ').toLowerCase().includes(q.toLowerCase());
 function hadithsIn(fid){
-  let list = S.empty ? [] : S.hadiths.filter(h => fid ? h.in.includes(fid) : h.in.some(id => F(id) && F(id).type==='bm'));
+  let list = S.hadiths.filter(h => fid ? h.in.includes(fid) : h.in.some(id => F(id) && F(id).type==='bm'));
   if (S.sort === 'name') list = list.slice().sort((a,b) => a.book.localeCompare(b.book,'bn') || a.no - b.no);
   else if (S.sort === 'modified') list = list.slice().reverse();
   return list;
@@ -450,27 +341,27 @@ function hadithCard(h, showTags){
         <h4>বুকমার্ক করা হাদিস লোড করা যায়নি</h4>
         <p>এই বুকমার্কের হাদিসের বইটি ডাউনলোড করা হয়নি। হাদিস দেখতে বইটি ডাউনলোড করুন।</p>
         <button class="btn tonal sm" data-act="download">ডাউনলোডে যান</button></div></div>`
-    : `<p class="hc-ar" dir="rtl" lang="ar">${h.ar}</p><p class="hc-bn">${h.tr}</p>`;
+    : `<p class="hc-bn">${h.tr}</p>`;
   const tags = showTags && n ? `<div class="hc-tags">${h.in.map(F).filter(Boolean).map(f =>
       `<span class="tag"><i style="background:${f.color}"></i>${esc(f.name)}</span>`).join('')}</div>` : '';
   return `<article class="hc">${top}${body}${tags}</article>`;
 }
 
 /* =========================================================
-   SCREEN: hadith list page (screen 1)
+   VIEW: hadith list page
    ========================================================= */
 function renderCardPage(){
   const list = ['b1','m223','b6018'].map(H);
-  return `<div class="appbar">
+  return `<header class="appbar">
       <button class="ib" data-act="openColl" aria-label="ফিরে যান">${I.back}</button>
       <h1>সহিহ বুখারি</h1>
       <button class="ib" data-act="openColl" aria-label="আমার কালেকশন">${I.bm}</button>
-    </div>
-    <div class="list">${list.map(h => hadithCard(h,false)).join('')}</div>`;
+    </header>
+    <div class="scroll"><div class="list">${list.map(h => hadithCard(h,false)).join('')}</div></div>`;
 }
 
 /* =========================================================
-   SCREEN: collection page (screens 5, 6, 9) — hero + chips + body
+   VIEW: collection page — hero + chips + body
    ========================================================= */
 function renderCollPage(){
   const fl = folders('bm');
@@ -488,9 +379,9 @@ function renderCollPage(){
       </div>`).join('')}
       <div class="fchip add"><button class="fchip-main" data-act="newFolder" aria-label="নতুন ফোল্ডার তৈরি করুন">${I.plus}</button></div>
     </div>` : '';
-  const tabs = ['বুকমার্কস','পিনস','নোটস'].map((t,i) =>
+  const tabs = ['বুকমার্কস','পিনস'].map((t,i) =>
       `<button role="tab" aria-selected="${S.tab===i}" data-act="tab" data-i="${i}">${t}</button>`).join('');
-  return `<header class="hero">
+  return `<div class="scroll"><header class="hero">
       <div class="hero-bar">
         <button class="ib" data-act="goCard" aria-label="ফিরে যান">${I.back}</button><span class="grow"></span>
         <button class="ib" data-act="login" aria-label="Gmail-এ লগইন ও ব্যাকআপ">${I.cloud}</button>
@@ -505,7 +396,7 @@ function renderCollPage(){
         <p>আপনার কালেকশনগুলো অনলাইনে সেভ রাখতে উপরের বাটনে ক্লিক করে Gmail-এ লগইন করুন</p>
         <button class="btn tonal sm" data-act="loginOk">ঠিক আছে</button></div></div>` : ''}
       ${renderCollBody(fl, selF)}
-    </div>`;
+    </div></div>`;
 }
 
 function emptyBlock(title, sub){
@@ -513,7 +404,6 @@ function emptyBlock(title, sub){
 }
 
 function renderCollBody(fl, selF){
-  if (S.tab === 2) return emptyBlock('কোন নোট পাওয়া যায়নি');
   if (S.tab === 1) {
     const pins = folders('pin');
     return `<div class="srow"><label class="search">${I.search}<input id="q" type="search" placeholder="পিন সার্চ করুন" value="${esc(S.q)}" aria-label="পিন সার্চ করুন"></label>
@@ -526,7 +416,7 @@ function renderCollBody(fl, selF){
       <button class="sqbtn" data-act="sort" aria-label="সাজান">${I.sort}</button></div>
       <div id="area">${folderListHtml(fl)}</div>`;
   }
-  // feed mode — selected folder (screen 6) or "সব"
+  // feed mode — one selected folder, or "সব"
   const head = selF
     ? `<div class="fhead"><span class="fic big" style="color:${selF.color}">${I.folder}</span>
         <div class="ftxt"><b>${esc(selF.name)}</b><small>${countText(selF.count)}</small></div>
@@ -560,33 +450,28 @@ function feedHtml(){
 }
 
 /* =========================================================
-   RENDER main screen
+   RENDER the view
    ========================================================= */
 function render(keepScroll){
-  const sc = $('screen'), top = sc.scrollTop;
-  sc.innerHTML = S.page === 'card' ? renderCardPage() : renderCollPage();
-  $('phone').style.setProperty('--sb', S.page === 'card' ? 'var(--appbar)' : 'var(--hdr1)');
-  sc.scrollTop = keepScroll ? top : 0;
+  const v = $('view'), old = v.querySelector('.scroll'), top = old ? old.scrollTop : 0;
+  v.innerHTML = S.page === 'card' ? renderCardPage() : renderCollPage();
+  const sc = v.querySelector('.scroll'); if (sc) sc.scrollTop = keepScroll ? top : 0;
   const sel = $('selChip'), row = $('chips');
   if (sel && row && sel.offsetLeft + sel.offsetWidth > row.clientWidth - 8) row.scrollLeft = sel.offsetLeft - 48;
-  syncToolbar();
 }
 
 /* =========================================================
    SHEETS
    ========================================================= */
-function openSheet(name, ctx){ S.sheet = name; if (ctx) S.ctx = Object.assign({}, S.ctx, ctx); renderSheet(); $('scrim').classList.add('open'); $('sheet').classList.add('open'); syncToolbar(); }
-function closeSheet(){ S.sheet = null; $('scrim').classList.remove('open'); $('sheet').classList.remove('open'); syncToolbar(); }
+function openSheet(name, ctx){ S.sheet = name; if (ctx) S.ctx = Object.assign({}, S.ctx, ctx); renderSheet(); Kit.open('sheet'); }
+function closeSheet(){ S.sheet = null; Kit.close('sheet'); }
 const head = (title, sub) => `<div class="grab"></div><div class="sh-head"><h3>${title}</h3><button class="ib" data-act="closeSheet" aria-label="বন্ধ করুন">${I.close}</button></div>${sub?`<div class="sh-sub">${sub}</div>`:''}`;
 
 function renderSheet(){
   const el = $('sheet'); let html = '';
   if (S.sheet === 'menu') {
     const h = H(S.ctx.h);
-    const items = [
-      ['collect', I.mCollection, 'বুকমার্ক / পিন'], ['note', I.mNote, 'নোট'], ['copyTr', I.mCopyTr, 'অনুবাদ কপি'],
-      ['copyAr', I.mCopyAr, 'আরবি কপি'], ['copyAll', I.mCopyAll, 'হাদিস কপি'], ['detail', I.mInfo, 'বিস্তারিত']
-    ];
+    const items = [['collect', I.mCollection, 'বুকমার্ক / পিন'], ['note', I.mNote, 'নোট'], ['detail', I.mInfo, 'বিস্তারিত']];
     if (S.ctx.inFolder) items.push(['remove', I.mRemove, 'বুকমার্ক সরান']);
     html = head('অপশন', `${h.book} · হাদিস ${bn(h.no)}`) + `<div class="sh-body"><div class="mgrid">${items.map(([a,ic,l]) =>
       `<button class="mitem ${a==='remove'?'rm':''}" data-act="m-${a}"><span class="mic">${ic}</span>${l}</button>`).join('')}</div></div>`;
@@ -604,7 +489,7 @@ function renderSheet(){
           </div></div>
         <div id="cList">${pickHtml(type)}</div>
       </div>
-      <div class="sh-foot"><button class="btn out" data-act="newFromSheet">${I.plus}নতুন তৈরি করুন</button><button class="btn fill" data-act="saveCollect">ঠিক আছে</button></div>`;
+      <div class="sh-foot"><button class="btn outline" data-act="newFromSheet">${I.plus}নতুন তৈরি করুন</button><button class="btn" data-act="saveCollect">ঠিক আছে</button></div>`;
   }
   else if (S.sheet === 'create') {
     const c = S.create;
@@ -615,25 +500,25 @@ function renderSheet(){
         <button class="type" role="radio" aria-checked="${c.type==='pin'}" data-act="cType" data-v="pin"><span class="rad"></span><span class="tic">${I.pin}</span><b>পিন</b><small>হাদিস পিন করুন</small></button>
       </div>
       <label class="lbl" for="cName" style="display:block">ফোল্ডারের নাম</label>
-      <input class="field" id="cName" placeholder="নামাজের হাদিস" value="${esc(c.name)}" autocomplete="off">
+      <input class="tfield" id="cName" placeholder="নামাজের হাদিস" value="${esc(c.name)}" autocomplete="off">
       ${c.err ? `<div class="err">${c.err}</div>` : ''}
       <div class="lbl">ফোল্ডার রং নির্বাচন করুন</div>
       ${swatches(c.color,'cColor')}
     </div>
-    <div class="sh-foot"><button class="btn out" data-act="cancelCreate">বাতিল</button><button class="btn fill" data-act="saveCreate">ঠিক আছে</button></div>`;
+    <div class="sh-foot"><button class="btn outline" data-act="cancelCreate">বাতিল</button><button class="btn" data-act="saveCreate">ঠিক আছে</button></div>`;
   }
   else if (S.sheet === 'manage') {
     const f = F(S.ctx.f);
     html = head('অন্যান্য অপশন', f ? esc(f.name) : '') + `<div class="sh-body">
       <button class="orow" data-act="editOpen"><span class="oic">${I.pencil}</span>বুকমার্ক এডিট করুন</button>
       <button class="orow del" data-act="delOpen"><span class="oic">${I.trash}</span>বুকমার্ক ডিলিট করুন</button>
-      <button class="btn text" style="width:100%;margin-top:10px" data-act="closeSheet">বাতিল</button></div>`;
+      <button class="btn text block" style="margin-top:10px" data-act="closeSheet">বাতিল</button></div>`;
   }
   else if (S.sheet === 'sort') {
     const opts = [['name','নাম অনুসারে (A–Z)'],['created','তৈরির তারিখ'],['modified','সর্বশেষ পরিবর্তিত']];
     html = head('বুকমার্কগুলো সাজান') + `<div class="sh-body" role="radiogroup">${opts.map(([v,l]) =>
       `<button class="rrow" role="radio" aria-checked="${S.sortTmp===v}" data-act="sortPick" data-v="${v}"><span class="rdot"></span>${l}</button>`).join('')}</div>
-      <div class="sh-foot"><button class="btn out" data-act="closeSheet">বাতিল</button><button class="btn fill" data-act="sortOk">ঠিক আছে</button></div>`;
+      <div class="sh-foot"><button class="btn outline" data-act="closeSheet">বাতিল</button><button class="btn" data-act="sortOk">ঠিক আছে</button></div>`;
   }
   el.innerHTML = html;
 }
@@ -644,7 +529,7 @@ function swatches(sel, act){
 }
 
 function pickHtml(type){
-  const all = S.folders.filter(f => f.type === type && !S.empty);
+  const all = S.folders.filter(f => f.type === type);
   if (!all.length) return emptyBlock(type==='bm' ? 'কোন বুকমার্ক পাওয়া যায়নি' : 'কোন পিন পাওয়া যায়নি');
   const q = S.cQ.trim(); const m = sorted(all).filter(f => !q || f.name.includes(q));
   if (!m.length) return emptyBlock('কোন সার্চ রেজাল্ট পাওয়া যায়নি');
@@ -660,16 +545,16 @@ function pickHtml(type){
 /* =========================================================
    DIALOGS
    ========================================================= */
-function openDialog(name){ S.dialog = name; renderDialog(); $('dscrim').classList.add('open'); $('dlg').classList.add('open'); syncToolbar();
+function openDialog(name){ S.dialog = name; renderDialog(); Kit.open('dlg');
   setTimeout(() => { const f = $('dlg').querySelector('input,.btn'); if (f) f.focus(); }, 60); }
-function closeDialog(){ S.dialog = null; $('dscrim').classList.remove('open'); $('dlg').classList.remove('open'); syncToolbar(); }
+function closeDialog(){ S.dialog = null; Kit.close('dlg'); }
 function renderDialog(){
   const d = $('dlg'); const confirmMsg = '<p>আপনি কি নিশ্চিত? বুকমার্ক ডিলিট করতে চান?</p>';
   if (S.dialog === 'edit') d.innerHTML = `<h3>বুকমার্ক এডিট করুন</h3>
       <label class="lbl" for="eName" style="display:block;margin-top:8px">ফোল্ডারের নাম</label>
-      <input class="field" id="eName" value="${esc(S.edit.name)}" autocomplete="off">
+      <input class="tfield" id="eName" value="${esc(S.edit.name)}" autocomplete="off">
       <div class="lbl">ফোল্ডার রং নির্বাচন করুন</div>${swatches(S.edit.color,'eColor')}
-      <div class="dlg-act"><button class="btn text" data-act="closeDialog">বাতিল</button><button class="btn fill" data-act="editOk">ঠিক আছে</button></div>`;
+      <div class="dlg-act"><button class="btn text" data-act="closeDialog">বাতিল</button><button class="btn" data-act="editOk">ঠিক আছে</button></div>`;
   else if (S.dialog === 'delete' || S.dialog === 'remove') d.innerHTML = `<h3>বুকমার্ক</h3>${confirmMsg}
       <div class="dlg-act"><button class="btn text" data-act="closeDialog">বাতিল</button><button class="btn danger" data-act="${S.dialog==='delete'?'delOk':'removeOk'}">ডিলিট করুন</button></div>`;
   else if (S.dialog === 'io') d.innerHTML = `<h3>ইমপোর্ট / এক্সপোর্ট</h3>
@@ -679,25 +564,47 @@ function renderDialog(){
       <div class="dlg-act" style="margin-top:6px"><button class="btn text" data-act="closeDialog">বাতিল</button></div>`;
 }
 
+const snack = msg => Kit.snack(msg);
+
 /* =========================================================
-   SNACKBAR
+   SCREENS — chips map to a view (+ a sheet for the sheet steps).
+   In-app navigation that changes the view moves the chip too.
    ========================================================= */
-let snackT;
-function snack(msg){ const s = $('snack'); s.innerHTML = I.check + `<span>${msg}</span>`; s.classList.add('show');
-  clearTimeout(snackT); snackT = setTimeout(() => s.classList.remove('show'), 2500); }
+const VIEW_OF = {card:'card', collection:'card', folders:'folders', details:'details', manage:'folders'};
+let internal = false;
+function go(id){ internal = true; Kit.show(id); internal = false; }
+function screenOf(){
+  if (S.page === 'card') return 'card';
+  return S.tab === 0 && S.mode === 'feed' && S.sel ? 'details' : 'folders';
+}
+function sync(keepScroll){ const want = screenOf(); if (VIEW_OF[Kit.current] !== want) go(want); else render(keepScroll); }
+const firstId = () => F(1) ? 1 : ((folders('bm')[0] || {}).id || null);
+
+Kit.onScreen(id => {
+  document.querySelector(`.screen[data-screen="${id}"]`).appendChild($('view'));
+  S.sheet = null; S.dialog = null;
+  if (!internal) { /* a chip resets the demo state for its step */
+    S.q = ''; S.dq = ''; S.tab = 0; S.login = true;
+    if (VIEW_OF[id] === 'card') S.page = 'card';
+    else { S.page = 'coll'; S.mode = 'feed'; S.sel = id === 'details' ? firstId() : null; }
+  }
+  render();
+  if (!internal && id === 'collection') { const h = H('b6018'); S.picks = new Set(h.in); S.cTab = 0; S.cQ = ''; openSheet('collection', {h:h.id}); }
+  if (!internal && id === 'manage') { const f = firstId(); if (f) openSheet('manage', {f}); }
+});
 
 /* =========================================================
    ACTIONS (event delegation)
    ========================================================= */
 const A = {
-  openColl(){ S.page='coll'; S.mode='feed'; S.sel=null; S.tab=0; S.empty=false; S.dq=''; render(); },
-  goCard(){ S.page='card'; render(); },
+  openColl(){ S.page='coll'; S.mode='feed'; S.sel=null; S.tab=0; S.dq=''; sync(); },
+  goCard(){ S.page='card'; sync(); },
   more(t){ const h = H(t.dataset.h); openSheet('menu', {h:h.id, inFolder: S.page==='coll' && S.mode==='feed' && !!S.sel}); },
   download(){ snack('ডাউনলোড পেজ খোলা হচ্ছে'); },
-  tab(t){ S.tab=+t.dataset.i; S.q=''; render(true); },
-  toggleView(){ S.mode = S.mode==='feed' ? 'list' : 'feed'; S.q=''; S.dq=''; render(true); },
-  chip(t){ const id=+t.dataset.f; S.sel = id || null; S.dq=''; render(true); },
-  openFolder(t){ S.mode='feed'; S.sel=+t.dataset.f; S.dq=''; render(); },
+  tab(t){ S.tab=+t.dataset.i; S.q=''; sync(true); },
+  toggleView(){ S.mode = S.mode==='feed' ? 'list' : 'feed'; S.q=''; S.dq=''; sync(true); },
+  chip(t){ const id=+t.dataset.f; S.sel = id || null; S.dq=''; sync(true); },
+  openFolder(t){ S.mode='feed'; S.sel=+t.dataset.f; S.dq=''; sync(); },
   fmore(t){ openSheet('manage', {f:+t.dataset.f}); },
   newFolder(){ S.create={type:'bm',name:'',color:0,err:'',ret:null}; openSheet('create'); },
   login(){ S.login=true; render(); snack('Gmail-এ লগইন করে কালেকশন ব্যাকআপ রাখুন'); },
@@ -709,22 +616,19 @@ const A = {
   closeDialog(){ closeDialog(); },
   /* menu sheet */
   'm-collect'(){ const h=H(S.ctx.h); S.picks=new Set(h.in); S.cTab=0; S.cQ=''; openSheet('collection'); },
-  'm-note'(){ closeSheet(); },
-  'm-detail'(){ closeSheet(); },
-  'm-copyTr'(){ closeSheet(); snack('অনুবাদ কপি করা হয়েছে'); },
-  'm-copyAr'(){ closeSheet(); snack('আরবি কপি করা হয়েছে'); },
-  'm-copyAll'(){ closeSheet(); snack('হাদিস কপি করা হয়েছে'); },
+  'm-note'(){ closeSheet(); snack('নোট লেখার শিট খোলা হবে'); },
+  'm-detail'(){ closeSheet(); snack('হাদিসের বিস্তারিত খোলা হবে'); },
   'm-remove'(){ closeSheet(); openDialog('remove'); },
   /* collection sheet */
   cTab(t){ S.cTab=+t.dataset.i; S.cQ=''; renderSheet(); },
-  cView(t){ S.cView=t.dataset.v; $('cList').innerHTML = pickHtml(S.cTab?'pin':'bm'); renderSheet(); },
+  cView(t){ S.cView=t.dataset.v; renderSheet(); },
   pick(t){ const id=+t.dataset.f; S.picks.has(id) ? S.picks.delete(id) : S.picks.add(id); $('cList').innerHTML = pickHtml(S.cTab?'pin':'bm'); },
   newFromSheet(){ S.create={type:S.cTab?'pin':'bm',name:'',color:0,err:'',ret:'collection'}; openSheet('create'); },
   saveCollect(){
     const h = H(S.ctx.h), next = [...S.picks].filter(id => F(id));
     S.folders.forEach(f => { const was=h.in.includes(f.id), now=next.includes(f.id);
       if (was!==now){ f.count = Math.max(0, f.count + (now?1:-1)); f.modified = ++clock; } });
-    h.in = next; closeSheet(); render(true); snack('বুকমার্ক সেভ করা হয়েছে');
+    h.in = next; closeSheet(); sync(true); snack('বুকমার্ক সেভ করা হয়েছে');
   },
   /* create sheet */
   cType(t){ S.create.type=t.dataset.v; S.create.name=$('cName').value; renderSheet(); },
@@ -734,21 +638,22 @@ const A = {
     const name = $('cName').value.trim();
     if (!name){ S.create.err='ফোল্ডারের নাম লিখুন'; S.create.name=''; renderSheet(); $('cName').focus(); return; }
     const f = {id:++uid,name,color:COLORS[S.create.color],count:0,type:S.create.type,created:++clock,modified:clock};
-    S.folders.push(f); S.empty=false;
+    S.folders.push(f);
+    sync(true);
     if (S.create.ret==='collection'){ S.picks.add(f.id); S.cTab = f.type==='pin'?1:0; S.cQ=''; openSheet('collection'); }
     else closeSheet();
-    render(true);
   },
   /* manage */
   editOpen(){ const f=F(S.ctx.f); S.edit={name:f.name,color:Math.max(0,COLORS.indexOf(f.color))}; closeSheet(); openDialog('edit'); },
   eColor(t){ S.edit.color=+t.dataset.i; S.edit.name=$('eName').value; renderDialog(); },
   editOk(){ const f=F(S.ctx.f), n=$('eName').value.trim(); if(!n){ $('eName').focus(); return; }
-    f.name=n; f.color=COLORS[S.edit.color]; f.modified=++clock; closeDialog(); render(true); snack('বুকমার্ক আপডেট করা হয়েছে'); },
+    f.name=n; f.color=COLORS[S.edit.color]; f.modified=++clock; closeDialog(); sync(true); snack('বুকমার্ক আপডেট করা হয়েছে'); },
   delOpen(){ closeSheet(); openDialog('delete'); },
   delOk(){ const id=S.ctx.f; S.folders=S.folders.filter(f=>f.id!==id); S.hadiths.forEach(h=>h.in=h.in.filter(x=>x!==id));
-    if (S.sel===id) S.sel=null; closeDialog(); render(true); snack('বুকমার্ক মুছে ফেলা হয়েছে'); },
+    if (S.sel===id) S.sel=null; closeDialog(); sync(true); snack('বুকমার্ক মুছে ফেলা হয়েছে'); },
   removeOk(){ const h=H(S.ctx.h), f=F(S.sel); h.in=h.in.filter(x=>x!==S.sel); if(f){ f.count=Math.max(0,f.count-1); f.modified=++clock; }
-    closeDialog(); if (!hadithsIn(S.sel).length){ S.mode='list'; S.sel=null; } render(true); snack('বুকমার্ক মুছে ফেলা হয়েছে'); },
+    /* last hadith removed → back to the folder list */
+    closeDialog(); if (!hadithsIn(S.sel).length){ S.mode='list'; S.sel=null; } sync(true); snack('বুকমার্ক মুছে ফেলা হয়েছে'); },
   /* sort */
   sortPick(t){ S.sortTmp=t.dataset.v; renderSheet(); },
   sortOk(){ S.sort=S.sortTmp; closeSheet(); render(true); }
@@ -758,9 +663,9 @@ document.addEventListener('click', e => {
   const t = e.target.closest('[data-act]'); if (!t) return;
   const fn = A[t.dataset.act]; if (fn){ e.preventDefault(); fn(t); }
 });
-$('scrim').addEventListener('click', closeSheet);
-$('dscrim').addEventListener('click', closeDialog);
-document.addEventListener('keydown', e => { if (e.key==='Escape'){ if (S.dialog) closeDialog(); else if (S.sheet) closeSheet(); } });
+/* The kit scrim and Escape close every overlay; keep the state in step */
+document.addEventListener('click', e => { if (e.target.classList.contains('scrim')) { S.sheet = null; S.dialog = null; } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { S.sheet = null; S.dialog = null; } });
 /* live search */
 document.addEventListener('input', e => {
   const id = e.target.id;
@@ -769,63 +674,13 @@ document.addEventListener('input', e => {
   else if (id==='cq'){ S.cQ=e.target.value; $('cList').innerHTML = pickHtml(S.cTab?'pin':'bm'); }
 });
 
-/* =========================================================
-   TOOLBAR — screen chips (jump straight to a state)
-   ========================================================= */
-function resetUi(){ closeDialog(); $('snack').classList.remove('show'); S.sheet=null; S.q=''; S.dq=''; S.empty=false; S.tab=0; S.login=true; }
-function go(id){
-  resetUi();
-  const toColl = (mode, sel) => { S.page='coll'; S.mode=mode; S.sel=sel; };
-  switch(id){
-    case 'card': S.page='card'; closeSheet(); break;
-    case 'menu': S.page='card'; render(); openSheet('menu',{h:'b6018',inFolder:false}); return;
-    case 'collection': S.page='card'; render(); S.picks=new Set(H('b6018').in); S.cTab=0; S.cQ=''; openSheet('collection',{h:'b6018'}); return;
-    case 'create': S.page='card'; render(); S.ctx.h='b6018'; S.picks=new Set(H('b6018').in); S.cTab=0;
-      S.create={type:'bm',name:'',color:0,err:'',ret:'collection'}; openSheet('create'); return;
-    case 'folders': toColl('list',null); closeSheet(); break;
-    case 'details': toColl('feed', F(1) ? 1 : (S.folders[0]||{}).id || null); closeSheet(); break;
-    case 'manage': toColl('list',null); render(); openSheet('manage',{f:(F(1)||S.folders[0]||{}).id}); return;
-    case 'sort': toColl('list',null); render(); S.sortTmp=S.sort; openSheet('sort'); return;
-    case 'empty': toColl('list',null); S.empty=true; closeSheet(); break;
-  }
-  render();
-}
-function activeId(){
-  if (S.page==='card') return S.sheet==='menu'?'menu':S.sheet==='collection'?'collection':S.sheet==='create'?'create':'card';
-  if (S.sheet==='manage' || S.dialog==='edit' || S.dialog==='delete') return 'manage';
-  if (S.sheet==='sort') return 'sort';
-  if (S.empty) return 'empty';
-  if (S.mode==='feed' && S.sel) return 'details';
-  if (S.mode==='list' && S.tab===0) return 'folders';
-  return '';
-}
-function syncToolbar(){
-  const a = activeId();
-  document.querySelectorAll('.tb-chip').forEach(c => { const on = c.dataset.s===a; c.classList.toggle('on',on); c.setAttribute('aria-current', on?'true':'false'); });
-}
-$('tbChips').innerHTML = SCREENS.map(([id,l]) => `<button class="tb-chip" data-s="${id}">${l}</button>`).join('');
-$('tbChips').addEventListener('click', e => { const c = e.target.closest('.tb-chip'); if (c) go(c.dataset.s); });
-
-/* =========================================================
-   THEME + BOOT
-   ========================================================= */
-(function(){
-  let dark = false;
-  try { dark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch(e){}
-  try { const t = localStorage.getItem('bm-demo-theme'); if (t) dark = t==='dark'; } catch(e){}
-  document.documentElement.setAttribute('data-theme', dark?'dark':'light');
-  $('themeBtn').addEventListener('click', () => {
-    const d = document.documentElement.getAttribute('data-theme') !== 'dark';
-    document.documentElement.setAttribute('data-theme', d?'dark':'light');
-    try { localStorage.setItem('bm-demo-theme', d?'dark':'light'); } catch(e){}
-  });
-})();
-window.addEventListener('message', e => { const d = e.data; if (d && d.type==='screen' && SCREENS.some(s=>s[0]===d.id)) go(d.id); });
-(function(){
-  let s = 'card';
-  try { const p = new URLSearchParams(location.search).get('screen'); if (p && SCREENS.some(x=>x[0]===p)) s = p; } catch(e){}
-  go(s);
-})();
+Kit.init({ demo: 4, name: 'চিপ ফিল্টার ও হাদিস ফিড', screens: [
+  { id: 'card', label: 'হাদিস কার্ড' },
+  { id: 'collection', label: 'কালেকশন শিট' },
+  { id: 'folders', label: 'ফোল্ডার লিস্ট' },
+  { id: 'details', label: 'ফোল্ডারের ভেতরে' },
+  { id: 'manage', label: 'এডিট ও ডিলিট' }
+]});
 </script>
 </body>
 </html>

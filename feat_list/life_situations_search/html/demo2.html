@@ -18,10 +18,6 @@
 .sfield input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:14.5px}
 .sfield input::placeholder{color:var(--hint)}
 .sdiv{height:1px;background:var(--divider);margin:14px 0}
-.wrap{display:flex;flex-wrap:wrap;gap:8px}
-.schip{display:inline-flex;align-items:center;gap:4px;height:30px;padding:0 12px;border-radius:20px;font-size:12.5px;color:var(--body);border:.8px solid var(--divider);background:var(--card)}
-.schip svg{width:13px;height:13px}
-.schip.fill{border-color:transparent;background:var(--tint)}
 
 /* ===== NEW: situation grid (4 per row, like the home quick actions) ===== */
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 4px}
@@ -46,13 +42,11 @@
 .sh-body{flex:1;min-height:0;overflow-y:auto;background:var(--scaffold);padding:4px 0 24px;border-top:1px solid var(--divider)}
 .sec-h{margin:14px 16px 8px;font-size:15.5px;font-weight:700;color:var(--title);display:flex;align-items:center;gap:8px}
 .sec-h::before{content:"";width:4px;height:16px;border-radius:4px;background:var(--primary)}
-.offl{margin:0 16px 10px;font-size:12.5px;color:var(--hint)}
 
 /* ===== Dua card with ⋮ menu ===== */
 .dua{padding:12px 8px 12px 14px}
 .dua-top{display:flex;align-items:flex-start;gap:4px}
 .dua-top h4{flex:1;margin:8px 0 0;font-size:15px;line-height:1.4;color:var(--title)}
-.dua .arabic{font-size:22px;margin:8px 6px 6px 0}
 .lbl{display:block;margin-top:6px;font-size:12.5px;font-weight:700;color:var(--primary-dark)}
 :root[data-theme="dark"] .lbl{color:var(--primary)}
 .txt{margin:2px 6px 0 0;color:var(--title);font-size:14.5px;line-height:1.6}
@@ -61,14 +55,10 @@
 /* ===== Hadith card + full hadith page ===== */
 .hcard{cursor:pointer}
 .hcard .translation{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.hcard .arabic{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .chap{background:var(--card);border-radius:var(--r-card);margin:0 12px 10px;padding:12px var(--pad);font-weight:700;color:var(--title)}
 .chap span{display:block;font-weight:400;font-size:13px;color:var(--hint)}
 
-/* ===== Loading + empty inside the sheet ===== */
-.ls-loading{min-height:200px;display:grid;place-items:center}
-.ls-loading canvas{transform:translateY(-16.5px)}
-.empty .btn{margin-top:14px}
+/* ===== Copy / share menu ===== */
 .list-row svg{color:var(--hint)}
 </style>
 </head>
@@ -76,7 +66,7 @@
 <main class="kit-stage">
   <div class="phone">
     <div class="viewport">
-      <!-- ===== Search page (moved into whichever of these 4 screens is open) ===== -->
+      <!-- ===== Search page (moved into whichever of these 2 screens is open) ===== -->
       <section class="screen" data-screen="search">
         <div id="search-page" style="display:contents">
           <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-snack="হোম পেজে ফিরবে" data-i="back"></button><h1>সার্চ</h1></header>
@@ -84,8 +74,6 @@
         </div>
       </section>
       <section class="screen" data-screen="sheet"></section>
-      <section class="screen" data-screen="loading"></section>
-      <section class="screen" data-screen="empty"></section>
 
       <!-- ===== Full hadith page ===== -->
       <section class="screen" data-screen="hadith">
@@ -100,7 +88,7 @@
         <div class="sh-body" id="sh-body"></div>
       </div>
 
-      <!-- ===== Sheet: dua / hadith menu (stacks above the situation sheet) ===== -->
+      <!-- ===== Sheet: dua / hadith copy-share menu (stacks above the situation sheet) ===== -->
       <div class="sheet" id="menu" data-stack="1" role="dialog" aria-label="অন্যান্য অপশন">
         <div class="sheet-head"><h2 id="menu-title"></h2><button class="icon-btn" data-close aria-label="বন্ধ করুন" data-i="close"></button></div>
         <div class="sheet-body" id="menu-body"></div>
@@ -112,9 +100,9 @@
 <script src="situations_data.js"></script>
 <script>
 (function () {
-  const { $, $$, bn, icons } = Kit;
+  const { $, $$, icons } = Kit;
   const ic = (n) => icons[n];
-  const S = { sit: 'debt', hadith: '6116', mode: 'sit', offline: false, menu: null };
+  const S = { sit: 'debt', hadith: '6116', menu: null };
 
   /* ---------- Search page ---------- */
   function renderSearch() {
@@ -125,12 +113,6 @@
         <!-- NEW: জীবনের পরিস্থিতি grid -->
         <h2 class="stitle">জীবনের পরিস্থিতি</h2>
         <div class="grid">${LS.SITUATIONS.map((s) => `<button class="tile" data-sit="${s.id}"><span class="ic">${LS.ICON[s.id]}</span><b>${s.name}</b><small>${s.phrase}</small></button>`).join('')}</div>
-        <div class="sdiv"></div>
-        <h2 class="stitle">সার্চ হিস্ট্রি</h2>
-        <div class="wrap">${LS.HISTORY.map((h) => `<button class="schip" data-term="${h}">${ic('search')}${h}</button>`).join('')}</div>
-        <div class="sdiv"></div>
-        <h2 class="stitle">জনপ্রিয় সার্চ</h2>
-        <div class="wrap">${LS.POPULAR.slice(0, 5).map((h) => `<button class="schip fill" data-term="${h}">${h}</button>`).join('')}</div>
       </div>`;
   }
 
@@ -138,7 +120,6 @@
   function duaCard(id) {
     const d = window.LS_DUAS[id];
     return `<article class="card dua"><div class="dua-top"><h4>${d.t}</h4><button class="icon-btn" aria-label="অন্যান্য অপশন" data-dmenu="${id}">${ic('more')}</button></div>
-      <p class="arabic">${d.ar}</p>
       <span class="lbl">উচ্চারণ</span><p class="txt">${d.tr}</p>
       <span class="lbl">অর্থ</span><p class="txt">${d.m}</p>
       <p class="ref">সূত্র: ${d.ref}</p></article>`;
@@ -150,34 +131,23 @@
         <div class="hadith-meta"><b>${LS.BOOK.name}</b><span>হাদিস: ${h.no}</span></div>
         <span class="grade">${LS.BOOK.grade}</span>
         <button class="icon-btn" aria-label="অন্যান্য অপশন" data-hmenu="${no}">${ic('more')}</button></div>
-      <p class="arabic">${h.ar}</p><p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${LS.nl(h.tr)}</p></article>`;
+      <p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${LS.nl(h.tr)}</p></article>`;
   }
   function renderSheet() {
     const s = LS.byId(S.sit);
     $('#sh-head').innerHTML = `<div class="sh-top"><span class="ic">${LS.ICON[s.id]}</span><div><h2>${s.name}</h2><span>${s.phrase}</span></div>
       <button class="icon-btn" data-close aria-label="বন্ধ করুন">${ic('close')}</button></div>
-      <p class="comfort">${s.comfort}<span class="tag">নমুনা</span></p>
-      ${S.offline ? '<p class="offl">অফলাইনে পড়া · ইন্টারনেট ছাড়াই খুলেছে</p>' : ''}`;
+      <p class="comfort">${s.comfort}<span class="tag">নমুনা</span></p>`;
     const b = $('#sh-body');
-    if (S.mode === 'loading') { b.innerHTML = `<div class="card" style="margin-top:12px">${LS.LOADER}</div>`; return; }
-    if (S.mode === 'empty') {
-      b.innerHTML = `<div class="empty"><h3>ডাটা পাওয়া যায়নি</h3><p>এই পরিস্থিতির দোয়া ও হাদিস এখন দেখানো যাচ্ছে না।</p><button class="btn" id="retry">আবার চেষ্টা করুন</button></div>`;
-      return;
-    }
     b.innerHTML = s.sections.map((x) => `<h3 class="sec-h">${x.title}</h3>${(x.duas || []).map(duaCard).join('')}${(x.hadiths || []).map((n) => hadithCard(n)).join('')}`).join('');
     b.scrollTop = S.keep || 0;
   }
-  function load(id) {
-    S.sit = id; S.mode = 'loading'; S.keep = 0; renderSheet(); Kit.open('sit-sheet');
-    clearTimeout(S.t); S.t = setTimeout(() => { if (S.mode === 'loading') { S.mode = 'sit'; renderSheet(); } }, 650);
-  }
+  function openSit(id) { S.sit = id; S.keep = 0; renderSheet(); Kit.open('sit-sheet'); }
 
-  /* ---------- Menus (dua and hadith share the same sheet) ---------- */
+  /* ---------- Copy / share menu (dua and hadith share the same sheet) ---------- */
   function openMenu(kind, id) {
     S.menu = { kind, id };
-    const rows = kind === 'dua'
-      ? [['dua', 'copy', 'দোয়া কপি'], ['ar', 'copy', 'আরবি কপি'], ['share', 'share', 'শেয়ার']]
-      : [['tr', 'copy', 'অনুবাদ কপি'], ['ar', 'copy', 'আরবি কপি'], ['full', 'copy', 'সম্পূর্ণ হাদিস কপি'], ['share', 'share', 'শেয়ার']];
+    const rows = [['copy', 'copy', 'কপি'], ['share', 'share', 'শেয়ার']];
     $('#menu-title').textContent = kind === 'dua' ? window.LS_DUAS[id].t : `${LS.BOOK.name}, হাদিস নং ${window.LS_HADITHS[id].no}`;
     $('#menu-body').innerHTML = rows.map(([k, i, t]) => `<button class="list-row" data-act="${k}">${ic(i)}${t}</button>`).join('');
     Kit.open('menu');
@@ -185,9 +155,8 @@
   function act(k) {
     const { kind, id } = S.menu; Kit.close('menu');
     if (k === 'share') return Kit.snack('শেয়ার করার অপশন খুলেছে');
-    if (kind === 'dua') { LS.copy(k === 'ar' ? window.LS_DUAS[id].ar : LS.duaText(id)); return Kit.snack(k === 'ar' ? 'আরবি কপি হয়েছে' : 'কপি হয়েছে'); }
-    LS.copy(LS.hadithText(id, k));
-    Kit.snack({ tr: 'বাংলা অনুবাদ কপি হয়েছে', ar: 'আরবি কপি হয়েছে', full: 'সম্পূর্ণ হাদিস কপি হয়েছে' }[k]);
+    LS.copy(kind === 'dua' ? LS.duaText(id) : LS.hadithText(id, 'full'));
+    Kit.snack(kind === 'dua' ? 'দোয়া কপি হয়েছে' : 'হাদিস কপি হয়েছে');
   }
 
   /* ---------- Full hadith page ---------- */
@@ -201,28 +170,23 @@
   document.addEventListener('click', (e) => {
     const t = e.target.closest('button,[data-h]');
     if (!t) return;
-    if (t.dataset.sit) return load(t.dataset.sit);
-    if (t.dataset.term) { $('#q').value = t.dataset.term; return Kit.snack(`"${t.dataset.term}" এর সার্চ ফলাফল খুলবে`); }
+    if (t.dataset.sit) return openSit(t.dataset.sit);
     if (t.dataset.dmenu) return openMenu('dua', t.dataset.dmenu);
     if (t.dataset.hmenu) { e.stopPropagation(); return openMenu('hadith', t.dataset.hmenu); }
     if (t.dataset.act) return act(t.dataset.act);
     if (t.dataset.h) { S.hadith = t.dataset.h; S.keep = $('#sh-body').scrollTop; S.back = true; return Kit.show('hadith'); }
-    if (t.id === 'h-back') { S.mode = 'sit'; return Kit.show('sheet'); }
-    if (t.id === 'retry') return load(S.sit);
-    if (t.id === 'net') { S.offline = !S.offline; t.setAttribute('aria-pressed', S.offline); renderSheet(); Kit.snack(S.offline ? 'ইন্টারনেট বন্ধ — পেজগুলো তবুও খুলবে' : 'ইন্টারনেট চালু'); }
+    if (t.id === 'h-back') return Kit.show('sheet');
   });
   document.addEventListener('keydown', (e) => {
     if (e.target.id === 'q' && e.key === 'Enter') Kit.snack(e.target.value.trim() ? `"${e.target.value}" এর সার্চ ফলাফল খুলবে` : 'সার্চ করতে কিছু লিখুন');
   });
 
-  /* ---------- Screens: search / sheet / loading / empty share one search page ---------- */
+  /* ---------- Screens: search / sheet share one search page ---------- */
   Kit.onScreen((id) => {
-    clearTimeout(S.t);
-    if (['search', 'sheet', 'loading', 'empty'].includes(id)) {
+    if (id === 'search' || id === 'sheet') {
       $(`.screen[data-screen="${id}"]`).appendChild($('#search-page'));
       if (!$('#q')) renderSearch();
-      if (id !== 'search') {
-        S.mode = id === 'sheet' ? 'sit' : id;
+      if (id === 'sheet') {
         if (!S.back) S.keep = 0;
         S.back = false;
         renderSheet(); Kit.open('sit-sheet');
@@ -232,12 +196,10 @@
   });
   $('#h-back').addEventListener('click', () => { S.back = true; }, true);
   $$('[data-i]').forEach((b) => { b.innerHTML = icons[b.dataset.i]; });
-  Kit.init({ demo: 2, name: 'গ্রিড আর বটম শিট', extra: '<button class="kit-chip" id="net" type="button" aria-pressed="false">অফলাইন</button>', screens: [
+  Kit.init({ demo: 2, name: 'গ্রিড আর বটম শিট', screens: [
     { id: 'search', label: 'সার্চ পেজ' },
     { id: 'sheet', label: 'পরিস্থিতির শিট' },
     { id: 'hadith', label: 'পুরো হাদিস' },
-    { id: 'loading', label: 'লোডিং' },
-    { id: 'empty', label: 'খালি অবস্থা' },
   ]});
 })();
 </script>
