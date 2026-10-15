@@ -143,7 +143,7 @@
     $('#sit-body').innerHTML = `
       <div class="card"><div class="shead"><span class="sit-ic">${LS.ICON[s.id]}</span>
         <div><h2>${s.name}</h2><span class="ph">${s.phrase}</span></div></div>
-        <p class="comfort">${s.comfort}<span class="tag">নমুনা</span></p></div>
+        <p class="comfort">${s.comfort}</p></div>
       ${s.sections.map((x) => `
         <div class="sec-h"><h3>${x.title}</h3></div>
         ${(x.duas || []).map(duaCard).join('')}${(x.hadiths || []).map((n) => hadithCard(n)).join('')}`).join('')}`;

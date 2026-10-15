@@ -186,7 +186,7 @@
   function renderSitTop() {
     const s = LS.byId(S.sit);
     $('#sit-name').innerHTML = `${s.name}<small>${s.phrase}</small>`;
-    $('#sit-top').innerHTML = `<div class="shead"><span class="big-ic">${LS.ICON[s.id]}</span><p>${s.comfort}<span class="tag">নমুনা</span></p></div>
+    $('#sit-top').innerHTML = `<div class="shead"><span class="big-ic">${LS.ICON[s.id]}</span><p>${s.comfort}</p></div>
       <div class="segs" id="segs"></div><div class="steps" id="steps"></div>`;
   }
   function renderStep(dir) {

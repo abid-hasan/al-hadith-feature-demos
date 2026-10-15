@@ -137,7 +137,7 @@
     const s = LS.byId(S.sit);
     $('#sh-head').innerHTML = `<div class="sh-top"><span class="ic">${LS.ICON[s.id]}</span><div><h2>${s.name}</h2><span>${s.phrase}</span></div>
       <button class="icon-btn" data-close aria-label="বন্ধ করুন">${ic('close')}</button></div>
-      <p class="comfort">${s.comfort}<span class="tag">নমুনা</span></p>`;
+      <p class="comfort">${s.comfort}</p>`;
     const b = $('#sh-body');
     b.innerHTML = s.sections.map((x) => `<h3 class="sec-h">${x.title}</h3>${(x.duas || []).map(duaCard).join('')}${(x.hadiths || []).map((n) => hadithCard(n)).join('')}`).join('');
     b.scrollTop = S.keep || 0;

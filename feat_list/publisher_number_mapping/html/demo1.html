@@ -6,7 +6,7 @@
 <title>প্রকাশনী নম্বর মিলানো — ডেমো ১ · অ্যাপের ধরন</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
-/* ===== Shared (same in all 5 demos): scroll body, home tiles, search, card, "নমুনা" tag ===== */
+/* ===== Shared (same in all 5 demos): scroll body, home tiles, search, card ===== */
 .body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:24px}
 .body::-webkit-scrollbar{width:0}
 .tag{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;line-height:18px;padding:0 7px;border-radius:20px;background:var(--surface-2);color:var(--hint);border:1px solid var(--divider);vertical-align:middle;white-space:nowrap}
@@ -278,7 +278,7 @@ function searchHTML() {
   const anyVia = hits.some((x) => x.via);
   return `${appbar('সার্চ', 'home')}
     <div class="body"><div class="sbox"><label class="sf"><span class="i">${icons.search}</span><input class="q" type="search" enterkeyhint="search" autocomplete="off" value="${esc(S.q)}" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন" aria-label="হাদিস সার্চ ইনপুট"></label><button class="btn" data-act="run">সার্চ করুন</button></div>
-    ${S.q.trim() ? `<div class="ov"><p class="ql">আপনি ( <b>${esc(S.q.trim())}</b> ) লিখে সার্চ করেছেন</p><p class="ct">সর্বমোট ফলাফল পাওয়া গেছে : ${bn(hits.length)} টি${anyVia ? ' <span class="tag">নমুনা</span>' : ''}</p></div>` : ''}
+    ${S.q.trim() ? `<div class="ov"><p class="ql">আপনি ( <b>${esc(S.q.trim())}</b> ) লিখে সার্চ করেছেন</p><p class="ct">সর্বমোট ফলাফল পাওয়া গেছে : ${bn(hits.length)} টি${anyVia ? '' : ''}</p></div>` : ''}
     ${hits.map((x) => cardHTML(x.id, plainNo(x.id), x.via ? D.chip(x.via) : '', `data-res="${x.id}" role="button" tabindex="0"`)).join('')}</div>`;
 }
 
@@ -373,16 +373,16 @@ const D = {
       </div></div>`;
   },
   picked() { Kit.close('pick-book'); Kit.close('pick-pub'); },
-  banner: (i) => (i ? `<div class="mb">${icons.link}<span>${i.text}</span><span class="tag">নমুনা</span></div>` : ''),
+  banner: (i) => (i ? `<div class="mb">${icons.link}<span>${i.text}</span></div>` : ''),
   numBtn: (id) => `<button class="hn" data-act="nums" aria-label="সব প্রকাশনীর নম্বর দেখুন">হাদিস: ${bn(appNo(id))}${icons.down}</button>`,
   numbers(m) {
-    return `<div class="sheet-head"><h2>সব প্রকাশনীর নম্বর<span class="tag">নমুনা</span></h2><button class="icon-btn" data-act="to-hadith" aria-label="বন্ধ করুন">${icons.close}</button></div>
+    return `<div class="sheet-head"><h2>সব প্রকাশনীর নম্বর</h2><button class="icon-btn" data-act="to-hadith" aria-label="বন্ধ করুন">${icons.close}</button></div>
       <p class="sub">${m.b.name} · অধ্যায়: ${m.h.ch}</p>
       <div class="sheet-body">${m.rows.map((r) => `<div class="nrow ${r.hit ? 'hit' : ''}"><div class="nm"><b>${r.name}</b>${r.own ? '<small>অ্যাপে এই নম্বর দেখায়</small>' : r.hit ? '<small>এই নম্বর দিয়ে খুলেছেন</small>' : ''}</div>${r.n ? `<span class="v">${r.n}</span>` : '<span class="v no">এই প্রকাশনীতে নেই</span>'}</div>`).join('')}</div>
       <div class="sheet-foot"><button class="btn" data-act="to-hadith">ঠিক আছে</button></div>`;
   },
   multi(m) {
-    return `<div class="sheet-head"><h2>একাধিক হাদিস মিলেছে<span class="tag">নমুনা</span></h2><button class="icon-btn" data-act="to-jump" aria-label="বন্ধ করুন">${icons.close}</button></div>
+    return `<div class="sheet-head"><h2>একাধিক হাদিস মিলেছে</h2><button class="icon-btn" data-act="to-jump" aria-label="বন্ধ করুন">${icons.close}</button></div>
       <p class="sub">${m.from} মিলেছে ${m.to} নম্বরের ${bn(m.list.length)}টি হাদিসের সাথে। একটি বেছে নিন।</p>
       <div class="sheet-body">${m.list.map((x) => `<button class="mrow" data-pick="${x.id}"><span class="book-badge">${m.b.abbr}</span><span class="mt"><b>হাদিস: ${x.n}</b><p>${x.text}</p></span>${icons.chevron}</button>`).join('')}</div>`;
   },

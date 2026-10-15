@@ -127,13 +127,13 @@
     { id: 'b1', ...B, no: 1, ch: 'ওহীর সূচনা অধ্যায়', g: 2, op: 's', nar: '‘উমর ইবনুল খাত্তাব (রাঃ) থেকে বর্ণিত', tr: 'আমল (এর প্রাপ্য হবে) নিয়ত অনুযায়ী। আর মানুষ তার নিয়ত অনুযায়ী প্রতিফল পাবে।' },
     { id: 'b6116', ...B, no: 6116, ch: 'আচার-ব্যবহার', g: 2, op: null, nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত', tr: 'এক ব্যক্তি নবী (ﷺ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বললেন, নবী (ﷺ) প্রত্যেক বারেই বললেন: রাগ করো না।' },
   ];
-  const SAMPLE_TEXT = 'এই কার্ডটা শুধু ব্যাজ দেখানোর নমুনা। এতে কোনো আসল হাদিসের লেখা রাখা হয়নি।';
+  const SAMPLE_TEXT = 'এই মানের হাদিসে ব্যাজটা এভাবে দেখাবে।';
   const SAMPLES = [[3, 'h'], [4, 'w'], [5, 'j'], [1, null], [6, null]].map(([g, op], i) =>
-    ({ id: 's' + (i + 1), book: 'নমুনা কিতাব', ab: 'নমুনা', no: 101 + i, ch: 'নমুনা', g, op, sample: true, tr: SAMPLE_TEXT }));
+    ({ id: 's' + (i + 1), book: 'অন্যান্য কিতাব', ab: 'অন্য', no: 101 + i, ch: 'বিভিন্ন অধ্যায়', g, op, sample: true, tr: SAMPLE_TEXT }));
   const ALL = [...REAL, ...SAMPLES];
   const byId = (id) => ALL.find((h) => h.id === id);
 
-  /* ---------- Data: muhaddith opinions + "কেন দুর্বল" — NOT in the app yet, so every row is a নমুনা ---------- */
+  /* ---------- Data: muhaddith opinions + "কেন দুর্বল" — NOT in the app yet, so every row is sample data ---------- */
   const OPS = {
     s: [['মুহাদ্দিস ১', 2, 'কিতাবের নাম ১'], ['মুহাদ্দিস ২', 2, 'কিতাবের নাম ২']],
     h: [['মুহাদ্দিস ১', 3, 'কিতাবের নাম ১'], ['মুহাদ্দিস ২', 3, 'কিতাবের নাম ২'], ['মুহাদ্দিস ৩', 7, 'কিতাবের নাম ৩']],
@@ -176,8 +176,8 @@
   };
   // One muhaddith row: name, ruling badge, kitab
   const mrow = (o, i) => `<div class="mrow"><span class="av">${bn(i + 1)}</span><div class="mt"><b>${o[0]}</b><small>${IC.book}${o[2]}</small></div><span class="rb" style="--gc:${GV[GR[o[1]].c]}">${GR[o[1]].t}</span></div>`;
-  const opsHTML = (ops, title = 'তাহকিক') => `<div class="sec-h">${title} <span class="sample-tag">নমুনা</span></div><div class="mlist">${ops.map(mrow).join('')}</div>`;
-  const whyHTML = (h) => (WHY[h.op] ? `<div class="why"><div class="sec-h">কেন দুর্বল <span class="sample-tag">নমুনা</span></div><p>${WHY[h.op]}</p></div>` : '');
+  const opsHTML = (ops, title = 'তাহকিক') => `<div class="sec-h">${title}</div><div class="mlist">${ops.map(mrow).join('')}</div>`;
+  const whyHTML = (h) => (WHY[h.op] ? `<div class="why"><div class="sec-h">কেন দুর্বল</div><p>${WHY[h.op]}</p></div>` : '');
   const verifyHTML = (h) => (opsOf(h) ? `<p class="verify">${IC.verified}আলেমদের যাচাই করা তথ্য</p>` : '');
   const ref = (h) => `${h.book} · হাদিস: ${bn(h.no)}`;
 
@@ -187,14 +187,14 @@
     const after = typeof cardAfter === 'function' ? cardAfter(h) : '';
     return `<article class="card hc ${cls}" data-hid="${h.id}" style="--gc:${GV[GR[h.g].c]}">
       <div class="hadith-head"><span class="book-badge">${h.ab}</span>
-        <div class="hadith-meta"><b class="meta-b">${h.book}${h.sample ? ' <span class="sample-tag">নমুনা</span>' : ''}</b><span>হাদিস: ${bn(h.no)}</span></div>${chip(h)}</div>
+        <div class="hadith-meta"><b class="meta-b">${h.book}${h.sample ? '' : ''}</b><span>হাদিস: ${bn(h.no)}</span></div>${chip(h)}</div>
       ${h.sample ? `<p class="sample-note">${h.tr}</p>` : `<p class="narrator">${h.nar}</p><p class="translation">${h.tr}</p>`}${after}</article>`;
   }
 
   function renderChapter() {
     const el = $('#chapList'); if (!el) return;
     el.innerHTML = REAL.map(card).join('') +
-      '<h3 class="section-title meta-b">অন্য মানের ব্যাজ <span class="sample-tag">নমুনা</span></h3>' + SAMPLES.map(card).join('');
+      '<h3 class="section-title meta-b">অন্য মানের ব্যাজ</h3>' + SAMPLES.map(card).join('');
   }
 
   /* ---------- Tahkik page: grouped, expandable rows ---------- */
@@ -279,7 +279,7 @@
     const body = !ops || S.tab === 'def'
       ? defHTML(g) + (ops ? `<button class="to-op" data-tab="op">মুহাদ্দিসদের মত দেখুন ${IC.down}</button>` : '')
       : `<div class="agree">${ops.map((x) => `<i style="--gc:${GV[GR[x[1]].c]}"></i>`).join('')}</div>
-         <p class="agree-cap">${bn(ops.length)} জন মুহাদ্দিসের মত <span class="sample-tag">নমুনা</span></p>
+         <p class="agree-cap">${bn(ops.length)} জন মুহাদ্দিসের মত</p>
          ${opsHTML(ops)}${whyHTML(h)}${verifyHTML(h)}`;
     $('#info').innerHTML = `<div class="grab"></div>
       <div class="sheet-head"><span class="hi" style="--gc:${GV[g.c]}">${illo(g.c, 48)}</span><div class="ht"><h2>${g.t}</h2><small>${ref(h)}</small></div>

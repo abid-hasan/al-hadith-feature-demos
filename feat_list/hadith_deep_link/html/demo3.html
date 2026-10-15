@@ -267,7 +267,7 @@
   /* ---------- Browser (app not installed): the same hadith on the website ---------- */
   function renderWeb() {
     const id = linkId(), h = H[id];
-    $('#web-body').innerHTML = `<div class="site">আল হাদিস<span class="ex">নমুনা ওয়েবসাইট</span></div>
+    $('#web-body').innerHTML = `<div class="site">আল হাদিস</div>
       <div class="crumb">${BOOK[h.bk].name} › ${h.sec} › হাদিস নং ${bn(h.no)}</div>${card(id).replace(/<button class="icon-btn"[\s\S]*?<\/button>/, '')}
       <p class="wfoot">লিংক কোন ওয়েবসাইটে যাবে, তা এখনো ঠিক হয়নি।</p>`;
   }

@@ -107,7 +107,7 @@
   const { bn, icons, $, $$ } = Kit;
 
   /* ---------- Data: real hadiths, copied from the app's own book database (hadith.db).
-     Only the summary text is a sample ("নমুনা") — that content does not exist in the app yet. ---------- */
+     Only the summary text is sample data — that content does not exist in the app yet. ---------- */
   const SUMMARY = 'ইসলাম, ঈমান আর ইহসানের সংজ্ঞা, আর কিয়ামতের কিছু আলামত।';
   // Hexagon badge = the book's abvr_code and colour_code from the books table
   const BOOKS = { m: { book: 'সহীহ মুসলিম', abbr: 'M', color: '#2d91c2' }, b: { book: 'সহীহ বুখারী', abbr: 'B', color: '#70bb65' } };
@@ -137,7 +137,7 @@
         <span class="grade">${h.grade}</span>
         <button class="icon-btn" data-more="${id}" aria-label="হাদিস নং ${bn(h.no)}-এর অপশন">${ic('more')}</button></div>`;
     const top = h.sum && !opts.noSum
-      ? `<div class="cap" role="note" aria-label="সংক্ষেপে">${head}<span class="pill">${LINES_IC}সংক্ষেপে</span><span class="tag">নমুনা</span><p class="sum-text">${h.sum}</p><p class="sum-note">এটা সারাংশ, মূল হাদিস পড়ুন</p></div><div class="orig">মূল হাদিস</div>`
+      ? `<div class="cap" role="note" aria-label="সংক্ষেপে">${head}<span class="pill">${LINES_IC}সংক্ষেপে</span><p class="sum-text">${h.sum}</p><p class="sum-note">এটা সারাংশ, মূল হাদিস পড়ুন</p></div><div class="orig">মূল হাদিস</div>`
       : head;
     return `<article class="card hcard">${top}${narLine(h)}${paras(h.tr)}</article>`;
   }
@@ -150,7 +150,7 @@
   function renderDetails() {
     const h = H[cur];
     $('#d-title').innerHTML = `${h.book}<small>হাদিস: ${bn(h.no)}</small>`;
-    $('#d-hero').innerHTML = h.sum ? `<div class="hero" role="note" aria-label="সংক্ষেপে"><div class="lab">সংক্ষেপে <span>নমুনা</span></div><p>${h.sum}</p><small>এটা সারাংশ, মূল হাদিস পড়ুন</small></div>` : '';
+    $('#d-hero').innerHTML = h.sum ? `<div class="hero" role="note" aria-label="সংক্ষেপে"><div class="lab">সংক্ষেপে</div><p>${h.sum}</p><small>এটা সারাংশ, মূল হাদিস পড়ুন</small></div>` : '';
     $('#d-body').innerHTML = card(cur, { noSum: true });
     $('#d-body').scrollTop = 0;
   }

@@ -4,7 +4,7 @@
    hadith card, details page and a minimal more-options sheet. Each demo
    passes hooks that place its own "মূল শিক্ষা" box. Real data:
    database_sources/hadith.db + the Bangla book databases. Only POINTS
-   is a sample (নমুনা).
+   is sample data.
    ===================================================================== */
 window.BST = (function () {
   'use strict';
@@ -74,7 +74,7 @@ window.BST = (function () {
   const ic = (k, w) => (w ? icons[k].replace('width="24" height="24"', `width="${w}" height="${w}"`) : icons[k]);
   const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const paras = (s) => s.split(/\n{2,}/).map((p) => `<p class="translation">${esc(p)}</p>`).join('');
-  const sample = '<span class="tag" title="এই লেখা অ্যাপে এখনো নেই">নমুনা</span>';
+  const sample = '';
   // Small icon next to "মূল শিক্ষা"
   const bulb = (w = 16) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>`;
 

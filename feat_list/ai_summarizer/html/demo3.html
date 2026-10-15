@@ -114,7 +114,7 @@
   const { bn, icons, $, $$ } = Kit;
 
   /* ---------- Data: real hadiths, copied from the app's own book database (hadith.db).
-     Only the summary text is a sample ("নমুনা") — that content does not exist in the app yet. ---------- */
+     Only the summary text is sample data — that content does not exist in the app yet. ---------- */
   const SUMMARY = 'ইসলাম, ঈমান আর ইহসানের সংজ্ঞা, আর কিয়ামতের কিছু আলামত।';
   // Hexagon badge = the book's abvr_code and colour_code from the books table
   const BOOKS = { m: { book: 'সহীহ মুসলিম', abbr: 'M', color: '#2d91c2' }, b: { book: 'সহীহ বুখারী', abbr: 'B', color: '#70bb65' } };
@@ -134,7 +134,7 @@
   let cur = 'm1', from = 'list';
   const ic = (k) => icons[k];
   const LINES_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h8"/></svg>';
-  const sumInner = (h) => `<div class="sum-head">সংক্ষেপে <span class="tag">নমুনা</span></div><p class="sum-text">${h.sum}</p><p class="sum-note">এটা সারাংশ, মূল হাদিস পড়ুন</p>`;
+  const sumInner = (h) => `<div class="sum-head">সংক্ষেপে</div><p class="sum-text">${h.sum}</p><p class="sum-note">এটা সারাংশ, মূল হাদিস পড়ুন</p>`;
 
   /* ---------- Card: head → band (summary) → narrator → translation ---------- */
   function card(id, opts = {}) {
@@ -190,7 +190,7 @@
   function openReport() {
     const h = H[cur];
     $('#r-ref').textContent = `${h.book} -> হাদিস নং ${bn(h.no)}`;
-    $('#r-quote').innerHTML = h.sum ? `<div class="rquote"><b>এই হাদিসের সারাংশ (নমুনা)</b>${h.sum}</div>` : '';
+    $('#r-quote').innerHTML = h.sum ? `<div class="rquote"><b>এই হাদিসের সারাংশ</b>${h.sum}</div>` : '';
     $('#r-text').value = ''; $('#r-cnt').textContent = '০/৫০০';
     Kit.open('sheet-report');
   }

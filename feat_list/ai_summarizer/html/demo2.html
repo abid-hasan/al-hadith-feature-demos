@@ -94,7 +94,7 @@
   const { bn, icons, $, $$ } = Kit;
 
   /* ---------- Data: real hadiths, copied from the app's own book database (hadith.db).
-     Only the summary text is a sample ("নমুনা") — that content does not exist in the app yet. ---------- */
+     Only the summary text is sample data — that content does not exist in the app yet. ---------- */
   const SUMMARY = 'ইসলাম, ঈমান আর ইহসানের সংজ্ঞা, আর কিয়ামতের কিছু আলামত।';
   // Hexagon badge = the book's abvr_code and colour_code from the books table
   const BOOKS = { m: { book: 'সহীহ মুসলিম', abbr: 'M', color: '#2d91c2' }, b: { book: 'সহীহ বুখারী', abbr: 'B', color: '#70bb65' } };
@@ -118,7 +118,7 @@
   function sumBlock(h, cls = 'sum') {
     if (!h.sum) return '';
     return `<div class="${cls}" role="note" aria-label="সংক্ষেপে">
-      <div class="sum-head">সংক্ষেপে <span class="tag">নমুনা</span></div>
+      <div class="sum-head">সংক্ষেপে</div>
       <p class="sum-text">${h.sum}</p>
       <p class="sum-note">এটা সারাংশ, মূল হাদিস পড়ুন</p></div>`;
   }

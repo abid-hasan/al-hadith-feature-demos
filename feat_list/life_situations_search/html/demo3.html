@@ -126,7 +126,7 @@
 
   /* ---------- Situation page ---------- */
   const hero = (s) => `<div class="hero-row"><span class="ic">${LS.ICON[s.id]}</span><div><h2>${s.name}</h2><span>${s.phrase}</span></div></div>
-    <p>${s.comfort}<span class="tag">নমুনা</span></p>`;
+    <p>${s.comfort}</p>`;
   function renderSit() {
     const s = LS.byId(S.sit), c = LS.counts(s);
     const secs = s.sections.filter((x) => (S.tab === 0 ? x.duas : x.hadiths));

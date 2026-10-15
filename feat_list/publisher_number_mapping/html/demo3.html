@@ -6,7 +6,7 @@
 <title>প্রকাশনী নম্বর মিলানো — ডেমো ৩ · আলাদা পেজ আর কিপ্যাড</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
-/* ===== Shared (same in all 5 demos): scroll body, home tiles, search, card, "নমুনা" tag ===== */
+/* ===== Shared (same in all 5 demos): scroll body, home tiles, search, card ===== */
 .body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:24px}
 .body::-webkit-scrollbar{width:0}
 .tag{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;line-height:18px;padding:0 7px;border-radius:20px;background:var(--surface-2);color:var(--hint);border:1px solid var(--divider);vertical-align:middle;white-space:nowrap}
@@ -272,7 +272,7 @@ function searchHTML() {
   const anyVia = hits.some((x) => x.via);
   return `${appbar('সার্চ', 'home')}
     <div class="body"><div class="sbox"><label class="sf"><span class="i">${icons.search}</span><input class="q" type="search" enterkeyhint="search" autocomplete="off" value="${esc(S.q)}" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন" aria-label="হাদিস সার্চ ইনপুট"></label><button class="btn" data-act="run">সার্চ করুন</button></div>
-    ${S.q.trim() ? `<div class="ov"><p class="ql">আপনি ( <b>${esc(S.q.trim())}</b> ) লিখে সার্চ করেছেন</p><p class="ct">সর্বমোট ফলাফল পাওয়া গেছে : ${bn(hits.length)} টি${anyVia ? ' <span class="tag">নমুনা</span>' : ''}</p></div>` : ''}
+    ${S.q.trim() ? `<div class="ov"><p class="ql">আপনি ( <b>${esc(S.q.trim())}</b> ) লিখে সার্চ করেছেন</p><p class="ct">সর্বমোট ফলাফল পাওয়া গেছে : ${bn(hits.length)} টি${anyVia ? '' : ''}</p></div>` : ''}
     ${hits.map((x) => cardHTML(x.id, plainNo(x.id), x.via ? D.chip(x.via) : '', `data-res="${x.id}" role="button" tabindex="0"`)).join('')}</div>`;
 }
 
@@ -357,16 +357,16 @@ const D = {
       </div>
       <div class="kp">${KEYS.map((k) => `<button data-key="${k}">${k}</button>`).join('')}<button data-key="del" aria-label="মুছুন">${DEL}</button><button data-key="০">০</button><button class="go" data-act="ok">ঠিক আছে</button></div>`;
   },
-  banner: (i) => (i ? `<div class="cmp"><div><small>আপনার দেওয়া · ${i.from.name}</small><b>${i.from.n}</b></div><span class="eq">=</span><div class="own"><small>অ্যাপে · ${i.to.name}</small><b>${i.to.n}</b></div></div><p class="cmp-note"><span class="tag">নমুনা</span></p>` : ''),
+  banner: (i) => (i ? `<div class="cmp"><div><small>আপনার দেওয়া · ${i.from.name}</small><b>${i.from.n}</b></div><span class="eq">=</span><div class="own"><small>অ্যাপে · ${i.to.name}</small><b>${i.to.n}</b></div></div><p class="cmp-note"></p>` : ''),
   numBtn: (id) => `<button class="hn" data-act="nums" aria-label="সব প্রকাশনীর নম্বর দেখুন">হাদিস: ${bn(appNo(id))}${icons.chevron}</button>`,
   numbers(m) {
-    return `<div class="sheet-head"><h2>সব প্রকাশনীর নম্বর<span class="tag">নমুনা</span></h2><button class="icon-btn" data-act="to-hadith" aria-label="বন্ধ করুন">${icons.close}</button></div>
+    return `<div class="sheet-head"><h2>সব প্রকাশনীর নম্বর</h2><button class="icon-btn" data-act="to-hadith" aria-label="বন্ধ করুন">${icons.close}</button></div>
       <p class="sub">${m.b.name} · অধ্যায়: ${m.h.ch}</p>
       <div class="sheet-body"><table class="tb"><thead><tr><th>প্রকাশনী</th><th>হাদিস নং</th></tr></thead><tbody>
       ${m.rows.map((r) => `<tr><td>${r.name}${r.own ? '<small>অ্যাপে এই নম্বর দেখায়</small>' : r.hit ? '<small>আপনার দেওয়া নম্বর</small>' : ''}</td><td>${r.n ? `<b>${r.n}</b>` : '<span class="no">এই প্রকাশনীতে নেই</span>'}</td></tr>`).join('')}</tbody></table></div>`;
   },
   multi(m) {
-    return `<div class="sheet-head"><h2>একাধিক হাদিস মিলেছে<span class="tag">নমুনা</span></h2><button class="icon-btn" data-act="to-jump" aria-label="বন্ধ করুন">${icons.close}</button></div>
+    return `<div class="sheet-head"><h2>একাধিক হাদিস মিলেছে</h2><button class="icon-btn" data-act="to-jump" aria-label="বন্ধ করুন">${icons.close}</button></div>
       <p class="sub">${m.from} মিলেছে ${m.to} নম্বরের ${bn(m.list.length)}টি হাদিসের সাথে। একটি বেছে নিন।</p>
       <div class="sheet-body">${m.list.map((x) => `<div class="mp"><b>${m.b.name} · হাদিস: ${x.n}</b><p>${x.text}</p><p class="narrator">${x.nar}</p><button class="btn tonal" data-pick="${x.id}">এই হাদিসটি খুলুন</button></div>`).join('')}</div>`;
   },

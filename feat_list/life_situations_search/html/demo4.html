@@ -144,7 +144,7 @@
         <button class="icon-btn" aria-label="অন্যান্য অপশন" data-hmenu="${no}">${ic('more')}</button></div>
       <p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${LS.nl(h.tr)}</p></article>`;
   }
-  const intro = (s) => `<div class="k">${LS.ICON[s.id]}জীবনের পরিস্থিতি</div><h2>${s.phrase}</h2><p>${s.comfort}<span class="tag">নমুনা</span></p>`;
+  const intro = (s) => `<div class="k">${LS.ICON[s.id]}জীবনের পরিস্থিতি</div><h2>${s.phrase}</h2><p>${s.comfort}</p>`;
   function renderSit() {
     const s = LS.byId(S.sit);
     $$('.sname').forEach((h) => { h.textContent = s.name; });
