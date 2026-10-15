@@ -339,6 +339,11 @@
     { id: 'o-sahih', label: 'সহিহ · মতসহ' }, { id: 'o-hasan', label: 'হাসান' }, { id: 'o-weak', label: 'দুর্বল' }, { id: 'o-jal', label: 'জাল' },
     { id: 'o-none', label: 'মত নেই' }, { id: 'o-load', label: 'লোডিং' }, { id: 'tahkik', label: 'তাহকিক পেজ' }, { id: 'o-empty', label: 'খালি সার্চ' },
   ];
+  // "আরো পড়ুন" only when the meaning really overflows its clamp
+  new MutationObserver(() => $$('[data-more]').forEach((b) => {
+    const p = b.previousElementSibling;
+    if (p.offsetParent && p.scrollHeight <= p.clientHeight + 2) { p.classList.remove('clamp'); b.remove(); }
+  })).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
 
   /* ---------- Demo 3: badge = soft tint + dot, name always written ---------- */
   function chip(h) {

@@ -253,7 +253,13 @@
     $('#time', pg).textContent = on ? `${mmss(Date.now() - S.t0)} / ${mmss(S.dur)}` : (d.audio ? 'শুনতে চাপুন' : '');
     $('#amsg', pg).innerHTML = S.err ? `<div class="amsg" role="alert">${ic('info')}<span>${S.err.text}</span>${S.err.retry ? '<button class="btn text" id="a-retry">আবার চেষ্টা করুন</button>' : ''}</div>` : '';
   }
-  function tick() { paintAudio(); if (S.playing) raf = requestAnimationFrame(tick); }
+  function tick() {
+    if (!S.playing) return;
+    const k = Math.min(1, (Date.now() - S.t0) / S.dur), c = $('.ring circle:last-child', pg), C = 2 * Math.PI * 34;
+    if (c) c.setAttribute('stroke-dashoffset', C * (1 - k));
+    const t = $('#time', pg); if (t) t.textContent = `${mmss(Date.now() - S.t0)} / ${mmss(S.dur)}`;
+    raf = requestAnimationFrame(tick);
+  }
   function stop() { clearTimeout(timer); cancelAnimationFrame(raf); S.playing = null; paintAudio(); }
   function play(id) {
     const d = D.duas[id];
@@ -263,7 +269,7 @@
     else if (!S.online) S.err = { text: 'ইন্টারনেট সংযোগ নেই। সংযোগ চালু করে আবার চেষ্টা করুন।', retry: true };
     if (S.err) return paintAudio();
     S.playing = id; S.t0 = Date.now(); S.dur = Math.min(10, Math.max(3, d.ar.length / 14)) * 1000;
-    timer = setTimeout(stop, S.dur); tick();
+    timer = setTimeout(stop, S.dur); paintAudio(); tick();
   }
 
   /* ---------- Hadith page ---------- */
@@ -303,7 +309,7 @@
     if (t.dataset.tab) { stop(); S.err = null; S.tab = +t.dataset.tab; S.idx = 0; renderPage(); t.scrollIntoView({ inline: 'nearest', block: 'nearest' }); }
     else if (t.dataset.play) play(+t.dataset.play);
     else if (t.dataset.step) step(+t.dataset.step);
-    else if (t.dataset.copy) { try { navigator.clipboard.writeText(plain(D.duas[t.dataset.copy])); } catch (err) { /* demo */ } Kit.snack('কপি হয়েছে'); }
+    else if (t.dataset.copy) { Promise.resolve().then(() => navigator.clipboard.writeText(plain(D.duas[t.dataset.copy]))).catch(() => { /* not allowed in this frame */ }); Kit.snack('কপি হয়েছে'); }
     else if (t.dataset.share) Kit.snack('ফোনের শেয়ার মেনু খুলবে');
     else if (t.dataset.h) { S.hk = t.dataset.h; S.back = Kit.current; go('hadith'); }
     else if (t.dataset.pick) { const id = +t.dataset.pick; S.tab = D.cats.findIndex((c) => c.duas.includes(id)); S.idx = D.cats[S.tab].duas.indexOf(id); S.q = ''; go('duas'); }

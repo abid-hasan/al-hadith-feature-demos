@@ -77,6 +77,8 @@
 @keyframes unfold{from{opacity:0;transform:translateY(-6px)}}
 .gpanel .loading{min-height:110px}
 .gp-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.gp-top .illo{margin:0}
+.gp-top div{flex:1}
 .gp-top b{display:block;font-size:17px;color:var(--title);line-height:1.3}
 .gp-top small{font-size:12.5px;color:var(--hint)}
 .gpanel .def{font-size:15px}
@@ -336,6 +338,11 @@
     { id: 'o-sahih', label: 'সহিহ · মতসহ' }, { id: 'o-hasan', label: 'হাসান' }, { id: 'o-weak', label: 'দুর্বল' }, { id: 'o-jal', label: 'জাল' },
     { id: 'o-none', label: 'মত নেই' }, { id: 'o-load', label: 'লোডিং' }, { id: 'tahkik', label: 'তাহকিক পেজ' }, { id: 'o-empty', label: 'খালি সার্চ' },
   ];
+  // "আরো পড়ুন" only when the meaning really overflows its clamp
+  new MutationObserver(() => $$('[data-more]').forEach((b) => {
+    const p = b.previousElementSibling;
+    if (p.offsetParent && p.scrollHeight <= p.clientHeight + 2) { p.classList.remove('clamp'); b.remove(); }
+  })).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
 
   /* ---------- Demo 4: badge = pill + chevron; aria-expanded mirrors the panel ---------- */
   function chip(h) {

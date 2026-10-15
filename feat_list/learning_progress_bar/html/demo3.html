@@ -14,7 +14,7 @@
   .pct{color:var(--pd);font-weight:700;font-size:14px;white-space:nowrap}
   .cnt{color:var(--hint);font-size:12.5px;white-space:nowrap}
   .done{display:inline-flex;align-items:center;gap:5px;color:var(--pd);font-size:13px;font-weight:700;white-space:nowrap}
-  .done .tk{width:18px;height:18px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;flex:none}
+  .done .tk{width:18px;height:18px;border-radius:50%;background:var(--primary);color:var(--on-appbar);display:grid;place-items:center;flex:none}
   .done .tk svg{width:12px;height:12px;stroke-width:3}
   .ring circle{fill:none}
   .ring .rt{stroke:var(--track)}
@@ -28,6 +28,7 @@
   .note svg{flex:none;color:var(--hint);margin-top:2px}
   .note b{display:block;color:var(--title);font-size:14.5px}
   .kit-extra .kit-chip{font-size:12.5px}
+  .snack:not(.on){visibility:hidden;transition:transform .25s,visibility 0s .25s}
 
   /* ---------- হোম: এক কার্ডে বইয়ের তালিকা, সারির নিচের কিনারায় বার ---------- */
   .pill{display:flex;gap:4px;margin:12px 12px 10px;padding:4px;border-radius:24px;background:var(--card);box-shadow:var(--shadow)}
@@ -36,7 +37,7 @@
   .group{margin:0 12px 12px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
   .brow{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px 16px;text-align:left;border-bottom:1px solid var(--divider)}
   .brow:last-child{border-bottom:0}
-  .hex{width:40px;height:40px;flex:none;display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px;background:var(--primary);clip-path:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%)}
+  .hex{width:40px;height:40px;flex:none;display:grid;place-items:center;color:var(--on-appbar);font-weight:700;font-size:13px;background:var(--primary);clip-path:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%)}
   .main{flex:1;min-width:0;display:flex;flex-direction:column}
   .main b{color:var(--title);font-size:15.5px;line-height:1.3}
   .main small{color:var(--hint);font-size:12.5px}
@@ -64,7 +65,7 @@
   .rside{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
   .rbox{position:relative;width:84px;height:84px}
   .rbox .in{position:absolute;inset:0;display:grid;place-items:center;font-weight:700;color:var(--pd);font-size:17px}
-  .rbox .tk{width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center}
+  .rbox .tk{width:32px;height:32px;border-radius:50%;background:var(--primary);color:var(--on-appbar);display:grid;place-items:center}
 </style>
 </head>
 <body>

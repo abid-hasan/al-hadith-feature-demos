@@ -56,7 +56,7 @@ mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-
 .pg textarea:focus{border-color:var(--primary)}
 .vf-row{display:flex;gap:10px;margin-top:12px}
 .vf-row .btn{flex:1}
-.empty-art{color:var(--primary)}
+.empty-art{color:var(--primary);margin:0 auto;flex:none}
 /* ===== Demo 5: big green header holds the box, the method pills and the note ===== */
 .hero{flex:none;background:var(--appbar);color:var(--on-appbar);padding:0 16px 26px}
 .hero .top{display:flex;align-items:center;gap:6px;min-height:52px;margin:0 -8px}
@@ -72,7 +72,7 @@ mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-
 :root[data-theme="dark"] .mp.on{color:var(--appbar)}
 .mp svg{width:16px;height:16px}
 .mp:not(.on) svg{display:none}
-.hero .qnote{margin:12px 0 0;padding:6px 12px;border-radius:20px;background:color-mix(in srgb,var(--on-appbar) 16%,transparent);color:var(--on-appbar);width:max-content;max-width:100%}
+:root[data-theme="dark"] .hero .qnote,.hero .qnote{margin:12px 0 0;padding:6px 12px;border-radius:20px;background:color-mix(in srgb,var(--on-appbar) 16%,transparent);color:var(--on-appbar);width:max-content;max-width:100%}
 .lift{margin-top:-14px;border-radius:18px 18px 0 0;background:var(--scaffold);padding:14px 12px 10px}
 .set{background:var(--card);border-radius:12px;overflow:hidden}
 .srow{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-bottom:1px solid var(--divider);text-align:left;color:var(--title)}
@@ -266,7 +266,7 @@ function ranges(src, needle) {
   const f = fold(src), out = [];
   for (let i = f.t.indexOf(p); i !== -1; i = f.t.indexOf(p, i + p.length)) {
     let e = f.map[i + p.length - 1] + 1;
-    while (e < src.length && MARKS.test(src[e])) e++;
+    while (e < src.length && (MARKS.test(src[e]) || /[\p{M}\u200c\u200d]/u.test(src[e]) || src[e - 1] === '\u09CD')) e++;   // never split a vowel sign or conjunct
     out.push([f.map[i], e]);
   }
   return out;

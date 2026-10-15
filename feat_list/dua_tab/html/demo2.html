@@ -292,7 +292,7 @@
     if (!t || !t.closest('.phone')) return;
     if (t.dataset.tab) { stop(); S.tab = +t.dataset.tab; renderPage(); $('#list', pg).scrollTop = 0; t.scrollIntoView({ inline: 'nearest', block: 'nearest' }); }
     else if (t.dataset.play) play(+t.dataset.play);
-    else if (t.dataset.copy) { try { navigator.clipboard.writeText(plain(D.duas[t.dataset.copy])); } catch (err) { /* demo */ } Kit.snack('কপি হয়েছে'); }
+    else if (t.dataset.copy) { Promise.resolve().then(() => navigator.clipboard.writeText(plain(D.duas[t.dataset.copy]))).catch(() => { /* not allowed in this frame */ }); Kit.snack('কপি হয়েছে'); }
     else if (t.dataset.share) Kit.snack('ফোনের শেয়ার মেনু খুলবে');
     else if (t.dataset.h) { S.hk = t.dataset.h; S.back = Kit.current; go('hadith'); }
     else if (t.dataset.dua) openDua(+t.dataset.dua);

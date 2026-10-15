@@ -14,7 +14,7 @@
   .pct{color:var(--pd);font-weight:700;font-size:14px;white-space:nowrap}
   .cnt{color:var(--hint);font-size:12.5px;white-space:nowrap}
   .done{display:inline-flex;align-items:center;gap:5px;color:var(--pd);font-size:13px;font-weight:700;white-space:nowrap}
-  .done .tk{width:18px;height:18px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;flex:none}
+  .done .tk{width:18px;height:18px;border-radius:50%;background:var(--primary);color:var(--on-appbar);display:grid;place-items:center;flex:none}
   .done .tk svg{width:12px;height:12px;stroke-width:3}
   .ring circle{fill:none}
   .ring .rt{stroke:var(--track)}
@@ -28,6 +28,7 @@
   .note svg{flex:none;color:var(--hint);margin-top:2px}
   .note b{display:block;color:var(--title);font-size:14.5px}
   .kit-extra .kit-chip{font-size:12.5px}
+  .snack:not(.on){visibility:hidden;transition:transform .25s,visibility 0s .25s}
 
   /* ---------- হোম: কুইক অ্যাকশন আর সেগমেন্টেড ট্যাব (HadithSegmentedTabs) ---------- */
   .quick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 12px 4px}
@@ -35,10 +36,10 @@
   .qa i{width:36px;height:36px;border-radius:10px;background:var(--tint);color:var(--pd);display:grid;place-items:center;font-style:normal}
   .seg{display:flex;margin:12px 12px 10px;padding:3px;border:1.5px solid var(--primary);border-radius:10px;background:var(--card)}
   .seg button{flex:1;height:36px;border-radius:7px;font-weight:500;font-size:14.5px;color:var(--body)}
-  .seg button[aria-selected="true"]{background:var(--primary);color:#fff;font-weight:700}
+  .seg button[aria-selected="true"]{background:var(--primary);color:var(--on-appbar);font-weight:700}
   /* ---------- বইয়ের কার্ড (ListItemCard) + প্রোগ্রেস ---------- */
   .row{display:flex;align-items:center;gap:14px;width:calc(100% - 24px);margin:0 12px 10px;padding:14px 16px;border-radius:10px;background:var(--card);box-shadow:var(--shadow);text-align:left}
-  .hex{width:46px;height:46px;flex:none;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;background:var(--primary);
+  .hex{width:46px;height:46px;flex:none;display:grid;place-items:center;color:var(--on-appbar);font-weight:700;font-size:14px;background:var(--primary);
     clip-path:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%)}
   .hex.sm{width:40px;height:40px;font-size:13.5px}
   .main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
@@ -55,12 +56,12 @@
   /* ---------- প্ল্যান কার্ড: রিং + "২৪/৪০" ---------- */
   .tabs{display:flex;background:var(--appbar)}
   .tabs button{flex:1;height:46px;color:rgba(255,255,255,.75);font-weight:700;border-bottom:3px solid transparent}
-  .tabs button[aria-selected="true"]{color:#fff;border-color:#fff}
+  .tabs button[aria-selected="true"]{color:var(--on-appbar);border-color:var(--on-appbar)}
   .plan{margin:14px 12px 0;padding:16px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);width:calc(100% - 24px);text-align:left;display:block}
   .plan-top{display:flex;align-items:center;gap:14px}
   .rbox{position:relative;width:68px;height:68px;flex:none}
   .rbox span{position:absolute;inset:0;display:grid;place-items:center;font-weight:700;color:var(--pd);font-size:15px}
-  .rbox .tk{position:absolute;inset:0;margin:auto;width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center}
+  .rbox .tk{position:absolute;inset:0;margin:auto;width:28px;height:28px;border-radius:50%;background:var(--primary);color:var(--on-appbar);display:grid;place-items:center}
   .plan .ph{display:block;font-weight:700;color:var(--title);font-size:16.5px;line-height:1.35}
   .plan .src{color:var(--hint);font-size:13px;margin-top:2px}
   .plan .rt-line{margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}

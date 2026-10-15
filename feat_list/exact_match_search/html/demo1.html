@@ -56,7 +56,7 @@ mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-
 .pg textarea:focus{border-color:var(--primary)}
 .vf-row{display:flex;gap:10px;margin-top:12px}
 .vf-row .btn{flex:1}
-.empty-art{color:var(--primary)}
+.empty-art{color:var(--primary);margin:0 auto;flex:none}
 /* ===== Demo 1: RoundedScaffoldBody — green app bar behind a rounded page ===== */
 .screen{background:var(--appbar)}
 .body{background:var(--scaffold);border-radius:20px 20px 0 0}
@@ -267,7 +267,7 @@ function ranges(src, needle) {
   const f = fold(src), out = [];
   for (let i = f.t.indexOf(p); i !== -1; i = f.t.indexOf(p, i + p.length)) {
     let e = f.map[i + p.length - 1] + 1;
-    while (e < src.length && MARKS.test(src[e])) e++;
+    while (e < src.length && (MARKS.test(src[e]) || /[\p{M}\u200c\u200d]/u.test(src[e]) || src[e - 1] === '\u09CD')) e++;   // never split a vowel sign or conjunct
     out.push([f.map[i], e]);
   }
   return out;

@@ -311,7 +311,7 @@
     if (!t) return;
     if (t.dataset.tab) { stop(); S.tab = +t.dataset.tab; renderPage(); $('#list', pg).scrollTop = 0; $(`[data-tab="${S.tab}"]`, pg).scrollIntoView({ inline: 'nearest', block: 'nearest' }); }
     if (t.dataset.play) play(+t.dataset.play);
-    if (t.dataset.copy) { try { navigator.clipboard.writeText(plain(D.duas[t.dataset.copy])); } catch (err) { /* demo */ } Kit.snack('কপি হয়েছে'); }
+    if (t.dataset.copy) { Promise.resolve().then(() => navigator.clipboard.writeText(plain(D.duas[t.dataset.copy]))).catch(() => { /* not allowed in this frame */ }); Kit.snack('কপি হয়েছে'); }
     if (t.dataset.share) { $('#share-text').textContent = plain(D.duas[t.dataset.share]); Kit.open('sheet-share'); }
     if (t.dataset.h) { S.hk = t.dataset.h; S.back = Kit.current; go('hadith'); }
     if (t.id === 'q-clr') { S.q = ''; go('duas'); }

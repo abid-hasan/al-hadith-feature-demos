@@ -83,7 +83,7 @@
 .grade.g5{font-size:13px;padding:2px 10px}
 .hc.sel{box-shadow:0 0 0 2px var(--primary)}
 #tkList{padding:0 4px}
-.tk-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 4px;align-items:start}
+.tk-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 4px;align-items:start}
 .tk-cols .tk-h{position:static}
 .tk-search{max-width:560px}
 @media (max-width:760px){
@@ -342,6 +342,11 @@
     { id: 'o-sahih', label: 'সহিহ · মতসহ' }, { id: 'o-hasan', label: 'হাসান' }, { id: 'o-weak', label: 'দুর্বল' }, { id: 'o-jal', label: 'জাল' },
     { id: 'o-none', label: 'মত নেই' }, { id: 'o-load', label: 'লোডিং' }, { id: 'tahkik', label: 'তাহকিক পেজ' }, { id: 'o-empty', label: 'খালি সার্চ' },
   ];
+  // "আরো পড়ুন" only when the meaning really overflows its clamp
+  new MutationObserver(() => $$('[data-more]').forEach((b) => {
+    const p = b.previousElementSibling;
+    if (p.offsetParent && p.scrollHeight <= p.clientHeight + 2) { p.classList.remove('clamp'); b.remove(); }
+  })).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
 
   /* ---------- Demo 5: badge = filled pill, tablet size (chipFontSize / chipPadding) ---------- */
   function chip(h) {
@@ -371,6 +376,7 @@
     S.hid = hid; S.ld = false;
     const pending = load(hid, o, () => { S.ld = false; renderAll(); });
     if (pending) { S.ld = true; renderAll(); }
+    const c = $('.screen.on .hc.sel'); if (c) c.scrollIntoView({ block: 'nearest' });
   }
   document.addEventListener('click', (e) => { if (e.target.closest('[data-dismiss]')) { S.hid = null; renderAll(); } });
 
