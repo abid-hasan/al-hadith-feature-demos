@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>হুবহু মিল সার্চ — ডেমো ৪ · ট্যাবলেটে পাশাপাশি</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared: highlight, controls, shared pages (same in all 5 demos) ===== */
+mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-radius:4px;padding:0 2px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+:root[data-theme="dark"] mark.hl{color:var(--primary)}
+.arabic mark.hl{font-weight:400}
+.rd{width:20px;height:20px;border-radius:50%;border:2px solid var(--hint);flex:none;display:grid;place-items:center}
+[aria-checked="true"] .rd{border-color:var(--primary)}
+[aria-checked="true"] .rd::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--primary)}
+.cbx{width:20px;height:20px;border-radius:5px;border:2px solid var(--hint);display:grid;place-items:center;flex:none;color:var(--on-appbar)}
+.cbx svg{width:14px;height:14px;opacity:0}
+[aria-checked="true"]>.cbx{background:var(--primary);border-color:var(--primary)}
+[aria-checked="true"]>.cbx svg{opacity:1}
+.body{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column}
+.body::-webkit-scrollbar{width:0}
+.foot{flex:none;padding:8px 16px 14px;background:var(--scaffold)}
+.btn:disabled{opacity:.45;cursor:default}
+.lnk{color:var(--primary);font-weight:700}
+.vlink{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin:10px 0 0;font-size:13.5px;color:var(--body)}
+.vlink svg{width:18px;height:18px;color:var(--hint)}
+.qnote{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--primary-dark)}
+:root[data-theme="dark"] .qnote{color:var(--primary)}
+.qnote svg{width:16px;height:16px;flex:none}
+.qnote:not([hidden]){animation:fadein .35s ease-out}
+@keyframes fadein{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@keyframes ring{from{box-shadow:0 0 0 0 color-mix(in srgb,var(--primary) 55%,transparent)}to{box-shadow:0 0 0 12px transparent}}
+.pulse{animation:ring .9s ease-out 1}
+.loading{flex:1;display:grid;place-items:center;min-height:300px}
+.fail{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:14px}
+.fail svg{width:64px;height:64px;color:var(--disabled)}
+.fail p{margin:0;font-size:16px;font-weight:700;color:var(--title)}
+.scope-note{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--hint);margin:8px 0 0}
+.scope-note svg{width:16px;height:16px;flex:none;margin-top:2px}
+/* shared pages: book / grade selection, verify */
+.pg{width:100%;max-width:640px;margin:0 auto;padding:14px 12px 20px}
+.pg-head{display:flex;align-items:center;gap:8px;padding:0 4px 10px}
+.pg-head div{flex:1}
+.pg-head b{display:block;color:var(--title);font-size:15.5px}
+.pg-head span{font-size:12.5px;color:var(--hint)}
+.pg-note{margin:0 4px 12px;font-size:13.5px;color:var(--body)}
+.pg-list{background:var(--card);border-radius:12px;overflow:hidden}
+.crow{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-bottom:1px solid var(--divider);text-align:left;color:var(--title);font-size:15px}
+.crow:last-child{border-bottom:0}
+.crow .nm{flex:1}
+.crow small{display:block;font-size:12px;color:var(--hint)}
+.crow .book-badge{width:32px;height:32px;font-size:9.5px}
+.gdot{width:12px;height:12px;border-radius:50%;flex:none}
+.pg-t{display:block;color:var(--title);font-size:15.5px;margin:0 4px 10px}
+.pg textarea{width:100%;min-height:170px;resize:none;border:1px solid var(--divider);border-radius:10px;padding:12px;background:var(--card);color:var(--title);font-size:15px;line-height:1.6;outline:none}
+.pg textarea:focus{border-color:var(--primary)}
+.vf-row{display:flex;gap:10px;margin-top:12px}
+.vf-row .btn{flex:1}
+.empty-art{color:var(--primary)}
+/* ===== Demo 4: tablet — search form on the left, results on the right ===== */
+.phone{width:1000px;height:680px;border-radius:28px}
+@media (max-width:480px){.phone{width:1000px;height:680px;border-radius:28px}}
+.pane{position:absolute;left:0;top:0;bottom:0;width:370px;display:flex;flex-direction:column;background:var(--scaffold);border-right:1px solid var(--divider)}
+.screen{left:370px}
+.screen.full{left:0;z-index:5}
+.screen:not(.full) .appbar [data-go="search"]{display:none}
+.screen:not(.full) .appbar{padding-left:16px}
+.pane .page{padding:12px 14px}
+.sc{background:var(--card);border-radius:12px;padding:12px;margin-bottom:12px}
+.st{margin:0 0 6px;font-size:15px;font-weight:600;color:var(--title)}
+.sf{display:flex;align-items:center;height:46px;border-radius:10px;border:1px solid var(--divider);background:color-mix(in srgb,var(--primary) 4%,transparent);color:var(--hint);padding-left:10px;gap:6px}
+.sf:focus-within{border-color:var(--primary)}
+.sf input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.sf input::placeholder{color:var(--hint)}
+.sf .icon-btn svg{width:20px;height:20px}
+.qnote{margin:8px 2px 0}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.opt{display:flex;align-items:center;gap:8px;min-height:42px;padding:6px 10px;border-radius:10px;border:1px solid var(--divider);font-size:14.5px;color:var(--title);text-align:left}
+.opt.on{border-color:var(--primary);background:var(--tint);font-weight:700}
+.tile{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:0 10px;border:1px solid var(--divider);border-radius:10px;font-weight:600;color:var(--title);text-align:left;margin-top:8px}
+.tile small{display:block;font-size:12px;font-weight:400;color:var(--hint)}
+.tile .tt{flex:1}
+.tile>svg{width:18px;height:18px;color:var(--hint)}
+/* right pane: start, results grid, empty */
+.rp{padding:16px 18px}
+.rp h3{margin:4px 0 10px;font-size:16px;color:var(--title)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.chips .chip{max-width:100%;overflow:hidden;text-overflow:ellipsis;display:block;line-height:30px}
+.chips .chip.pop{background:var(--tint);border-color:transparent}
+.ov{display:flex;gap:18px;align-items:center;background:var(--card);border-radius:12px;padding:12px 16px;margin:14px 16px 4px}
+.ov .l{flex:1}
+.ov p{margin:0}
+.ov .ql{font-size:16px;font-weight:600;color:var(--title)}
+.ov .q{color:var(--primary)}
+.ov .ct{font-size:13px;color:var(--body)}
+.ov .mt{font-size:12px;padding:0 8px;margin-left:6px;border-radius:6px;background:var(--tint);color:var(--primary-dark);font-weight:700}
+:root[data-theme="dark"] .ov .mt{color:var(--primary)}
+.bars{width:210px;display:grid;gap:6px}
+.bar{font-size:12.5px;color:var(--body)}
+.bar .progress{margin-top:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px 20px;align-items:start}
+.grid .hc{margin:0}
+.ev{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 80px;gap:10px}
+.ev h3{margin:14px 0 0;font-size:20px;color:var(--title)}
+.ev p.m{margin:0;font-size:15px;color:var(--body)}
+.ev .vlink{justify-content:center}
+.ev .scope-note{text-align:left;max-width:420px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Left pane: the search form stays put ===== -->
+      <aside class="pane">
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body"><div class="page">
+          <div class="sc">
+            <label class="sf"><span data-x="search"></span>
+              <input id="q" type="search" enterkeyhint="search" autocomplete="off" aria-label="হাদিস সার্চ ইনপুট" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন">
+              <button class="icon-btn" id="qx" type="button" aria-label="ক্লিয়ার"></button></label>
+            <p class="qnote" id="qnote" role="status" hidden></p>
+            <div class="vl"></div>
+          </div>
+          <div class="sc">
+            <h3 class="st">সার্চের পদ্ধতি নির্বাচন করুন</h3>
+            <div class="opts" role="radiogroup"><button class="opt" data-m="normal" role="radio"><span class="rd"></span>স্বাভাবিক</button><button class="opt" data-m="exact" role="radio"><span class="rd"></span>হুবহু মিল</button></div>
+            <h3 class="st" style="margin-top:12px">কোথায় সার্চ করবেন</h3>
+            <div class="opts" role="radiogroup"><button class="opt" data-sc="online" role="radio"><span class="rd"></span>অনলাইন</button><button class="opt" data-sc="offline" role="radio"><span class="rd"></span>অফলাইন</button></div>
+            <p class="scope-note" id="scope-note"></p>
+          </div>
+          <div class="sc">
+            <button class="tile" data-go="books" style="margin-top:0"><span data-x="bookSel"></span><span class="tt"><small>বই সিলেক্ট</small><span class="bk-sum"></span></span></button>
+            <button class="tile" data-go="grades"><span data-x="gradeSel"></span><span class="tt"><small>গ্রেড সিলেক্ট</small><span class="gr-sum"></span></span></button>
+          </div>
+        </div></div>
+        <div class="foot"><button class="btn block" data-run>হাদিস সার্চ করুন</button></div>
+      </aside>
+
+      <!-- ===== Right pane: start (history + popular) ===== -->
+      <section class="screen" data-screen="search">
+        <header class="appbar"><h1>সার্চ রেজাল্ট</h1></header>
+        <div class="body"><div class="rp">
+          <h3>সার্চ হিস্ট্রি</h3><div class="chips" id="hist"></div>
+          <h3>জনপ্রিয় সার্চ</h3><div class="chips" id="pop"></div>
+        </div></div>
+      </section>
+
+      <!-- ===== Right pane: results in two columns ===== -->
+      <section class="screen" data-screen="results">
+        <header class="appbar"><h1>সার্চ রেজাল্ট<small id="r-sub"></small></h1></header>
+        <div class="body" id="r-body"></div>
+      </section>
+
+      <!-- ===== Right pane: nothing matched exactly ===== -->
+      <section class="screen" data-screen="empty">
+        <header class="appbar"><h1>সার্চ রেজাল্ট<small>সর্বমোট ফলাফল পাওয়া গেছে : ০ টি</small></h1></header>
+        <div class="body" id="e-body"></div>
+      </section>
+
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, quote detection, exact and
+   normal matching, highlight, shared pages. The demo's own look lives in
+   the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const sv = (d, w = 20, fill = 'none') => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="${fill}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const XI = {
+  quote: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6H5.5A1.5 1.5 0 0 0 4 7.5v5A1.5 1.5 0 0 0 5.5 14H8v1a3 3 0 0 1-3 3v2a5 5 0 0 0 5-5zm10 0h-4.5A1.5 1.5 0 0 0 14 7.5v5a1.5 1.5 0 0 0 1.5 1.5H18v1a3 3 0 0 1-3 3v2a5 5 0 0 0 5-5z"/></svg>',
+  wifi: sv('<path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/>', 16),
+  wifiOff: sv('<path d="M2 8.5a15 15 0 0 1 4.5-2.8M10 5.1A15 15 0 0 1 22 8.5M5 12a10 10 0 0 1 3.5-2.2M15 10.2a10 10 0 0 1 4 1.8M8.5 15.5a5 5 0 0 1 7 0M3 3l18 18"/>', 16),
+  error: sv('<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5h.01"/>', 64),
+  refresh: sv('<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>', 18),
+  verify: sv('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="m9 12 2 2 4-4M9 17h6"/>', 18),
+  bookSel: '<svg width="30" height="30" viewBox="0 0 30 30" fill="none"><rect x="5" y="4" width="16" height="22" rx="3" style="fill:var(--tint);stroke:var(--primary)" stroke-width="2"/><path d="M9 10h8M9 14h8M9 18h5" style="stroke:var(--primary)" stroke-width="2" stroke-linecap="round"/><circle cx="22" cy="21" r="5" style="fill:var(--primary)"/><path d="m19.8 21 1.5 1.5 2.9-2.9" style="stroke:var(--on-appbar)" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  gradeSel: '<svg width="30" height="30" viewBox="0 0 30 30" fill="none"><path d="M15 3 25 7v7c0 6-4.3 10.6-10 13C9.3 24.6 5 20 5 14V7z" style="fill:var(--tint);stroke:var(--primary)" stroke-width="2" stroke-linejoin="round"/><path d="m10.5 15 3 3 6-6" style="stroke:var(--primary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  empty: '<svg class="empty-art" width="84" height="84" viewBox="0 0 84 84" fill="none"><rect x="14" y="8" width="44" height="58" rx="6" style="fill:var(--tint);stroke:var(--primary)" stroke-width="2.5"/><path d="M24 24h24M24 34h24M24 44h12" style="stroke:var(--primary)" stroke-width="2.5" stroke-linecap="round" opacity=".55"/><circle cx="54" cy="54" r="13" style="fill:var(--card);stroke:var(--primary-dark)" stroke-width="3"/><path d="m63.5 63.5 9 9" style="stroke:var(--primary-dark)" stroke-width="4" stroke-linecap="round"/><path d="m49.5 49.5 9 9m0-9-9 9" style="stroke:var(--primary-dark)" stroke-width="2.5" stroke-linecap="round"/></svg>',
+  arrowFill: sv('<path d="M17 17 7 7M7 15V7h8"/>', 18),
+};
+const ic = (k) => icons[k] || XI[k];
+
+/* ---------- Demo data (hadith text only from the safe list) ---------- */
+const BOOKS = [
+  { id: 'bukhari', name: 'সহিহ বুখারি', abbr: 'বুখারী', dl: true },
+  { id: 'muslim', name: 'সহিহ মুসলিম', abbr: 'মুসলিম', dl: false },
+  { id: 'abudawud', name: 'সুনানে আবু দাউদ', abbr: 'দাউদ', dl: true },
+  { id: 'tirmidhi', name: 'জামে আত-তিরমিজি', abbr: 'তিরমিজি', dl: false },
+  { id: 'nasai', name: 'সুনানে নাসাই', abbr: 'নাসাই', dl: false },
+  { id: 'ibnmajah', name: 'সুনানে ইবনে মাজাহ', abbr: 'মাজাহ', dl: false },
+];
+const BOOK = Object.fromEntries(BOOKS.map((b) => [b.id, b]));
+const GRADES = [
+  { id: 'sahih', name: 'সহিহ হাদিস', c: 'sahih' },
+  { id: 'hasan', name: 'হাসান হাদিস', c: 'sahih' },
+  { id: 'und', name: 'অনির্ধারিত', c: 'undetermined' },
+  { id: 'weak', name: 'দুর্বল হাদিস', c: 'weak' },
+  { id: 'fab', name: 'জাল হাদিস', c: 'weak' },
+];
+const GRADE = Object.fromEntries(GRADES.map((g) => [g.id, g]));
+const HADITHS = [
+  { id: 'b1', book: 'bukhari', num: 1, grade: 'sahih', nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত',
+    ar: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ', bn: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' },
+  { id: 'b1894', book: 'bukhari', num: 1894, grade: 'sahih', nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত',
+    ar: 'الصِّيَامُ جُنَّةٌ', bn: 'রোজা ঢালস্বরূপ।' },
+  { id: 'b6018', book: 'bukhari', num: 6018, grade: 'sahih', nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত',
+    ar: 'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ', bn: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।' },
+  { id: 'b6116', book: 'bukhari', num: 6116, grade: 'sahih', nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত',
+    ar: 'أَنَّ رَجُلاً قَالَ لِلنَّبِيِّ صلى الله عليه وسلم أَوْصِنِي، قَالَ: لاَ تَغْضَبْ، فَرَدَّدَ مِرَارًا، قَالَ: لاَ تَغْضَبْ', bn: 'এক ব্যক্তি নবী (সা.)-কে বলল, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বলল, তিনি প্রতিবারই বললেন, রাগ করো না।' },
+  { id: 'm223', book: 'muslim', num: 223, grade: 'sahih', nar: 'আবু মালিক আশআরি (রা.) থেকে বর্ণিত',
+    ar: 'الطُّهُورُ شَطْرُ الإِيمَانِ', bn: 'পবিত্রতা ঈমানের অর্ধেক।' },
+].map((h) => ({ ...h, ar: h.ar.normalize('NFC'), bn: h.bn.normalize('NFC'), order: BOOKS.findIndex((b) => b.id === h.book) * 1e5 + h.num }));
+
+const DEFAULT_Q = '“ভালো কথা বলে অথবা চুপ থাকে”';
+const EMPTY_Q = '“ঈমানের অর্ধেক হলো পবিত্রতা”';
+const LONG_Q = '“রাগ এলে চুপ থাকো আর ভালো কথা বলো, এতে মানুষের মন জয় করা যায়”';
+const HISTORY = ['“রাগ করো না”', EMPTY_Q, '৬১১৬', '"الصيام جنة"', LONG_Q];
+const POPULAR = ['নিয়ত', 'রোজা ঢাল', '“পবিত্রতা ঈমানের অর্ধেক”', 'لا تغضب', '«ঈমান»'];
+const METHOD = { normal: 'স্বাভাবিক', exact: 'হুবহু মিল', number: 'হাদিস নাম্বার' };
+const NOTE_TEXT = 'কোটেশনের ভেতরের বাক্য হুবহু খোঁজা হবে';
+const SCOPE_OFF = 'অফলাইন সার্চ শুধু ডাউনলোড করা বইয়ের ভেতরে চলে, ইন্টারনেট ছাড়াই কাজ করে। অনলাইনে যে বইগুলো পড়েন সেগুলো এতে আসে না।';
+const SCOPE_ON = 'অনলাইন সার্চ সংগ্রহের সব বইয়ের ভেতরে চলে, ডাউনলোড করা নেই এমন বইও এতে আসে। এর জন্য ইন্টারনেট সংযোগ লাগবে।';
+
+/* ---------- Quote detection: any quote mark, marks are not searched ---------- */
+const QCLS = '["\'“”„‟‘’‚‛«»‹›「」『』＂＇]';
+const QUOTED = new RegExp('^' + QCLS + '+([^]*?)' + QCLS + '+$');
+const QALL = new RegExp(QCLS, 'g');
+function parseQuery(raw) {
+  const t = String(raw).normalize('NFC').trim();
+  const m = t.match(QUOTED);
+  const phrase = (m ? m[1] : t).replace(QALL, ' ').replace(/\s+/g, ' ').trim();
+  return { quoted: !!(m && phrase), phrase };
+}
+const toEn = (s) => String(s).replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+
+/* ---------- Matching: Arabic marks (harakat) ignored, whole phrase in order ---------- */
+const MARKS = /[ؐ-ًؚ-ٰٟۖ-ۭـ‎‏]/;
+function fold(s) {
+  let t = ''; const map = [];
+  for (let i = 0; i < s.length; i++) {
+    let c = s[i];
+    if (MARKS.test(c)) continue;
+    if ('أإآٱ'.includes(c)) c = 'ا';
+    else if (c === 'ى') c = 'ي';
+    else if (/\s/.test(c)) { if (t.endsWith(' ')) continue; c = ' '; }
+    t += c.toLowerCase(); map.push(i);
+  }
+  return { t, map };
+}
+function ranges(src, needle) {
+  const p = fold(needle).t.trim();
+  if (!p) return [];
+  const f = fold(src), out = [];
+  for (let i = f.t.indexOf(p); i !== -1; i = f.t.indexOf(p, i + p.length)) {
+    let e = f.map[i + p.length - 1] + 1;
+    while (e < src.length && MARKS.test(src[e])) e++;
+    out.push([f.map[i], e]);
+  }
+  return out;
+}
+function markUp(src, rs) {
+  if (!rs || !rs.length) return esc(src);
+  const m = [];
+  rs.slice().sort((a, b) => a[0] - b[0]).forEach(([s, e]) => { const l = m[m.length - 1]; if (l && s <= l[1]) l[1] = Math.max(l[1], e); else m.push([s, e]); });
+  let out = '', pos = 0;
+  m.forEach(([s, e]) => { out += esc(src.slice(pos, s)) + `<mark class="hl">${esc(src.slice(s, e))}</mark>`; pos = e; });
+  return out + esc(src.slice(pos));
+}
+
+/* ---------- Search state ---------- */
+const S = { text: '', method: 'normal', auto: false, quoted: false, justAuto: false, scope: 'online', net: true,
+  books: new Set(BOOKS.map((b) => b.id)), grades: new Set(), last: null, pending: null, history: HISTORY.slice(), back: 'search' };
+const visibleBooks = () => BOOKS.filter((b) => S.scope === 'online' || b.dl);
+function pool() {
+  return HADITHS.filter((h) => S.books.has(h.book) && (S.scope === 'online' || BOOK[h.book].dl) && (!S.grades.size || S.grades.has(h.grade)));
+}
+function run(raw, method) {
+  const q = parseQuery(raw);
+  method = /^[0-9০-৯]+$/.test(q.phrase) ? 'number' : (method || S.method);
+  const P = pool(); let list;
+  if (method === 'number') list = P.filter((h) => String(h.num) === toEn(q.phrase)).map((h) => ({ h, bn: [], ar: [] }));
+  else if (method === 'exact') list = P.map((h) => ({ h, bn: ranges(h.bn, q.phrase), ar: ranges(h.ar, q.phrase) })).filter((r) => r.bn.length || r.ar.length);
+  else {
+    const words = q.phrase.split(' ').filter(Boolean);
+    list = P.map((h) => {
+      const r = { h, bn: [], ar: [], hit: 0 };
+      words.forEach((w) => { const a = ranges(h.bn, w), b = ranges(h.ar, w); if (a.length || b.length) r.hit++; r.bn.push(...a); r.ar.push(...b); });
+      return r;
+    }).filter((r) => r.hit).sort((a, b) => b.hit - a.hit || a.h.order - b.h.order);
+  }
+  const byBook = BOOKS.map((b) => ({ b, n: list.filter((r) => r.h.book === b.id).length })).filter((x) => x.n);
+  return { raw: String(raw).trim(), phrase: q.phrase, quoted: q.quoted, method, list, byBook, scope: S.scope,
+    long: q.phrase.length >= 45 || q.phrase.split(' ').length >= 8 };
+}
+
+/* ---------- Flow ---------- */
+function setText(v) {
+  S.text = v;
+  const q = parseQuery(v);
+  if (q.quoted && !S.quoted) { S.method = 'exact'; S.auto = true; S.justAuto = true; }   // quote typed: switch on
+  if (!q.quoted && S.quoted && S.auto) { S.method = 'normal'; S.auto = false; }          // quote removed: switch back
+  S.quoted = q.quoted;
+  renderSearch();
+}
+function pickMethod(m) { S.method = m; S.auto = false; renderSearch(); }
+function pickScope(sc) { S.scope = sc; renderSearch(); }
+function go(id) { Kit.show(id); }
+let token = 0;
+function search(raw, opt = {}) {
+  if (raw !== undefined && opt.fill) setText(raw);
+  raw = raw === undefined ? S.text : raw;
+  if (!raw.trim()) { Kit.snack('সার্চ করার জন্য কিছু লিখুন'); $('#q')?.focus(); return; }
+  S.history = [raw.trim(), ...S.history.filter((x) => x !== raw.trim())].slice(0, 6);
+  S.pending = { raw, method: opt.method };
+  document.activeElement?.blur?.();
+  if (S.scope === 'online' && !S.net) { go('offline'); return; }
+  const my = ++token;
+  go('loading');
+  setTimeout(() => {
+    if (my !== token || Kit.current !== 'loading') return;
+    S.last = run(raw, opt.method);
+    if (D.clearAfterSearch) setText('');
+    go(S.last.list.length ? 'results' : 'empty');
+  }, 750);
+}
+function tryNormal() { if (S.last) search(S.last.raw, { method: 'normal' }); }
+function openVerify() { S.back = Kit.current || 'search'; go('verify'); }
+function syncNet() {
+  const b = $('#net'); if (!b) return;
+  b.innerHTML = S.net ? XI.wifi : XI.wifiOff;
+  b.setAttribute('aria-pressed', String(!S.net));
+  b.title = S.net ? 'ইন্টারনেট চালু — চাপলে বন্ধ হবে' : 'ইন্টারনেট বন্ধ — চাপলে চালু হবে';
+}
+
+/* ---------- Shared render helpers ---------- */
+const chipQ = (q, cls = 'chip') => `<button class="${cls}" data-q="${esc(q)}" title="${esc(q)}">${esc(q)}</button>`;
+const gradeTag = (h) => `<span class="grade" style="background:var(--grade-${GRADE[h.grade].c})">${GRADE[h.grade].name}</span>`;
+const countLine = (res) => `সর্বমোট ফলাফল পাওয়া গেছে : ${bn(res.list.length)} টি`;
+const youSearched = (res) => `আপনি ( <b class="q">${esc(res.raw)}</b> ) লিখে সার্চ করেছেন`;
+const verifyLink = () => `<p class="vlink">${XI.verify}<span>লম্বা লেখা বা ফেসবুক পোস্ট?</span><button class="lnk" data-verify>হাদিস যাচাই করুন</button></p>`;
+function cardHTML(r, cls = '') {
+  const h = r.h, b = BOOK[h.book];
+  return `<article class="card hc ${cls}" data-snack="হাদিসের বিস্তারিত খুলবে — এই ফিচারের অংশ নয়">
+    <div class="hadith-head"><span class="book-badge">${b.abbr}</span><div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${bn(h.num)}</span></div>${gradeTag(h)}
+    <button class="icon-btn" aria-label="আরও" data-snack="অন্যান্য অপশন খুলবে — এই ফিচারের অংশ নয়">${icons.more}</button></div>
+    <p class="arabic">${markUp(h.ar, r.ar)}</p><p class="narrator">${h.nar}</p><p class="translation">${markUp(h.bn, r.bn)}</p></article>`;
+}
+function emptyInfo(res) {
+  return {
+    title: 'কোন সার্চ রেজাল্ট পাওয়া যায়নি',
+    msg: res.method === 'exact' ? 'আপনার লেখা বাক্যটি হুবহু এই ক্রমে কোনো হাদিসে মেলেনি। অনুবাদের শব্দ বা ক্রম একটু আলাদা হতে পারে।' : '',
+    normal: res.method === 'exact',
+    verify: res.long,
+    scope: res.scope === 'offline' ? SCOPE_OFF : '',
+  };
+}
+
+function renderSearch() {
+  const q = $('#q');
+  if (q && q.value !== S.text) q.value = S.text;
+  $$('#qx').forEach((x) => { x.hidden = !S.text; });
+  $$('[data-m]').forEach((el) => { const on = el.dataset.m === S.method; el.setAttribute('aria-checked', on); el.classList.toggle('on', on); });
+  $$('[data-sc]').forEach((el) => { const on = el.dataset.sc === S.scope; el.setAttribute('aria-checked', on); el.classList.toggle('on', on); });
+  $$('#qnote').forEach((n) => { n.hidden = !(S.quoted && S.method === 'exact'); });
+  $$('#scope-note').forEach((n) => { n.innerHTML = `${icons.info}<span>${S.scope === 'offline' ? SCOPE_OFF : SCOPE_ON}</span>`; });
+  const vb = visibleBooks(), nb = vb.filter((b) => S.books.has(b.id)).length;
+  $$('.bk-sum').forEach((e) => { e.textContent = nb === vb.length ? 'সব সিলেক্টেড' : `${bn(nb)}টি বই সিলেক্টেড`; });
+  $$('.gr-sum').forEach((e) => { e.textContent = S.grades.size ? `${bn(S.grades.size)}টি গ্রেড সিলেক্টেড` : 'সব সিলেক্টেড'; });
+  $$('.m-sum').forEach((e) => { e.textContent = METHOD[S.method]; });
+  $$('.sc-sum').forEach((e) => { e.textContent = S.scope === 'online' ? 'অনলাইন' : 'অফলাইন'; });
+  $$('#hist').forEach((e) => { e.innerHTML = S.history.map((x) => D.histItem ? D.histItem(x) : chipQ(x)).join(''); });
+  $$('#pop').forEach((e) => { e.innerHTML = POPULAR.map((x) => chipQ(x, 'chip pop')).join(''); });
+  if (S.justAuto) {
+    S.justAuto = false;
+    $$('[data-m="exact"], #qnote, .m-pulse').forEach((el) => { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); });
+  }
+  D.renderSearch?.();
+}
+
+/* ---------- Shared pages: loading, offline, book and grade selection, verify ---------- */
+const bar = (title, back = 'search') => D.bar ? D.bar(title, back) :
+  `<header class="appbar"><button class="icon-btn" data-go="${back}" aria-label="পেছনে">${icons.back}</button><h1>${title}</h1></header>`;
+function mountShared() {
+  $('.viewport').insertAdjacentHTML('beforeend', `
+  <section class="screen" data-screen="loading">${bar('সার্চ রেজাল্ট')}<div class="body"><div class="loading" role="status" aria-label="লোড হচ্ছে"><canvas class="inkdrop"></canvas></div></div></section>
+  <section class="screen" data-screen="offline">${bar('সার্চ রেজাল্ট')}<div class="body"><div class="fail">${XI.error}
+    <p>আপনি অফলাইনে আছেন, তাই অনলাইন সার্চ চালানো যাচ্ছে না। ইন্টারনেটে যুক্ত হোন, অথবা অফলাইন সার্চে যান।</p>
+    <button class="btn text" id="retry">${XI.refresh} আবার চেষ্টা করুন</button></div></div></section>
+  <section class="screen full" data-screen="books">${bar('বই নির্বাচন করুন')}<div class="body"><div class="pg">
+    <p class="pg-note" id="bk-note" hidden></p>
+    <div class="pg-head"><div><b>কোন বইগুলোতে সার্চ করবেন?</b><span id="bk-total"></span></div><button class="btn text" id="bk-all"></button></div>
+    <div class="pg-list" id="bk-list"></div></div></div>
+    <div class="foot"><button class="btn block" id="bk-apply"></button></div></section>
+  <section class="screen full" data-screen="grades">${bar('গ্রেড নির্বাচন করুন')}<div class="body"><div class="pg">
+    <div class="pg-head"><div><b id="gr-h1"></b><span id="gr-h2"></span></div><button class="btn text" id="gr-clear">ক্লিয়ার</button></div>
+    <div class="pg-list" id="gr-list"></div></div></div>
+    <div class="foot"><button class="btn block" id="gr-apply"></button></div></section>
+  <section class="screen full" data-screen="verify">${bar('হাদিস যাচাই')}<div class="body"><div class="pg">
+    <b class="pg-t">যে লেখাটি যাচাই করতে চান, সেটি এখানে দিন</b>
+    <textarea id="vf-text" aria-label="যাচাইয়ের লেখা" placeholder="ফেসবুক, হোয়াটসঅ্যাপ বা অন্য কোথাও পাওয়া হাদিসটি এখানে পেস্ট করুন…"></textarea>
+    <div class="vf-row"><button class="btn outline" data-snack="পেস্ট করার মতো কোনো লেখা নেই">পেস্ট করুন</button><button class="btn" id="vf-go">যাচাই করুন</button></div>
+  </div></div></section>`);
+}
+let draftB, draftG;
+function renderBooks() {
+  const vb = visibleBooks(), n = vb.filter((b) => draftB.has(b.id)).length;
+  $('#bk-note').hidden = S.scope !== 'offline';
+  $('#bk-note').textContent = SCOPE_OFF;
+  $('#bk-total').textContent = `মোট ${bn(vb.length)}টি বই`;
+  $('#bk-all').textContent = n === vb.length ? 'সব বাদ দিন' : 'সব নির্বাচন করুন';
+  $('#bk-list').innerHTML = vb.map((b) => `<button class="crow" data-b="${b.id}" role="checkbox" aria-checked="${draftB.has(b.id)}"><span class="cbx">${icons.check}</span><span class="book-badge">${b.abbr}</span><span class="nm">${b.name}${S.scope === 'offline' ? '<small>ডাউনলোড করা</small>' : ''}</span></button>`).join('');
+  $('#bk-apply').textContent = `প্রয়োগ করুন (${bn(n)})`;
+  $('#bk-apply').disabled = !n;
+}
+function renderGrades() {
+  $('#gr-h1').textContent = draftG.size ? 'শুধু টিক দেওয়া গ্রেডগুলোতে সার্চ হবে।' : 'ডিফল্টভাবে সব গ্রেডে সার্চ হবে';
+  $('#gr-h2').textContent = draftG.size ? `${bn(draftG.size)}টি গ্রেড সিলেক্টেড` : 'নির্দিষ্ট গ্রেডে সার্চ করতে নিচের তালিকা থেকে টিক দিন।';
+  $('#gr-clear').hidden = !draftG.size;
+  $('#gr-list').innerHTML = GRADES.map((g) => `<button class="crow" data-g="${g.id}" role="checkbox" aria-checked="${draftG.has(g.id)}"><span class="cbx">${icons.check}</span><span class="gdot" style="background:var(--grade-${g.c})"></span><span class="nm">${g.name}</span></button>`).join('');
+  $('#gr-apply').textContent = draftG.size ? `প্রয়োগ করুন (${bn(draftG.size)})` : 'প্রয়োগ করুন';
+}
+
+/* ---------- Loading: the app's LoadingIndicator (InkDropLoading, 33px) ---------- */
+(function inkDrop() {
+  const SZ = 33, PAD = 6, W = SZ + PAD * 2, HT = SZ * 2 + PAD * 2, PI = Math.PI;
+  const iv = (t, a, b) => Math.min(1, Math.max(0, (t - a) / (b - a)));
+  const lerp = (a, b, k) => a + (b - a) * k;
+  function frame(now) {
+    $$('canvas.inkdrop').forEach((c) => {
+      if (!c.offsetParent) return;
+      const dpr = window.devicePixelRatio || 1;
+      if (c.width !== W * dpr) { c.width = W * dpr; c.height = HT * dpr; c.style.width = W + 'px'; c.style.height = HT + 'px'; }
+      const g = c.getContext('2d'), cs = getComputedStyle(c);
+      const color = cs.getPropertyValue('--primary-dark').trim(), ring = cs.getPropertyValue('--divider').trim();
+      g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, HT);
+      g.lineWidth = SZ / 5; g.lineCap = 'round';
+      const cx = W / 2, cy = PAD + SZ * 1.5, r = SZ / 2;
+      const arc = (st, sw, col, dy = 0) => { g.strokeStyle = col; g.beginPath(); g.arc(cx, cy + dy, r, st, st + sw, sw < 0); g.stroke(); };
+      const t = (now % 1400) / 1400;
+      arc(PI / 2, 2 * PI, ring);
+      if (t <= 0.9) {
+        const dy = lerp(-SZ, 0, Math.pow(iv(t, 0.05, 0.4), 3)), k = iv(t, 0.38, 0.9);
+        arc(-3 * PI / 2, lerp(PI / (SZ * SZ), PI / 1.13, k), color, dy);
+        arc(-3 * PI / 2, lerp(PI / (SZ * SZ), -PI / 1.13, k), color, dy);
+      } else {
+        const k1 = iv(t, 0.9, 0.96), k2 = iv(t, 0.9, 1);
+        arc(-PI / 4, lerp(-PI / 7.4, -PI / 4, k1), color);
+        arc(-3 * PI / 4, lerp(PI / 7.4, PI / 4, k1), color);
+        arc(-PI / 3.5, lerp(PI / 1.273, PI / 28, k2), color);
+        arc(PI / 0.778, lerp(-PI / 1.273, -PI / 27, k2), color);
+      }
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ---------- Wiring ---------- */
+const NET_BTN = '<button class="kit-btn" type="button" id="net" aria-label="ইন্টারনেট সংযোগ চালু/বন্ধ"></button>';
+function startEngine() {
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-m],[data-sc],[data-q],[data-verify],[data-normal],[data-run],[data-b],[data-g],#net,#retry,#qx,#bk-all,#bk-apply,#gr-clear,#gr-apply,#vf-go');
+    if (!t) return;
+    if (t.dataset.m) pickMethod(t.dataset.m);
+    else if (t.dataset.sc) pickScope(t.dataset.sc);
+    else if (t.dataset.q) search(t.dataset.q, { fill: true });
+    else if (t.dataset.verify !== undefined) openVerify();
+    else if (t.dataset.normal !== undefined) tryNormal();
+    else if (t.dataset.run !== undefined) search();
+    else if (t.dataset.b) { draftB.has(t.dataset.b) ? draftB.delete(t.dataset.b) : draftB.add(t.dataset.b); renderBooks(); }
+    else if (t.dataset.g) { draftG.has(t.dataset.g) ? draftG.delete(t.dataset.g) : draftG.add(t.dataset.g); renderGrades(); }
+    else if (t.id === 'net') { S.net = !S.net; syncNet(); Kit.snack(S.net ? 'ইন্টারনেট সংযোগ চালু' : 'ইন্টারনেট সংযোগ বন্ধ'); }
+    else if (t.id === 'retry') { S.net = true; syncNet(); search(S.pending ? S.pending.raw : DEFAULT_Q, { method: S.pending?.method }); }
+    else if (t.id === 'qx') { setText(''); $('#q').focus(); }
+    else if (t.id === 'bk-all') { const vb = visibleBooks(), all = vb.every((b) => draftB.has(b.id)); vb.forEach((b) => (all ? draftB.delete(b.id) : draftB.add(b.id))); renderBooks(); }
+    else if (t.id === 'bk-apply') { visibleBooks().forEach((b) => (draftB.has(b.id) ? S.books.add(b.id) : S.books.delete(b.id))); go(D.afterPick || 'search'); }
+    else if (t.id === 'gr-clear') { draftG.clear(); renderGrades(); }
+    else if (t.id === 'gr-apply') { S.grades = new Set(draftG); go(D.afterPick || 'search'); }
+    else if (t.id === 'vf-go') Kit.snack($('#vf-text').value.trim() ? 'যাচাইয়ের ফলাফল খুলবে — এই ফিচারের অংশ নয়' : 'আগে লেখাটি দিন');
+  });
+  const q = $('#q');
+  q.addEventListener('input', () => setText(q.value));
+  q.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); search(); } });
+  Kit.onScreen((id) => {
+    if (id === 'search') renderSearch();
+    if (id === 'results') { if (!S.last || !S.last.list.length) S.last = run(DEFAULT_Q, 'exact'); D.renderResults(S.last); }
+    if (id === 'empty') { if (!S.last || S.last.list.length) S.last = run(EMPTY_Q, 'exact'); D.renderEmpty(S.last); }
+    if (id === 'offline') { S.net = false; syncNet(); }
+    if (id === 'books') { draftB = new Set(S.books); renderBooks(); }
+    if (id === 'grades') { draftG = new Set(S.grades); renderGrades(); }
+    if (id === 'verify') {
+      $$('[data-screen="verify"] .appbar [data-go]').forEach((b) => { b.dataset.go = S.back; });
+      $('#vf-text').value = S.back === 'search' ? parseQuery(S.text).phrase : (S.last ? S.last.phrase : '');
+    }
+    D.onScreen?.(id);
+  });
+  Object.assign(S, { text: DEFAULT_Q, quoted: true, method: 'exact', auto: true });   // opens with a quoted line typed
+  renderSearch();
+  syncNet();
+  if (Kit.current) { const cur = Kit.current; Kit.show(cur); }
+}
+
+/* ======================================================================
+   DEMO 4 — ট্যাবলেটে পাশাপাশি: the form never leaves the screen, so the
+   auto-picked method and the results are visible at the same time.
+   ====================================================================== */
+const D = {
+  renderResults(res) {
+    const max = Math.max(...res.byBook.map((x) => x.n));
+    $('#r-sub').textContent = countLine(res);
+    $('#r-body').innerHTML = `<div class="ov"><div class="l"><p class="ql">${youSearched(res)}</p><p class="ct">${countLine(res)}<span class="mt">${METHOD[res.method]}</span></p></div>
+      <div class="bars">${res.byBook.map((x) => `<div class="bar">${x.b.name} · ${bn(x.n)}টি<div class="progress"><i style="width:${(x.n / max) * 100}%"></i></div></div>`).join('')}</div></div>
+      <div class="grid">${res.list.map((r) => cardHTML(r)).join('')}</div>`;
+  },
+  renderEmpty(res) {
+    const e = emptyInfo(res);
+    $('#e-body').innerHTML = `<div class="ev">${XI.empty}<h3>${e.title}</h3>${e.msg ? `<p class="m">${e.msg}</p>` : ''}
+      ${e.normal ? '<button class="btn outline" data-normal>স্বাভাবিক সার্চে দেখুন</button>' : ''}
+      ${e.verify ? verifyLink() : ''}${e.scope ? `<p class="scope-note">${icons.info}<span>${e.scope}</span></p>` : ''}</div>`;
+  },
+};
+
+mountShared();
+$('.pane .appbar .icon-btn').innerHTML = icons.back;
+$$('[data-x]').forEach((b) => { b.innerHTML = ic(b.dataset.x); });
+$$('.tile').forEach((t) => t.insertAdjacentHTML('beforeend', icons.chevron));
+$('#qx').innerHTML = icons.close;
+$('#qnote').innerHTML = XI.quote + NOTE_TEXT;
+$('.vl').innerHTML = verifyLink();
+const fit = () => { $('.phone').style.zoom = Math.min(1, (innerWidth - 32) / 1020).toFixed(3); };
+addEventListener('resize', fit); fit();
+
+Kit.init({ demo: 4, name: 'ট্যাবলেটে পাশাপাশি', extra: NET_BTN, screens: [
+  { id: 'search', label: 'শুরু' },
+  { id: 'results', label: 'সার্চ রেজাল্ট' },
+  { id: 'empty', label: 'হুবহু মেলেনি' },
+  { id: 'loading', label: 'লোডিং' },
+  { id: 'offline', label: 'অফলাইন' },
+  { id: 'books', label: 'বই নির্বাচন' },
+  { id: 'grades', label: 'গ্রেড নির্বাচন' },
+  { id: 'verify', label: 'হাদিস যাচাই' },
+]});
+startEngine();
+</script>
+</body>
+</html>

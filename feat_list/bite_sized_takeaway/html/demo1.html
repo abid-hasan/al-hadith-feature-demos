@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ছোট টেকঅ্যাওয়ে — ডেমো ১ · অ্যাপের ধরন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="common.css">
+<style>
+/* ===== "মূল শিক্ষা" box — same shape as the "আমার নোট" preview (tint, radius 10),
+   inside the card, right above the translation (after Arabic, before narrator) ===== */
+.ks{margin:14px 0 2px;border-radius:10px;background:var(--tint)}
+.ks-head{display:flex;align-items:center;gap:6px;width:100%;padding:10px 6px 10px 12px;text-align:left;
+  font-size:calc(var(--fs) * .88);font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .ks-head{color:var(--primary)}
+.ks-head .tag{margin-left:2px}
+.ks-head .chev{margin-left:auto;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;transition:transform .2s}
+.ks-head .chev svg{width:18px;height:18px}
+.ks.collapsed .chev{transform:rotate(-90deg)}
+
+/* Numbered points — the HadithTeachingsList pattern (26px number column, primary number) */
+.ks-body{padding:0 12px 10px}
+.ks-body .tlist li{font-size:calc(var(--fs) * .94);line-height:1.6;margin-bottom:4px}
+.ks-body .tlist li>b{width:22px}
+
+/* "আলেমদের যাচাই করা" — small, neutral (no green: green means grade) */
+.ks-note{display:flex;align-items:center;gap:5px;margin:6px 0 0;padding-top:7px;border-top:1px solid var(--divider);font-size:12.5px;color:var(--hint)}
+.ks-note svg{width:14px;height:14px}
+
+/* Collapsed = one line: only the title row stays */
+.ks.collapsed .ks-body{display:none}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport"><!-- screens, sheets and drawer come from common.js --></div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="common.js"></script>
+<script>
+(function () {
+  const { bn, bulb, sample, tlist, ic } = BST;
+
+  /* ---------- The box: title row (icon, "মূল শিক্ষা", arrow) → 3 numbered points → verified note ---------- */
+  function box(h) {
+    if (!h.points) return '';                      // nothing verified → card stays as today
+    return `<div class="ks" data-box="${h.id}" role="note" aria-label="মূল শিক্ষা">
+      <button class="ks-head" data-toggle="${h.id}" aria-expanded="true">${bulb()}মূল শিক্ষা${sample}
+        <span class="chev" aria-hidden="true">${ic('down')}</span></button>
+      <div class="ks-body">${tlist(h.points)}
+        <p class="ks-note">${ic('check')}আলেমদের যাচাই করা</p></div>
+    </div>`;
+  }
+
+  BST.init({
+    demo: 1, name: 'অ্যাপের ধরন',
+    hooks: {
+      // Same place on the list card and on the details page: above the translation
+      slots: (h) => ({ mid: box(h) }),
+    },
+    screens: [
+      { id: 'list', label: 'হাদিস লিস্ট' },
+      { id: 'collapsed', label: 'গোটানো' },
+      { id: 'menu', label: 'মেনু' },
+      { id: 'details', label: 'হাদিসের বিস্তারিত' },
+      { id: 'settings', label: 'ফন্ট সাইজ' },
+      { id: 'nobox', label: 'বক্স নেই' },
+      { id: 'loading', label: 'লোডিং' },
+      { id: 'offline', label: 'অফলাইন' },
+    ],
+  });
+})();
+</script>
+</body>
+</html>

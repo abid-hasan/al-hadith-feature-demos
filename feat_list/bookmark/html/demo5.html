@@ -1,0 +1,858 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>বুকমার্ক — ডেমো ৫ · মিনিমাল ও ট্যাবলেট ভিউ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600&display=swap">
+<style>
+/* =========================================================
+   FONTS
+   ========================================================= */
+@font-face{font-family:Kalpurush;src:url("../../../assets/fonts/font_kalpurush.ttf") format("truetype");font-display:swap}
+@font-face{font-family:KFGQ;src:url("../../../assets/fonts/font_kfgq.ttf") format("truetype");font-display:swap}
+
+/* =========================================================
+   TOKENS (app colours, light + dark)
+   ========================================================= */
+:root{
+  --page:#E9EDEC; --tb-bg:rgba(255,255,255,.72); --tb-fg:#2B2F33; --tb-line:rgba(0,0,0,.08);
+  --primary:#1AA483; --primary-dark:#0D8C5C; --appbar:#118C6E;
+  --scaffold:#F4F4F4; --card:#FFFFFF; --divider:rgba(0,0,0,.12); --hint:rgba(0,0,0,.54);
+  --body:#5D646F; --title:#2B2F33; --disabled:#788A95; --error:#F95B53; --tint:#E8F6F3;
+  --grade:#46B891; --accent-text:#0D8C5C;
+  --track:rgba(0,0,0,.045); --hover:rgba(0,0,0,.04); --field:#F4F4F4;
+  --frame:#FFFFFF; --frame-line:rgba(0,0,0,.10); --bezel:#16191C;
+  --snack-bg:#2B2F33; --snack-fg:#FFFFFF; --scrim:rgba(0,0,0,.32);
+  --r-card:10px; --r-sheet:20px; --pad:16px; --gap:8px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --page:#05080B; --tb-bg:rgba(22,28,35,.8); --tb-fg:#ECEDEE; --tb-line:rgba(255,255,255,.07);
+    --appbar:#161C23; --scaffold:#0D1116; --card:#161C23; --divider:rgba(104,112,121,.3); --hint:rgba(255,255,255,.6);
+    --body:#C6C3CA; --title:#ECEDEE; --tint:rgba(26,164,131,.12); --accent-text:#1AA483;
+    --track:rgba(255,255,255,.06); --hover:rgba(255,255,255,.05); --field:#0D1116;
+    --frame:#0D1116; --frame-line:rgba(255,255,255,.08); --bezel:#000;
+    --snack-bg:#ECEDEE; --snack-fg:#161C23; --scrim:rgba(0,0,0,.55); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#05080B; --tb-bg:rgba(22,28,35,.8); --tb-fg:#ECEDEE; --tb-line:rgba(255,255,255,.07);
+  --appbar:#161C23; --scaffold:#0D1116; --card:#161C23; --divider:rgba(104,112,121,.3); --hint:rgba(255,255,255,.6);
+  --body:#C6C3CA; --title:#ECEDEE; --tint:rgba(26,164,131,.12); --accent-text:#1AA483;
+  --track:rgba(255,255,255,.06); --hover:rgba(255,255,255,.05); --field:#0D1116;
+  --frame:#0D1116; --frame-line:rgba(255,255,255,.08); --bezel:#000;
+  --snack-bg:#ECEDEE; --snack-fg:#161C23; --scrim:rgba(0,0,0,.55); color-scheme:dark;
+}
+
+/* =========================================================
+   PAGE SHELL (toolbar, stage, device frames)
+   ========================================================= */
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--page);font-family:Kalpurush,"Noto Sans Bengali",sans-serif;color:var(--body);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:8px}
+svg{display:block}
+
+.tb{position:sticky;top:0;z-index:10;height:44px;display:flex;align-items:center;gap:12px;padding:0 12px;
+  background:var(--tb-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--tb-line);color:var(--tb-fg)}
+.tb-name{font-size:13px;white-space:nowrap;font-weight:600}
+.chips{flex:1;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:6px 0}
+.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;font-size:13px;padding:5px 11px;border-radius:999px;border:1px solid var(--tb-line);color:var(--tb-fg);opacity:.8}
+.chip:hover{opacity:1}
+.chip.on{opacity:1;border-color:var(--primary);color:var(--accent-text);background:var(--tint)}
+.devsw{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:3px;border-radius:9px;background:var(--track);flex:none}
+.devsw .ind{position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);border-radius:7px;background:var(--card);border:1px solid var(--tb-line);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.devsw[data-v="tablet"] .ind{transform:translateX(100%)}
+.devsw button{position:relative;font-size:12.5px;padding:3px 12px;opacity:.7}
+.devsw button[aria-pressed="true"]{opacity:1;font-weight:600}
+.theme-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--tb-line);font-size:16px;flex:none}
+@media (max-width:640px){.tb-name{display:none}}
+
+main{display:flex;justify-content:center;align-items:center;min-height:calc(100vh - 44px);padding:16px;overflow:hidden}
+.stage{position:relative;flex:none}
+.device{position:absolute;top:0;left:0;transform-origin:0 0;display:flex;flex-direction:column;overflow:hidden;background:var(--scaffold)}
+.device.phone{width:390px;height:844px;border-radius:44px;border:1px solid var(--frame-line);box-shadow:0 1px 2px rgba(0,0,0,.04),0 24px 60px -24px rgba(0,0,0,.25)}
+.device.tablet{width:1180px;height:820px;border-radius:34px;border:12px solid var(--bezel);box-shadow:0 30px 80px -30px rgba(0,0,0,.35)}
+body.bare main{padding:0;align-items:stretch}
+body.bare .stage{width:100%!important;height:calc(100vh - 44px)!important}
+body.bare .device.phone{position:relative;width:100%;height:100%;border-radius:0;border:0;box-shadow:none;transform:none!important}
+
+/* status bar */
+.status{flex:none;display:flex;align-items:center;justify-content:space-between;color:var(--title);background:var(--scaffold);font-size:14px;font-weight:600}
+.phone .status{height:44px;padding:0 28px 0 32px;position:relative}
+.phone .status::after{content:"";position:absolute;left:50%;top:11px;width:96px;height:24px;margin-left:-48px;border-radius:14px;background:var(--bezel)}
+.tablet .status{height:26px;padding:0 22px;font-size:12px}
+body.bare .phone .status::after{display:none}
+.glyphs{display:flex;gap:6px;align-items:center}
+#app{position:relative;flex:1;overflow:hidden}
+
+/* =========================================================
+   APP PRIMITIVES
+   ========================================================= */
+.pg{display:flex;flex-direction:column;height:100%;background:var(--scaffold)}
+.scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:12px var(--pad) 32px}
+.scroll::-webkit-scrollbar{width:0}
+
+/* app bar — scaffold colour, hairline under it */
+.ab{flex:none;height:56px;display:flex;align-items:center;gap:4px;padding:0 6px;background:var(--scaffold);border-bottom:1px solid var(--divider);color:var(--title)}
+.ab-t{flex:1;min-width:0;padding-left:4px}
+.ab-t h1{margin:0;font-size:18px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ab-t small{display:block;font-size:12px;color:var(--hint);line-height:1.2}
+.ib{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;color:inherit}
+.ib:hover{background:var(--hover)}
+.ib svg{width:22px;height:22px}
+.ib.sm{width:34px;height:34px}.ib.sm svg{width:20px;height:20px}
+.ib.boxed{border-radius:10px;border:1px solid var(--divider);width:42px;height:42px;background:var(--card);color:var(--title)}
+.stroke{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* segmented control with sliding indicator */
+.seg{position:relative;display:grid;grid-template-columns:repeat(var(--n),1fr);padding:4px;border-radius:12px;background:var(--track);margin-bottom:12px}
+.seg-ind{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px) / var(--n));border-radius:9px;background:var(--card);border:1px solid var(--divider);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.seg button{position:relative;height:34px;font-size:14.5px;color:var(--body);border-radius:9px}
+.seg button.on{color:var(--accent-text);font-weight:600}
+
+/* search row */
+.srow{display:flex;gap:8px;margin-bottom:12px}
+.search{flex:1;display:flex;align-items:center;gap:8px;height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--divider);background:var(--card);color:var(--hint)}
+.search svg{width:18px;height:18px;flex:none}
+.search input{flex:1;min-width:0;border:0;outline:0;background:none;font-size:14.5px;color:var(--title)}
+.search input::placeholder{color:var(--hint)}
+.search:focus-within{border-color:var(--primary)}
+.sheet .search,.dlg .search{background:var(--field)}
+
+/* login box */
+.login{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--divider);border-radius:var(--r-card);background:var(--card);margin-bottom:14px}
+.login .lic{width:36px;height:36px;border-radius:50%;background:var(--tint);color:var(--primary);display:grid;place-items:center;flex:none}
+.login .lic svg{width:20px;height:20px}
+.login p{margin:0;font-size:13.5px;line-height:1.6;color:var(--body)}
+.login .tbtn{margin-top:6px}
+.tbtn{font-size:14px;color:var(--accent-text);font-weight:600;padding:4px 2px}
+
+/* folder list (shared by page + rail) */
+.group{background:var(--card);border:1px solid var(--divider);border-radius:var(--r-card);overflow:hidden}
+.frow{display:flex;align-items:center;padding-right:4px;position:relative}
+.frow+.frow::before{content:"";position:absolute;top:0;left:68px;right:0;border-top:1px solid var(--divider)}
+.frow-main{flex:1;display:flex;align-items:center;gap:14px;min-width:0;padding:12px 0 12px 14px;text-align:start}
+.frow:hover{background:var(--hover)}
+.frow.sel{background:var(--tint)}
+.frow.sel .fname{color:var(--accent-text)}
+.frow.sel::after{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--primary)}
+.ftint{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ftint svg{width:20px;height:17px}
+.ftxt{min-width:0}
+.fname{display:block;font-size:15.5px;color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.fcount{display:block;font-size:12.5px;color:var(--hint);line-height:1.35}
+.ib.more{color:var(--hint)}
+
+/* hadith card */
+.hc{background:var(--card);border:1px solid var(--divider);border-radius:var(--r-card);padding:14px var(--pad) 16px;margin-bottom:12px}
+.hc-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.hc-ref{font-size:14px;color:var(--title);font-weight:600}
+.grade{font-size:12px;color:var(--grade);border:1px solid var(--grade);border-radius:999px;padding:0 8px;line-height:20px}
+.sp{flex:1}
+.bm{width:22px;height:22px;flex:none}
+.bm svg{width:22px;height:22px}
+.ar{font-family:KFGQ,"Amiri",serif;font-size:22px;line-height:1.9;color:var(--title);text-align:right;margin:4px 0 8px}
+.tr{font-size:15px;line-height:1.8;margin:0;color:var(--body)}
+.missing{margin-top:6px;padding:16px;border-radius:10px;border:1px dashed var(--divider);text-align:center}
+.missing svg{width:34px;height:34px;margin:0 auto 8px;color:var(--disabled)}
+.missing h3{margin:0 0 4px;font-size:15px;color:var(--title);font-weight:600}
+.missing p{margin:0 0 12px;font-size:13.5px;line-height:1.6}
+
+/* buttons */
+.btn{height:44px;border-radius:10px;padding:0 18px;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.primary{background:var(--primary);color:#fff;font-weight:600}
+.btn.primary:disabled{background:var(--track);color:var(--disabled);cursor:default}
+.btn.outline{border:1px solid var(--divider);color:var(--title);background:var(--card)}
+.btn.tonal{background:var(--tint);color:var(--accent-text);font-weight:600;height:38px;font-size:14px}
+.btn.text{color:var(--body)}
+.btn.danger{background:var(--error);color:#fff;font-weight:600}
+
+/* empty states */
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:48px 24px}
+.empty svg{width:132px;height:132px;margin-bottom:14px}
+.empty p{margin:0;font-size:15px;color:var(--body)}
+.empty.small{padding:28px 12px}.empty.small svg{width:72px;height:72px}
+.quiet{color:var(--hint);font-size:14px;text-align:center;padding:40px 12px}
+
+/* =========================================================
+   OVERLAYS: bottom sheets + dialogs
+   ========================================================= */
+.ov{position:absolute;inset:0;z-index:20}
+.scrim{position:absolute;inset:0;background:var(--scrim)}
+.ov.under .dlg{visibility:hidden}
+.ov.enter .scrim{animation:fade .24s ease both}
+.ov.leave .scrim{animation:fade .18s ease reverse both}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:88%;display:flex;flex-direction:column;background:var(--card);border-radius:var(--r-sheet) var(--r-sheet) 0 0;border-top:1px solid var(--divider)}
+.ov.enter .sheet{animation:up .3s cubic-bezier(.2,.8,.2,1) both}
+.ov.leave .sheet{animation:down .2s ease-in both}
+.dlg{position:absolute;left:50%;top:50%;width:min(340px,calc(100% - 40px));max-height:86%;display:flex;flex-direction:column;background:var(--card);border-radius:var(--r-sheet);border:1px solid var(--divider);transform:translate(-50%,-50%)}
+.dlg.wide{width:min(520px,calc(100% - 80px))}
+.ov.enter .dlg{animation:pop .24s cubic-bezier(.2,.8,.2,1) both}
+.ov.leave .dlg{animation:pop .16s ease reverse both}
+@keyframes fade{from{opacity:0}}
+@keyframes up{from{transform:translateY(100%)}}
+@keyframes down{to{transform:translateY(100%)}}
+@keyframes pop{from{opacity:0;transform:translate(-50%,-48%) scale(.96)}}
+.handle{width:36px;height:4px;border-radius:2px;background:var(--divider);margin:10px auto 2px;flex:none}
+.dlg .handle{display:none}
+.sh-head{display:flex;align-items:center;gap:8px;padding:10px 12px 10px 20px;flex:none}
+.sh-head h2{flex:1;margin:0;font-size:18px;font-weight:600;color:var(--title)}
+.sh-head small{display:block;font-size:12.5px;color:var(--hint);font-weight:400}
+.sh-body{padding:4px 20px 12px;overflow-y:auto;flex:1;min-height:0}
+.sh-foot{display:flex;gap:10px;padding:12px 20px 20px;border-top:1px solid var(--divider);flex:none}
+.sh-foot .btn{flex:1}
+.dlg .sh-foot{border-top:0;justify-content:flex-end}
+.dlg .sh-foot .btn{flex:none}
+.dlg .sh-head{padding-top:18px}
+.lbl{display:block;font-size:13.5px;color:var(--title);margin:14px 0 8px;font-weight:600}
+.msg{margin:0;font-size:15px;line-height:1.7}
+
+/* menu grid */
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:6px 12px 22px}
+.mitem{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px;border-radius:12px;font-size:13.5px;color:var(--title);text-align:center;line-height:1.3}
+.mitem:hover{background:var(--hover)}
+.mitem svg{width:32px;height:32px}
+
+/* checkbox list in collection sheet */
+.clist{display:flex;flex-direction:column}
+.crow{display:flex;align-items:center;gap:14px;padding:10px 4px;text-align:start;border-radius:10px}
+.crow:hover{background:var(--hover)}
+.crow .ftxt{flex:1}
+.cbox{width:22px;height:22px;border-radius:6px;border:1.6px solid var(--disabled);display:grid;place-items:center;flex:none;color:#fff;transition:background .15s,border-color .15s}
+.cbox svg{width:16px;height:16px;opacity:0}
+.crow[aria-checked="true"] .cbox{background:var(--primary);border-color:var(--primary)}
+.crow[aria-checked="true"] .cbox svg{opacity:1}
+
+/* option cards (folder type / sort radio) */
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--divider);border-radius:10px;text-align:start}
+.opt svg{width:22px;height:22px;color:var(--disabled);flex:none;margin-top:2px}
+.opt b{display:block;font-size:15px;color:var(--title);font-weight:600}
+.opt span{display:block;font-size:12.5px;color:var(--hint);line-height:1.4}
+.opt[aria-checked="true"]{border-color:var(--primary);background:var(--tint)}
+.opt[aria-checked="true"] svg{color:var(--primary)}
+.radio{display:flex;align-items:center;gap:14px;width:100%;padding:13px 4px;font-size:15px;color:var(--title);text-align:start}
+.radio+.radio{border-top:1px solid var(--divider)}
+.rdot{width:20px;height:20px;border-radius:50%;border:1.6px solid var(--disabled);flex:none;display:grid;place-items:center}
+.radio[aria-checked="true"] .rdot{border-color:var(--primary)}
+.radio[aria-checked="true"] .rdot::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--primary)}
+.field{width:100%;height:46px;border-radius:10px;border:1px solid var(--divider);background:var(--field);padding:0 14px;font-size:15px;outline:0;color:var(--title)}
+.field:focus{border-color:var(--primary)}
+.field::placeholder{color:var(--hint)}
+
+/* colour swatches */
+.sw{display:flex;flex-wrap:wrap;gap:10px}
+.swc{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.swc svg{width:18px;height:18px;opacity:0}
+.swc[aria-checked="true"]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--title)}
+.swc[aria-checked="true"] svg{opacity:1}
+
+/* list rows in manage sheet */
+.lrow{display:flex;align-items:center;gap:14px;width:100%;padding:14px 4px;font-size:15.5px;color:var(--title);text-align:start}
+.lrow+.lrow{border-top:1px solid var(--divider)}
+.lrow svg{width:22px;height:22px;color:var(--body)}
+.lrow:hover{background:var(--hover)}
+
+/* snackbar */
+#snack{position:absolute;left:16px;right:16px;bottom:18px;z-index:40;padding:13px 16px;border-radius:10px;background:var(--snack-bg);color:var(--snack-fg);font-size:14.5px;
+  transform:translateY(160%);opacity:0;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s;pointer-events:none}
+#snack.show{transform:none;opacity:1}
+.tablet #snack{left:50%;right:auto;width:420px;margin-left:-210px}
+/* keep content clear of the phone's rounded bottom corners */
+.phone .sheet .sh-foot,.phone .sheet .mgrid{padding-bottom:30px}
+.phone #snack{bottom:30px}
+body.bare .phone .sheet .sh-foot,body.bare .phone .sheet .mgrid{padding-bottom:20px}
+
+/* =========================================================
+   TABLET LANDSCAPE (rail + detail)
+   ========================================================= */
+.t-body{flex:1;display:flex;min-height:0}
+.t-rail{width:380px;flex:none;display:flex;flex-direction:column;border-right:1px solid var(--divider)}
+.t-rail .scroll{padding:16px 18px 24px}
+.t-detail{flex:1;min-width:0;display:flex;flex-direction:column}
+.t-dhead{display:flex;align-items:center;gap:16px;padding:18px 28px 12px}
+.t-dhead .tt{flex:1;min-width:0}
+.t-dhead h2{margin:0;font-size:22px;font-weight:600;color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-dhead small{font-size:13px;color:var(--hint)}
+.t-dhead .srow{margin:0;width:340px}
+.t-detail .scroll{padding:4px 28px 28px}
+.t-col{max-width:780px}
+.t-center{max-width:820px;margin:0 auto}
+.t-ph{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--hint);gap:12px;font-size:15px}
+.t-ph > svg{width:64px;height:54px;opacity:.35}
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     TOOLBAR (outside the device)
+     ========================================================= -->
+<header class="tb">
+  <span class="tb-name">ডেমো ৫ · মিনিমাল ও ট্যাবলেট ভিউ</span>
+  <nav class="chips" id="chips" aria-label="স্ক্রিন"></nav>
+  <div class="devsw" id="devsw" data-v="phone" role="group" aria-label="ডিভাইস">
+    <span class="ind"></span>
+    <button data-dev="phone" aria-pressed="true">ফোন</button>
+    <button data-dev="tablet" aria-pressed="false">ট্যাবলেট</button>
+  </div>
+  <button class="theme-btn" id="themeBtn" aria-label="লাইট / ডার্ক মোড">◐</button>
+</header>
+
+<main>
+  <div class="stage" id="stage">
+    <div class="device phone" id="device">
+      <div class="status" aria-hidden="true">
+        <span>৯:৪১</span>
+        <span class="glyphs">
+          <svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="currentColor"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="currentColor"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="currentColor"/></svg>
+          <svg width="15" height="11" viewBox="0 0 15 11"><path d="M7.5 2.2c2.3 0 4.4.9 6 2.4l1-1A9.9 9.9 0 0 0 7.5.8 9.9 9.9 0 0 0 .5 3.6l1 1a8.5 8.5 0 0 1 6-2.4zm0 3c1.5 0 2.8.5 3.9 1.5l1-1a7 7 0 0 0-9.8 0l1 1a5.6 5.6 0 0 1 3.9-1.5zm0 3a2.5 2.5 0 0 0-1.8.7L7.5 10.7l1.8-1.8a2.5 2.5 0 0 0-1.8-.7z" fill="currentColor"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="1.6" fill="currentColor"/><rect x="22.5" y="4" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".4"/></svg>
+        </span>
+      </div>
+      <div id="app"></div>
+      <div id="snack" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+/* =========================================================
+   ICONS
+   ========================================================= */
+const I = {
+  folder:'<svg viewBox="0 0 24 20" aria-hidden="true"><path d="M10.3549 1.35508C9.91159 0.911748 9.31659 0.666748 8.69825 0.666748H2.66659C1.38325 0.666748 0.344919 1.71675 0.344919 3.00008L0.333252 17.0001C0.333252 18.2834 1.38325 19.3334 2.66659 19.3334H21.3333C22.6166 19.3334 23.6666 18.2834 23.6666 17.0001V5.33341C23.6666 4.05008 22.6166 3.00008 21.3333 3.00008H11.9999L10.3549 1.35508Z" fill="currentColor"/></svg>',
+  bookmark:'<svg viewBox="0 0 24 24" aria-label="বুকমার্ক করা"><path d="M20.5852 12.2565C20.5852 15.7436 20.0756 21.077 20.0756 21.2821C20.0756 21.4872 19.8718 21.7949 19.668 21.8975C19.5661 22 19.4642 22 19.2603 22C19.1584 22 19.0565 22 18.8527 21.8975L12.6361 18.6154C12.5342 18.6154 12.4323 18.6154 12.4323 18.6154L6.21575 21.8975C6.01193 22 5.70619 22 5.50237 21.8975C5.29855 21.7949 5.09473 21.5898 5.09473 21.2821C5.09473 21.077 4.58517 15.7436 4.58517 12.2565C4.68709 10 4.89091 7.02569 5.09473 4.87184C5.19664 3.53851 6.21575 2.51287 7.54059 2.30774C8.96734 2.20517 11.0056 2.00005 12.6361 2.00005C14.2667 2.00005 16.3049 2.20517 17.7317 2.30774C19.0565 2.4103 20.0756 3.53851 20.1775 4.87184C20.3814 7.02569 20.5852 10 20.5852 12.2565Z" fill="#1AA483"/></svg>',
+  multi:'<svg viewBox="0 0 22 23" aria-label="একাধিক ফোল্ডারে বুকমার্ক করা"><path d="M5.66663 15.9823V8.39849C5.66663 5.0679 5.66663 3.40261 6.74057 2.36793C7.81451 1.33325 9.54299 1.33325 13 1.33325C16.4569 1.33325 18.1855 1.33325 19.2593 2.36793C20.3333 3.40261 20.3333 5.0679 20.3333 8.39849V15.9823C20.3333 18.0961 20.3333 19.1529 19.6249 19.5312C18.2529 20.2637 15.6796 17.8197 14.4575 17.0838C13.7487 16.657 13.3943 16.4436 13 16.4436C12.6056 16.4436 12.2512 16.657 11.5425 17.0838C10.3204 17.8197 7.74697 20.2637 6.37507 19.5312C5.66663 19.1529 5.66663 18.0961 5.66663 15.9823Z" fill="#1AA483" fill-opacity="0.26"/><path d="M1.66663 18.9823V11.3985C1.66663 8.0679 1.66663 6.40261 2.74057 5.36793C3.81451 4.33325 5.54299 4.33325 8.99996 4.33325C12.4569 4.33325 14.1855 4.33325 15.2593 5.36793C16.3333 6.40261 16.3333 8.0679 16.3333 11.3985V18.9823C16.3333 21.0961 16.3333 22.1529 15.6249 22.5312C14.2529 23.2637 11.6796 20.8197 10.4575 20.0838C9.74869 19.657 9.39431 19.4436 8.99996 19.4436C8.60561 19.4436 8.25123 19.657 7.54246 20.0838C6.32036 20.8197 3.74697 23.2637 2.37507 22.5312C1.66663 22.1529 1.66663 21.0961 1.66663 18.9823Z" fill="#1AA483"/></svg>',
+  /* menu icons (two-tone: primary / dark / accent) */
+  mColl:'<svg viewBox="0 0 33 33" fill="none" aria-hidden="true"><path d="M5 5.5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3V29l-9-5.5L5 29z" fill="#1AA483"/><path d="M5 5.5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3V9H5z" fill="#118C6E"/><circle cx="24.5" cy="23.5" r="7" fill="#FFB84D"/><path d="M24.5 20v7M21 23.5h7" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  mRemove:'<svg viewBox="0 0 33 33" fill="none" aria-hidden="true"><path d="M7 10h19l-1.5 17.5a3 3 0 0 1-3 2.5h-10a3 3 0 0 1-3-2.5z" fill="#1AA483"/><rect x="4.5" y="6.5" width="24" height="4" rx="2" fill="#118C6E"/><path d="M12.5 6.5V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1.5" stroke="#FFB84D" stroke-width="2.4"/><rect x="12" y="14" width="2.4" height="11" rx="1.2" fill="#E6F7F1"/><rect x="18.6" y="14" width="2.4" height="11" rx="1.2" fill="#E6F7F1"/></svg>',
+  mNote:'<svg viewBox="0 0 33 33" fill="none" aria-hidden="true"><rect x="5" y="3" width="19" height="26" rx="3" fill="#1AA483"/><path d="M5 6a3 3 0 0 1 3-3h13a3 3 0 0 1 3 3v3H5z" fill="#118C6E"/><path d="M9.5 14h10M9.5 19h7" stroke="#E6F7F1" stroke-width="2.2" stroke-linecap="round"/><path d="M20 29.5l9-9 3 3-9 9h-3z" fill="#FFB84D"/></svg>',
+  mTrans:'<svg viewBox="0 0 33 33" fill="none" aria-hidden="true"><rect x="10" y="9" width="18" height="21" rx="3" fill="#118C6E"/><rect x="5" y="3" width="18" height="21" rx="3" fill="#1AA483"/><path d="M9 9.5h10M9 14h10M9 18.5h6" stroke="#E6F7F1" stroke-width="2.2" stroke-linecap="round"/><circle cx="25.5" cy="25.5" r="4" fill="#FFB84D"/></svg>',
+  mArabic:'<svg viewBox="0 0 33 33" fill="none" aria-hidden="true"><rect x="10" y="9" width="18" height="21" rx="3" fill="#118C6E"/><rect x="5" y="3" width="18" height="21" rx="3" fill="#1AA483"/><path d="M19 9.5H10M19 14h-6" stroke="#E6F7F1" stroke-width="2.2" stroke-linecap="round"/><path d="M13 17.5a3.5 3.5 0 1 0 4.5 3.4 2.8 2.8 0 1 1-4.5-3.4z" fill="#FFB84D"/></svg>',
+  mCopy:'<svg viewBox="0 0 33 33" fill="none" aria-hidden="true"><rect x="10" y="9" width="18" height="21" rx="3" fill="#118C6E"/><rect x="5" y="3" width="18" height="21" rx="3" fill="#1AA483"/><path d="M9 9.5h10M9 14h7" stroke="#E6F7F1" stroke-width="2.2" stroke-linecap="round"/><circle cx="24.5" cy="24.5" r="6" fill="#FFB84D"/><path d="M21.8 24.6l1.9 1.9 3.3-3.6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  mInfo:'<svg viewBox="0 0 33 33" fill="none" aria-hidden="true"><circle cx="16.5" cy="16.5" r="13.5" fill="#1AA483"/><path d="M3 16.5a13.5 13.5 0 0 1 27 0z" fill="#118C6E" opacity=".35"/><rect x="15.2" y="14.5" width="2.6" height="10" rx="1.3" fill="#fff"/><circle cx="16.5" cy="10" r="2" fill="#FFB84D"/></svg>',
+  /* stroke UI glyphs */
+  back:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>',
+  search:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>',
+  sort:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg>',
+  more:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/><circle cx="12" cy="18.5" r="1.7" fill="currentColor"/></svg>',
+  close:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  check:'<svg viewBox="0 0 24 24" class="stroke" style="stroke-width:2.6" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  cloud:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><path d="M7 18.5a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4.5 4.5 0 0 1-.5 9"/><path d="M12 19.5v-7M9 15l3-3 3 3"/></svg>',
+  swap:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><path d="M7 4v15M3.5 7.5L7 4l3.5 3.5M17 20V5M13.5 16.5L17 20l3.5-3.5"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><path d="M4.5 7h15M10 11v6M14 11v6M6 7l1 12.5a1.5 1.5 0 0 0 1.5 1.5h7a1.5 1.5 0 0 0 1.5-1.5L18 7M9 7V4.5h6V7"/></svg>',
+  bmOutline:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.3-5.5 3.3z"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><path d="M9 3.5h6M10 3.5v6l-3.5 4h11L14 9.5v-6M12 13.5V21"/></svg>',
+  file:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><path d="M14 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5z"/><path d="M14 3.5v5h5M12 11.5v6M9.5 15l2.5 2.5 2.5-2.5"/></svg>',
+  fileIn:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><path d="M14 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5z"/><path d="M14 3.5v5h5M12 17.5v-6M9.5 14l2.5-2.5 2.5 2.5"/></svg>',
+  bookDl:'<svg viewBox="0 0 24 24" class="stroke" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5M12 7v6.5M9.5 11l2.5 2.5 2.5-2.5"/></svg>',
+  /* empty-state illustration (brand colours) */
+  empty:'<svg viewBox="0 0 140 140" aria-hidden="true"><circle cx="70" cy="70" r="60" fill="#1AA483" opacity=".08"/><path d="M34 52a6 6 0 0 1 6-6h18l7 7h35a6 6 0 0 1 6 6v36a6 6 0 0 1-6 6H40a6 6 0 0 1-6-6z" fill="#1AA483" opacity=".22"/><path d="M34 62a6 6 0 0 1 6-6h60a6 6 0 0 1 6 6v33a6 6 0 0 1-6 6H40a6 6 0 0 1-6-6z" fill="#1AA483" opacity=".38"/><path d="M78 40a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4v30l-11-6.5L78 70z" fill="#1AA483"/><path d="M78 40a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4v5H78z" fill="#118C6E"/><circle cx="110" cy="34" r="3" fill="#FFB84D"/><circle cx="28" cy="40" r="2.2" fill="#FFB84D"/><path d="M114 96l2 4 4 2-4 2-2 4-2-4-4-2 4-2z" fill="#FFB84D"/></svg>'
+};
+
+/* =========================================================
+   SAMPLE DATA + STATE
+   ========================================================= */
+const COLORS = ['#66BB6A','#7986CB','#4FC3F7','#4DB6AC','#9CCC65','#DCE775','#FFB74D','#FF8A65','#BA68C8','#F06292','#E57373','#BCAAA4','#90A4AE'];
+let clock = 100; const now = () => ++clock;
+const S = {
+  device:'phone', base:'folders', tab:0, q:'', dq:'', sortF:'name', sortH:'name',
+  folderId:1, forceEmpty:false, showLogin:true, overlays:[], nextId:7,
+  folders:[
+    {id:1, name:'নামাজের হাদিস',  color:'#66BB6A', count:12, type:'b', created:1, modified:9},
+    {id:2, name:'রমজান',         color:'#FFB74D', count:5,  type:'b', created:2, modified:6},
+    {id:3, name:'পরিবার ও আখলাক', color:'#7986CB', count:8,  type:'b', created:3, modified:8},
+    {id:4, name:'দোয়া ও যিকির',   color:'#4FC3F7', count:3,  type:'b', created:4, modified:5},
+    {id:5, name:'পরে পড়ব',       color:'#F06292', count:0,  type:'b', created:5, modified:7},
+    {id:6, name:'প্রতিদিন পড়ি',   color:'#4DB6AC', count:2,  type:'p', created:6, modified:4}
+  ],
+  hadiths:[
+    {id:1, book:'সহিহ বুখারি', no:1, ar:'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ', bn:'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।', f:[1,3], dl:true, added:3},
+    {id:2, book:'সহিহ মুসলিম', no:223, ar:'الطُّهُورُ شَطْرُ الإِيمَانِ', bn:'পবিত্রতা ঈমানের অর্ধেক।', f:[1], dl:true, added:5},
+    {id:3, book:'সহিহ বুখারি', no:6018, ar:'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ', bn:'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।', f:[], dl:true, added:0},
+    {id:4, book:'সুনানে আবু দাউদ', no:4985, f:[1], dl:false, added:4},
+    {id:5, book:'সহিহ বুখারি', no:1894, ar:'الصِّيَامُ جُنَّةٌ', bn:'রোজা ঢালস্বরূপ।', f:[2], dl:true, added:6},
+    {id:6, book:'সহিহ বুখারি', no:6407, ar:'مَثَلُ الَّذِي يَذْكُرُ رَبَّهُ وَالَّذِي لاَ يَذْكُرُ رَبَّهُ مَثَلُ الْحَىِّ وَالْمَيِّتِ', bn:'যে তার রবকে স্মরণ করে আর যে করে না, তাদের দৃষ্টান্ত জীবিত ও মৃতের মতো।', f:[4,6], dl:true, added:7}
+  ]
+};
+const CARD_PAGE = [1,6,3];   // hadiths on the "সহিহ বুখারি" list page
+const SORTS = [['name','নাম অনুসারে (A–Z)'],['created','তৈরির তারিখ'],['modified','সর্বশেষ পরিবর্তিত']];
+const SCREENS = [['card','হাদিস কার্ড'],['menu','মেনু শিট'],['collection','কালেকশন শিট'],['create','নতুন ফোল্ডার'],['folders','ফোল্ডার লিস্ট'],['details','ফোল্ডারের ভেতরে'],['manage','এডিট ও ডিলিট'],['sort','সাজানো'],['empty','খালি অবস্থা']];
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const bn = n => String(n).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hexA = (hex, a) => { const n = parseInt(hex.slice(1),16); return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`; };
+const countText = c => c > 0 ? `${bn(c)}টি হাদিস` : 'কোন হাদিস যুক্ত করা হয়নি';
+const folder = id => S.folders.find(f => f.id === id);
+const hadith = id => S.hadiths.find(h => h.id === id);
+const topOv = () => S.overlays[S.overlays.length - 1];
+const isTablet = () => S.device === 'tablet';
+const match = (txt, q) => !q.trim() || txt.toLowerCase().includes(q.trim().toLowerCase());
+const bmFolders = h => h.f.filter(id => folder(id) && folder(id).type === 'b');
+const segMem = {};
+
+function sortFolders(list){
+  const k = S.sortF;
+  return list.slice().sort((a,b) => k === 'name' ? a.name.localeCompare(b.name,'bn') : b[k] - a[k]);
+}
+function sortHadiths(list){
+  const k = S.sortH;
+  return list.slice().sort((a,b) => k === 'name' ? (a.book.localeCompare(b.book,'bn') || a.no - b.no) : b.added - a.added);
+}
+function visibleFolders(type, q){
+  if (S.forceEmpty && type === 'b') return [];
+  return sortFolders(S.folders.filter(f => f.type === type && match(f.name, q)));
+}
+function folderHadiths(fid, q){
+  return sortHadiths(S.hadiths.filter(h => h.f.includes(fid) && match(`${h.book} ${h.no} ${bn(h.no)} ${h.bn||''} ${h.ar||''}`, q)));
+}
+
+/* =========================================================
+   COMPONENTS
+   ========================================================= */
+function appBar(title, sub, actions){
+  return `<header class="ab">
+    <button class="ib" data-act="back" aria-label="পেছনে যান">${I.back}</button>
+    <div class="ab-t"><h1>${esc(title)}</h1>${sub ? `<small>${esc(sub)}</small>` : ''}</div>
+    ${actions || ''}
+  </header>`;
+}
+function seg(id, labels, idx){
+  const from = segMem[id] ?? idx;
+  return `<div class="seg" role="tablist" data-seg="${id}" data-to="${idx}" style="--n:${labels.length}">
+    <span class="seg-ind" style="transform:translateX(${from*100}%)"></span>
+    ${labels.map((l,i) => `<button role="tab" aria-selected="${i===idx}" class="${i===idx?'on':''}" data-act="seg" data-seg="${id}" data-i="${i}">${l}</button>`).join('')}
+  </div>`;
+}
+function searchRow(key, value, placeholder, sortTarget){
+  return `<div class="srow">
+    <label class="search">${I.search}<input type="search" data-input="${key}" data-fid="${key}" value="${esc(value)}" placeholder="${placeholder}" aria-label="${placeholder}"></label>
+    ${sortTarget ? `<button class="ib boxed" data-act="sort" data-target="${sortTarget}" aria-label="সাজান">${I.sort}</button>` : ''}
+  </div>`;
+}
+function folderIcon(f){
+  return `<span class="ftint" style="background:${hexA(f.color,.16)};color:${f.color}">${I.folder}</span>`;
+}
+function folderRow(f, selected){
+  return `<div class="frow${selected ? ' sel' : ''}">
+    <button class="frow-main" data-act="open" data-id="${f.id}" aria-label="${esc(f.name)}, ${countText(f.count)}">
+      ${folderIcon(f)}<span class="ftxt"><span class="fname">${esc(f.name)}</span><span class="fcount">${countText(f.count)}</span></span>
+    </button>
+    <button class="ib sm more" data-act="fmore" data-id="${f.id}" aria-label="${esc(f.name)} — অন্যান্য অপশন">${I.more}</button>
+  </div>`;
+}
+function loginBox(){
+  if (!S.showLogin) return '';
+  return `<div class="login"><span class="lic">${I.cloud}</span><div>
+    <p>আপনার কালেকশনগুলো অনলাইনে সেভ রাখতে উপরের বাটনে ক্লিক করে Gmail-এ লগইন করুন</p>
+    <button class="tbtn" data-act="login-ok">ঠিক আছে</button></div></div>`;
+}
+function emptyState(q, type, small){
+  const text = q.trim() ? 'কোন সার্চ রেজাল্ট পাওয়া যায়নি' : (type === 'p' ? 'কোন পিন পাওয়া যায়নি' : 'কোন বুকমার্ক পাওয়া যায়নি');
+  return `<div class="empty${small ? ' small' : ''}">${I.empty}<p>${text}</p></div>`;
+}
+/* folder list for the current tab (page + tablet rail) */
+function tabContent(){
+  if (S.tab === 2) return `<div class="quiet">কোন নোট পাওয়া যায়নি</div>`;
+  const type = S.tab === 0 ? 'b' : 'p';
+  const list = visibleFolders(type, S.q);
+  const sel = isTablet() ? selectedFolderId() : null;
+  return searchRow('q', S.q, type === 'b' ? 'বুকমার্ক সার্চ করুন' : 'পিন সার্চ করুন', 'f') +
+    (list.length ? `<div class="group">${list.map(f => folderRow(f, f.id === sel)).join('')}</div>` : emptyState(S.q, type, isTablet()));
+}
+function hadithCard(h, inFolder){
+  const n = bmFolders(h).length;
+  const icon = inFolder ? '' : n > 1 ? `<span class="bm">${I.multi}</span>` : n === 1 ? `<span class="bm">${I.bookmark}</span>` : '';
+  const ref = `${h.book} · হাদিস ${bn(h.no)}`;
+  const body = h.dl
+    ? `<p class="ar" dir="rtl" lang="ar">${h.ar}</p><p class="tr">${h.bn}</p>`
+    : `<div class="missing">${I.bookDl}<h3>বুকমার্ক করা হাদিস লোড করা যায়নি</h3>
+        <p>এই বুকমার্কের হাদিসের বইটি ডাউনলোড করা হয়নি। হাদিস দেখতে বইটি ডাউনলোড করুন।</p>
+        <button class="btn tonal" data-act="noop">ডাউনলোডে যান</button></div>`;
+  return `<article class="hc"><div class="hc-top">
+      <span class="hc-ref">${ref}</span>${h.dl ? '<span class="grade">সহিহ</span>' : ''}<span class="sp"></span>${icon}
+      <button class="ib sm more" data-act="hmore" data-id="${h.id}" data-inf="${inFolder ? 1 : 0}" aria-label="${ref} — আরও অপশন">${I.more}</button>
+    </div>${body}</article>`;
+}
+function detailList(fid){
+  const list = folderHadiths(fid, S.dq);
+  if (list.length) return list.map(h => hadithCard(h, true)).join('');
+  return S.dq.trim() ? emptyState(S.dq, 'b') : `<div class="quiet">কোন হাদিস যুক্ত করা হয়নি</div>`;
+}
+const collectionActions = `<button class="ib" data-act="login-show" aria-label="লগইন ও ব্যাকআপ">${I.cloud}</button>
+  <button class="ib" data-act="io" aria-label="ইমপোর্ট / এক্সপোর্ট">${I.swap}</button>`;
+
+/* =========================================================
+   PAGES — phone
+   ========================================================= */
+function phonePage(){
+  if (S.base === 'card') return cardPage();
+  if (S.base === 'details' && folder(S.folderId)){
+    const f = folder(S.folderId);
+    return `<div class="pg">${appBar(f.name, f.count ? countText(f.count) : '')}
+      <div class="scroll" data-keep="details">${searchRow('dq', S.dq, 'হাদিস সার্চ করুন', 'h')}${detailList(f.id)}</div></div>`;
+  }
+  return `<div class="pg">${appBar('কালেকশন', '', collectionActions)}
+    <div class="scroll" data-keep="folders">${loginBox()}${seg('main', ['বুকমার্কস','পিনস','নোটস'], S.tab)}${tabContent()}</div></div>`;
+}
+function cardPage(){
+  const cards = CARD_PAGE.map(id => hadithCard(hadith(id), false)).join('');
+  return `<div class="pg">${appBar('সহিহ বুখারি', '')}
+    <div class="scroll" data-keep="card"><div class="${isTablet() ? 't-center' : ''}">${cards}</div></div></div>`;
+}
+
+/* =========================================================
+   PAGES — tablet landscape (left rail + right detail)
+   ========================================================= */
+function selectedFolderId(){
+  if (S.tab === 2 || S.forceEmpty) return null;
+  const type = S.tab === 0 ? 'b' : 'p';
+  const f = folder(S.folderId);
+  if (f && f.type === type) return f.id;
+  const first = visibleFolders(type, '')[0];
+  return first ? first.id : null;
+}
+function tabletPage(){
+  if (S.base === 'card') return cardPage();
+  const fid = selectedFolderId(), f = fid && folder(fid);
+  let right;
+  if (f){
+    right = `<div class="t-dhead"><div class="tt"><h2>${esc(f.name)}</h2><small>${countText(f.count)}</small></div>
+      ${searchRow('dq', S.dq, 'হাদিস সার্চ করুন', 'h')}</div>
+      <div class="scroll" data-keep="tdetail"><div class="t-col">${detailList(f.id)}</div></div>`;
+  } else if (S.tab === 2){
+    right = `<div class="t-ph">${I.folder}<span>কোন নোট পাওয়া যায়নি</span></div>`;
+  } else {
+    right = `<div class="t-ph" style="opacity:1">${emptyState('', S.tab === 0 ? 'b' : 'p')}</div>`;
+  }
+  return `<div class="pg">${appBar('কালেকশন', '', collectionActions)}
+    <div class="t-body">
+      <aside class="t-rail"><div class="scroll" data-keep="rail">${loginBox()}${seg('main', ['বুকমার্কস','পিনস','নোটস'], S.tab)}${tabContent()}</div></aside>
+      <section class="t-detail">${right}</section>
+    </div></div>`;
+}
+
+/* =========================================================
+   OVERLAYS — sheets (phone) / dialogs (tablet)
+   ========================================================= */
+const SHEETS = ['menu','coll','create','manage','sort'];
+function overlayHTML(o, i){
+  const asDialog = isTablet() || !SHEETS.includes(o.t);
+  const cls = asDialog ? `dlg${isTablet() && SHEETS.includes(o.t) ? ' wide' : ''}` : 'sheet';
+  const inner = ({menu:menuSheet, coll:collSheet, create:createSheet, manage:manageSheet, sort:sortSheet, edit:editDialog, delf:confirmDialog, remh:confirmDialog, io:ioDialog})[o.t](o);
+  const under = isTablet() && i < S.overlays.length - 1 ? ' under' : '';
+  return `<div class="ov${o.anim ? ' enter' : ''}${under}" style="z-index:${20+i}" data-ov="${i}">
+    <div class="scrim" data-act="scrim"></div>
+    <div class="${cls}" role="dialog" aria-modal="true">${inner}</div></div>`;
+}
+const closeBtn = `<button class="ib sm" data-act="close" aria-label="বন্ধ করুন">${I.close}</button>`;
+
+/* hadith more-options menu */
+function menuSheet(o){
+  const h = hadith(o.h);
+  const items = [['m-coll',I.mColl,'বুকমার্ক / পিন'],['m-noop',I.mNote,'নোট'],['m-noop',I.mTrans,'অনুবাদ কপি'],['m-noop',I.mArabic,'আরবি কপি'],['m-noop',I.mCopy,'হাদিস কপি'],['m-noop',I.mInfo,'বিস্তারিত']];
+  if (o.inFolder) items.push(['m-remove',I.mRemove,'বুকমার্ক সরান']);
+  return `<div class="handle"></div>
+    <div class="sh-head"><h2>${h.book} · হাদিস ${bn(h.no)}</h2>${closeBtn}</div>
+    <div class="mgrid">${items.map(([a,ic,l]) => `<button class="mitem" data-act="${a}">${ic}<span>${l}</span></button>`).join('')}</div>`;
+}
+/* কালেকশন sheet — tick folders */
+function collSheet(o){
+  const type = o.tab === 0 ? 'b' : 'p';
+  const list = sortFolders(S.folders.filter(f => f.type === type && match(f.name, o.q)));
+  const rows = list.length ? list.map(f => `<button class="crow" role="checkbox" aria-checked="${o.ticks.includes(f.id)}" data-act="tick" data-id="${f.id}">
+      ${folderIcon(f)}<span class="ftxt"><span class="fname">${esc(f.name)}</span><span class="fcount">${countText(f.count)}</span></span>
+      <span class="cbox">${I.check}</span></button>`).join('') : emptyState(o.q, type, true);
+  return `<div class="handle"></div>
+    <div class="sh-head"><h2>কালেকশন</h2>${closeBtn}</div>
+    <div style="padding:0 20px">${seg('coll', ['বুকমার্কস','পিনস'], o.tab)}${searchRow('cq', o.q, type === 'b' ? 'বুকমার্ক সার্চ করুন' : 'পিন সার্চ করুন')}</div>
+    <div class="sh-body" data-keep="coll" style="padding-top:0"><div class="clist">${rows}</div></div>
+    <div class="sh-foot"><button class="btn outline" data-act="c-new">নতুন তৈরি করুন</button><button class="btn primary" data-act="c-ok">ঠিক আছে</button></div>`;
+}
+function swatches(sel){
+  return `<div class="sw" role="radiogroup" aria-label="ফোল্ডার রং">${COLORS.map((c,i) => `<button class="swc" role="radio" aria-checked="${i===sel}" aria-label="রং ${bn(i+1)}" data-act="color" data-i="${i}" style="background:${c}">${I.check}</button>`).join('')}</div>`;
+}
+/* নতুন ফোল্ডার */
+function createSheet(o){
+  const opt = (t, ic, title, sub) => `<button class="opt" role="radio" aria-checked="${o.type===t}" data-act="ctype" data-v="${t}">${ic}<span><b>${title}</b><span>${sub}</span></span></button>`;
+  return `<div class="handle"></div>
+    <div class="sh-head"><h2>নতুন কালেকশন তৈরি করুন</h2>${closeBtn}</div>
+    <div class="sh-body">
+      <span class="lbl" style="margin-top:0">ফোল্ডার টাইপ নির্বাচন করুন</span>
+      <div class="opts" role="radiogroup">${opt('b', I.bmOutline, 'বুকমার্ক', 'হাদিস বুকমার্ক করুন')}${opt('p', I.pin, 'পিন', 'হাদিস পিন করুন')}</div>
+      <label class="lbl" for="fname-new">ফোল্ডারের নাম</label>
+      <input id="fname-new" class="field" data-input="name" data-fid="name" value="${esc(o.name)}" placeholder="নামাজের হাদিস" autocomplete="off">
+      <span class="lbl">ফোল্ডার রং নির্বাচন করুন</span>${swatches(o.color)}
+    </div>
+    <div class="sh-foot"><button class="btn outline" data-act="close">বাতিল</button><button class="btn primary" data-act="create-ok" ${o.name.trim() ? '' : 'disabled'}>ঠিক আছে</button></div>`;
+}
+/* অন্যান্য অপশন — folder */
+function manageSheet(o){
+  const f = folder(o.f);
+  return `<div class="handle"></div>
+    <div class="sh-head"><h2>অন্যান্য অপশন<small>${esc(f.name)}</small></h2>${closeBtn}</div>
+    <div class="sh-body" style="padding-bottom:4px">
+      <button class="lrow" data-act="edit-open">${I.edit}বুকমার্ক এডিট করুন</button>
+      <button class="lrow" data-act="del-open">${I.trash}বুকমার্ক ডিলিট করুন</button>
+    </div>
+    <div class="sh-foot" style="border-top:0"><button class="btn outline" data-act="close">বাতিল</button></div>`;
+}
+/* সাজানো */
+function sortSheet(o){
+  return `<div class="handle"></div>
+    <div class="sh-head"><h2>বুকমার্কগুলো সাজান</h2>${closeBtn}</div>
+    <div class="sh-body" role="radiogroup">${SORTS.map(([k,l]) => `<button class="radio" role="radio" aria-checked="${o.sel===k}" data-act="sort-pick" data-k="${k}"><span class="rdot"></span>${l}</button>`).join('')}</div>
+    <div class="sh-foot"><button class="btn outline" data-act="close">বাতিল</button><button class="btn primary" data-act="sort-ok">ঠিক আছে</button></div>`;
+}
+/* edit dialog */
+function editDialog(o){
+  return `<div class="sh-head"><h2>বুকমার্ক এডিট করুন</h2></div>
+    <div class="sh-body">
+      <label class="lbl" for="fname-edit" style="margin-top:0">ফোল্ডারের নাম</label>
+      <input id="fname-edit" class="field" data-input="name" data-fid="ename" value="${esc(o.name)}" placeholder="নামাজের হাদিস" autocomplete="off">
+      <span class="lbl">ফোল্ডার রং নির্বাচন করুন</span>${swatches(o.color)}
+    </div>
+    <div class="sh-foot"><button class="btn text" data-act="close">বাতিল</button><button class="btn primary" data-act="edit-ok" ${o.name.trim() ? '' : 'disabled'}>ঠিক আছে</button></div>`;
+}
+/* delete confirm (folder or hadith-from-folder) */
+function confirmDialog(o){
+  return `<div class="sh-head"><h2>বুকমার্ক</h2></div>
+    <div class="sh-body"><p class="msg">আপনি কি নিশ্চিত? বুকমার্ক ডিলিট করতে চান?</p></div>
+    <div class="sh-foot"><button class="btn text" data-act="close">বাতিল</button><button class="btn danger" data-act="${o.t === 'delf' ? 'delf-ok' : 'remh-ok'}">ডিলিট করুন</button></div>`;
+}
+/* file import / export */
+function ioDialog(){
+  return `<div class="sh-head"><h2>ইমপোর্ট / এক্সপোর্ট</h2>${closeBtn}</div>
+    <div class="sh-body">
+      <button class="lrow" data-act="close">${I.file}ফাইলে এক্সপোর্ট করুন</button>
+      <button class="lrow" data-act="close">${I.fileIn}ফাইল থেকে ইমপোর্ট করুন</button>
+    </div>`;
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+function render(){
+  const app = $('#app');
+  // keep focus + scroll positions across re-render
+  const a = document.activeElement, fid = a && a.dataset && a.dataset.fid, caret = fid ? a.selectionStart : 0;
+  const scrolls = {}; app.querySelectorAll('[data-keep]').forEach(el => scrolls[el.dataset.keep] = el.scrollTop);
+
+  app.innerHTML = (isTablet() ? tabletPage() : phonePage()) + S.overlays.map(overlayHTML).join('');
+
+  app.querySelectorAll('[data-keep]').forEach(el => { if (scrolls[el.dataset.keep]) el.scrollTop = scrolls[el.dataset.keep]; });
+  if (fid){ const el = app.querySelector(`[data-fid="${fid}"]`); if (el){ el.focus({preventScroll:true}); try{ el.setSelectionRange(caret, caret); }catch(e){} } }
+  // slide segmented indicators from previous index to the new one
+  app.querySelectorAll('.seg').forEach(el => {
+    const ind = el.querySelector('.seg-ind'), to = +el.dataset.to;
+    ind.getBoundingClientRect();
+    ind.style.transform = `translateX(${to*100}%)`;
+    segMem[el.dataset.seg] = to;
+  });
+  S.overlays.forEach(o => o.anim = false);
+  updateChips();
+}
+function currentScreen(){
+  const o = topOv();
+  if (o) return ({menu:'menu', coll:'collection', create:'create', manage:'manage', edit:'manage', delf:'manage', sort:'sort', remh:'details', io:'folders'})[o.t];
+  if (S.base === 'card') return 'card';
+  if (S.forceEmpty) return 'empty';
+  return S.base === 'details' ? 'details' : 'folders';
+}
+function updateChips(){
+  const cur = currentScreen();
+  document.querySelectorAll('.chip').forEach(c => { const on = c.dataset.screen === cur; c.classList.toggle('on', on); c.setAttribute('aria-current', on ? 'page' : 'false'); });
+}
+
+/* overlay stack */
+function push(o){ o.anim = true; S.overlays.push(o); if (!closing) render(); }
+let closing = false;
+function closeTop(after){
+  if (!S.overlays.length || closing) return;
+  closing = true;
+  const el = $(`#app [data-ov="${S.overlays.length-1}"]`);
+  if (el) el.classList.add('leave');
+  setTimeout(() => { S.overlays.pop(); if (after) after(); closing = false; render(); }, 180);
+}
+let snackTimer;
+function snack(text){
+  const el = $('#snack'); el.textContent = text; el.classList.add('show');
+  clearTimeout(snackTimer); snackTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* =========================================================
+   NAVIGATION (toolbar chips, query param, postMessage)
+   ========================================================= */
+function collFor(hid){ delete segMem.coll; return {t:'coll', h:hid, tab:0, q:'', ticks:hadith(hid).f.slice()}; }
+function go(id){
+  S.overlays = []; S.forceEmpty = false; S.dq = ''; S.q = '';
+  if (!folder(S.folderId) || folder(S.folderId).type !== 'b'){ const f = visibleFolders('b','')[0]; if (f) S.folderId = f.id; }
+  const base = {card:'card', menu:'card', collection:'card', create:'card', details:'details'}[id] || 'folders';
+  S.base = base;
+  if (base !== 'card') S.tab = 0;
+  if (id === 'details' && folder(1)) S.folderId = 1;
+  if (id === 'empty') S.forceEmpty = true;
+  const ov = {
+    menu: () => [{t:'menu', h:3, inFolder:false}],
+    collection: () => [collFor(3)],
+    create: () => [collFor(3), {t:'create', type:'b', name:'', color:0}],
+    manage: () => folder(S.folderId) ? [{t:'manage', f:S.folderId}] : [],
+    sort: () => [{t:'sort', target:'f', sel:S.sortF}]
+  }[id];
+  S.overlays = ov ? ov() : [];
+  S.overlays.forEach(o => o.anim = true);
+  render();
+}
+function setDevice(d){
+  S.device = d === 'tablet' ? 'tablet' : 'phone';
+  const dev = $('#device'); dev.className = 'device ' + S.device;
+  $('#devsw').dataset.v = S.device;
+  document.querySelectorAll('#devsw button').forEach(b => b.setAttribute('aria-pressed', b.dataset.dev === S.device));
+  fit(); render();
+}
+function fit(){
+  const stage = $('#stage'), dev = $('#device');
+  const bare = S.device === 'phone' && innerWidth < 480;
+  document.body.classList.toggle('bare', bare);
+  if (bare){ dev.style.transform = ''; stage.style.width = stage.style.height = ''; return; }
+  const W = S.device === 'phone' ? 390 : 1180, H = S.device === 'phone' ? 844 : 820;
+  let s = Math.min(1, (innerWidth - 32) / W, (innerHeight - 44 - 32) / H);
+  s = Math.max(S.device === 'phone' ? .62 : .3, s);
+  dev.style.transform = `scale(${s})`;
+  stage.style.width = W * s + 'px'; stage.style.height = H * s + 'px';
+}
+
+/* =========================================================
+   ACTIONS (event delegation inside the device)
+   ========================================================= */
+const ACT = {
+  back(){ if (S.base === 'details' && !isTablet()){ S.base = 'folders'; S.dq = ''; render(); } },
+  scrim(){ closeTop(); }, close(){ closeTop(); }, noop(){},
+  seg(b){
+    const i = +b.dataset.i;
+    if (b.dataset.seg === 'main'){ S.tab = i; S.q = ''; S.dq = ''; S.forceEmpty = S.forceEmpty && i === 0; }
+    else { topOv().tab = i; topOv().q = ''; }
+    render();
+  },
+  open(b){ S.folderId = +b.dataset.id; S.base = 'details'; S.dq = ''; S.forceEmpty = false; render(); },
+  fmore(b){ push({t:'manage', f:+b.dataset.id}); },
+  hmore(b){ push({t:'menu', h:+b.dataset.id, inFolder:b.dataset.inf === '1', f:isTablet() ? selectedFolderId() : S.folderId}); },
+  sort(b){ const t = b.dataset.target; push({t:'sort', target:t, sel:t === 'f' ? S.sortF : S.sortH}); },
+  'sort-pick'(b){ topOv().sel = b.dataset.k; render(); },
+  'sort-ok'(){ const o = topOv(); closeTop(() => { if (o.target === 'f') S.sortF = o.sel; else S.sortH = o.sel; }); },
+  'login-ok'(){ S.showLogin = false; render(); },
+  'login-show'(){ S.showLogin = true; render(); },
+  io(){ push({t:'io'}); },
+  /* hadith menu */
+  'm-coll'(){ const h = topOv().h; closeTop(() => push(collFor(h))); },
+  'm-noop'(){ closeTop(); },
+  'm-remove'(){ const o = topOv(); closeTop(() => push({t:'remh', h:o.h, f:o.f})); },
+  'remh-ok'(){
+    const o = topOv();
+    closeTop(() => {
+      const h = hadith(o.h), f = folder(o.f);
+      h.f = h.f.filter(id => id !== o.f);
+      if (f){ f.count = Math.max(0, f.count - 1); f.modified = now(); if (!folderHadiths(f.id, '').length){ f.count = 0; if (!isTablet()){ S.base = 'folders'; S.dq = ''; } } }
+      snack('বুকমার্ক মুছে ফেলা হয়েছে');
+    });
+  },
+  /* collection sheet */
+  tick(b){ const o = topOv(), id = +b.dataset.id; o.ticks = o.ticks.includes(id) ? o.ticks.filter(x => x !== id) : o.ticks.concat(id); render(); },
+  'c-new'(){ push({t:'create', type:topOv().tab === 1 ? 'p' : 'b', name:'', color:0}); },
+  'c-ok'(){
+    const o = topOv();
+    closeTop(() => {
+      const h = hadith(o.h), before = h.f;
+      o.ticks.filter(id => !before.includes(id)).forEach(id => { const f = folder(id); if (f){ f.count++; f.modified = now(); } });
+      before.filter(id => !o.ticks.includes(id)).forEach(id => { const f = folder(id); if (f){ f.count = Math.max(0, f.count - 1); f.modified = now(); } });
+      h.f = o.ticks.slice(); if (o.ticks.length) h.added = now();
+      snack('বুকমার্ক সেভ করা হয়েছে');
+    });
+  },
+  /* create / edit */
+  ctype(b){ topOv().type = b.dataset.v; render(); },
+  color(b){ topOv().color = +b.dataset.i; render(); },
+  'create-ok'(){
+    const o = topOv(); if (!o.name.trim()) return;
+    closeTop(() => {
+      const t = now(), f = {id:S.nextId++, name:o.name.trim(), color:COLORS[o.color], count:0, type:o.type, created:t, modified:t};
+      S.folders.push(f);
+      const c = topOv(); if (c && c.t === 'coll'){ c.ticks.push(f.id); c.tab = o.type === 'p' ? 1 : 0; c.q = ''; }
+    });
+  },
+  'edit-open'(){ const f = folder(topOv().f); closeTop(() => push({t:'edit', f:f.id, name:f.name, color:Math.max(0, COLORS.indexOf(f.color))})); },
+  'edit-ok'(){
+    const o = topOv(); if (!o.name.trim()) return;
+    closeTop(() => { const f = folder(o.f); f.name = o.name.trim(); f.color = COLORS[o.color]; f.modified = now(); snack('বুকমার্ক আপডেট করা হয়েছে'); });
+  },
+  'del-open'(){ const id = topOv().f; closeTop(() => push({t:'delf', f:id})); },
+  'delf-ok'(){
+    const o = topOv();
+    closeTop(() => {
+      S.folders = S.folders.filter(f => f.id !== o.f);
+      S.hadiths.forEach(h => h.f = h.f.filter(id => id !== o.f));
+      if (S.folderId === o.f && S.base === 'details' && !isTablet()) S.base = 'folders';
+      snack('বুকমার্ক মুছে ফেলা হয়েছে');
+    });
+  }
+};
+
+const app = $('#app');
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || !app.contains(b) || b.disabled) return;
+  const fn = ACT[b.dataset.act]; if (fn) fn(b);
+});
+app.addEventListener('input', e => {
+  const k = e.target.dataset.input; if (!k) return;
+  const v = e.target.value;
+  if (k === 'name'){ topOv().name = v; const ok = app.querySelector('[data-act="create-ok"],[data-act="edit-ok"]'); if (ok) ok.disabled = !v.trim(); return; }
+  if (k === 'q') S.q = v; else if (k === 'dq') S.dq = v; else if (k === 'cq') topOv().q = v;
+  if (!e.isComposing) render();
+});
+app.addEventListener('compositionend', e => { if (e.target.dataset.input && e.target.dataset.input !== 'name') render(); });
+app.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.dataset.input === 'name'){ const ok = app.querySelector('[data-act="create-ok"],[data-act="edit-ok"]'); if (ok && !ok.disabled) ok.click(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTop(); });
+
+/* toolbar */
+$('#chips').innerHTML = SCREENS.map(([id,l]) => `<button class="chip" data-screen="${id}">${l}</button>`).join('');
+$('#chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) go(c.dataset.screen); });
+$('#devsw').addEventListener('click', e => { const b = e.target.closest('button'); if (b && b.dataset.dev !== S.device) setDevice(b.dataset.dev); });
+$('#themeBtn').addEventListener('click', () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+});
+addEventListener('resize', fit);
+addEventListener('message', e => {
+  const d = e.data || {};
+  if (d.type === 'screen' && SCREENS.some(s => s[0] === d.id)) go(d.id);
+  if (d.type === 'device') setDevice(d.id);
+  if (d.type === 'theme' && (d.id === 'dark' || d.id === 'light')) document.documentElement.dataset.theme = d.id;
+});
+
+/* boot */
+(function(){
+  let p; try{ p = new URLSearchParams(location.search); }catch(e){ p = new URLSearchParams(); }
+  const th = p.get('theme'); if (th === 'dark' || th === 'light') document.documentElement.dataset.theme = th;
+  if (p.get('device') === 'tablet'){ S.device = 'tablet'; $('#device').className = 'device tablet'; $('#devsw').dataset.v = 'tablet';
+    document.querySelectorAll('#devsw button').forEach(b => b.setAttribute('aria-pressed', b.dataset.dev === 'tablet')); }
+  const sc = p.get('screen');
+  fit();
+  go(SCREENS.some(s => s[0] === sc) ? sc : 'folders');
+})();
+</script>
+</body>
+</html>

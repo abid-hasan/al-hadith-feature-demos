@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ফিচার ভিউয়ার</title>
+<style>
+@font-face{font-family:Kalpurush;src:url("assets/fonts/font_kalpurush.ttf") format("truetype");font-display:swap}
+
+/* ---------- Tokens ---------- */
+:root{
+  --primary:#1AA483; --primary-dark:#0D8C5C; --bar:#118C6E;
+  --bg:#F4F4F4; --surface:#FFFFFF; --surface-2:#F8FAF9; --sunken:#E9EDEC;
+  --text:#2B2F33; --body:#5D646F; --hint:rgba(0,0,0,.54); --line:rgba(0,0,0,.10);
+  --tint:#E8F6F3; --warn-bg:#FFF6E5; --warn:#8A5A00;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 16px rgba(16,24,40,.06);
+  --radius:12px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bar:#161C23; --bg:#0D1116; --surface:#161C23; --surface-2:#1B222A; --sunken:#05080B;
+    --text:#ECEDEE; --body:#C6C3CA; --hint:rgba(255,255,255,.6); --line:rgba(104,112,121,.3);
+    --tint:rgba(26,164,131,.14); --warn-bg:rgba(255,183,77,.12); --warn:#FFCC80;
+    --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bar:#161C23; --bg:#0D1116; --surface:#161C23; --surface-2:#1B222A; --sunken:#05080B;
+  --text:#ECEDEE; --body:#C6C3CA; --hint:rgba(255,255,255,.6); --line:rgba(104,112,121,.3);
+  --tint:rgba(26,164,131,.14); --warn-bg:rgba(255,183,77,.12); --warn:#FFCC80;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:Kalpurush,"Noto Sans Bengali",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.app{display:grid;grid-template-columns:280px 1fr;height:100vh}
+.scrim{display:none}
+
+/* ---------- Sidebar ---------- */
+aside{background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px}
+.brand-mark{width:36px;height:36px;border-radius:10px;background:var(--bar);display:grid;place-items:center;flex:none}
+.brand b{display:block;font-size:17px;line-height:1.2}
+.brand small{color:var(--hint);font-size:12px}
+.search{margin:0 14px 10px;position:relative}
+.search input{width:100%;font:inherit;padding:9px 12px 9px 34px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--text)}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--hint)}
+.side-label{padding:6px 18px;font-size:12px;color:var(--hint)}
+.features{list-style:none;margin:0;padding:0 8px 8px;overflow:auto;flex:1}
+.feature{width:100%;text-align:left;border:0;background:none;border-radius:10px;padding:9px 10px;display:flex;align-items:center;gap:10px}
+.feature:hover{background:var(--surface-2)}
+.feature[aria-current="true"]{background:var(--tint)}
+.feature[aria-current="true"] .f-title{color:var(--primary-dark)}
+:root[data-theme="dark"] .feature[aria-current="true"] .f-title{color:var(--primary)}
+.f-dot{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
+.feature[aria-current="true"] .f-dot{background:var(--primary)}
+.f-text{flex:1;min-width:0}
+.f-title{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.f-id{display:block;font-size:11.5px;color:var(--hint);font-family:ui-monospace,Menlo,monospace}
+.f-count{font-size:12px;color:var(--hint);background:var(--surface-2);border:1px solid var(--line);border-radius:20px;padding:0 8px;flex:none}
+.side-foot{border-top:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--hint)}
+.live{display:inline-flex;align-items:center;gap:6px;flex:1}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 3px var(--tint)}
+.live.off i{background:#F95B53;box-shadow:none}
+.icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;width:34px;height:34px;display:inline-grid;place-items:center;flex:none}
+.icon-btn:hover{background:var(--surface-2)}
+
+/* ---------- Main ---------- */
+main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.topbar{display:flex;align-items:center;gap:14px;padding:14px 22px;background:var(--surface);border-bottom:1px solid var(--line)}
+.menu-btn{display:none}
+.heading{flex:1;min-width:0}
+.heading h1{margin:0;font-size:21px;line-height:1.25}
+.heading p{margin:2px 0 0;font-size:12.5px;color:var(--hint);font-family:ui-monospace,Menlo,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);padding:4px;border-radius:12px;flex:none}
+.tab{border:0;background:none;border-radius:9px;padding:6px 14px;font-size:14.5px;color:var(--body);display:flex;gap:7px;align-items:center}
+.tab[aria-selected="true"]{background:var(--bar);color:#fff}
+.tab .n{font-size:11.5px;background:rgba(127,127,127,.18);border-radius:20px;padding:0 7px}
+.tab[aria-selected="true"] .n{background:rgba(255,255,255,.22)}
+.panel{flex:1;min-height:0;display:none}
+.panel.on{display:flex;flex-direction:column}
+
+/* ---------- Requirements ---------- */
+#req{overflow:auto}
+.doc-wrap{max-width:820px;width:100%;margin:0 auto;padding:26px 26px 60px}
+.doc-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip{font-size:12.5px;border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:2px 10px;color:var(--body)}
+.chip.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.doc{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px 32px;box-shadow:var(--shadow);color:var(--body)}
+.doc h1{font-size:26px;color:var(--text);margin:0 0 10px}
+.doc h2{font-size:19px;color:var(--text);margin:28px 0 10px;padding-top:18px;border-top:1px solid var(--line)}
+.doc h3{font-size:16.5px;color:var(--text);margin:20px 0 8px}
+.doc p{margin:8px 0}
+.doc ul,.doc ol{padding-left:22px;margin:8px 0}
+.doc li{margin:5px 0}
+.doc li::marker{color:var(--primary)}
+.doc strong{color:var(--text)}
+.doc code{font-family:ui-monospace,Menlo,monospace;font-size:.86em;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:1px 5px}
+.doc pre{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow:auto}
+.doc pre code{border:0;background:none;padding:0}
+.doc blockquote{margin:10px 0;padding:10px 14px;border-left:3px solid var(--primary);background:var(--tint);border-radius:0 10px 10px 0;color:var(--text)}
+.doc blockquote p{margin:2px 0}
+.doc .table{overflow-x:auto;margin:10px 0}
+.doc table{border-collapse:collapse;width:100%;font-size:14px}
+.doc th,.doc td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:var(--surface-2);color:var(--text)}
+.doc a{color:var(--primary)}
+.doc hr{border:0;border-top:1px solid var(--line);margin:20px 0}
+
+/* ---------- UI preview ---------- */
+.ptools{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.demos{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
+.demo-btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;min-width:38px;height:34px;padding:0 10px;display:inline-flex;align-items:center;gap:6px;font-size:14.5px}
+.demo-btn:hover{border-color:var(--primary)}
+.demo-btn[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
+.demo-btn.empty{border-style:dashed;color:var(--hint)}
+.demo-name{font-size:13px;color:var(--hint);padding:0 4px;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toggle{border:1px solid var(--line);background:var(--surface);border-radius:10px;height:34px;padding:0 12px;font-size:13.5px;display:inline-flex;align-items:center;gap:6px}
+.toggle[aria-pressed="true"]{background:var(--tint);border-color:var(--primary);color:var(--primary-dark)}
+:root[data-theme="dark"] .toggle[aria-pressed="true"]{color:var(--primary)}
+.stage{flex:1;min-height:0;display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+.stage.split{grid-template-columns:1fr 1fr}
+.pane[hidden]{display:none}
+.pane{position:relative;background:var(--sunken);min-width:0;min-height:0;display:flex;flex-direction:column}
+.pane-body{flex:1;min-height:0;display:flex;flex-direction:column}
+.pane-body iframe{flex:1;width:100%;border:0;background:var(--sunken)}
+/* Per-pane demo bar: only in side-by-side mode */
+.pane-bar{display:none;align-items:center;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.stage.split .pane-bar{display:flex}
+.stage.split .pane.active .pane-bar{box-shadow:inset 0 -2px 0 var(--primary)}
+.pane-side{font-size:12px;font-weight:700;color:var(--hint);padding:0 4px;min-width:30px}
+.pane.active .pane-side{color:var(--primary)}
+.pane-bar .demo-btn{min-width:32px;height:30px;font-size:13.5px;padding:0 8px}
+.pane-bar .pane-name{flex:1;min-width:0;font-size:12.5px;color:var(--hint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pane-bar .icon-btn{width:30px;height:30px}
+.ptools .split-hint{display:none;font-size:13px;color:var(--hint);flex:1}
+.ui-split .ptools .demos,.ui-split .ptools .demo-name,.ui-split .ptools #open{display:none}
+.ui-split .ptools .split-hint{display:block}
+.blank{flex:1;display:grid;place-items:center;text-align:center;color:var(--hint);padding:30px}
+.blank b{display:block;color:var(--text);font-size:17px;margin:10px 0 4px}
+.blank code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.kbd{font-size:12px;color:var(--hint)}
+kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--surface)}
+
+/* ---------- Narrow screens ---------- */
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  aside{position:fixed;inset:0 auto 0 0;width:min(300px,86vw);z-index:20;transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow)}
+  body.drawer aside{transform:none}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:15}
+  body.drawer .scrim{display:block}
+  .menu-btn{display:inline-grid}
+  .topbar{padding:10px 16px;flex-wrap:wrap}
+  .tabs{order:3;width:100%}
+  .tab{flex:1;justify-content:center}
+  .doc-wrap{padding:16px 16px 40px}
+  .doc{padding:20px 18px}
+  .stage.split{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
+  .kbd,.demo-name{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside aria-label="ফিচারের তালিকা">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M20.58 12.26c0 3.48-.5 8.82-.5 9.02s-.21.51-.41.62c-.1.1-.2.1-.41.1-.1 0-.2 0-.4-.1l-6.22-3.29h-.2L6.22 21.9c-.2.1-.51.1-.72 0-.2-.1-.4-.31-.4-.62 0-.2-.51-5.54-.51-9.02.1-2.26.3-5.23.51-7.39A2.6 2.6 0 0 1 7.54 2.3C8.97 2.2 11 2 12.64 2s3.67.2 5.1.3a2.6 2.6 0 0 1 2.44 2.57c.2 2.16.4 5.13.4 7.39Z" fill="#fff"/></svg>
+      </span>
+      <span><b>ফিচার ভিউয়ার</b><small>আল হাদিস · feat_list</small></span>
+    </div>
+    <label class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="ফিচার খুঁজুন" aria-label="ফিচার খুঁজুন">
+    </label>
+    <div class="side-label" id="side-label">ফিচার</div>
+    <ul class="features" id="features"></ul>
+    <div class="side-foot">
+      <span class="live" id="live" title="ফাইল বদলালে আপনা থেকে রিফ্রেশ হয়"><i></i><span>লাইভ</span></span>
+      <button class="icon-btn" id="theme" aria-label="লাইট/ডার্ক মোড বদলান" title="লাইট/ডার্ক মোড">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16Z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main>
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menu" aria-label="ফিচারের তালিকা খুলুন">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <div class="heading"><h1 id="title">লোড হচ্ছে…</h1><p id="path"></p></div>
+      <div class="tabs" role="tablist" aria-label="ভিউ">
+        <button class="tab" role="tab" id="tab-req" aria-controls="req" aria-selected="true">রিকোয়ারমেন্টস</button>
+        <button class="tab" role="tab" id="tab-ui" aria-controls="ui" aria-selected="false">UI প্রিভিউ <span class="n" id="demo-n">০</span></button>
+      </div>
+    </header>
+
+    <section class="panel on" id="req" role="tabpanel" aria-labelledby="tab-req">
+      <div class="doc-wrap">
+        <div class="doc-meta" id="doc-meta"></div>
+        <article class="doc" id="doc"></article>
+      </div>
+    </section>
+
+    <section class="panel" id="ui" role="tabpanel" aria-labelledby="tab-ui">
+      <div class="ptools">
+        <div class="demos" id="demos" aria-label="ডেমো বেছে নিন"></div>
+        <span class="demo-name" id="demo-name"></span>
+        <span class="split-hint">দুই পাশের বার থেকে আলাদা করে ডেমো বাছুন</span>
+        <button class="toggle" id="compare" aria-pressed="false" title="দুটো ডেমো পাশাপাশি দেখুন">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></svg>
+          পাশাপাশি
+        </button>
+        <button class="icon-btn" id="reload" aria-label="ডেমো রিলোড করুন" title="রিলোড">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+        </button>
+        <button class="icon-btn" id="open" aria-label="নতুন ট্যাবে খুলুন" title="নতুন ট্যাবে খুলুন">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+        </button>
+        <span class="kbd"><kbd>←</kbd> <kbd>→</kbd> ডেমো</span>
+      </div>
+      <div class="stage" id="stage">
+        <div class="pane active" id="pane-a" data-side="a"><div class="pane-bar" id="bar-a"></div><div class="pane-body" id="body-a"></div></div>
+        <div class="pane" id="pane-b" data-side="b" hidden><div class="pane-bar" id="bar-b"></div><div class="pane-body" id="body-b"></div></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+'use strict';
+/* ---------- Helpers ---------- */
+const $ = (id) => document.getElementById(id);
+const BN = '০১২৩৪৫৬৭৮৯';
+const bn = (n) => String(n).replace(/\d/g, (d) => BN[d]);
+const esc = (s) => s.replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
+};
+
+/* ---------- Tiny markdown renderer (headings, lists, tables, quotes, code) ---------- */
+function inline(s) {
+  const codes = [];
+  s = s.replace(/`([^`]+)`/g, (_, c) => { codes.push(c); return `\u0000${codes.length - 1}\u0000`; });
+  s = esc(s)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*\s][^*]*?)\*/g, '$1<em>$2</em>')
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t, u) =>
+      /^(https?:|#|\/|\.)/.test(u) ? `<a href="${u}" target="_blank" rel="noopener">${t}</a>` : t);
+  return s.replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${esc(codes[i])}</code>`);
+}
+
+function renderMarkdown(md) {
+  const lines = md.replace(/\r\n?/g, '\n').split('\n');
+  const out = [];
+  let i = 0;
+  const isTableSep = (l) => /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(l);
+  const cells = (l) => l.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
+  const listRe = /^(\s*)([-*+]|\d+[.)])\s+(.*)$/;
+
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line.trim()) { i++; continue; }
+
+    if (/^```/.test(line)) {
+      const buf = []; i++;
+      while (i < lines.length && !/^```/.test(lines[i])) buf.push(lines[i++]);
+      i++;
+      out.push(`<pre><code>${esc(buf.join('\n'))}</code></pre>`);
+      continue;
+    }
+    const h = line.match(/^(#{1,6})\s+(.*)$/);
+    if (h) { out.push(`<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`); i++; continue; }
+    if (/^\s*([-*_])(\s*\1){2,}\s*$/.test(line)) { out.push('<hr>'); i++; continue; }
+
+    if (/^\s*>/.test(line)) {
+      const buf = [];
+      while (i < lines.length && /^\s*>/.test(lines[i])) buf.push(lines[i++].replace(/^\s*>\s?/, ''));
+      out.push(`<blockquote>${renderMarkdown(buf.join('\n'))}</blockquote>`);
+      continue;
+    }
+    if (line.includes('|') && i + 1 < lines.length && isTableSep(lines[i + 1])) {
+      const head = cells(line); i += 2;
+      const rows = [];
+      while (i < lines.length && lines[i].includes('|') && lines[i].trim()) rows.push(cells(lines[i++]));
+      out.push('<div class="table"><table><thead><tr>' + head.map((c) => `<th>${inline(c)}</th>`).join('') +
+        '</tr></thead><tbody>' + rows.map((r) => '<tr>' + r.map((c) => `<td>${inline(c)}</td>`).join('') + '</tr>').join('') +
+        '</tbody></table></div>');
+      continue;
+    }
+    if (listRe.test(line)) {
+      // Nested lists by indentation.
+      const stack = [];
+      while (i < lines.length && (listRe.test(lines[i]) || (/^\s{2,}\S/.test(lines[i]) && stack.length))) {
+        const m = lines[i].match(listRe);
+        if (!m) { out.push(' ' + inline(lines[i].trim())); i++; continue; }
+        const indent = m[1].replace(/\t/g, '    ').length;
+        const tag = /\d/.test(m[2]) ? 'ol' : 'ul';
+        while (stack.length && indent < stack[stack.length - 1].indent) out.push(`</li></${stack.pop().tag}>`);
+        const top = stack[stack.length - 1];
+        if (!top || indent > top.indent) { out.push(`<${tag}><li>`); stack.push({ indent, tag }); }
+        else out.push('</li><li>');
+        out.push(inline(m[3]));
+        i++;
+      }
+      while (stack.length) out.push(`</li></${stack.pop().tag}>`);
+      continue;
+    }
+    const buf = [];
+    while (i < lines.length && lines[i].trim() && !/^(#{1,6}\s|```|\s*>|\s*([-*+]|\d+[.)])\s)/.test(lines[i])) buf.push(lines[i++].trim());
+    out.push(`<p>${inline(buf.join(' '))}</p>`);
+  }
+  return out.join('\n');
+}
+
+/* ---------- State ---------- */
+let features = [];
+const state = { feature: null, tab: 'req', demo: 0, compare: false, demoB: 1, side: 'a' };
+const mtimes = { md: 0, a: 0, b: 0 };
+
+function current() { return features.find((f) => f.id === state.feature) || null; }
+
+function readHash() {
+  // #/<feature>/<tab>/<demo>[/<right demo>] — a 4th part means side-by-side.
+  const [, id, tab, demo, demoB] = decodeURIComponent(location.hash).match(/^#\/?([^/]*)\/?([^/]*)\/?(\d*)\/?(\d*)/) || [];
+  if (id) state.feature = id;
+  if (tab === 'ui' || tab === 'req') state.tab = tab;
+  if (demo) state.demo = Math.max(0, Number(demo) - 1);
+  state.compare = Boolean(demoB);
+  if (demoB) state.demoB = Math.max(0, Number(demoB) - 1);
+}
+function writeHash() {
+  const h = `#/${state.feature}/${state.tab}` +
+    (state.tab === 'ui' ? `/${state.demo + 1}` + (state.compare ? `/${state.demoB + 1}` : '') : '');
+  if (location.hash !== h) history.replaceState(null, '', h);
+  store.set('featViewer.last', h);
+}
+
+/* ---------- Sidebar ---------- */
+function renderSidebar() {
+  const q = $('q').value.trim().toLowerCase();
+  const list = features.filter((f) => !q || f.title.toLowerCase().includes(q) || f.id.includes(q));
+  $('side-label').textContent = `ফিচার · ${bn(features.length)}টি`;
+  $('features').innerHTML = list.map((f) => {
+    const ready = f.demos.filter((d) => !d.empty).length;
+    return `<li><button class="feature" data-id="${esc(f.id)}" aria-current="${f.id === state.feature}">
+      <span class="f-dot"></span>
+      <span class="f-text"><span class="f-title">${esc(f.title)}</span><span class="f-id">${esc(f.id)}/</span></span>
+      <span class="f-count" title="ডেমো">${bn(ready)}/${bn(f.demos.length)}</span>
+    </button></li>`;
+  }).join('') || '<li class="side-label">কিছু পাওয়া যায়নি</li>';
+}
+
+/* ---------- Requirements ---------- */
+function renderDoc() {
+  const f = current();
+  if (!f) return;
+  mtimes.md = f.mdMtime;
+  const meta = [];
+  if (f.markdown) {
+    const words = f.markdown.replace(/[#>*|`\-]/g, ' ').split(/\s+/).filter(Boolean).length;
+    const mins = Math.max(1, Math.round(words / 200));
+    meta.push(`<span class="chip${mins > 2 ? ' warn' : ''}" title="শব্দ গুনে আনুমানিক হিসাব, প্রতি মিনিটে ২০০ শব্দ। লক্ষ্য: এক-দুই মিনিট">পড়তে আনুমানিক ${bn(mins)} মিনিট · ${bn(words)} শব্দ</span>`);
+    const sections = (f.markdown.match(/^##\s/gm) || []).length;
+    meta.push(`<span class="chip${sections === 3 ? '' : ' warn'}" title="লক্ষ্য: ৩টি সেকশন">${bn(sections)}টি সেকশন</span>`);
+  }
+  $('doc-meta').innerHTML = meta.join('');
+  $('doc').innerHTML = f.markdown
+    ? renderMarkdown(f.markdown)
+    : `<div class="blank"><div><b>রিকোয়ারমেন্ট ফাইল নেই</b><code>feat_list/${esc(f.id)}/${esc(f.id)}.md</code> তৈরি করুন।</div></div>`;
+}
+
+/* ---------- UI preview ---------- */
+function paneHtml(f, idx) {
+  const d = f.demos[idx];
+  if (!d) return `<div class="blank"><div><b>এখনো কোনো ডেমো নেই</b><code>feat_list/${esc(f.id)}/html/demo1.html</code> যোগ করুন।</div></div>`;
+  if (d.empty) return `<div class="blank"><div><b>${esc(d.file)} এখনো খালি</b>ফাইলটায় HTML লিখলে এখানে আপনা থেকে দেখাবে।</div></div>`;
+  return `<iframe src="${d.url}?v=${d.mtime}&theme=${currentTheme()}" title="${esc(d.title || d.file)}"></iframe>`;
+}
+
+const demoIndex = (side) => (side === 'b' ? state.demoB : state.demo);
+const shortName = (d) => (d && d.title ? d.title.split('·').pop().trim() : (d ? d.file : ''));
+
+function demoButtons(f, selected) {
+  return f.demos.map((d, i) =>
+    `<button class="demo-btn${d.empty ? ' empty' : ''}" data-i="${i}" aria-pressed="${i === selected}"
+      title="${esc(d.title || d.file)}${d.empty ? ' (খালি)' : ''}">${bn(i + 1)}</button>`).join('');
+}
+
+function renderPaneBar(side) {
+  const f = current();
+  const idx = demoIndex(side);
+  const d = f.demos[idx];
+  $(`bar-${side}`).innerHTML = `
+    <span class="pane-side">${side === 'a' ? 'বাঁয়ে' : 'ডানে'}</span>
+    ${demoButtons(f, idx)}
+    <span class="pane-name" title="${esc(d ? (d.title || d.file) : '')}">${esc(shortName(d))}</span>
+    <button class="icon-btn pane-open" aria-label="নতুন ট্যাবে খুলুন" title="নতুন ট্যাবে খুলুন" ${!d || d.empty ? 'disabled' : ''}>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+    </button>`;
+}
+
+function mountPane(side, idx) {
+  const f = current();
+  writeDemoThemeKeys(currentTheme());
+  const body = $(`body-${side}`);
+  body.innerHTML = paneHtml(f, idx);
+  const d = f.demos[idx];
+  mtimes[side] = d ? d.mtime : 0;
+  const frame = body.querySelector('iframe');
+  if (frame) frame.addEventListener('load', () => watchFrameTheme(frame));
+}
+
+function setActiveSide(side) {
+  state.side = state.compare ? side : 'a';
+  $('pane-a').classList.toggle('active', state.side === 'a');
+  $('pane-b').classList.toggle('active', state.side === 'b');
+}
+
+function renderDemoBar() {
+  const f = current();
+  $('demo-n').textContent = bn(f.demos.filter((d) => !d.empty).length);
+  $('demos').innerHTML = demoButtons(f, state.demo);
+  const d = f.demos[state.demo];
+  $('demo-name').textContent = d ? (d.title || d.file) : '';
+  $('open').disabled = !d || d.empty;
+  $('compare').setAttribute('aria-pressed', state.compare);
+  $('compare').title = state.compare ? 'একটা ডেমোতে ফিরে যান' : 'দুটো ডেমো পাশাপাশি দেখুন';
+  $('ui').classList.toggle('ui-split', state.compare);
+  if (state.compare) { renderPaneBar('a'); renderPaneBar('b'); }
+}
+
+function renderPreview() {
+  const f = current();
+  if (!f) return;
+  const last = Math.max(0, f.demos.length - 1);
+  state.demo = Math.min(state.demo, last);
+  state.demoB = Math.min(state.demoB, last);
+  $('stage').classList.toggle('split', state.compare);
+  $('pane-b').hidden = !state.compare;
+  setActiveSide(state.side);
+  renderDemoBar();
+  mountPane('a', state.demo);
+  if (state.compare) mountPane('b', state.demoB);
+}
+
+/* ---------- Page ---------- */
+function renderAll() {
+  const f = current();
+  if (!f) { $('title').textContent = 'কোনো ফিচার নেই'; return; }
+  $('title').textContent = f.title;
+  $('path').textContent = `feat_list/${f.id}/${f.mdFile || ''}`;
+  document.title = `${f.title} · ফিচার ভিউয়ার`;
+  renderSidebar();
+  renderDoc();
+  renderPreview();
+  setTab(state.tab);
+}
+
+function setTab(tab) {
+  state.tab = tab;
+  for (const [name, el] of [['req', $('tab-req')], ['ui', $('tab-ui')]]) {
+    el.setAttribute('aria-selected', name === tab);
+    $(name).classList.toggle('on', name === tab);
+  }
+  writeHash();
+}
+
+function selectFeature(id) {
+  if (!features.some((f) => f.id === id)) return;
+  state.feature = id; state.demo = 0; state.demoB = 1;
+  document.body.classList.remove('drawer');
+  renderAll();
+}
+
+function selectDemo(i, side = state.side) {
+  const f = current();
+  if (!f || i < 0 || i >= f.demos.length) return;
+  if (side === 'b' && state.compare) { state.demoB = i; mountPane('b', i); }
+  else { state.demo = i; mountPane('a', i); }
+  setActiveSide(side);
+  renderDemoBar();
+  writeHash();
+}
+
+/* ---------- Theme ----------
+   The viewer's theme is the single source of truth. Every demo is opened in
+   it, and a theme toggled inside a demo becomes the viewer's theme too.
+   Demos keep their own theme state (old bookmark demos use different
+   localStorage keys or the OS setting), so the viewer pushes the theme into
+   each frame in every way they read it. */
+const DEMO_THEME_KEYS = ['featKit.theme', 'bm-demo-theme'];
+const osTheme = () => (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+function currentTheme() { return store.get('featViewer.theme') || osTheme(); }
+
+function writeDemoThemeKeys(t) {
+  // Same origin as the demos, so they read this before their first paint.
+  DEMO_THEME_KEYS.forEach((k) => store.set(k, t));
+}
+
+function pushThemeToFrame(frame, t) {
+  try {
+    const root = frame.contentDocument.documentElement;
+    if (root.getAttribute('data-theme') !== t) root.setAttribute('data-theme', t);
+  } catch { /* cross-origin */ }
+  frame.contentWindow?.postMessage({ type: 'theme', id: t }, '*');
+}
+
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  writeDemoThemeKeys(t);
+  document.querySelectorAll('.pane-body iframe').forEach((fr) => pushThemeToFrame(fr, t));
+}
+
+function setTheme(t) {
+  if (t !== 'dark' && t !== 'light') return;
+  store.set('featViewer.theme', t);
+  applyTheme(t);
+}
+
+function watchFrameTheme(frame) {
+  pushThemeToFrame(frame, currentTheme());
+  try {
+    const root = frame.contentDocument.documentElement;
+    new MutationObserver(() => {
+      const t = root.getAttribute('data-theme');
+      if (t && t !== currentTheme()) setTheme(t);   // toggled inside the demo
+    }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  } catch { /* cross-origin */ }
+}
+
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  if (!store.get('featViewer.theme')) applyTheme(currentTheme());
+});
+
+/* ---------- Data + live reload ---------- */
+async function fetchFeatures() {
+  // Local server: live API. Static hosting (GitHub Pages): features.json
+  // written by build_static.py. Paths are relative so both work under any base.
+  for (const url of ['api/features', 'features.json']) {
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (res.ok) return res.json();
+    } catch { /* try the next source */ }
+  }
+  throw new Error('no feature list');
+}
+
+async function poll() {
+  try {
+    const next = await fetchFeatures();
+    $('live').classList.remove('off');
+    const prevIds = features.map((f) => f.id + ':' + f.demos.map((d) => d.file + (d.empty ? '0' : '1')).join()).join('|');
+    const nextIds = next.map((f) => f.id + ':' + f.demos.map((d) => d.file + (d.empty ? '0' : '1')).join()).join('|');
+    features = next;
+    const f = current();
+    if (!f) { state.feature = features[0]?.id ?? null; renderAll(); return; }
+    if (prevIds !== nextIds) { renderAll(); return; }
+    if (f.mdMtime !== mtimes.md) { renderDoc(); $('title').textContent = f.title; renderSidebar(); }
+    if (f.demos[state.demo] && f.demos[state.demo].mtime !== mtimes.a) mountPane('a', state.demo);
+    if (state.compare && f.demos[state.demoB] && f.demos[state.demoB].mtime !== mtimes.b) mountPane('b', state.demoB);
+  } catch {
+    $('live').classList.add('off');
+  }
+}
+
+/* ---------- Events ---------- */
+$('features').addEventListener('click', (e) => {
+  const b = e.target.closest('.feature'); if (b) selectFeature(b.dataset.id);
+});
+$('q').addEventListener('input', renderSidebar);
+$('tab-req').addEventListener('click', () => setTab('req'));
+$('tab-ui').addEventListener('click', () => setTab('ui'));
+$('demos').addEventListener('click', (e) => {
+  const b = e.target.closest('.demo-btn'); if (b) selectDemo(Number(b.dataset.i), 'a');
+});
+['a', 'b'].forEach((side) => {
+  $(`bar-${side}`).addEventListener('click', (e) => {
+    const b = e.target.closest('.demo-btn');
+    if (b) { selectDemo(Number(b.dataset.i), side); return; }
+    if (e.target.closest('.pane-open')) {
+      const d = current()?.demos[demoIndex(side)];
+      if (d && !d.empty) window.open(`${d.url}?theme=${currentTheme()}`, '_blank', 'noopener');
+      return;
+    }
+    setActiveSide(side);
+  });
+});
+$('compare').addEventListener('click', () => {
+  state.compare = !state.compare;
+  if (state.compare && state.demoB === state.demo) state.demoB = (state.demo + 1) % Math.max(1, current().demos.length);
+  state.side = 'a';
+  renderPreview();
+  writeHash();
+});
+$('reload').addEventListener('click', () => {
+  document.querySelectorAll('.pane-body iframe').forEach((fr) => fr.contentWindow?.location.reload());
+});
+$('open').addEventListener('click', () => {
+  const d = current()?.demos[state.demo];
+  if (d && !d.empty) window.open(`${d.url}?theme=${currentTheme()}`, '_blank', 'noopener');
+});
+$('theme').addEventListener('click', () => setTheme(currentTheme() === 'dark' ? 'light' : 'dark'));
+$('menu').addEventListener('click', () => document.body.classList.add('drawer'));
+$('scrim').addEventListener('click', () => document.body.classList.remove('drawer'));
+window.addEventListener('hashchange', () => { readHash(); renderAll(); });
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
+  const f = current(); if (!f) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    if (state.tab !== 'ui') setTab('ui');
+    const cur = demoIndex(state.side);
+    selectDemo((cur + (e.key === 'ArrowRight' ? 1 : -1) + f.demos.length) % f.demos.length, state.side);
+    e.preventDefault();
+  } else if (/^[0-9]$/.test(e.key) && state.tab === 'ui') {
+    selectDemo(e.key === '0' ? 9 : Number(e.key) - 1, state.side);
+  } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    const i = features.findIndex((x) => x.id === state.feature);
+    const n = features[i + (e.key === 'ArrowDown' ? 1 : -1)];
+    if (n) { selectFeature(n.id); e.preventDefault(); }
+  }
+});
+
+/* ---------- Boot ---------- */
+(async () => {
+  applyTheme(currentTheme());
+  if (!location.hash && store.get('featViewer.last')) history.replaceState(null, '', store.get('featViewer.last'));
+  readHash();
+  try {
+    features = await fetchFeatures();
+  } catch {
+    $('title').textContent = 'সার্ভার চালু নেই';
+    $('doc').innerHTML = '<div class="blank"><div><b>ভিউয়ারটা সার্ভার দিয়ে খুলুন</b><code>python3 feat_list/viewer.py</code></div></div>';
+    $('live').classList.add('off');
+    return;
+  }
+  if (!current()) state.feature = features[0]?.id ?? null;
+  renderAll();
+  setInterval(poll, 2500);
+})();
+</script>
+</body>
+</html>

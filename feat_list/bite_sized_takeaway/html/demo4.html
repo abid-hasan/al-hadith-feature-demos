@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ছোট টেকঅ্যাওয়ে — ডেমো ৪ · মাথার ফিতা</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="common.css">
+<style>
+/* ===== A band joined to the top edge of the card, before the book/number row.
+   On the details page the same band stays pinned under the app bar while the
+   long translation scrolls, so the gist is always in sight. ===== */
+.kb{background:var(--tint);border-bottom:1px solid var(--divider)}
+.hcard .kb{margin:-8px calc(var(--pad) * -1) 6px;border-radius:var(--r-card) var(--r-card) 0 0}
+.kb-head{display:flex;align-items:center;gap:6px;width:100%;min-height:40px;padding:6px 6px 6px 14px;text-align:left;font-size:calc(var(--fs) * .85);font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .kb-head{color:var(--primary)}
+.kb-line{display:none;flex:1;min-width:0;font-weight:400;color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kb-head .chev{margin-left:auto;flex:none;width:28px;height:28px;display:grid;place-items:center;transition:transform .2s}
+.kb-head .chev svg{width:18px;height:18px}
+
+/* One point per line, each kept to a single line */
+.kb-list{margin:0;padding:0 14px;list-style:none}
+.kb-list li{display:flex;gap:8px;padding:5px 0;border-top:1px dashed var(--divider);font-size:calc(var(--fs) * .92);color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kb-list li b{flex:none;color:var(--primary);width:16px}
+.kb-note{display:flex;align-items:center;gap:5px;margin:0;padding:6px 14px 9px;font-size:12px;color:var(--hint)}
+.kb-note svg{width:14px;height:14px}
+
+/* Collapsed = one line: title + the three points joined */
+.kb.collapsed .kb-list,.kb.collapsed .kb-note{display:none}
+.kb.collapsed .kb-line{display:block}
+.kb.collapsed .chev{transform:rotate(-90deg)}
+
+/* Details page: pinned band */
+.kb-pin{position:sticky;top:-14px;z-index:5;background:var(--card);margin:-14px 0 12px;box-shadow:0 2px 8px rgba(0,0,0,.08);border-radius:20px 20px 0 0;overflow:hidden}
+.kb-pin .kb{padding-top:4px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport"><!-- screens, sheets and drawer come from common.js --></div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="common.js"></script>
+<script>
+(function () {
+  const { bn, bulb, sample, ic } = BST;
+
+  /* ---------- The band: title row → 3 one-line points → verified note ---------- */
+  function band(h) {
+    if (!h.points) return '';                      // nothing verified → card stays as today
+    return `<div class="kb" data-box="${h.id}" role="note" aria-label="মূল শিক্ষা">
+      <button class="kb-head" data-toggle="${h.id}" aria-expanded="true">${bulb()}মূল শিক্ষা${sample}
+        <span class="kb-line">${h.points.join(' · ')}</span>
+        <span class="chev" aria-hidden="true">${ic('down')}</span></button>
+      <ol class="kb-list">${h.points.map((p, i) => `<li><b>${bn(i + 1)}</b>${p}</li>`).join('')}</ol>
+      <p class="kb-note">${ic('check')}আলেমদের যাচাই করা</p>
+    </div>`;
+  }
+
+  BST.init({
+    demo: 4, name: 'মাথার ফিতা',
+    hooks: {
+      // List: band before the card's own head row
+      card: (h, p, ctx) => (ctx === 'list' ? band(h) : '') + p.head + p.arabic + p.local,
+      // Details: band pinned at the top of the page body, then chapter, card, শিক্ষণীয় বিষয়
+      details: (h, p) => (h.points ? `<div class="kb-pin">${band(h)}</div>` : '') + p.sec + p.card + p.teach,
+    },
+    screens: [
+      { id: 'list', label: 'হাদিস লিস্ট' },
+      { id: 'collapsed', label: 'গোটানো' },
+      { id: 'menu', label: 'মেনু' },
+      { id: 'details', label: 'হাদিসের বিস্তারিত' },
+      { id: 'settings', label: 'ফন্ট সাইজ' },
+      { id: 'nobox', label: 'বক্স নেই' },
+      { id: 'loading', label: 'লোডিং' },
+      { id: 'offline', label: 'অফলাইন' },
+    ],
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ছোট টেকঅ্যাওয়ে — ডেমো ৫ · ট্যাবলেটে পাশাপাশি</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="common.css">
+<style>
+/* ===== Tablet (landscape). List card uses the app's split layout (translation left,
+   Arabic right) with the box across both columns. Details page puts "মূল শিক্ষা" and
+   "শিক্ষণীয় বিষয়" in a side column next to the hadith. ===== */
+.phone.tablet{width:min(1040px,calc(100vw - 48px));height:720px;border-radius:30px}
+.phone.tablet .card,.phone.tablet .sec{margin-left:20px;margin-right:20px}
+.phone.tablet .sheet:not(.drawer){left:50%;right:auto;width:560px;margin-left:-280px}
+.phone.tablet .sheet.drawer{width:380px}
+.phone.tablet .dialog{left:50%;right:auto;width:440px;margin-left:-220px}
+
+/* List card: split content */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.split .arabic{margin-top:12px}
+
+/* The box (list): wide, points side by side in one row */
+.kt{margin:12px 0 4px;border-radius:10px;background:var(--tint)}
+.kt-head{display:flex;align-items:center;gap:6px;width:100%;min-height:40px;padding:6px 8px 6px 14px;text-align:left;font-size:calc(var(--fs) * .88);font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .kt-head{color:var(--primary)}
+.kt-head .chev{margin-left:auto;width:28px;height:28px;display:grid;place-items:center;transition:transform .2s}
+.kt-head .chev svg{width:18px;height:18px}
+.kt-line{display:none;flex:1;min-width:0;font-weight:400;color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kt-body{display:flex;align-items:center;gap:20px;padding:0 14px 10px;flex-wrap:wrap}
+.kt-body .tlist{display:flex;gap:28px;flex:1}
+.kt-body .tlist li{margin:0;font-size:calc(var(--fs) * .94)}
+.kt-note{display:flex;align-items:center;gap:5px;margin:0;font-size:12.5px;color:var(--hint)}
+.kt-note svg{width:14px;height:14px}
+.kt.collapsed .kt-body{display:none}
+.kt.collapsed .kt-line{display:block}
+.kt.collapsed .chev{transform:rotate(-90deg)}
+
+/* Details: two panes; the side column stays in view while the hadith scrolls */
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:0;align-items:start}
+.dgrid>main .card{margin-right:10px}
+.aside{position:sticky;top:0;padding-right:20px}
+.aside .dcard{margin:0 0 12px}
+.aside .kt{margin:0;background:var(--card)}
+.aside .kt-body{display:block;padding:0 14px 12px}
+.aside .kt-body .tlist{display:block}
+.aside .kt-body .tlist li{margin-bottom:8px}
+.aside .kt-note{margin-top:10px;padding-top:8px;border-top:1px solid var(--divider)}
+.aside .kt-head{padding-top:10px;padding-bottom:10px}
+@media (max-width:760px){ .split,.dgrid{grid-template-columns:1fr} .aside{position:static;padding:0 20px} }
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport"><!-- screens, sheets and drawer come from common.js --></div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="common.js"></script>
+<script>
+(function () {
+  const { bulb, sample, tlist, ic } = BST;
+
+  /* ---------- The box: title row → points → verified note. Collapsed: one line ---------- */
+  function box(h) {
+    if (!h.points) return '';                      // nothing verified → card stays as today
+    return `<div class="kt" data-box="${h.id}" role="note" aria-label="মূল শিক্ষা">
+      <button class="kt-head" data-toggle="${h.id}" aria-expanded="true">${bulb()}মূল শিক্ষা${sample}
+        <span class="kt-line">${h.points.join(' · ')}</span>
+        <span class="chev" aria-hidden="true">${ic('down')}</span></button>
+      <div class="kt-body">${tlist(h.points)}<p class="kt-note">${ic('check')}আলেমদের যাচাই করা</p></div>
+    </div>`;
+  }
+
+  BST.init({
+    demo: 5, name: 'ট্যাবলেটে পাশাপাশি', phoneClass: 'tablet',
+    hooks: {
+      // List: box across both columns, then translation | Arabic
+      card: (h, p, ctx) => p.head + (ctx === 'list' ? box(h) : '') + `<div class="split"><div>${p.local}</div>${p.arabic}</div>`,
+      // Details: hadith on the left, "মূল শিক্ষা" + "শিক্ষণীয় বিষয়" on the right
+      details: (h, p) => p.sec + `<div class="dgrid"><main>${p.card}</main>
+        <div class="aside">${h.points ? `<div class="dcard" style="padding:0">${box(h)}</div>` : ''}${p.teach}</div></div>`,
+    },
+    screens: [
+      { id: 'list', label: 'হাদিস লিস্ট' },
+      { id: 'collapsed', label: 'গোটানো' },
+      { id: 'menu', label: 'মেনু' },
+      { id: 'details', label: 'হাদিসের বিস্তারিত' },
+      { id: 'settings', label: 'ফন্ট সাইজ' },
+      { id: 'nobox', label: 'বক্স নেই' },
+      { id: 'loading', label: 'লোডিং' },
+      { id: 'offline', label: 'অফলাইন' },
+    ],
+  });
+})();
+</script>
+</body>
+</html>

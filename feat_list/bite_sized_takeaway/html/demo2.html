@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ছোট টেকঅ্যাওয়ে — ডেমো ২ · তিন খোপের গ্রিড</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="common.css">
+<style>
+/* ===== "মূল শিক্ষা" as three tiles, at the very top of the card (before the Arabic),
+   so the gist comes before any long text. On the details page it is its own card. ===== */
+.kg{margin:12px 0 4px;border:1px solid var(--divider);border-radius:12px;padding:8px 10px 10px}
+.kg-head{display:flex;align-items:center;gap:6px;width:100%;min-height:32px;text-align:left;font-size:calc(var(--fs) * .88);font-weight:700;color:var(--title)}
+.kg-head>svg:first-child{color:var(--primary);flex:none}
+.kg-line{flex:1;min-width:0;font-weight:400;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none}
+.kg-head .chev{margin-left:auto;flex:none;width:28px;height:28px;display:grid;place-items:center;transition:transform .2s;color:var(--hint)}
+.kg-head .chev svg{width:18px;height:18px}
+
+/* Three equal tiles: number on top, one short line below */
+.kg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.kg-tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:10px;background:var(--surface-2);text-align:center;
+  font-size:calc(var(--fs) * .9);line-height:1.35;color:var(--title)}
+.kg-tile b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark);font-size:14px}
+:root[data-theme="dark"] .kg-tile b{color:var(--primary)}
+.kg-note{display:flex;justify-content:center;align-items:center;gap:5px;margin:8px 0 0;font-size:12.5px;color:var(--hint)}
+.kg-note svg{width:14px;height:14px}
+
+/* Collapsed = one line: title + the three points joined, cut with … */
+.kg.collapsed .kg-grid,.kg.collapsed .kg-note{display:none}
+.kg.collapsed .kg-line{display:block}
+.kg.collapsed .chev{transform:rotate(-90deg)}
+
+/* Details page: the same tiles sit in their own section card above the hadith */
+.dcard.kg-card{padding:10px 12px 12px}
+.dcard.kg-card .kg{margin:0;border:0;padding:0}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport"><!-- screens, sheets and drawer come from common.js --></div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="common.js"></script>
+<script>
+(function () {
+  const { bn, bulb, sample, ic } = BST;
+
+  /* ---------- The box: title row → 3 tiles → verified note. Collapsed: one line ---------- */
+  function box(h) {
+    if (!h.points) return '';                      // nothing verified → card stays as today
+    return `<div class="kg" data-box="${h.id}" role="note" aria-label="মূল শিক্ষা">
+      <button class="kg-head" data-toggle="${h.id}" aria-expanded="true">${bulb()}মূল শিক্ষা${sample}
+        <span class="kg-line">${h.points.join(' · ')}</span>
+        <span class="chev" aria-hidden="true">${ic('down')}</span></button>
+      <div class="kg-grid">${h.points.map((p, i) => `<div class="kg-tile"><b>${bn(i + 1)}</b>${p}</div>`).join('')}</div>
+      <p class="kg-note">${ic('check')}আলেমদের যাচাই করা</p>
+    </div>`;
+  }
+
+  BST.init({
+    demo: 2, name: 'তিন খোপের গ্রিড',
+    hooks: {
+      // List card: right under the book/number row. Details page: own card instead (below).
+      slots: (h, ctx) => ({ top: ctx === 'list' ? box(h) : '' }),
+      detailsTop: (h) => (h.points ? `<div class="dcard kg-card">${box(h)}</div>` : ''),
+    },
+    screens: [
+      { id: 'list', label: 'হাদিস লিস্ট' },
+      { id: 'collapsed', label: 'গোটানো' },
+      { id: 'menu', label: 'মেনু' },
+      { id: 'details', label: 'হাদিসের বিস্তারিত' },
+      { id: 'settings', label: 'ফন্ট সাইজ' },
+      { id: 'nobox', label: 'বক্স নেই' },
+      { id: 'loading', label: 'লোডিং' },
+      { id: 'offline', label: 'অফলাইন' },
+    ],
+  });
+})();
+</script>
+</body>
+</html>

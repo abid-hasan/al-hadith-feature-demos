@@ -1,0 +1,146 @@
+/* =====================================================================
+   feat_list demo kit — shared look for every feature demo.
+   A demo links this file, then adds only its own feature styles.
+   Docs: feat_list/_kit/README.md
+   ===================================================================== */
+
+@font-face{font-family:Kalpurush;src:url("../../assets/fonts/font_kalpurush.ttf") format("truetype");font-display:swap}
+@font-face{font-family:KFGQ;src:url("../../assets/fonts/font_kfgq.ttf") format("truetype");font-display:swap}
+
+/* ---------- Tokens (from the app: docs/DESIGN.md §1) ---------- */
+:root{
+  --primary:#1AA483; --primary-dark:#0D8C5C; --appbar:#118C6E; --on-appbar:#FFFFFF;
+  --scaffold:#F4F4F4; --card:#FFFFFF; --surface-2:#F7F9F8;
+  --title:#2B2F33; --body:#5D646F; --hint:rgba(0,0,0,.54); --disabled:#788A95;
+  --divider:rgba(0,0,0,.12); --error:#F95B53; --tint:#E8F6F3; --accent:#FFB84D;
+  --grade-sahih:#46B891; --grade-undetermined:#F0AD4E; --grade-weak:#F85B24; --grade-other:#4A85CE;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 2px 10px rgba(16,24,40,.06);
+  --scrim:rgba(0,0,0,.42);
+  --page:#E9EDEC; --page-text:#2B2F33; --page-line:rgba(0,0,0,.1);
+  --r-card:10px; --r-sheet:20px; --pad:16px; --gap:8px;
+  --font:Kalpurush,"Noto Sans Bengali",sans-serif;
+  --font-ar:KFGQ,"Amiri","Noto Naskh Arabic",serif;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --appbar:#161C23; --scaffold:#0D1116; --card:#161C23; --surface-2:#1C232B;
+  --title:#ECEDEE; --body:#C6C3CA; --hint:rgba(255,255,255,.6);
+  --divider:rgba(104,112,121,.3); --tint:rgba(26,164,131,.14);
+  --shadow:0 1px 2px rgba(0,0,0,.35); --scrim:rgba(0,0,0,.6);
+  --page:#05080B; --page-text:#ECEDEE; --page-line:rgba(255,255,255,.1);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--font);background:var(--page);color:var(--body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:6px}
+svg{display:block}
+[hidden]{display:none!important}
+
+/* ---------- Page shell: toolbar outside the phone ---------- */
+.kit-bar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--page);border-bottom:1px solid var(--page-line);color:var(--page-text)}
+.kit-name{font-size:13.5px;white-space:nowrap;font-weight:700}
+.kit-chips{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none;padding:2px}
+.kit-chips::-webkit-scrollbar{display:none}
+.kit-chip{flex:none;font-size:13px;padding:4px 12px;border-radius:20px;border:1px solid var(--page-line);background:transparent;color:var(--page-text)}
+.kit-chip[aria-pressed="true"]{background:var(--page-text);color:var(--page);border-color:var(--page-text)}
+.kit-btn{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid var(--page-line);display:grid;place-items:center;color:var(--page-text)}
+.kit-extra{display:flex;gap:6px;flex:none}
+.kit-stage{display:grid;place-items:start center;padding:24px 16px 48px}
+
+/* ---------- Phone frame ---------- */
+.phone{position:relative;width:390px;height:844px;border-radius:44px;background:var(--scaffold);overflow:hidden;
+  box-shadow:0 0 0 10px #101418,0 0 0 11px #2a3138,0 24px 60px rgba(0,0,0,.25);display:flex;flex-direction:column}
+.statusbar{flex:none;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px 0 30px;font-size:14px;font-weight:700;color:var(--on-appbar);background:var(--appbar)}
+.statusbar.light{background:var(--scaffold);color:var(--title)}
+.statusbar .sys{display:flex;gap:6px;align-items:center}
+.viewport{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;background:var(--scaffold)}
+.screen.on{display:flex}
+.scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:24px}
+.scroll::-webkit-scrollbar{width:0}
+@media (max-width:480px){
+  .kit-stage{padding:0}
+  .phone{width:100%;height:calc(100vh - 49px);border-radius:0;box-shadow:none}
+}
+
+/* ---------- App bar ---------- */
+.appbar{flex:none;display:flex;align-items:center;gap:6px;min-height:56px;padding:0 8px;background:var(--appbar);color:var(--on-appbar)}
+.appbar h1{flex:1;margin:0 4px;font-size:19px;font-weight:700;line-height:1.25;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.appbar small{display:block;font-size:12px;font-weight:400;opacity:.85}
+.appbar.flat{background:var(--scaffold);color:var(--title);border-bottom:1px solid var(--divider)}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;color:inherit}
+.icon-btn:hover{background:rgba(127,127,127,.12)}
+
+/* ---------- Cards & hadith ---------- */
+.card{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:0 12px 10px;padding:14px var(--pad)}
+.section-title{margin:16px 16px 8px;font-size:16px;font-weight:700;color:var(--title)}
+.hadith-head{display:flex;align-items:center;gap:10px}
+.book-badge{width:38px;height:38px;flex:none;display:grid;place-items:center;color:#fff;font-size:10.5px;font-weight:700;
+  clip-path:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%);background:var(--primary)}
+.hadith-meta{flex:1;min-width:0}
+.hadith-meta b{display:block;color:var(--title);font-size:15px;line-height:1.3}
+.hadith-meta span{font-size:12.5px;color:var(--primary-dark)}
+:root[data-theme="dark"] .hadith-meta span{color:var(--primary)}
+.grade{font-size:12px;color:#fff;border-radius:20px;padding:1px 10px;background:var(--grade-sahih);flex:none;white-space:nowrap}
+.arabic{font-family:var(--font-ar);direction:rtl;text-align:right;font-size:22px;line-height:1.95;color:var(--title);margin:12px 0 6px}
+.translation{color:var(--body);font-size:15px;margin:6px 0 0}
+.narrator{font-size:13px;color:var(--hint);margin:8px 0 0}
+
+/* ---------- Buttons, chips, inputs ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:42px;padding:0 18px;border-radius:10px;font-size:15px;font-weight:700;background:var(--primary);color:#fff}
+.btn.tonal{background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .btn.tonal{color:var(--primary)}
+.btn.outline{background:transparent;border:1.5px solid var(--primary);color:var(--primary)}
+.btn.text{background:transparent;color:var(--primary);padding:0 10px}
+.btn.danger{background:var(--error)}
+.btn.block{width:100%}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:20px;border:1px solid var(--divider);background:var(--card);color:var(--body);font-size:13.5px;white-space:nowrap}
+.chip[aria-pressed="true"],.chip.on{background:var(--tint);border-color:var(--primary);color:var(--primary-dark)}
+:root[data-theme="dark"] .chip[aria-pressed="true"],:root[data-theme="dark"] .chip.on{color:var(--primary)}
+.chip-row{display:flex;gap:8px;overflow-x:auto;padding:4px 12px;scrollbar-width:none}
+.chip-row::-webkit-scrollbar{display:none}
+.field{display:flex;align-items:center;gap:8px;height:44px;padding:0 12px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--hint)}
+.field input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.field input::placeholder{color:var(--hint)}
+.switch{position:relative;width:42px;height:24px;border-radius:20px;background:var(--divider);flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .2s}
+.switch[aria-checked="true"]{background:var(--primary)}
+.switch[aria-checked="true"]::after{transform:translateX(18px)}
+.progress{height:6px;border-radius:6px;background:var(--divider);overflow:hidden}
+.progress>i{display:block;height:100%;border-radius:inherit;background:var(--primary)}
+.list-row{display:flex;align-items:center;gap:12px;padding:12px var(--pad);border-bottom:1px solid var(--divider);width:100%;text-align:left}
+.list-row:last-child{border-bottom:0}
+.muted{color:var(--hint);font-size:13px}
+
+/* ---------- Bottom sheet, dialog, snackbar ---------- */
+.scrim{position:absolute;inset:0;z-index:30;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .22s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:31;max-height:86%;display:flex;flex-direction:column;background:var(--card);border-radius:var(--r-sheet) var(--r-sheet) 0 0;
+  transform:translateY(105%);transition:transform .26s cubic-bezier(.2,.8,.2,1);box-shadow:0 -6px 24px rgba(0,0,0,.12)}
+.sheet.on{transform:none}
+.sheet-head{display:flex;align-items:center;gap:8px;padding:16px 12px 8px var(--pad)}
+.sheet-head h2{flex:1;margin:0;font-size:17px;color:var(--title)}
+.sheet-body{overflow-y:auto;padding:0 var(--pad) 12px}
+.sheet-foot{display:flex;gap:10px;justify-content:flex-end;padding:10px var(--pad) 18px;border-top:1px solid var(--divider)}
+.dialog{position:absolute;left:24px;right:24px;top:50%;z-index:32;background:var(--card);border-radius:16px;padding:20px;transform:translateY(-50%) scale(.96);opacity:0;pointer-events:none;transition:all .2s}
+.dialog.on{opacity:1;pointer-events:auto;transform:translateY(-50%)}
+.dialog h2{margin:0 0 8px;font-size:17px;color:var(--title)}
+.dialog .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.snack{position:absolute;left:12px;right:12px;bottom:18px;z-index:40;background:#2B2F33;color:#fff;border-radius:10px;padding:12px 14px;font-size:14px;display:flex;align-items:center;gap:10px;
+  transform:translateY(140%);transition:transform .25s}
+.snack.on{transform:none}
+.snack button{margin-left:auto;color:#7FE0C4;font-weight:700}
+
+/* ---------- Bottom navigation (for home-level screens) ---------- */
+.bottom-nav{flex:none;display:flex;justify-content:space-around;height:62px;background:var(--card);border-top:1px solid var(--divider)}
+.bottom-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;color:var(--hint);flex:1}
+.bottom-nav button.on{color:var(--primary)}
+
+/* ---------- Empty state ---------- */
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:48px 32px;gap:8px}
+.empty h3{margin:8px 0 0;font-size:17px;color:var(--title)}
+.empty p{margin:0;font-size:14px;color:var(--hint)}

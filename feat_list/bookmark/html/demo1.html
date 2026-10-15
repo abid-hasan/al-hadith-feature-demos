@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>বুকমার্ক — ডেমো ১ · বর্তমান অ্যাপের মতো</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+/* Theme: follow the OS until the user toggles */
+(function(){var dark=false;try{dark=window.matchMedia('(prefers-color-scheme: dark)').matches}catch(e){}
+document.documentElement.setAttribute('data-theme',dark?'dark':'light')})();
+</script>
+<style>
+/* =========================================================
+   Fonts
+   ========================================================= */
+@font-face{font-family:Kalpurush;src:url("../../../assets/fonts/font_kalpurush.ttf") format("truetype");font-display:swap}
+@font-face{font-family:KFGQ;src:url("../../../assets/fonts/font_kfgq.ttf") format("truetype");font-display:swap}
+
+/* =========================================================
+   Tokens (from lib/presentation/config/theme)
+   ========================================================= */
+:root{
+  --page:#E9EDEC; --tb-bg:#F7F9F8; --tb-fg:#2B2F33; --tb-line:rgba(0,0,0,.10);
+  --primary:#1AA483; --primary-dark:#0D8C5C; --appbar:#118C6E;
+  --scaffold:#F4F4F4; --card:#FFFFFF; --divider:rgba(0,0,0,.12);
+  --hint:rgba(0,0,0,.54); --body:#5D646F; --title:#2B2F33; --disabled:#788A95;
+  --error:#F95B53; --grade:#46B891; --icon:#5D646F; --on-surface:#1C1B1F;
+  --tile:#F4F5F6;                       /* menuTileBackground */
+  --tint6:rgba(26,164,131,.06);         /* collection sheet tab / search fill */
+  --subtle:rgba(26,164,131,.08);        /* subtleAccentSurface (light 8%) */
+  --input:#FFFFFF;                      /* inputDecorationTheme fill */
+  --scrim:rgba(0,0,0,.5);
+  --snack-bg:#323232; --snack-fg:#FFFFFF;
+  --frame:#1A1F24;
+}
+[data-theme=dark]{
+  --page:#05080B; --tb-bg:#0D1116; --tb-fg:#ECEDEE; --tb-line:rgba(255,255,255,.10);
+  --appbar:#161C23; --scaffold:#0D1116; --card:#161C23; --divider:rgba(104,112,121,.3);
+  --hint:rgba(255,255,255,.6); --body:#C6C3CA; --title:#ECEDEE; --icon:#C6C3CA; --on-surface:#E6E1E5;
+  --tile:#222A33; --tint6:rgba(26,164,131,.06); --subtle:rgba(26,164,131,.12);
+  --input:#161C23; --scrim:rgba(0,0,0,.6);
+  --snack-bg:#E6E8EA; --snack-fg:#1C1F23; --frame:#22282F;
+}
+
+/* =========================================================
+   Base
+   ========================================================= */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--page);font-family:Kalpurush,"Noto Sans Bengali",sans-serif;color:var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+input{font:inherit;color:var(--title)}
+svg{display:block}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* =========================================================
+   Page shell: toolbar + phone frame (outside the app)
+   ========================================================= */
+.tb{position:sticky;top:0;z-index:50;height:44px;display:flex;align-items:center;gap:12px;padding:0 12px;background:var(--tb-bg);border-bottom:1px solid var(--tb-line);color:var(--tb-fg)}
+.tb-name{font-size:14px;font-weight:700;white-space:nowrap}
+.chips{flex:1;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;white-space:nowrap;padding:4px 12px 3px;border-radius:999px;border:1px solid var(--tb-line);font-size:13px;color:var(--tb-fg)}
+.chip:hover{border-color:var(--tb-fg)}
+.chip.on{background:var(--tb-fg);color:var(--tb-bg);border-color:var(--tb-fg)}
+.tb-theme{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid var(--tb-line);font-size:17px;color:var(--tb-fg)}
+.stage{display:flex;justify-content:center;padding:24px 16px 40px}
+.phone{position:relative;width:390px;height:844px;flex:none;border-radius:44px;overflow:hidden;overflow:clip;background:var(--scaffold);box-shadow:0 0 0 9px var(--frame),0 0 0 10px rgba(0,0,0,.25),0 30px 60px rgba(0,0,0,.22)}
+@media (max-width:479px){
+  .stage{padding:0}
+  .phone{width:100%;height:calc(100vh - 44px);height:calc(100dvh - 44px);border-radius:0;box-shadow:none}
+}
+
+/* Status bar (coloured by secondaryHeaderColor in the app) */
+.sb{position:absolute;top:0;left:0;right:0;height:44px;z-index:2;background:var(--appbar);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:4px 30px 0 34px;font-size:15px;font-weight:600}
+.sb-glyphs{display:flex;gap:6px;align-items:center}
+.view{position:absolute;top:44px;left:0;right:0;bottom:0;overflow:hidden;overflow:clip}
+
+/* =========================================================
+   App bar (HadithFancyAppBar) + RoundedScaffoldBody
+   ========================================================= */
+.page{position:absolute;inset:0;display:none;flex-direction:column;background:var(--appbar)}
+.page.on{display:flex}
+.ab{position:relative;flex:none;height:60px;display:flex;align-items:center;color:#fff;background:linear-gradient(var(--appbar),color-mix(in srgb,var(--appbar) 95%,transparent))}
+.ab.has-sub{height:70px}
+.ab-titles{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.ab-titles.start{left:52px;right:52px;align-items:flex-start}
+.ab-titles.center{left:100px;right:100px;align-items:center;text-align:center}
+.ab-title{font-size:20px;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ab-sub{font-size:14px;opacity:.9;line-height:1.3}
+.ab-actions{position:absolute;right:4px;top:0;bottom:0;display:flex;align-items:center}
+.ibtn{width:48px;height:48px;display:grid;place-items:center;border-radius:50%;color:inherit;flex:none}
+.ibtn:active{background:rgba(255,255,255,.12)}
+.body{flex:1;min-height:0;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden;overflow:clip;display:flex;flex-direction:column}
+.scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+
+/* =========================================================
+   Hadith card (HadithListItem + HadithListItemTopBar)
+   ========================================================= */
+.hlist{padding:14px 0 24px}
+.hc{background:var(--card);border-radius:10px;margin:0 14px 12px;overflow:hidden}
+.hc-top{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:12px 0 0 12px}
+.hc-id{display:flex;align-items:center;gap:10px;min-width:0}
+.hex{position:relative;width:46px;height:46px;flex:none;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:600;line-height:1}
+.hex svg{position:absolute;inset:0;width:100%;height:100%}
+.hex span{position:relative;padding-top:2px}
+.hc-book{font-size:17px;font-weight:600;color:var(--title);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hc-num{font-size:15px;font-weight:600;color:var(--primary-dark);line-height:1.3}
+.hc-trail{display:flex;align-items:center;flex:none}
+.bm{width:24px;height:48px;display:grid;place-items:center;color:var(--primary)}
+.bm svg{width:22px;height:22px}
+.grade{margin-left:8px;background:var(--grade);color:#fff;border-radius:999px;padding:5px 10px 2px;font-size:12px;font-weight:500;line-height:1.2}
+.more{width:40px;height:48px;display:grid;place-items:center;color:var(--icon);border-radius:50%}
+.hc-ar{font-family:KFGQ,"Amiri",serif;direction:rtl;text-align:right;font-size:22px;line-height:1.9;color:var(--title);padding:18px 16px 6px}
+.hc-bn{font-size:16px;line-height:1.7;color:var(--body);padding:4px 16px 18px}
+/* "Book not downloaded" placeholder (BookmarkedHadithNotAvailablePlaceholder) */
+.na{display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 28px 26px}
+.na svg{color:var(--primary);opacity:.7}
+.na h3{margin-top:16px;font-size:17px;font-weight:600;color:var(--title)}
+.na p{margin-top:8px;font-size:15px;line-height:1.6;color:var(--hint)}
+.filled{margin-top:18px;height:40px;padding:2px 22px 0 16px;border-radius:999px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
+
+/* =========================================================
+   Collection page: sync box, 3-segment tabs, search row
+   ========================================================= */
+.sync{margin:15px 14px 0;padding:12px;border-radius:10px;background:var(--subtle);display:flex;gap:12px;align-items:flex-start}
+.sync svg{flex:none;margin-top:2px}
+.sync-body{flex:1}
+.sync p{font-size:15px;font-weight:600;line-height:1.55;color:var(--body)}
+.sync .tbtn{display:block;margin-left:auto;padding:4px 8px 2px;font-size:15px}
+.tabs-pin{position:sticky;top:0;z-index:3;background:var(--scaffold);padding-top:14px}
+.seg3{margin:0 14px;height:56px;display:flex;padding:3px 4px;background:var(--card);border:1.5px solid var(--primary);border-radius:10px}
+.seg3 button{flex:1;border-radius:7px;font-size:15px;font-weight:600;color:var(--body);padding-top:3px;transition:background .2s,color .2s}
+.seg3 button[aria-selected=true]{background:var(--primary);color:#fff}
+.srow{display:flex;gap:12px;padding:14px}
+.sfield{flex:1;min-width:0;height:48px;display:flex;align-items:center;background:var(--input);border-radius:8px;color:var(--icon)}
+.sfield svg{margin:0 12px 0 14px;flex:none}
+.sfield input{flex:1;min-width:0;height:100%;border:0;outline:0;background:none;font-size:15px;padding-top:3px}
+.sfield input::placeholder{color:var(--hint)}
+.sfield:focus-within{box-shadow:0 0 0 2px var(--primary)}
+.sortbtn{width:48px;height:48px;border-radius:8px;background:var(--card);display:grid;place-items:center;color:var(--icon);flex:none}
+
+/* Folder card (BookmarkFolderListItem) */
+.flist{padding:0 14px 16px}
+.fc{display:flex;align-items:center;min-height:72px;margin-bottom:12px;padding:12px 0 12px 16px;background:var(--card);border-radius:10px;cursor:pointer}
+.fc:active{filter:brightness(.97)}
+.fc-main{flex:1;min-width:0;display:flex;align-items:center;gap:15px;text-align:left}
+.fc-main > svg{flex:none;width:30px;height:25px}
+.fc-name{font-size:17px;font-weight:600;color:var(--title);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fc-count{margin-top:4px;font-size:15px;color:var(--body);line-height:1.3}
+.fc .more{width:48px}
+
+/* Empty / no-result placeholder (NoBookmarksFoundPlaceholder) */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:90px 24px;color:var(--primary);text-align:center}
+.empty p{font-size:17px;font-weight:600;color:var(--title)}
+
+/* =========================================================
+   Overlays: bottom sheets, dialogs, scrim, snackbar
+   ========================================================= */
+.ov{position:absolute;inset:0;z-index:20}
+.scrim{position:absolute;inset:0;background:var(--scrim);opacity:0;transition:opacity .25s}
+.ov.open .scrim{opacity:1}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:92%;display:flex;flex-direction:column;background:var(--card);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.ov.open .sheet{transform:none}
+.dialog{position:absolute;left:18px;right:18px;top:50%;max-height:86%;overflow-y:auto;background:var(--card);border-radius:20px;padding:24px 20px 16px;opacity:0;transform:translateY(-50%) scale(.92);transition:opacity .2s,transform .25s cubic-bezier(.2,.8,.2,1)}
+.ov.open .dialog{opacity:1;transform:translateY(-50%) scale(1)}
+.tbtn{color:var(--primary);font-weight:600;font-size:16px;padding:10px 12px 8px;border-radius:6px}
+.tbtn:active{background:var(--tint6)}
+.abtn{flex:1;height:50px;border-radius:5px;font-size:16px;font-weight:600;padding-top:3px;color:var(--body)}
+.abtn.pri{color:var(--primary)}
+.abtn.err{color:var(--error)}
+.abtn:active{background:var(--tint6)}
+.btnrow{display:flex;gap:15px}
+.hr{height:1px;background:var(--divider);border:0}
+
+/* Hadith more-options sheet (MoreOptionBottomSheet + MenuGrid) */
+.menu{padding:20px 16px 20px}
+.sh-head{display:flex;align-items:center;padding-left:6px}
+.sh-head > div{flex:1;min-width:0}
+.sh-title{font-size:18px;font-weight:800;color:var(--title);line-height:1.4}
+.sh-ref{font-size:12px;color:var(--hint)}
+.xbtn{width:48px;height:48px;display:grid;place-items:center;flex:none;border-radius:50%}
+.xbtn span{width:36px;height:36px;border-radius:50%;background:var(--tile);display:grid;place-items:center;color:var(--icon)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.tile{min-height:104px;border-radius:18px;background:var(--tile);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px 6px;font-size:14px;font-weight:600;line-height:1.3;color:var(--body);text-align:center}
+.tile:active{filter:brightness(.95)}
+.tile svg{width:34px;height:34px}
+
+/* Collection sheet (CollectionBottomSheet) */
+.coll-head{padding:20px 0 10px;text-align:center}
+.coll-title{font-size:21px;font-weight:700;color:var(--title)}
+.seg2{margin:16px 14px 0;min-height:48px;display:flex;background:var(--tint6);border-radius:14px}
+.seg2 button{flex:1;border-radius:14px;font-size:15px;font-weight:600;color:var(--body);padding-top:3px;transition:background .2s,color .2s}
+.seg2 button[aria-selected=true]{background:var(--primary);color:#fff}
+.csearch{margin:14px 14px 0;height:48px;display:flex;align-items:center;background:var(--tint6);border-radius:14px;color:var(--icon)}
+.csearch svg{margin:0 12px 0 14px;flex:none}
+.csearch input{flex:1;min-width:0;height:100%;border:0;outline:0;background:none;font-size:15px;padding-top:3px}
+.csearch input::placeholder{color:var(--hint)}
+.csearch:focus-within{box-shadow:0 0 0 2px var(--primary)}
+.coll-list{height:300px;overflow-y:auto;padding:4px 4px 8px}
+.crow{width:100%;display:flex;align-items:center;gap:15px;padding:9px 10px;text-align:left;border-radius:8px}
+.crow:active{background:var(--tint6)}
+.cbox{width:18px;height:18px;flex:none;border:2px solid var(--body);border-radius:2px;display:grid;place-items:center;color:var(--card);margin:0 6px}
+.crow[aria-checked=true] .cbox{background:var(--primary);border-color:var(--primary)}
+.crow[aria-checked=false] .cbox svg{visibility:hidden}
+.radio{width:20px;height:20px;flex:none;border:2px solid var(--body);border-radius:50%;display:grid;place-items:center;margin:0 5px}
+.radio::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--primary);transform:scale(0);transition:transform .15s}
+[aria-checked=true] > .radio{border-color:var(--primary)}
+[aria-checked=true] > .radio::after{transform:scale(1)}
+.crow-name{flex:1;font-size:15px;font-weight:600;color:var(--title);line-height:1.4}
+.coll-empty{padding:40px 16px;text-align:center;font-size:15px;color:var(--hint)}
+.coll-foot{border-top:1px solid var(--divider);min-height:57px;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+
+/* Create collection sheet (CreateNewCollectionBottomSheet) */
+.create{padding:20px 14px 8px;overflow-y:auto}
+.create h2{text-align:center;font-size:21px;font-weight:600;color:var(--title)}
+.flabel{display:block;font-size:15px;font-weight:600;color:var(--body);margin-bottom:10px}
+.tfield{width:100%;height:50px;border:.8px solid var(--divider);border-radius:5px;background:transparent;padding:3px 14px 0;font-size:15px;outline:0}
+.tfield::placeholder{color:var(--hint)}
+.tfield:focus{border-color:var(--primary)}
+.tfield.err{border-color:var(--error)}
+.pfield{display:flex;align-items:center;height:50px;border:.8px solid var(--divider);border-radius:5px}
+.pfield svg{margin:0 10px 0 12px;width:22px;height:19px;flex:none}
+.pfield input{flex:1;height:100%;border:0;outline:0;background:none;font-size:15px;padding-top:3px}
+.pfield:focus-within{border-color:var(--primary)}
+.pfield.err{border-color:var(--error)}
+.colors{display:grid;grid-template-columns:repeat(8,1fr);row-gap:5px}
+.sw{height:44px;display:grid;place-items:center;border-radius:50%}
+.sw span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff}
+.sw[aria-checked=false] span svg{display:none}
+.trow{width:100%;min-height:48px;display:flex;align-items:flex-start;text-align:left;padding:2px 0}
+.tdot{width:16px;height:16px;border-radius:50%;border:2px solid var(--on-surface);flex:none;margin-top:4px;display:grid;place-items:center;color:#fff}
+.trow[aria-checked=true] .tdot{background:var(--primary);border-color:var(--primary)}
+.trow[aria-checked=false] .tdot svg{display:none}
+.trow .ticon{margin:4px 15px 0 20px;flex:none}
+.ttitle{font-size:16px;font-weight:600;color:var(--title);line-height:1.4}
+.tsub{font-size:13px;color:var(--disabled);line-height:1.4}
+
+/* Folder more sheet (MoreBookmarkOptionBottomSheet + MenuListItem) */
+.fmore{padding:20px 20px 10px}
+.fmore .sh-head{padding-left:0}
+.fmore .sh-title{font-size:20px;font-weight:600}
+.mli{width:100%;min-height:48px;display:flex;align-items:center;gap:20px;padding:15px 0;text-align:left;font-size:17px;font-weight:600;color:var(--title);border-radius:6px}
+.mli svg{width:22px;height:22px;flex:none;color:var(--primary)}
+
+/* Dialogs (RemoveDialog, EditBookmarkDialog, ImportExportDialog) */
+.dlg-c{text-align:center}
+.dlg-title{font-size:22px;font-weight:700;color:var(--title);line-height:1.35}
+.dlg-msg{margin-top:12px;font-size:15px;line-height:1.6;color:var(--body)}
+.dlg-art{display:flex;justify-content:center;margin-bottom:18px}
+
+/* Sort sheet (CollectionSortFilterSelector) */
+.sort{border-radius:25px 25px 0 0}
+.sort-in{padding:20px 25px 6px}
+.sort .sh-head{padding-left:0}
+.sort .sh-title{font-size:21px;font-weight:600}
+.rrow{width:100%;min-height:56px;display:flex;align-items:center;gap:18px;text-align:left;font-size:17px;font-weight:600;color:var(--title)}
+.rrow .radio{margin:0 2px}
+.sort-foot{margin:0 16px;border-top:1px solid var(--divider);min-height:57px;display:flex;justify-content:center;align-items:center}
+
+/* Snackbar */
+.snack{position:absolute;left:14px;right:14px;bottom:22px;z-index:40;background:var(--snack-bg);color:var(--snack-fg);border-radius:8px;padding:14px 16px 12px;font-size:15px;line-height:1.5;box-shadow:0 6px 18px rgba(0,0,0,.2);transform:translateY(150%);opacity:0;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s;pointer-events:none}
+.snack.show{transform:none;opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     Toolbar (outside the phone)
+     ========================================================= -->
+<header class="tb">
+  <div class="tb-name">ডেমো ১ · বর্তমান অ্যাপের মতো</div>
+  <nav class="chips" id="chips" aria-label="স্ক্রিন">
+    <button class="chip" data-screen="card">হাদিস কার্ড</button>
+    <button class="chip" data-screen="menu">মেনু শিট</button>
+    <button class="chip" data-screen="collection">কালেকশন শিট</button>
+    <button class="chip" data-screen="create">নতুন ফোল্ডার</button>
+    <button class="chip" data-screen="folders">ফোল্ডার লিস্ট</button>
+    <button class="chip" data-screen="details">ফোল্ডারের ভেতরে</button>
+    <button class="chip" data-screen="manage">এডিট ও ডিলিট</button>
+    <button class="chip" data-screen="sort">সাজানো</button>
+    <button class="chip" data-screen="empty">খালি অবস্থা</button>
+  </nav>
+  <button class="tb-theme" id="themeBtn" aria-label="লাইট/ডার্ক মোড বদলান">◐</button>
+</header>
+
+<main class="stage">
+<div class="phone" id="phone">
+
+  <!-- Status bar -->
+  <div class="sb" aria-hidden="true">
+    <span>৯:৪১</span>
+    <span class="sb-glyphs">
+      <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0zM3.5 6.9a6.4 6.4 0 0 1 9 0l-1.4 1.4a4.4 4.4 0 0 0-6.2 0zM1.3 4.7a9.5 9.5 0 0 1 13.4 0l-1.4 1.4a7.5 7.5 0 0 0-10.6 0z" fill="currentColor"/></svg>
+      <svg width="26" height="12" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="currentColor" opacity=".5"/><rect x="2" y="2" width="16" height="8" rx="1.6" fill="currentColor"/><rect x="23.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".5"/></svg>
+    </span>
+  </div>
+
+  <div class="view">
+
+    <!-- =====================================================
+         PAGE: hadith list (screen "card")
+         ===================================================== -->
+    <section class="page" id="page-card" aria-label="হাদিস লিস্ট">
+      <div class="ab">
+        <button class="ibtn" data-act="back" aria-label="পেছনে যান"><svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M8.75 16.5 1.25 9l7.5-7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="ab-titles start"><div class="ab-title">সহিহ বুখারি</div></div>
+      </div>
+      <div class="body"><div class="scroll"><div class="hlist" id="cardList"></div></div></div>
+    </section>
+
+    <!-- =====================================================
+         PAGE: collection (screens "folders", "empty")
+         ===================================================== -->
+    <section class="page" id="page-folders" aria-label="কালেকশন">
+      <div class="ab">
+        <div class="ab-titles center"><div class="ab-title">কালেকশন</div></div>
+        <div class="ab-actions">
+          <button class="ibtn" data-act="io" aria-label="ইম্পোর্ট / এক্সপোর্ট">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M2 6.95c0-.88 0-1.32.07-1.69a3.98 3.98 0 0 1 3.19-3.19C5.63 2 6.07 2 6.95 2c.39 0 .58 0 .77.02.8.07 1.56.39 2.18.9.14.12.28.26.55.53L11 4c.82.82 1.22 1.22 1.71 1.5.27.14.55.26.85.35.54.15 1.11.15 2.27.15h.37c2.63 0 3.95 0 4.8.77l.23.22c.77.86.77 2.18.77 4.81V14c0 3.77 0 5.66-1.17 6.83C19.66 22 17.77 22 14 22h-4c-3.77 0-5.66 0-6.83-1.17C2 19.66 2 17.77 2 14z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="13" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M12 15v2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <button class="ibtn" data-act="login" aria-label="লগইন">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M17.63 2H9.08a3.2 3.2 0 0 0-3.2 3.2v1.98a.94.94 0 0 0 1.88 0V5.2c0-.73.6-1.32 1.32-1.32h8.55c.73 0 1.32.6 1.32 1.32v13.6c0 .73-.59 1.32-1.32 1.32H9.08c-.73 0-1.32-.59-1.32-1.32v-2.29a.94.94 0 0 0-1.88 0v2.29A3.2 3.2 0 0 0 9.08 22h8.55a3.2 3.2 0 0 0 3.2-3.2V5.2a3.2 3.2 0 0 0-3.2-3.2Z" fill="currentColor"/><path d="m16.25 11.32-3.34-3.34a.94.94 0 0 0-1.31 1.34l1.74 1.74H4.1a.94.94 0 0 0 0 1.88h9.23l-1.75 1.75a.94.94 0 0 0 1.33 1.33l3.34-3.34a.94.94 0 0 0 0-1.36Z" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="body">
+        <div class="scroll" id="foldersScroll">
+          <!-- AskToSyncBox -->
+          <div class="sync" id="syncBox">
+            <svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+            <div class="sync-body">
+              <p>আপনার কালেকশনগুলো অনলাইনে সেভ রাখতে উপরের বাটনে ক্লিক করে Gmail-এ লগইন করুন</p>
+              <button class="tbtn" data-act="sync-ok">ঠিক আছে</button>
+            </div>
+          </div>
+          <!-- Pinned 3-segment tab bar -->
+          <div class="tabs-pin">
+            <div class="seg3" role="tablist" aria-label="কালেকশন ট্যাব">
+              <button role="tab" data-act="tab" data-i="0">বুকমার্কস</button>
+              <button role="tab" data-act="tab" data-i="1">পিনস</button>
+              <button role="tab" data-act="tab" data-i="2">নোটস</button>
+            </div>
+          </div>
+          <!-- BookmarkSearchEditBox -->
+          <div class="srow" id="folderSearchRow">
+            <label class="sfield"><svg width="20" height="20" viewBox="0 0 23 22"><path fill-rule="evenodd" d="M10.99 3.24a7.28 7.28 0 1 0 5.14 12.43 7.28 7.28 0 0 0-5.14-12.43Zm-8.7 7.28a8.7 8.7 0 1 1 15.32 5.63l2.81 2.81a.7.7 0 1 1-1 1l-2.81-2.81a8.7 8.7 0 0 1-14.32-6.63Z" fill="currentColor"/></svg><input id="qFolders" type="search" maxlength="40" placeholder="বুকমার্ক সার্চ করুন" aria-label="বুকমার্ক সার্চ করুন"></label>
+            <button class="sortbtn" data-act="sort" data-t="folders" aria-label="ফিল্টার"><svg width="16" height="14" viewBox="0 0 14 12"><path d="M7 9.75H1M7 2.25h6" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><circle cx="2.5" cy="2.25" r="1.5" stroke="currentColor" stroke-width="1.25" fill="none"/><circle cx="11.5" cy="9.75" r="1.5" stroke="currentColor" stroke-width="1.25" fill="none"/></svg></button>
+          </div>
+          <div id="folderList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         PAGE: bookmark details (screen "details")
+         ===================================================== -->
+    <section class="page" id="page-details" aria-label="ফোল্ডারের ভেতরে">
+      <div class="ab has-sub">
+        <button class="ibtn" data-act="back" aria-label="পেছনে যান"><svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M8.75 16.5 1.25 9l7.5-7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="ab-titles start"><div class="ab-title" id="dTitle"></div><div class="ab-sub" id="dSub"></div></div>
+      </div>
+      <div class="body">
+        <div class="scroll">
+          <div class="srow">
+            <label class="sfield"><svg width="20" height="20" viewBox="0 0 23 22"><path fill-rule="evenodd" d="M10.99 3.24a7.28 7.28 0 1 0 5.14 12.43 7.28 7.28 0 0 0-5.14-12.43Zm-8.7 7.28a8.7 8.7 0 1 1 15.32 5.63l2.81 2.81a.7.7 0 1 1-1 1l-2.81-2.81a8.7 8.7 0 0 1-14.32-6.63Z" fill="currentColor"/></svg><input id="qDetails" type="search" maxlength="40" placeholder="বুকমার্ক সার্চ করুন" aria-label="বুকমার্ক সার্চ করুন"></label>
+            <button class="sortbtn" data-act="sort" data-t="details" aria-label="ফিল্টার"><svg width="16" height="14" viewBox="0 0 14 12"><path d="M7 9.75H1M7 2.25h6" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><circle cx="2.5" cy="2.25" r="1.5" stroke="currentColor" stroke-width="1.25" fill="none"/><circle cx="11.5" cy="9.75" r="1.5" stroke="currentColor" stroke-width="1.25" fill="none"/></svg></button>
+          </div>
+          <div id="detailList" style="padding-bottom:24px"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- =======================================================
+       SHEET: hadith more options (screen "menu")
+       ======================================================= -->
+  <div class="ov" id="ov-menu" hidden>
+    <div class="scrim" data-act="close"></div>
+    <div class="sheet menu" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+      <div class="sh-head">
+        <div><div class="sh-title" id="menuTitle">অন্যান্য অপশন</div><div class="sh-ref" id="menuRef"></div></div>
+        <button class="xbtn" data-act="close" aria-label="বন্ধ করুন"><span><svg width="18" height="18" viewBox="0 0 25 25" fill="none"><path d="M6.4 18.8 18.4 6.8M6.4 6.8l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></button>
+      </div>
+      <div class="grid3" id="menuGrid"></div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       SHEET: collection picker (screen "collection")
+       ======================================================= -->
+  <div class="ov" id="ov-coll" hidden>
+    <div class="scrim" data-act="close"></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="collTitle">
+      <div class="coll-head">
+        <div class="coll-title" id="collTitle">কালেকশন</div>
+        <div class="seg2" role="tablist" aria-label="কালেকশন ধরন">
+          <button role="tab" data-act="ctab" data-i="0">বুকমার্কস</button>
+          <button role="tab" data-act="ctab" data-i="1">পিনস</button>
+        </div>
+        <label class="csearch"><svg width="20" height="20" viewBox="0 0 23 22"><path fill-rule="evenodd" d="M10.99 3.24a7.28 7.28 0 1 0 5.14 12.43 7.28 7.28 0 0 0-5.14-12.43Zm-8.7 7.28a8.7 8.7 0 1 1 15.32 5.63l2.81 2.81a.7.7 0 1 1-1 1l-2.81-2.81a8.7 8.7 0 0 1-14.32-6.63Z" fill="currentColor"/></svg><input id="qColl" type="search" maxlength="40" placeholder="বুকমার্ক সার্চ করুন" aria-label="সার্চ"></label>
+      </div>
+      <div class="coll-list" id="collList"></div>
+      <div class="coll-foot">
+        <button class="tbtn" data-act="coll-new">নতুন তৈরি করুন</button>
+        <button class="tbtn" data-act="coll-ok">ঠিক আছে</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       SHEET: create new collection (screen "create")
+       ======================================================= -->
+  <div class="ov" id="ov-create" hidden>
+    <div class="scrim" data-act="close"></div>
+    <div class="sheet create" role="dialog" aria-modal="true" aria-labelledby="createTitle">
+      <h2 id="createTitle">নতুন কালেকশন তৈরি করুন</h2>
+      <label class="flabel" for="cName" style="margin-top:30px">ফোল্ডারের নাম</label>
+      <input class="tfield" id="cName" maxlength="50" placeholder="নামাজের হাদিস" autocomplete="off">
+      <div class="flabel" style="margin-top:22px">ফোল্ডার রং নির্বাচন করুন</div>
+      <div class="colors" id="cColors" role="radiogroup" aria-label="ফোল্ডার রং"></div>
+      <div class="flabel" style="margin-top:26px;margin-bottom:15px">ফোল্ডার টাইপ নির্বাচন করুন</div>
+      <div id="cTypes" role="radiogroup" aria-label="ফোল্ডার টাইপ"></div>
+      <hr class="hr" style="margin:20px 10px 10px">
+      <div class="btnrow">
+        <button class="abtn" data-act="create-cancel">বাতিল করুন</button>
+        <button class="abtn pri" data-act="create-ok">ঠিক আছে</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       SHEET: folder more options (screen "manage")
+       ======================================================= -->
+  <div class="ov" id="ov-manage" hidden>
+    <div class="scrim" data-act="close"></div>
+    <div class="sheet fmore" role="dialog" aria-modal="true" aria-labelledby="fmTitle">
+      <div class="sh-head">
+        <div><div class="sh-title" id="fmTitle">অন্যান্য অপশন</div></div>
+        <button class="xbtn" data-act="close" aria-label="বাতিল"><svg width="25" height="25" viewBox="0 0 25 25" fill="none" style="color:var(--on-surface)"><path d="M6.4 18.8 18.4 6.8M6.4 6.8l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+      </div>
+      <div style="margin-top:12px">
+        <button class="mli" data-act="edit"><svg viewBox="0 0 14 14" fill="none"><path d="M9.84 2.94 11.49 4.6m-.94 4.29v2.97a1.4 1.4 0 0 1-1.4 1.4H2.58a1.4 1.4 0 0 1-1.4-1.4V5.3a1.4 1.4 0 0 1 1.4-1.41h2.97m4.29-.95 1.05-1.05a1.17 1.17 0 0 1 1.66 1.66L5.91 10.18a2.8 2.8 0 0 1-1.18.7l-1.68.5.5-1.68c.13-.44.37-.85.7-1.18z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>বুকমার্ক এডিট করুন</button>
+        <button class="mli" data-act="fdelete" style="margin-top:5px"><svg viewBox="0 0 16 15" fill="none"><path d="m9.75 5.63-.22 5.62m-2.99 0-.22-5.62m6.23-2.01.64.1m-.64-.1-.67 8.68a1.4 1.4 0 0 1-1.4 1.3H5.59a1.4 1.4 0 0 1-1.4-1.3L3.52 3.62m9.03 0a33.6 33.6 0 0 0-2.17-.25m-7.5.35.64-.1m0 0c.72-.11 1.45-.2 2.17-.25m4.69 0v-.57c0-.74-.57-1.36-1.31-1.38a40 40 0 0 0-2.07 0c-.74.02-1.31.64-1.31 1.38v.57m4.69 0a30 30 0 0 0-4.69 0" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>বুকমার্ক ডিলিট করুন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       DIALOG: edit folder
+       ======================================================= -->
+  <div class="ov" id="ov-edit" hidden>
+    <div class="scrim" data-act="close"></div>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="editTitle" style="padding:20px 15px 8px">
+      <div class="dlg-title dlg-c" id="editTitle" style="font-weight:600">বুকমার্ক এডিট করুন</div>
+      <label class="flabel" for="eName" style="margin-top:24px;font-size:16px;font-weight:400">ফোল্ডারের নাম এডিট করুন</label>
+      <div class="pfield" id="eField"><svg viewBox="0 0 24 20" id="eIcon"><path d="M10.35 1.36A2.33 2.33 0 0 0 8.7.67H2.67A2.33 2.33 0 0 0 .34 3L.33 17a2.33 2.33 0 0 0 2.34 2.33h18.66A2.34 2.34 0 0 0 23.67 17V5.33A2.34 2.34 0 0 0 21.33 3H12z" fill="currentColor"/></svg><input id="eName" maxlength="40" placeholder="ফোল্ডারের নাম" autocomplete="off"></div>
+      <div class="flabel" style="margin-top:25px;margin-bottom:12px;font-size:16px;font-weight:400">ফোল্ডার রং নির্বাচন করুন</div>
+      <div class="colors" id="eColors" role="radiogroup" aria-label="ফোল্ডার রং"></div>
+      <hr class="hr" style="margin:16px 0 4px">
+      <div class="btnrow">
+        <button class="abtn" data-act="close">বাতিল করুন</button>
+        <button class="abtn pri" data-act="edit-ok">ঠিক আছে</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       DIALOG: delete confirm (RemoveDialog)
+       ======================================================= -->
+  <div class="ov" id="ov-del" hidden>
+    <div class="scrim" data-act="close"></div>
+    <div class="dialog dlg-c" role="alertdialog" aria-modal="true" aria-labelledby="delTitle" aria-describedby="delMsg">
+      <div class="dlg-art" aria-hidden="true">
+        <svg width="148" height="96" viewBox="0 0 148 96" fill="none">
+          <circle cx="74" cy="48" r="42" fill="#E53935" fill-opacity=".08"/>
+          <circle cx="28" cy="22" r="2.5" fill="#E53935" fill-opacity=".25"/><circle cx="122" cy="18" r="3" fill="#E53935" fill-opacity=".2"/><circle cx="128" cy="74" r="2" fill="#E53935" fill-opacity=".25"/><circle cx="18" cy="70" r="3" fill="#E53935" fill-opacity=".15"/>
+          <rect x="52" y="28" width="44" height="8" rx="4" fill="#F95B53"/>
+          <path d="M66 28v-3a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v3" stroke="#F95B53" stroke-width="3"/>
+          <path d="M56 38h36l-3 34a6 6 0 0 1-6 5.5H65a6 6 0 0 1-6-5.5z" fill="#F95B53" fill-opacity=".85"/>
+          <rect x="65" y="46" width="3.5" height="22" rx="1.75" fill="#fff"/><rect x="79.5" y="46" width="3.5" height="22" rx="1.75" fill="#fff"/>
+        </svg>
+      </div>
+      <div class="dlg-title" id="delTitle">বুকমার্ক ডিলিট করুন</div>
+      <p class="dlg-msg" id="delMsg">আপনি কি নিশ্চিত? বুকমার্ক ডিলিট করতে চান?</p>
+      <div class="btnrow" style="margin-top:20px;gap:12px">
+        <button class="abtn" data-act="close">বাতিল করুন</button>
+        <button class="abtn err" data-act="del-ok">ডিলিট করুন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       SHEET: sort (screen "sort")
+       ======================================================= -->
+  <div class="ov" id="ov-sort" hidden>
+    <div class="scrim" data-act="close"></div>
+    <div class="sheet sort" role="dialog" aria-modal="true" aria-labelledby="sortTitle">
+      <div class="sort-in">
+        <div class="sh-head">
+          <div><div class="sh-title" id="sortTitle">বুকমার্কগুলো সাজান</div></div>
+          <button class="xbtn" data-act="close" aria-label="বাতিল"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:var(--on-surface)"><path d="M6 18 18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        </div>
+        <div id="sortList" role="radiogroup" aria-labelledby="sortTitle" style="margin-top:12px"></div>
+      </div>
+      <div class="sort-foot"><button class="tbtn" data-act="close">ঠিক আছে</button></div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       DIALOG: import / export (app bar action)
+       ======================================================= -->
+  <div class="ov" id="ov-io" hidden>
+    <div class="scrim" data-act="close"></div>
+    <div class="dialog dlg-c" role="dialog" aria-modal="true" aria-labelledby="ioTitle">
+      <div class="dlg-art" aria-hidden="true">
+        <svg width="96" height="80" viewBox="0 0 96 80" fill="none"><rect x="14" y="16" width="68" height="52" rx="8" fill="#1AA483" fill-opacity=".14"/><path d="M14 26a8 8 0 0 1 8-8h18l6 6h28a8 8 0 0 1 8 8v28a8 8 0 0 1-8 8H22a8 8 0 0 1-8-8z" fill="#1AA483"/><path d="M40 50V36m0 0-5 5m5-5 5 5M56 36v14m0 0-5-5m5 5 5-5" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <p class="dlg-msg" id="ioTitle" style="margin-top:0">আপনার বুকমার্ক, পিন, ব্যক্তিগত নোট, রিডিং প্ল্যান ও রিডিং অ্যাক্টিভিটি ব্যাকআপ করতে <strong>‘এক্সপোর্ট’</strong> চাপুন। আগের ব্যাকআপ থেকে ডেটা ফিরিয়ে আনতে <strong>‘ইম্পোর্ট’</strong> চাপুন এবং ব্যাকআপ ফাইলটি নির্বাচন করুন।</p>
+      <div class="btnrow" style="margin-top:22px;gap:12px">
+        <button class="filled" style="flex:1;justify-content:center;margin:0;height:46px;border-radius:10px" data-act="imp">ইম্পোর্ট</button>
+        <button class="filled" style="flex:1;justify-content:center;margin:0;height:46px;border-radius:10px" data-act="exp">এক্সপোর্ট</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="snack" id="snack" role="status" aria-live="polite"></div>
+</div>
+</main>
+
+<script>
+/* =========================================================
+   Data
+   ========================================================= */
+var COLORS=['#66BB6A','#7986CB','#4FC3F7','#4DB6AC','#9CCC65','#DCE775','#FFB74D','#FF8A65','#BA68C8','#F06292','#E57373','#BCAAA4','#90A4AE'];
+var HADITHS={
+  h1:{id:'h1',book:'সহিহ বুখারি',abbr:'বুখারী',hex:'#1AA483',num:'১',ar:'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ',bn:'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।'},
+  h2:{id:'h2',book:'সহিহ মুসলিম',abbr:'মুসলিম',hex:'#4A85CE',num:'২২৩',ar:'الطُّهُورُ شَطْرُ الإِيمَانِ',bn:'পবিত্রতা ঈমানের অর্ধেক।'},
+  h3:{id:'h3',book:'সহিহ বুখারি',abbr:'বুখারী',hex:'#1AA483',num:'৬০১৮',ar:'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ',bn:'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।'},
+  h4:{id:'h4',book:'সুনানে আবু দাউদ',abbr:'দাউদ',hex:'#7986CB',num:'৪৯৮৫',missing:true,ar:'',bn:''}
+};
+/* c = created order, m = last-modified order (bigger = newer) */
+var folders=[
+  {id:1,name:'নামাজের হাদিস',color:'#66BB6A',count:12,c:1,m:5,items:['h1','h2','h4']},
+  {id:2,name:'রমজান',color:'#FFB74D',count:5,c:2,m:2,items:[]},
+  {id:3,name:'পরিবার ও আখলাক',color:'#7986CB',count:8,c:3,m:4,items:['h1']},
+  {id:4,name:'দোয়া ও যিকির',color:'#4FC3F7',count:3,c:4,m:1,items:[]},
+  {id:5,name:'পরে পড়ব',color:'#F06292',count:0,c:5,m:3,items:[]}
+];
+var pins=[{id:'p1',name:'আজকের পড়া',color:'#FF8A65'},{id:'p2',name:'মুখস্থ করব',color:'#BA68C8'}];
+var SORTS=[['name','নাম অনুসারে (A–Z)'],['created','তৈরির তারিখ'],['modified','সর্বশেষ পরিবর্তিত']];
+var clock=10, nextId=6;
+
+var S={page:'card',hist:[],tab:0,ctab:0,q:'',dq:'',cq:'',sort:'name',dsort:'name',sortTarget:'folders',
+  forceEmpty:false,ctxHadith:'h3',ctxFolder:1,fromFolder:false,sel:{},pinSel:null,
+  cColor:COLORS[0],cType:'bookmark',eColor:COLORS[0],delMode:'folder',overlay:null};
+
+/* =========================================================
+   Helpers + icons
+   ========================================================= */
+function $(s){return document.querySelector(s)}
+function bnNum(n){return String(n).replace(/\d/g,function(d){return '০১২৩৪৫৬৭৮৯'[d]})}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function folderSvg(color,w,h){return '<svg viewBox="0 0 24 20" width="'+(w||30)+'" height="'+(h||25)+'" style="color:'+color+'" aria-hidden="true"><path d="M10.3549 1.35508C9.91159 0.911748 9.31659 0.666748 8.69825 0.666748H2.66659C1.38325 0.666748 0.344919 1.71675 0.344919 3.00008L0.333252 17.0001C0.333252 18.2834 1.38325 19.3334 2.66659 19.3334H21.3333C22.6166 19.3334 23.6666 18.2834 23.6666 17.0001V5.33341C23.6666 4.05008 22.6166 3.00008 21.3333 3.00008H11.9999L10.3549 1.35508Z" fill="currentColor"/></svg>'}
+function pinSvg(color,s){return '<svg viewBox="0 0 16 16" width="'+(s||16)+'" height="'+(s||16)+'" aria-hidden="true"><path d="M15.44 4.52 11.52.6a1.66 1.66 0 0 0-2.17-.23 1.6 1.6 0 0 0-.21 2.51l.39.39c.2.2.2.53 0 .75L8.14 5.41a1 1 0 0 1-.94.26l-.54-.14a5.4 5.4 0 0 0-1.91-.14 2.2 2.2 0 0 0-1.87 1.49 2.2 2.2 0 0 0 .54 2.43l1.15 1.19L.28 14.78a.66.66 0 1 0 .93.93l4.27-4.26.82.85c.56.6 1.33.94 2.15.97.26 0 .52-.04.77-.13a2.2 2.2 0 0 0 1.39-1.78c.07-.64.02-1.28-.14-1.9l-.14-.67a.96.96 0 0 1 .26-.93l1.38-1.38a.68.68 0 0 1 .73-.12l.16.1.33.34a1.6 1.6 0 0 0 2.19.25 1.6 1.6 0 0 0 .21-2.51z" fill="'+color+'"/></svg>'}
+var I={
+  bm:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5852 12.2565C20.5852 15.7436 20.0756 21.077 20.0756 21.2821C20.0756 21.4872 19.8718 21.7949 19.668 21.8975C19.5661 22 19.4642 22 19.2603 22C19.1584 22 19.0565 22 18.8527 21.8975L12.6361 18.6154C12.5342 18.6154 12.4323 18.6154 12.4323 18.6154L6.21575 21.8975C6.01193 22 5.70619 22 5.50237 21.8975C5.29855 21.7949 5.09473 21.5898 5.09473 21.2821C5.09473 21.077 4.58517 15.7436 4.58517 12.2565C4.68709 10 4.89091 7.02569 5.09473 4.87184C5.19664 3.53851 6.21575 2.51287 7.54059 2.30774C8.96734 2.20517 11.0056 2.00005 12.6361 2.00005C14.2667 2.00005 16.3049 2.20517 17.7317 2.30774C19.0565 2.4103 20.0756 3.53851 20.1775 4.87184C20.3814 7.02569 20.5852 10 20.5852 12.2565Z" fill="currentColor"/></svg>',
+  multi:'<svg viewBox="0 0 22 23" aria-hidden="true"><path d="M5.66663 15.9823V8.39849C5.66663 5.0679 5.66663 3.40261 6.74057 2.36793C7.81451 1.33325 9.54299 1.33325 13 1.33325C16.4569 1.33325 18.1855 1.33325 19.2593 2.36793C20.3333 3.40261 20.3333 5.0679 20.3333 8.39849V15.9823C20.3333 18.0961 20.3333 19.1529 19.6249 19.5312C18.2529 20.2637 15.6796 17.8197 14.4575 17.0838C13.7487 16.657 13.3943 16.4436 13 16.4436C12.6056 16.4436 12.2512 16.657 11.5425 17.0838C10.3204 17.8197 7.74697 20.2637 6.37507 19.5312C5.66663 19.1529 5.66663 18.0961 5.66663 15.9823Z" fill="#1AA483" fill-opacity="0.26"/><path d="M1.66663 18.9823V11.3985C1.66663 8.0679 1.66663 6.40261 2.74057 5.36793C3.81451 4.33325 5.54299 4.33325 8.99996 4.33325C12.4569 4.33325 14.1855 4.33325 15.2593 5.36793C16.3333 6.40261 16.3333 8.0679 16.3333 11.3985V18.9823C16.3333 21.0961 16.3333 22.1529 15.6249 22.5312C14.2529 23.2637 11.6796 20.8197 10.4575 20.0838C9.74869 19.657 9.39431 19.4436 8.99996 19.4436C8.60561 19.4436 8.25123 19.657 7.54246 20.0838C6.32036 20.8197 3.74697 23.2637 2.37507 22.5312C1.66663 22.1529 1.66663 21.0961 1.66663 18.9823Z" fill="#1AA483"/></svg>',
+  more:'<svg width="4" height="16" viewBox="0 0 4 16" aria-hidden="true"><circle cx="2" cy="2" r="1.6" fill="currentColor"/><circle cx="2" cy="8" r="1.6" fill="currentColor"/><circle cx="2" cy="14" r="1.6" fill="currentColor"/></svg>',
+  hex:'<svg viewBox="0 0 47 47" aria-hidden="true"><path d="m19.955 2.4533c2.1658-1.2504 4.8342-1.2504 7 0l12.919 7.4586c2.1658 1.2504 3.5 3.5613 3.5 6.0622v14.917c0 2.5008-1.3342 4.8117-3.5 6.0621l-12.919 7.4586c-2.1658 1.2504-4.8342 1.2504-7 0l-12.919-7.4586c-2.1658-1.2504-3.5-3.5613-3.5-6.0621v-14.917c0-2.5009 1.3342-4.8118 3.5-6.0622l12.919-7.4586z" fill="currentColor"/></svg>',
+  check:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  checkCircle:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="m8 12.3 2.7 2.7L16.2 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  download:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  emptyBm:'<svg width="96" height="80" viewBox="0 0 96 80" fill="none" aria-hidden="true"><path d="M10 16a6 6 0 0 1 6-6h20l6 6h38a6 6 0 0 1 6 6v42a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M10 26h76" stroke="currentColor" stroke-width="2.4"/><path d="M40 36h16v24l-8-5-8 5z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><circle cx="6" cy="6" r="2.4" stroke="currentColor" stroke-width="1.4"/><circle cx="90" cy="8" r="1.4" fill="currentColor"/><path d="M92 40v8M88 44h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  emptySearch:'<svg width="98" height="80" viewBox="0 0 78 64" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="29" cy="27" r="21"/><path d="M46.16 39.16l12 12a3.5 3.5 0 0 1-5 5l-12-12"/><path d="M15 25a14 14 0 0 1 12-12" stroke-width="1.5"/><circle cx="64" cy="30" r="10"/><path d="m60.5 26.5 7 7m0-7-7 7"/></g><g stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="9" r="3"/><circle cx="65" cy="8" r="3"/><path d="M9 47v10M4 55v6"/></g><g fill="currentColor"><circle cx="27" cy="2" r="1"/><circle cx="49" cy="5" r="1"/><circle cx="4" cy="29" r="1"/><circle cx="30" cy="58" r="1"/></g></svg>'
+};
+/* Menu-grid icons: the app's own two-tone set (assets/images/svg/ic_menu_*.svg) */
+var M={
+  details:'<svg viewBox="0 0 33 33" fill="none"><path d="M3 7.5a2 2 0 0 1 2-2h7a4 4 0 0 1 4 4V28a2.5 2.5 0 0 0-2.5-2.5H5a2 2 0 0 1-2-2z" fill="#1AA483"/><path d="M30 7.5a2 2 0 0 0-2-2h-7a4 4 0 0 0-4 4V28a2.5 2.5 0 0 1 2.5-2.5H28a2 2 0 0 0 2-2z" fill="#118C6E"/><rect x="6.5" y="11" width="6" height="2.2" rx="1.1" fill="#E6F7F1"/><rect x="6.5" y="15.5" width="6" height="2.2" rx="1.1" fill="#E6F7F1"/><rect x="20.5" y="17" width="6" height="2.2" rx="1.1" fill="#E6F7F1"/><path d="M22 5.5h4v8.5l-2-1.6-2 1.6z" fill="#FFB84D"/></svg>',
+  remove:'<svg viewBox="0 0 33 33" fill="none"><path d="M7 10h19l-1.5 17.5a3 3 0 0 1-3 2.5h-10a3 3 0 0 1-3-2.5z" fill="#1AA483"/><rect x="4.5" y="6.5" width="24" height="4" rx="2" fill="#118C6E"/><path d="M12.5 6.5V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1.5" stroke="#FFB84D" stroke-width="2.4"/><rect x="12" y="14" width="2.4" height="11" rx="1.2" fill="#E6F7F1"/><rect x="18.6" y="14" width="2.4" height="11" rx="1.2" fill="#E6F7F1"/></svg>',
+  collect:'<svg viewBox="0 0 33 33" fill="none"><path d="M5 5.5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3V29l-9-5.5L5 29z" fill="#1AA483"/><path d="M5 5.5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3V9H5z" fill="#118C6E"/><circle cx="24.5" cy="23.5" r="7" fill="#FFB84D"/><path d="M24.5 20v7M21 23.5h7" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  note:'<svg viewBox="0 0 33 33" fill="none"><rect x="3.5" y="4" width="21" height="25" rx="4" fill="#1AA483"/><path d="M3.5 8a4 4 0 0 1 4-4h13a4 4 0 0 1 4 4v2h-21z" fill="#118C6E"/><rect x="7.5" y="15" width="12" height="2.4" rx="1.2" fill="#E6F7F1"/><rect x="7.5" y="20" width="8" height="2.4" rx="1.2" fill="#E6F7F1"/><path d="M27.3 11.8a2 2 0 0 1 2.9 2.9L20.4 24.5l-4.2 1.3 1.3-4.2z" fill="#FFB84D"/></svg>',
+  copyTr:'<svg viewBox="0 0 33 33" fill="none"><rect x="10" y="3" width="19" height="22" rx="4" fill="#118C6E"/><rect x="4" y="8" width="19" height="22" rx="4" fill="#1AA483"/><rect x="8" y="14" width="11" height="2.4" rx="1.2" fill="#E6F7F1"/><rect x="8" y="19" width="7" height="2.4" rx="1.2" fill="#E6F7F1"/><circle cx="25" cy="25" r="7" fill="#FFB84D"/><path d="M22.4 28.2 25 21.6l2.6 6.6M23.4 26h3.2" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  copyAr:'<svg viewBox="0 0 33 33" fill="none"><rect x="10" y="3" width="19" height="22" rx="4" fill="#118C6E"/><rect x="4" y="8" width="19" height="22" rx="4" fill="#1AA483"/><rect x="8" y="14" width="11" height="2.4" rx="1.2" fill="#E6F7F1"/><rect x="8" y="19" width="7" height="2.4" rx="1.2" fill="#E6F7F1"/><circle cx="25" cy="25" r="7" fill="#FFB84D"/><path d="M27.2 21.9c-.9-.9-3-.7-3 .9 0 1.3 1.6 1.7 3.2 1.2-2.3.6-3.9 1.7-3.5 3.3.4 1.4 2.2 1.6 3.6.9" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  copyAll:'<svg viewBox="0 0 33 33" fill="none"><path d="M4 17c0-6 3.5-10 9-11v4c-2.5.8-4 2.6-4.3 5H13v10H4z" fill="#1AA483"/><path d="M18 17c0-6 3.5-10 9-11v4c-2.5.8-4 2.6-4.3 5H27v10h-9z" fill="#FFB84D"/></svg>'
+};
+
+function membership(hid){return folders.filter(function(f){return f.items.indexOf(hid)>-1}).length}
+function getFolder(id){for(var i=0;i<folders.length;i++)if(folders[i].id===id)return folders[i];return null}
+function countLabel(f){return f.count===0?'কোন হাদিস যুক্ত করা হয়নি':bnNum(f.count)+'টি হাদিস'}
+function sortList(list,key){
+  var a=list.slice();
+  if(key==='name')a.sort(function(x,y){return x.name.localeCompare(y.name,'bn')});
+  else if(key==='created')a.sort(function(x,y){return y.c-x.c});
+  else a.sort(function(x,y){return y.m-x.m});
+  return a;
+}
+
+/* =========================================================
+   Render: hadith card
+   ========================================================= */
+function hadithCard(h,inFolder){
+  var n=membership(h.id);
+  var mark=n===0?'':'<span class="bm" role="img" aria-label="'+(n>1?'একাধিক বুকমার্কে সেভ করা হাদিস':'বুকমার্ক করা হাদিস')+'">'+(n>1?I.multi:I.bm)+'</span>';
+  var top='<div class="hc-top"><div class="hc-id"><span class="hex" style="color:'+h.hex+'">'+I.hex+'<span style="color:#fff">'+h.abbr+'</span></span>'+
+    '<div style="min-width:0"><div class="hc-book">'+h.book+'</div><div class="hc-num">হাদিস: '+h.num+'</div></div></div>'+
+    '<div class="hc-trail">'+mark+(h.missing?'':'<span class="grade">সহিহ</span>')+
+    '<button class="more" data-act="more" data-h="'+h.id+'" data-from="'+(inFolder?'folder':'list')+'" aria-label="'+h.book+' হাদিস '+h.num+' এর আরও অপশন খুলুন">'+I.more+'</button></div></div>';
+  if(h.missing){
+    return '<article class="hc">'+top+'<div class="na">'+I.emptyBm.replace('width="96" height="80"','width="77" height="64"')+
+      '<h3>বুকমার্ক করা হাদিস লোড করা যায়নি</h3><p>এই বুকমার্কের হাদিসের বইটি ডাউনলোড করা হয়নি। হাদিস দেখতে বইটি ডাউনলোড করুন।</p>'+
+      '<button class="filled" data-act="dl">'+I.download+'ডাউনলোডে যান</button></div></article>';
+  }
+  return '<article class="hc">'+top+'<p class="hc-ar" lang="ar">'+h.ar+'</p><p class="hc-bn">'+h.bn+'</p></article>';
+}
+function renderCardList(){$('#cardList').innerHTML=['h1','h2','h3'].map(function(id){return hadithCard(HADITHS[id],false)}).join('')}
+
+/* =========================================================
+   Render: collection page (tabs, folder list, empty)
+   ========================================================= */
+function emptyState(searching,text){
+  return '<div class="empty">'+(searching?I.emptySearch:I.emptyBm)+'<p>'+(searching?'কোন সার্চ রেজাল্ট পাওয়া যায়নি':text)+'</p></div>';
+}
+function renderFolders(){
+  var tabs=document.querySelectorAll('.seg3 button');
+  for(var i=0;i<tabs.length;i++)tabs[i].setAttribute('aria-selected',String(i===S.tab));
+  var q=S.q.trim(), html='';
+  $('#qFolders').placeholder=S.tab===1?'পিন সার্চ করুন':S.tab===2?'নোট সার্চ করুন':'বুকমার্ক সার্চ করুন';
+  if(S.tab===0){
+    var list=S.forceEmpty?[]:sortList(folders,S.sort).filter(function(f){return !q||f.name.indexOf(q)>-1});
+    if(!list.length)html=emptyState(!!q,'কোন বুকমার্ক পাওয়া যায়নি');
+    else html='<div class="flist">'+list.map(function(f){
+      return '<div class="fc"><button class="fc-main" data-act="open-folder" data-id="'+f.id+'">'+folderSvg(f.color)+
+        '<span style="min-width:0"><span class="fc-name">'+esc(f.name)+'</span><span class="fc-count" style="display:block">'+countLabel(f)+'</span></span></button>'+
+        '<button class="more" data-act="fmore" data-id="'+f.id+'" aria-label="'+esc(f.name)+' এর আরও অপশন">'+I.more+'</button></div>';
+    }).join('')+'</div>';
+  }else if(S.tab===1){
+    var pl=sortList(pins.map(function(p,i){return {id:p.id,name:p.name,color:p.color,c:i,m:i}}),S.sort).filter(function(p){return !q||p.name.indexOf(q)>-1});
+    html=pl.length?'<div class="flist">'+pl.map(function(p){
+      return '<div class="fc" style="cursor:default"><span class="fc-main">'+pinSvg(p.color,24)+'<span><span class="fc-name">'+esc(p.name)+'</span><span class="fc-count" style="display:block">পিন</span></span></span><span style="width:48px"></span></div>';
+    }).join('')+'</div>':emptyState(!!q,'কোন পিন পাওয়া যায়নি');
+  }else html=emptyState(!!q,'কোন নোট পাওয়া যায়নি');
+  $('#folderList').innerHTML=html;
+}
+
+/* =========================================================
+   Render: folder details
+   ========================================================= */
+function renderDetails(){
+  var f=getFolder(S.ctxFolder); if(!f)return;
+  $('#dTitle').textContent=f.name; $('#dSub').textContent=countLabel(f);
+  var q=S.dq.trim();
+  var list=f.items.map(function(id){return HADITHS[id]}).filter(function(h){
+    return !q||(h.bn+' '+h.book+' '+h.num).indexOf(q)>-1});
+  if(S.dsort==='name')list.sort(function(a,b){return a.book.localeCompare(b.book,'bn')});
+  else if(S.dsort==='modified')list.reverse();
+  $('#detailList').innerHTML=list.length?list.map(function(h){return hadithCard(h,true)}).join(''):
+    emptyState(!!q,f.items.length?'কোন বুকমার্ক পাওয়া যায়নি':'কোন হাদিস নেই');
+}
+
+/* =========================================================
+   Render: sheets
+   ========================================================= */
+function renderMenu(){
+  var h=HADITHS[S.ctxHadith];
+  $('#menuRef').textContent=h.book+' · হাদিস: '+h.num;
+  var acts=[['details','বিস্তারিত',M.details]];
+  if(S.fromFolder)acts.push(['remove','বুকমার্ক সরান',M.remove]);
+  acts.push(['collect','বুকমার্ক / পিন',M.collect],['note','নোট',M.note],['copyTr','অনুবাদ কপি',M.copyTr],['copyAr','আরবি কপি',M.copyAr],['copyAll','হাদিস কপি',M.copyAll]);
+  $('#menuGrid').innerHTML=acts.map(function(a){return '<button class="tile" data-act="m-'+a[0]+'">'+a[2]+'<span>'+a[1]+'</span></button>'}).join('');
+}
+function renderColl(){
+  var tabs=document.querySelectorAll('.seg2 button');
+  for(var i=0;i<tabs.length;i++)tabs[i].setAttribute('aria-selected',String(i===S.ctab));
+  $('#qColl').placeholder=S.ctab===0?'বুকমার্ক সার্চ করুন':'পিন সার্চ করুন';
+  var q=S.cq.trim(), html;
+  if(S.ctab===0){
+    var list=sortList(folders,S.sort).filter(function(f){return !q||f.name.indexOf(q)>-1});
+    html=list.map(function(f){var on=!!S.sel[f.id];
+      return '<button class="crow" role="checkbox" aria-checked="'+on+'" data-act="chk" data-id="'+f.id+'"><span class="cbox">'+I.check+'</span>'+folderSvg(f.color,24,20)+'<span class="crow-name">'+esc(f.name)+'</span></button>'}).join('');
+  }else{
+    html=pins.filter(function(p){return !q||p.name.indexOf(q)>-1}).map(function(p){var on=S.pinSel===p.id;
+      return '<button class="crow" role="radio" aria-checked="'+on+'" data-act="pinsel" data-id="'+p.id+'"><span class="radio"></span>'+pinSvg(p.color)+'<span class="crow-name">'+esc(p.name)+'</span></button>'}).join('');
+  }
+  $('#collList').innerHTML=html||'<div class="coll-empty">কোন সার্চ রেজাল্ট পাওয়া যায়নি</div>';
+}
+function swatches(sel,act){
+  return COLORS.map(function(c,i){var on=c===sel;
+    return '<button class="sw" role="radio" aria-checked="'+on+'" aria-label="রং '+bnNum(i+1)+'" data-act="'+act+'" data-c="'+c+'"><span style="background:'+c+'">'+I.checkCircle+'</span></button>'}).join('');
+}
+function renderCreate(){
+  $('#cColors').innerHTML=swatches(S.cColor,'ccolor');
+  var t=[['bookmark','বুকমার্ক','হাদিস বুকমার্ক করুন',folderSvg(S.cColor,19,16)],['pin','পিন','হাদিস পিন করুন',pinSvg(S.cColor)]];
+  $('#cTypes').innerHTML=t.map(function(x,i){return '<button class="trow" role="radio" aria-checked="'+(S.cType===x[0])+'" data-act="ctype" data-t="'+x[0]+'"'+(i?' style="margin-top:15px"':'')+'><span class="tdot"><svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="m4 12.5 5 5L20 6.5" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ticon">'+x[3]+'</span><span><span class="ttitle" style="display:block">'+x[1]+'</span><span class="tsub">'+x[2]+'</span></span></button>'}).join('');
+}
+function renderEdit(){$('#eColors').innerHTML=swatches(S.eColor,'ecolor');$('#eIcon').style.color=S.eColor}
+function renderSort(){
+  var cur=S.sortTarget==='details'?S.dsort:S.sort;
+  $('#sortTitle').textContent=(S.sortTarget==='folders'&&S.tab===1)?'পিনগুলো সাজান':(S.sortTarget==='folders'&&S.tab===2)?'নোটগুলো সাজান':'বুকমার্কগুলো সাজান';
+  $('#sortList').innerHTML=SORTS.map(function(s){return '<button class="rrow" role="radio" aria-checked="'+(cur===s[0])+'" data-act="sortpick" data-k="'+s[0]+'"><span class="radio"></span>'+s[1]+'</button>'}).join('');
+}
+function renderAll(){renderCardList();renderFolders();renderDetails()}
+
+/* =========================================================
+   Navigation: pages, overlays, chips, snackbar
+   ========================================================= */
+var PAGE_CHIP={card:'card',folders:'folders',details:'details'};
+var OV_CHIP={menu:'menu',coll:'collection',create:'create',manage:'manage',sort:'sort'};
+function setChip(id){var c=document.querySelectorAll('.chip');for(var i=0;i<c.length;i++)c[i].classList.toggle('on',c[i].getAttribute('data-screen')===id)}
+function pageChip(){return S.page==='folders'&&S.forceEmpty?'empty':PAGE_CHIP[S.page]}
+function go(page,push){
+  if(push&&S.page!==page)S.hist.push(S.page);
+  S.page=page;
+  var p=document.querySelectorAll('.page');for(var i=0;i<p.length;i++)p[i].classList.toggle('on',p[i].id==='page-'+page);
+  if(page==='details')renderDetails();
+  if(page==='folders')renderFolders();
+  setChip(pageChip());
+}
+var lastFocus=null;
+function openOv(id){
+  closeOv(true);
+  var o=$('#ov-'+id); o.hidden=false; S.overlay=id; lastFocus=document.activeElement;
+  void o.offsetWidth; o.classList.add('open');
+  setChip(id==='edit'||(id==='del'&&S.delMode==='folder')?'manage':(OV_CHIP[id]||pageChip()));
+  setTimeout(function(){var f=o.querySelector('input,button:not(.scrim)');if(f&&S.overlay===id)try{f.focus({preventScroll:true})}catch(e){}},320);
+}
+function closeOv(silent){
+  var o=document.querySelectorAll('.ov.open');
+  for(var i=0;i<o.length;i++){(function(el){el.classList.remove('open');setTimeout(function(){if(!el.classList.contains('open'))el.hidden=true},300)})(o[i])}
+  S.overlay=null;
+  if(!silent){setChip(pageChip());if(lastFocus&&lastFocus.focus)try{lastFocus.focus({preventScroll:true})}catch(e){}}
+}
+function then(fn){closeOv(true);setTimeout(fn,320)}
+var snackT;
+function snack(msg){var s=$('#snack');s.textContent=msg;s.classList.add('show');clearTimeout(snackT);snackT=setTimeout(function(){s.classList.remove('show')},2500)}
+
+function openCollection(hid){
+  S.ctxHadith=hid; S.sel={}; S.pinSel=null; S.ctab=0; S.cq=''; $('#qColl').value='';
+  folders.forEach(function(f){if(f.items.indexOf(hid)>-1)S.sel[f.id]=true});
+  renderColl(); openOv('coll');
+}
+function openCreate(){S.cColor=COLORS[0];S.cType=S.ctab===1?'pin':'bookmark';$('#cName').value='';$('#cName').classList.remove('err');renderCreate();openOv('create')}
+function openSort(t){S.sortTarget=t;renderSort();openOv('sort')}
+function firstFolderId(){return folders.length?sortList(folders,S.sort)[0].id:null}
+
+/* Toolbar chip → screen */
+function showScreen(id){
+  closeOv(true); S.forceEmpty=false; S.hist=[];
+  if(id==='card'){go('card')}
+  else if(id==='menu'){go('card');S.ctxHadith='h1';S.fromFolder=false;renderMenu();openOv('menu')}
+  else if(id==='collection'){go('card');openCollection('h3')}
+  else if(id==='create'){go('card');S.ctxHadith='h3';S.ctab=0;S.sel={};folders.forEach(function(f){if(f.items.indexOf('h3')>-1)S.sel[f.id]=true});openCreate()}
+  else if(id==='folders'){S.tab=0;go('folders')}
+  else if(id==='details'){var f=getFolder(1)||folders[0];if(!f){go('folders');return}S.ctxFolder=f.id;S.dq='';$('#qDetails').value='';S.hist=['folders'];go('details')}
+  else if(id==='manage'){S.tab=0;go('folders');var fid=firstFolderId();if(fid){S.ctxFolder=fid;openOv('manage')}}
+  else if(id==='sort'){S.tab=0;go('folders');openSort('folders')}
+  else if(id==='empty'){S.tab=0;S.forceEmpty=true;go('folders')}
+  else return;
+  setChip(S.overlay?OV_CHIP[S.overlay]:pageChip());
+}
+
+/* =========================================================
+   Actions (event delegation)
+   ========================================================= */
+var ACT={
+  close:function(){closeOv()},
+  back:function(){go(S.hist.length?S.hist.pop():'folders')},
+  more:function(el){S.ctxHadith=el.getAttribute('data-h');S.fromFolder=el.getAttribute('data-from')==='folder';renderMenu();openOv('menu')},
+  'm-collect':function(){var h=S.ctxHadith;then(function(){openCollection(h)})},
+  'm-remove':function(){S.delMode='hadith';then(function(){openOv('del')})},
+  'm-details':function(){closeOv();snack('হাদিসের বিস্তারিত খোলা হবে')},
+  'm-note':function(){closeOv();snack('নোট লেখার শিট খোলা হবে')},
+  'm-copyTr':function(){closeOv();snack('অনুবাদ কপি করা হয়েছে')},
+  'm-copyAr':function(){closeOv();snack('আরবি কপি করা হয়েছে')},
+  'm-copyAll':function(){closeOv();snack('হাদিস কপি করা হয়েছে')},
+  tab:function(el){S.tab=+el.getAttribute('data-i');S.q='';$('#qFolders').value='';renderFolders()},
+  ctab:function(el){S.ctab=+el.getAttribute('data-i');S.cq='';$('#qColl').value='';renderColl()},
+  chk:function(el){var id=+el.getAttribute('data-id');if(S.sel[id])delete S.sel[id];else S.sel[id]=true;renderColl()},
+  pinsel:function(el){var id=el.getAttribute('data-id');S.pinSel=S.pinSel===id?null:id;renderColl()},
+  'coll-ok':function(){
+    var h=S.ctxHadith;
+    folders.forEach(function(f){var has=f.items.indexOf(h)>-1,want=!!S.sel[f.id];
+      if(want&&!has){f.items.push(h);f.count++;f.m=++clock}
+      if(!want&&has){f.items.splice(f.items.indexOf(h),1);f.count=Math.max(0,f.count-1);f.m=++clock}});
+    closeOv();renderAll();snack('বুকমার্ক সেভ করা হয়েছে');
+  },
+  'coll-new':function(){then(openCreate)},
+  ccolor:function(el){S.cColor=el.getAttribute('data-c');renderCreate()},
+  ctype:function(el){S.cType=el.getAttribute('data-t');renderCreate()},
+  'create-cancel':function(){var h=S.ctxHadith,keep=S.sel;then(function(){openCollection(h);S.sel=keep;renderColl()})},
+  'create-ok':function(){
+    var inp=$('#cName'),name=inp.value.trim();
+    if(!name){inp.classList.add('err');inp.focus();return}
+    var h=S.ctxHadith,keep=S.sel,type=S.cType;
+    if(type==='pin'){pins.push({id:'p'+(nextId++),name:name,color:S.cColor})}
+    else{var f={id:nextId++,name:name,color:S.cColor,count:0,c:++clock,m:clock,items:[]};folders.push(f);keep[f.id]=true}
+    renderFolders();
+    then(function(){openCollection(h);S.sel=keep;S.ctab=type==='pin'?1:0;renderColl()});
+  },
+  'open-folder':function(el){
+    var f=getFolder(+el.getAttribute('data-id'));
+    if(!f.items.length&&f.count===0){snack('কোন হাদিস নেই');return}
+    S.ctxFolder=f.id;S.dq='';$('#qDetails').value='';S.dsort='name';go('details',true);
+  },
+  fmore:function(el){S.ctxFolder=+el.getAttribute('data-id');openOv('manage')},
+  edit:function(){var f=getFolder(S.ctxFolder);S.eColor=f.color;then(function(){$('#eName').value=f.name;$('#eField').classList.remove('err');renderEdit();openOv('edit')})},
+  ecolor:function(el){S.eColor=el.getAttribute('data-c');renderEdit()},
+  'edit-ok':function(){
+    var name=$('#eName').value.trim();
+    if(!name){$('#eField').classList.add('err');$('#eName').focus();return}
+    var f=getFolder(S.ctxFolder);f.name=name;f.color=S.eColor;f.m=++clock;
+    closeOv();renderAll();snack('বুকমার্ক আপডেট করা হয়েছে');
+  },
+  fdelete:function(){S.delMode='folder';then(function(){openOv('del')})},
+  'del-ok':function(){
+    if(S.delMode==='folder'){folders=folders.filter(function(f){return f.id!==S.ctxFolder});closeOv();renderAll()}
+    else{
+      var f=getFolder(S.ctxFolder),i=f?f.items.indexOf(S.ctxHadith):-1;
+      if(i>-1){f.items.splice(i,1);f.count=Math.max(0,f.count-1);f.m=++clock}
+      closeOv();renderAll();
+      if(f&&!f.items.length){S.hist=[];go('folders')}
+    }
+    snack('বুকমার্ক মুছে ফেলা হয়েছে');
+  },
+  sort:function(el){openSort(el.getAttribute('data-t'))},
+  sortpick:function(el){var k=el.getAttribute('data-k');if(S.sortTarget==='details'){S.dsort=k;renderDetails()}else{S.sort=k;renderFolders()}renderSort()},
+  'sync-ok':function(){$('#syncBox').hidden=true},
+  login:function(){snack('বুকমার্ক, পিন, নোট এবং লাইফটাইম অ্যাক্টিভিটি সেভ রাখতে লগইন করুন')},
+  io:function(){openOv('io')},
+  imp:function(){closeOv();snack('ইম্পোর্ট সম্পন্ন হয়েছে')},
+  exp:function(){closeOv();snack('ব্যাকআপ সেভ হয়েছে।')},
+  dl:function(){snack('ডাউনলোড পেজে নেওয়া হবে')}
+};
+document.addEventListener('click',function(e){
+  var chip=e.target.closest('[data-screen]');
+  if(chip){showScreen(chip.getAttribute('data-screen'));chip.scrollIntoView({block:'nearest',inline:'nearest'});return}
+  var el=e.target.closest('[data-act]');
+  if(el&&ACT[el.getAttribute('data-act')]){ACT[el.getAttribute('data-act')](el)}
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&S.overlay)closeOv()});
+$('#qFolders').addEventListener('input',function(){S.q=this.value;renderFolders()});
+$('#qDetails').addEventListener('input',function(){S.dq=this.value;renderDetails()});
+$('#qColl').addEventListener('input',function(){S.cq=this.value;renderColl()});
+$('#cName').addEventListener('input',function(){this.classList.remove('err')});
+$('#eName').addEventListener('input',function(){$('#eField').classList.remove('err')});
+$('#themeBtn').addEventListener('click',function(){var d=document.documentElement;d.setAttribute('data-theme',d.getAttribute('data-theme')==='dark'?'light':'dark')});
+
+/* Parent viewer can switch screens */
+window.addEventListener('message',function(e){var d=e.data;if(d&&d.type==='screen'&&d.id)showScreen(d.id)});
+
+/* =========================================================
+   Boot
+   ========================================================= */
+renderAll();
+(function(){var id='card';try{id=new URLSearchParams(location.search).get('screen')||'card'}catch(e){}showScreen(id)})();
+</script>
+</body>
+</html>

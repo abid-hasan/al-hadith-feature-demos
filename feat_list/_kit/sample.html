@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>কিট নমুনা — ডেমো ০ · নমুনা</title>
+<link rel="stylesheet" href="kit.css">
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <section class="screen" data-screen="list">
+        <header class="appbar">
+          <button class="icon-btn" aria-label="পেছনে" data-icon="back"></button>
+          <h1>সহিহ বুখারি<small>কিতাবুল ওহি</small></h1>
+          <button class="icon-btn" aria-label="সার্চ" data-icon="search"></button>
+        </header>
+        <div class="scroll">
+          <div class="chip-row" style="padding-top:12px"><button class="chip on">সব</button><button class="chip">নামাজ</button><button class="chip">রোজা</button></div>
+          <article class="card" style="margin-top:10px">
+            <div class="hadith-head">
+              <span class="book-badge">বুখারী</span>
+              <div class="hadith-meta"><b>সহিহ বুখারি</b><span>হাদিস: ১</span></div>
+              <span class="grade">সহিহ</span>
+              <button class="icon-btn" aria-label="আরও" data-open="sheet-more" data-icon="more"></button>
+            </div>
+            <p class="arabic">إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ</p>
+            <p class="translation">সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।</p>
+            <p class="narrator">উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত</p>
+          </article>
+          <div class="card"><div class="muted">অগ্রগতি · ৩২%</div><div class="progress" style="margin-top:8px"><i style="width:32%"></i></div></div>
+          <div style="padding:8px 12px;display:flex;gap:8px"><button class="btn" data-go="detail">বিস্তারিত</button><button class="btn tonal" data-open="dlg">ডায়ালগ</button></div>
+        </div>
+      </section>
+      <section class="screen" data-screen="detail" data-status="light">
+        <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-go="list" data-icon="back"></button><h1>বিস্তারিত</h1></header>
+        <div class="scroll"><div class="empty"><h3>খালি অবস্থা</h3><p>এখানে কিছু নেই</p></div></div>
+      </section>
+      <div class="sheet" id="sheet-more" role="dialog" aria-label="অন্যান্য অপশন">
+        <div class="sheet-head"><h2>অন্যান্য অপশন</h2><button class="icon-btn" data-close aria-label="বন্ধ করুন" data-icon="close"></button></div>
+        <div class="sheet-body"><button class="list-row" data-close data-snack="কপি করা হয়েছে">অনুবাদ কপি</button><button class="list-row" data-close data-snack="কপি করা হয়েছে">আরবি কপি</button></div>
+        <div class="sheet-foot"><button class="btn text" data-close>বাতিল</button><button class="btn" data-close data-snack="সেভ করা হয়েছে">ঠিক আছে</button></div>
+      </div>
+      <div class="dialog" id="dlg" role="dialog" aria-label="নিশ্চিত করুন">
+        <h2>আপনি কি নিশ্চিত?</h2><p>এটা একটা নমুনা ডায়ালগ।</p>
+        <div class="actions"><button class="btn text" data-close>বাতিল</button><button class="btn danger" data-close data-snack="ডিলিট করা হয়েছে">ডিলিট করুন</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="kit.js"></script>
+<script>
+  Kit.$$('[data-icon]').forEach((b) => { b.innerHTML = Kit.icons[b.dataset.icon]; });
+  Kit.init({ demo: 0, name: 'কিট নমুনা', screens: [{ id: 'list', label: 'লিস্ট' }, { id: 'detail', label: 'বিস্তারিত' }] });
+</script>
+</body>
+</html>

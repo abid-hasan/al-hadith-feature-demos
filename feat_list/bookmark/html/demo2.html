@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>বুকমার্ক — ডেমো ২ · রঙিন ফোল্ডার গ্রিড</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  /* Theme: follow the system until the toggle is used */
+  (function(){
+    var dark = false;
+    try { dark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch(e) {}
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  })();
+</script>
+<style>
+/* ============================================================
+   Fonts
+   ============================================================ */
+@font-face{font-family:Kalpurush;src:url("../../../assets/fonts/font_kalpurush.ttf") format("truetype");font-display:swap}
+@font-face{font-family:KFGQ;src:url("../../../assets/fonts/font_kfgq.ttf") format("truetype");font-display:swap}
+
+/* ============================================================
+   Tokens (app colours, light + dark)
+   ============================================================ */
+:root{
+  --page:#E9EDEC; --tb-bg:rgba(255,255,255,.72); --tb-text:#2B2F33; --tb-border:rgba(0,0,0,.08); --tb-chip:#FFFFFF; --tb-chip-on:#2B2F33; --tb-chip-on-text:#FFFFFF;
+  --primary:#1AA483; --primaryDark:#0D8C5C; --appbar:#118C6E; --onAppbar:#FFFFFF;
+  --scaffold:#F4F4F4; --card:#FFFFFF; --divider:rgba(0,0,0,.12); --hint:rgba(0,0,0,.54);
+  --body:#5D646F; --title:#2B2F33; --disabled:#788A95; --error:#F95B53;
+  --soft:#E8F6F3; --grade:#46B891; --tint:12%; --tint-strong:18%;
+  --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.05);
+  --snack-bg:#2B2F33; --snack-text:#FFFFFF; --scrim:rgba(0,0,0,.42);
+  --frame:#1B2026;
+}
+[data-theme=dark]{
+  --page:#05080B; --tb-bg:rgba(22,28,35,.8); --tb-text:#ECEDEE; --tb-border:rgba(255,255,255,.08); --tb-chip:#161C23; --tb-chip-on:#ECEDEE; --tb-chip-on-text:#0D1116;
+  --appbar:#161C23; --onAppbar:#ECEDEE;
+  --scaffold:#0D1116; --card:#161C23; --divider:rgba(104,112,121,.3); --hint:rgba(255,255,255,.6);
+  --body:#C6C3CA; --title:#ECEDEE;
+  --soft:rgba(26,164,131,.12); --tint:16%; --tint-strong:22%;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+  --snack-bg:#ECEDEE; --snack-text:#161C23; --scrim:rgba(0,0,0,.62);
+  --frame:#2A323B;
+}
+
+/* ============================================================
+   Page shell: toolbar + phone frame
+   ============================================================ */
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--page);color:var(--title);font-family:Kalpurush,"Noto Sans Bengali",sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+
+.toolbar{position:sticky;top:0;z-index:10;height:44px;display:flex;align-items:center;gap:12px;padding:0 12px;background:var(--tb-bg);border-bottom:1px solid var(--tb-border);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--tb-text)}
+.tb-name{font-size:14px;font-weight:700;white-space:nowrap}
+.tb-chips{flex:1;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:4px 0}
+.tb-chips::-webkit-scrollbar{display:none}
+.tb-chip{flex:none;border:1px solid var(--tb-border);background:var(--tb-chip);border-radius:999px;padding:4px 12px;font-size:13px;color:var(--tb-text)}
+.tb-chip[aria-pressed=true]{background:var(--tb-chip-on);color:var(--tb-chip-on-text);border-color:transparent}
+.tb-theme{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid var(--tb-border);background:var(--tb-chip);font-size:16px;color:var(--tb-text)}
+
+.stage{display:flex;justify-content:center;align-items:flex-start;padding:24px 16px 40px}
+.phone{position:relative;width:390px;height:844px;border-radius:44px;overflow:hidden;background:var(--scaffold);border:10px solid var(--frame);box-shadow:0 20px 60px rgba(0,0,0,.18);display:flex;flex-direction:column;--sb:var(--appbar);--sb-text:var(--onAppbar)}
+@media (max-width:479px){
+  .stage{padding:0}
+  .phone{width:100%;height:calc(100vh - 44px);height:calc(100dvh - 44px);border-radius:0;border:0;box-shadow:none}
+  .tb-name{display:none}
+}
+
+/* status bar (colour follows the current screen header) */
+.statusbar{flex:none;height:40px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;background:var(--sb);color:var(--sb-text);font-size:14px;font-weight:600;transition:background .25s}
+.statusbar svg{display:block}
+.sb-right{display:flex;gap:6px;align-items:center}
+
+/* ============================================================
+   Screens
+   ============================================================ */
+.host{position:relative;flex:1;overflow:hidden}
+.screen{position:absolute;inset:0;overflow-y:auto;display:none;background:var(--scaffold);scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{display:block;animation:screenIn .22s ease-out}
+@keyframes screenIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+
+/* shared bits */
+.icon-btn{width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:inline-grid;place-items:center;padding:0;flex:none}
+.icon-btn svg{width:22px;height:22px}
+.icon-btn.sm{width:32px;height:32px}
+.icon-btn.sm svg{width:20px;height:20px}
+.icon-btn:active{background:rgba(127,127,127,.15)}
+.stroke{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.spacer{flex:1}
+
+/* green app bar (hadith list page — the app's normal style) */
+.appbar{position:sticky;top:0;z-index:2;height:56px;display:flex;align-items:center;gap:4px;padding:0 4px;background:var(--appbar);color:var(--onAppbar)}
+.appbar h1{margin:0 0 0 4px;font-size:19px;font-weight:600}
+
+/* light header (collection page) */
+.lhead{padding:4px 8px 0;display:flex;align-items:center;color:var(--primary)}
+.big-title{margin:2px 20px 14px;font-size:28px;line-height:1.25;font-weight:700;color:var(--title)}
+
+/* search + sort row */
+.search-row{display:flex;gap:8px;padding:0 16px 14px}
+.search{flex:1;display:flex;align-items:center;gap:8px;height:44px;padding:0 12px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--hint)}
+.search svg{width:20px;height:20px;flex:none}
+.search input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15px;color:var(--title);outline:none}
+.search input::placeholder{color:var(--hint)}
+.search:focus-within{border-color:var(--primary)}
+.sq-btn{width:44px;height:44px;border-radius:10px;border:1px solid var(--divider);background:var(--card);color:var(--primary);display:grid;place-items:center;flex:none}
+.sq-btn svg{width:22px;height:22px}
+
+/* pill tabs */
+.pills{display:flex;gap:8px;padding:0 16px 14px}
+.pill{border:1px solid var(--divider);background:var(--card);color:var(--body);height:36px;padding:0 16px;border-radius:999px;font-size:15px}
+.pill[aria-selected=true]{background:var(--primary);color:#fff;border-color:transparent;font-weight:600}
+
+/* buttons */
+.btn{height:46px;border-radius:10px;padding:0 18px;font-size:16px;font-weight:600;border:1px solid transparent}
+.btn-fill{background:var(--primary);color:#fff}
+.btn-fill:disabled{background:var(--disabled);opacity:.55;cursor:default}
+.btn-out{background:transparent;border-color:var(--primary);color:var(--primary)}
+.btn-ghost{background:transparent;color:var(--body);border-color:var(--divider)}
+.btn-danger{background:var(--error);color:#fff}
+.btn-sm{height:34px;padding:0 14px;font-size:14px;border-radius:8px}
+.btn-row{display:flex;gap:12px}
+.btn-row .btn{flex:1}
+
+/* ============================================================
+   Hadith card
+   ============================================================ */
+.hlist{padding:12px 12px 24px;display:flex;flex-direction:column;gap:12px}
+.hcard{background:var(--card);border-radius:10px;padding:12px 8px 16px 16px;box-shadow:var(--shadow)}
+.hc-top{display:flex;align-items:center;gap:8px;min-height:32px}
+.hc-ref{font-size:14px;font-weight:600;color:var(--title)}
+.hc-ref .dot{margin:0 5px;color:var(--hint)}
+.grade{font-size:12px;line-height:1;color:#fff;background:var(--grade);padding:4px 9px 3px;border-radius:999px}
+.bm{display:grid;place-items:center;width:28px;height:28px;color:var(--primary)}
+.bm svg{width:22px;height:22px}
+.hc-body{padding-right:8px}
+.ar{margin:12px 0 8px;font-family:KFGQ,"Amiri",serif;font-size:22px;line-height:1.9;color:var(--title);text-align:right}
+.bn{margin:0;font-size:15px;line-height:1.75;color:var(--body)}
+.hc-missing{margin:12px 8px 0 0;padding:16px;border-radius:10px;background:var(--soft);text-align:center}
+.hc-missing svg{width:40px;height:40px}
+.hc-missing h3{margin:8px 0 4px;font-size:15px;color:var(--title);font-weight:600}
+.hc-missing p{margin:0 0 12px;font-size:14px;line-height:1.6;color:var(--body)}
+
+/* ============================================================
+   Collection page: login box + colored folder grid
+   ============================================================ */
+.login{margin:0 16px 14px;padding:14px;border-radius:10px;background:var(--card);box-shadow:var(--shadow);display:flex;gap:12px;align-items:flex-start;transition:box-shadow .3s}
+.login.flash{box-shadow:0 0 0 2px var(--primary)}
+.login-ic{width:38px;height:38px;border-radius:50%;background:var(--soft);color:var(--primary);display:grid;place-items:center;flex:none}
+.login-ic svg{width:22px;height:22px}
+.login p{margin:0 0 10px;font-size:14px;line-height:1.6;color:var(--body)}
+
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 28px}
+.ftile{position:relative;border-radius:14px;background:var(--card);background:color-mix(in srgb,var(--c) var(--tint),var(--card));overflow:hidden}
+.ftile::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--c);opacity:.55}
+.ft-main{display:flex;flex-direction:column;align-items:flex-start;width:100%;min-height:138px;padding:16px 14px 14px;border:0;background:transparent;text-align:left;border-radius:14px}
+.ft-icon{display:block;width:48px;height:40px;color:var(--c);margin-bottom:auto}
+.ft-icon svg{width:100%;height:100%;display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.08))}
+.ft-name{margin-top:14px;font-size:16px;font-weight:700;line-height:1.35;color:var(--title);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ft-count{margin-top:2px;font-size:12px;color:var(--body)}
+.ft-more{position:absolute;top:8px;right:6px;color:var(--title)}
+
+/* empty / no-result state */
+.empty{grid-column:1/-1;padding:40px 24px;text-align:center}
+.empty svg{width:150px;height:auto}
+.empty h3{margin:14px 0 4px;font-size:17px;font-weight:600;color:var(--title)}
+.empty p{margin:0;font-size:14px;color:var(--hint)}
+
+/* ============================================================
+   Folder details: colour band header
+   ============================================================ */
+.band{background:var(--scaffold);background:color-mix(in srgb,var(--c) var(--tint-strong),var(--scaffold));border-radius:0 0 22px 22px;padding:4px 0 2px;margin-bottom:4px}
+.band-top{display:flex;align-items:center;padding:0 4px;color:var(--title)}
+.band-title{display:flex;align-items:center;gap:12px;padding:6px 20px 16px}
+.band-title .ft-icon{width:42px;height:35px;margin:0}
+.band-title h1{margin:0;font-size:24px;font-weight:700;color:var(--title);line-height:1.25}
+.band-title small{display:block;font-size:13px;color:var(--body);margin-top:2px}
+.band .search{background:var(--card)}
+
+/* ============================================================
+   Sheets, dialogs, snackbar
+   ============================================================ */
+.scrim{position:absolute;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .22s;z-index:20}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:21;max-height:88%;display:flex;flex-direction:column;background:var(--card);border-radius:20px 20px 0 0;transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);visibility:hidden}
+.sheet.open{transform:none;visibility:visible}
+.handle{width:40px;height:4px;border-radius:2px;background:var(--divider);margin:10px auto 4px;flex:none}
+.sh-head{display:flex;align-items:center;gap:8px;padding:6px 8px 10px 20px;flex:none}
+.sh-head h2{margin:0;font-size:19px;font-weight:700;color:var(--title)}
+.sh-head .sub{font-size:12px;color:var(--hint)}
+.sh-body{overflow-y:auto;padding:0 16px 16px;scrollbar-width:thin}
+.sh-foot{flex:none;padding:12px 16px 22px;border-top:1px solid var(--divider);background:var(--card)}
+.label{display:block;margin:6px 0 10px;font-size:14px;font-weight:600;color:var(--title)}
+
+/* menu sheet grid */
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:4px 16px 26px}
+.mitem{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px 12px;border:0;border-radius:12px;background:transparent;font-size:13px;color:var(--title);line-height:1.35}
+.mitem:active{background:var(--soft)}
+.mitem .mi{width:54px;height:54px;border-radius:16px;background:var(--soft);display:grid;place-items:center}
+.mitem .mi svg{width:30px;height:30px}
+
+/* collection sheet: compact selectable colour tiles */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:8px 0 2px}
+.ctile{position:relative;display:flex;align-items:center;gap:10px;min-height:64px;padding:10px 12px;border-radius:12px;border:2px solid transparent;background:var(--card);background:color-mix(in srgb,var(--c) var(--tint),var(--card));text-align:left}
+.ctile[aria-checked=true]{border-color:var(--primary)}
+.ctile .ft-icon{width:30px;height:25px;margin:0;flex:none}
+.ct-text{min-width:0;display:flex;flex-direction:column}
+.ct-name{font-size:14px;font-weight:600;color:var(--title);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct-count{font-size:12px;color:var(--body)}
+.ct-check{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;display:none;place-items:center;border:2px solid var(--card)}
+.ct-check svg{width:12px;height:12px}
+.ctile[aria-checked=true] .ct-check{display:grid}
+.sheet .search{margin-bottom:14px}
+.sheet .pills{padding:0 0 12px}
+.cempty{grid-column:1/-1;text-align:center;padding:26px 0;font-size:14px;color:var(--hint)}
+
+/* create sheet */
+.preview{display:flex;justify-content:center;margin:2px 0 14px}
+.preview .ftile{width:150px}
+.preview .ft-main{min-height:112px;cursor:default}
+.types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.type{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:10px;border:1.5px solid var(--divider);background:transparent;text-align:left}
+.type[aria-checked=true]{border-color:var(--primary);background:var(--soft)}
+.radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--disabled);flex:none;margin-top:2px;display:grid;place-items:center}
+[aria-checked=true] > .radio{border-color:var(--primary)}
+[aria-checked=true] > .radio::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--primary)}
+.type b{display:block;font-size:15px;color:var(--title)}
+.type span.t2{font-size:12px;color:var(--body)}
+.field{width:100%;height:46px;border-radius:10px;border:1px solid var(--divider);background:transparent;padding:0 14px;font:inherit;font-size:15px;color:var(--title);margin-bottom:16px;outline:none}
+.field:focus{border-color:var(--primary)}
+.field::placeholder{color:var(--hint)}
+.swatches{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px}
+.sw{width:34px;height:34px;border-radius:50%;border:0;background:var(--c);display:grid;place-items:center;color:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.sw svg{width:16px;height:16px;opacity:0}
+.sw[aria-checked=true]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--c)}
+.sw[aria-checked=true] svg{opacity:1}
+.dialog .sw{width:30px;height:30px}
+
+/* manage sheet rows */
+.mrow{display:flex;align-items:center;gap:14px;width:100%;padding:12px 8px;border:0;background:transparent;border-radius:10px;text-align:left;font-size:16px;color:var(--title)}
+.mrow:active{background:var(--soft)}
+.mrow .mi{width:44px;height:44px;border-radius:12px;background:var(--soft);display:grid;place-items:center;flex:none}
+.mrow .mi svg{width:26px;height:26px}
+.mhead{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;margin-bottom:8px;background:color-mix(in srgb,var(--c) var(--tint),var(--card))}
+.mhead .ft-icon{width:34px;height:28px;margin:0}
+.mhead b{display:block;font-size:15px;color:var(--title)}
+.mhead small{font-size:12px;color:var(--body)}
+
+/* sort sheet radios */
+.srow{display:flex;align-items:center;gap:14px;width:100%;padding:13px 8px;border:0;background:transparent;text-align:left;font-size:16px;color:var(--title);border-bottom:1px solid var(--divider)}
+.srow:last-child{border-bottom:0}
+
+/* dialogs */
+.dialog{position:absolute;left:24px;right:24px;top:50%;z-index:22;background:var(--card);border-radius:16px;padding:22px 20px 18px;transform:translateY(-50%) scale(.95);opacity:0;visibility:hidden;transition:opacity .18s,transform .18s,visibility 0s .18s}
+.dialog.open{opacity:1;visibility:visible;transform:translateY(-50%);transition:opacity .18s,transform .18s}
+.dialog h2{margin:0 0 10px;font-size:19px;font-weight:700;color:var(--title)}
+.dialog p{margin:0 0 20px;font-size:15px;line-height:1.6;color:var(--body)}
+.dialog .btn-row{margin-top:18px}
+
+/* snackbar */
+.snack{position:absolute;left:16px;right:16px;bottom:22px;z-index:30;padding:13px 16px;border-radius:10px;background:var(--snack-bg);color:var(--snack-text);font-size:14px;display:flex;align-items:center;gap:10px;transform:translateY(140%);opacity:0;transition:transform .25s,opacity .25s;pointer-events:none}
+.snack.on{transform:none;opacity:1}
+.snack svg{width:18px;height:18px;color:var(--primary);flex:none}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     Toolbar (outside the phone)
+     ============================================================ -->
+<header class="toolbar">
+  <span class="tb-name">ডেমো ২ · রঙিন ফোল্ডার গ্রিড</span>
+  <nav class="tb-chips" id="chips" aria-label="স্ক্রিন"></nav>
+  <button class="tb-theme" id="themeBtn" aria-label="লাইট/ডার্ক মোড বদলান">◐</button>
+</header>
+
+<main class="stage">
+<div class="phone" id="phone">
+
+  <!-- status bar -->
+  <div class="statusbar" aria-hidden="true">
+    <span>৯:৪১</span>
+    <span class="sb-right">
+      <svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="currentColor"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="currentColor"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="currentColor"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity=".5"/><rect x="2" y="2" width="15" height="8" rx="1.6" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".5"/></svg>
+    </span>
+  </div>
+
+  <div class="host">
+
+    <!-- ========================================================
+         Screen 1: hadith list (normal green app bar)
+         ======================================================== -->
+    <section class="screen" id="s-card" data-bar="green">
+      <div class="appbar">
+        <button class="icon-btn" aria-label="ফিরে যান" data-act="noop"><svg viewBox="0 0 24 24" class="stroke"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <h1>সহিহ বুখারি</h1>
+        <span class="spacer"></span>
+        <button class="icon-btn" aria-label="সার্চ" data-act="noop"><svg viewBox="0 0 24 24" class="stroke"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg></button>
+        <button class="icon-btn" aria-label="আমার কালেকশন" data-act="go-folders"><svg viewBox="0 0 24 20" style="width:22px;height:19px"><path d="M10.3549 1.35508C9.91159 0.911748 9.31659 0.666748 8.69825 0.666748H2.66659C1.38325 0.666748 0.344919 1.71675 0.344919 3.00008L0.333252 17.0001C0.333252 18.2834 1.38325 19.3334 2.66659 19.3334H21.3333C22.6166 19.3334 23.6666 18.2834 23.6666 17.0001V5.33341C23.6666 4.05008 22.6166 3.00008 21.3333 3.00008H11.9999L10.3549 1.35508Z" fill="currentColor"/></svg></button>
+      </div>
+      <div class="hlist" id="cardList"></div>
+    </section>
+
+    <!-- ========================================================
+         Screen 5: collection page (light header + colour grid)
+         ======================================================== -->
+    <section class="screen" id="s-folders" data-bar="plain">
+      <div class="lhead">
+        <button class="icon-btn" aria-label="ফিরে যান" data-act="go-card"><svg viewBox="0 0 24 24" class="stroke"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <span class="spacer"></span>
+        <button class="icon-btn" aria-label="Gmail-এ লগইন ও ব্যাকআপ" data-act="login"><svg viewBox="0 0 24 24" class="stroke"><path d="M7 18.5a4.5 4.5 0 0 1-.7-8.95A6 6 0 0 1 17.8 9a4.3 4.3 0 0 1-.3 9.5z"/><path d="M12 15.5v-5M9.8 12.5 12 10.3l2.2 2.2"/></svg></button>
+        <button class="icon-btn" aria-label="ফাইলে রাখা ও ফিরিয়ে আনা" data-act="io"><svg viewBox="0 0 24 24" class="stroke"><path d="M8 4v14M4.5 14.5 8 18l3.5-3.5M16 20V6M12.5 9.5 16 6l3.5 3.5"/></svg></button>
+      </div>
+      <h1 class="big-title">কালেকশন</h1>
+
+      <div class="login" id="loginBox">
+        <span class="login-ic"><svg viewBox="0 0 24 24" class="stroke"><path d="M7 18.5a4.5 4.5 0 0 1-.7-8.95A6 6 0 0 1 17.8 9a4.3 4.3 0 0 1-.3 9.5z"/><path d="M12 15.5v-5M9.8 12.5 12 10.3l2.2 2.2"/></svg></span>
+        <div>
+          <p>আপনার কালেকশনগুলো অনলাইনে সেভ রাখতে উপরের বাটনে ক্লিক করে Gmail-এ লগইন করুন</p>
+          <button class="btn btn-fill btn-sm" data-act="login-ok">ঠিক আছে</button>
+        </div>
+      </div>
+
+      <div class="pills" role="tablist" aria-label="কালেকশনের ধরন">
+        <button class="pill" role="tab" data-act="ftab" data-tab="b" aria-selected="true">বুকমার্কস</button>
+        <button class="pill" role="tab" data-act="ftab" data-tab="p" aria-selected="false">পিনস</button>
+        <button class="pill" role="tab" data-act="ftab" data-tab="n" aria-selected="false">নোটস</button>
+      </div>
+
+      <div class="search-row">
+        <label class="search">
+          <svg viewBox="0 0 24 24" class="stroke"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+          <input id="fSearch" type="search" placeholder="বুকমার্ক সার্চ করুন" aria-label="বুকমার্ক সার্চ করুন">
+        </label>
+        <button class="sq-btn" aria-label="সাজান" data-act="sort" data-ctx="folders"><svg viewBox="0 0 24 24" class="stroke"><path d="M4 7h10M4 12h7M4 17h4M18 5v14M14.5 15.5 18 19l3.5-3.5"/></svg></button>
+      </div>
+
+      <div class="fgrid" id="folderGrid"></div>
+    </section>
+
+    <!-- ========================================================
+         Screen 6: inside a folder (colour band header)
+         ======================================================== -->
+    <section class="screen" id="s-details" data-bar="band">
+      <div class="band" id="band">
+        <div class="band-top">
+          <button class="icon-btn" aria-label="ফিরে যান" data-act="go-folders"><svg viewBox="0 0 24 24" class="stroke"><path d="M15 5l-7 7 7 7"/></svg></button>
+        </div>
+        <div class="band-title">
+          <span class="ft-icon" id="dIcon"></span>
+          <div><h1 id="dName"></h1><small id="dCount"></small></div>
+        </div>
+        <div class="search-row">
+          <label class="search">
+            <svg viewBox="0 0 24 24" class="stroke"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+            <input id="dSearch" type="search" placeholder="হাদিস সার্চ করুন" aria-label="হাদিস সার্চ করুন">
+          </label>
+          <button class="sq-btn" aria-label="সাজান" data-act="sort" data-ctx="details"><svg viewBox="0 0 24 24" class="stroke"><path d="M4 7h10M4 12h7M4 17h4M18 5v14M14.5 15.5 18 19l3.5-3.5"/></svg></button>
+        </div>
+      </div>
+      <div class="hlist" id="detailList"></div>
+    </section>
+  </div>
+
+  <!-- ==========================================================
+       Overlay layer: scrim, sheets, dialogs, snackbar
+       ========================================================== -->
+  <div class="scrim" id="scrim" data-act="scrim"></div>
+
+  <!-- Screen 2: hadith menu sheet -->
+  <div class="sheet" id="sh-menu" role="dialog" aria-modal="true" aria-label="হাদিসের অপশন">
+    <div class="handle"></div>
+    <div class="sh-head"><div><h2>অপশন</h2><span class="sub" id="menuRef"></span></div><span class="spacer"></span>
+      <button class="icon-btn" aria-label="বন্ধ করুন" data-act="close"><svg viewBox="0 0 24 24" class="stroke"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="mgrid" id="menuGrid"></div>
+  </div>
+
+  <!-- Screen 3: collection sheet -->
+  <div class="sheet" id="sh-collection" role="dialog" aria-modal="true" aria-label="কালেকশন">
+    <div class="handle"></div>
+    <div class="sh-head"><h2>কালেকশন</h2><span class="spacer"></span>
+      <button class="icon-btn" aria-label="বন্ধ করুন" data-act="close"><svg viewBox="0 0 24 24" class="stroke"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="sh-body">
+      <div class="pills" role="tablist" aria-label="কালেকশনের ধরন">
+        <button class="pill" role="tab" data-act="ctab" data-tab="b" aria-selected="true">বুকমার্কস</button>
+        <button class="pill" role="tab" data-act="ctab" data-tab="p" aria-selected="false">পিনস</button>
+      </div>
+      <label class="search">
+        <svg viewBox="0 0 24 24" class="stroke"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+        <input id="cSearch" type="search" placeholder="বুকমার্ক সার্চ করুন" aria-label="বুকমার্ক সার্চ করুন">
+      </label>
+      <div class="cgrid" id="cGrid" role="group" aria-label="ফোল্ডার"></div>
+    </div>
+    <div class="sh-foot btn-row">
+      <button class="btn btn-out" data-act="create">নতুন তৈরি করুন</button>
+      <button class="btn btn-fill" data-act="save-collection">ঠিক আছে</button>
+    </div>
+  </div>
+
+  <!-- Screen 4: create folder sheet -->
+  <div class="sheet" id="sh-create" role="dialog" aria-modal="true" aria-label="নতুন কালেকশন তৈরি করুন">
+    <div class="handle"></div>
+    <div class="sh-head"><h2>নতুন কালেকশন তৈরি করুন</h2></div>
+    <div class="sh-body">
+      <div class="preview"><div class="ftile" id="nPreview"><div class="ft-main"><span class="ft-icon" id="nPrevIcon"></span><span class="ft-name" id="nPrevName">নামাজের হাদিস</span><span class="ft-count">কোন হাদিস যুক্ত করা হয়নি</span></div></div></div>
+      <span class="label">ফোল্ডার টাইপ নির্বাচন করুন</span>
+      <div class="types" role="radiogroup" aria-label="ফোল্ডার টাইপ">
+        <button class="type" role="radio" data-act="ntype" data-type="b" aria-checked="true"><span class="radio"></span><span><b>বুকমার্ক</b><span class="t2">হাদিস বুকমার্ক করুন</span></span></button>
+        <button class="type" role="radio" data-act="ntype" data-type="p" aria-checked="false"><span class="radio"></span><span><b>পিন</b><span class="t2">হাদিস পিন করুন</span></span></button>
+      </div>
+      <label class="label" for="nName">ফোল্ডারের নাম</label>
+      <input class="field" id="nName" placeholder="নামাজের হাদিস" maxlength="40" autocomplete="off">
+      <span class="label">ফোল্ডার রং নির্বাচন করুন</span>
+      <div class="swatches" id="nSwatches" role="radiogroup" aria-label="ফোল্ডার রং"></div>
+    </div>
+    <div class="sh-foot btn-row">
+      <button class="btn btn-ghost" data-act="create-cancel">বাতিল</button>
+      <button class="btn btn-fill" id="nOk" data-act="create-ok" disabled>ঠিক আছে</button>
+    </div>
+  </div>
+
+  <!-- Screen 7: folder more sheet -->
+  <div class="sheet" id="sh-manage" role="dialog" aria-modal="true" aria-label="অন্যান্য অপশন">
+    <div class="handle"></div>
+    <div class="sh-head"><h2>অন্যান্য অপশন</h2></div>
+    <div class="sh-body">
+      <div class="mhead" id="mHead"></div>
+      <button class="mrow" data-act="edit"><span class="mi"><svg viewBox="0 0 33 33" fill="none"><path d="M7 26l1.2-5.4L21 7.8a2.6 2.6 0 0 1 3.7 0l.5.5a2.6 2.6 0 0 1 0 3.7L12.4 24.8z" fill="#1AA483"/><path d="M19.3 9.5l4.2 4.2 1.7-1.7a2.6 2.6 0 0 0 0-3.7l-.5-.5a2.6 2.6 0 0 0-3.7 0z" fill="#118C6E"/><path d="M6 28h12" stroke="#FFB84D" stroke-width="2.4" stroke-linecap="round"/></svg></span>বুকমার্ক এডিট করুন</button>
+      <button class="mrow" data-act="delete-folder"><span class="mi"><svg viewBox="0 0 33 33" fill="none"><path d="M7 10h19l-1.5 17.5a3 3 0 0 1-3 2.5h-10a3 3 0 0 1-3-2.5z" fill="#1AA483"/><rect x="4.5" y="6.5" width="24" height="4" rx="2" fill="#118C6E"/><path d="M12.5 6.5V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1.5" stroke="#FFB84D" stroke-width="2.4"/><rect x="12" y="14" width="2.4" height="11" rx="1.2" fill="#E6F7F1"/><rect x="18.6" y="14" width="2.4" height="11" rx="1.2" fill="#E6F7F1"/></svg></span>বুকমার্ক ডিলিট করুন</button>
+    </div>
+    <div class="sh-foot"><button class="btn btn-ghost" style="width:100%" data-act="close">বাতিল</button></div>
+  </div>
+
+  <!-- Screen 8: sort sheet -->
+  <div class="sheet" id="sh-sort" role="dialog" aria-modal="true" aria-label="বুকমার্কগুলো সাজান">
+    <div class="handle"></div>
+    <div class="sh-head"><h2>বুকমার্কগুলো সাজান</h2></div>
+    <div class="sh-body" role="radiogroup" aria-label="সাজানোর ধরন" id="sortList">
+      <button class="srow" role="radio" data-act="sortpick" data-sort="name" aria-checked="true"><span class="radio"></span>নাম অনুসারে (A–Z)</button>
+      <button class="srow" role="radio" data-act="sortpick" data-sort="created" aria-checked="false"><span class="radio"></span>তৈরির তারিখ</button>
+      <button class="srow" role="radio" data-act="sortpick" data-sort="modified" aria-checked="false"><span class="radio"></span>সর্বশেষ পরিবর্তিত</button>
+    </div>
+    <div class="sh-foot btn-row">
+      <button class="btn btn-ghost" data-act="close">বাতিল</button>
+      <button class="btn btn-fill" data-act="sort-ok">ঠিক আছে</button>
+    </div>
+  </div>
+
+  <!-- Edit folder dialog -->
+  <div class="dialog" id="dlg-edit" role="dialog" aria-modal="true" aria-labelledby="eTitle">
+    <h2 id="eTitle">বুকমার্ক এডিট করুন</h2>
+    <label class="label" for="eName">ফোল্ডারের নাম</label>
+    <input class="field" id="eName" maxlength="40" autocomplete="off">
+    <span class="label">ফোল্ডার রং নির্বাচন করুন</span>
+    <div class="swatches" id="eSwatches" role="radiogroup" aria-label="ফোল্ডার রং"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" data-act="close">বাতিল</button>
+      <button class="btn btn-fill" id="eOk" data-act="edit-ok">ঠিক আছে</button>
+    </div>
+  </div>
+
+  <!-- Delete confirm dialog (folder or a hadith inside a folder) -->
+  <div class="dialog" id="dlg-delete" role="alertdialog" aria-modal="true" aria-labelledby="xTitle">
+    <h2 id="xTitle">বুকমার্ক</h2>
+    <p>আপনি কি নিশ্চিত? বুকমার্ক ডিলিট করতে চান?</p>
+    <div class="btn-row">
+      <button class="btn btn-ghost" data-act="close">বাতিল</button>
+      <button class="btn btn-danger" data-act="delete-ok">ডিলিট করুন</button>
+    </div>
+  </div>
+
+  <!-- Import / export dialog (app bar action) -->
+  <div class="dialog" id="dlg-io" role="dialog" aria-modal="true" aria-labelledby="ioTitle">
+    <h2 id="ioTitle">ফাইলে রাখা ও ফিরিয়ে আনা</h2>
+    <p>লগইন ছাড়াও বুকমার্কগুলো ফাইল হিসেবে রেখে দিতে বা আগের ফাইল থেকে ফিরিয়ে আনতে পারবেন।</p>
+    <div class="btn-row" style="flex-direction:column;gap:10px">
+      <button class="btn btn-fill" data-act="close">ফাইলে সেভ করুন</button>
+      <button class="btn btn-out" data-act="close">ফাইল থেকে আনুন</button>
+      <button class="btn btn-ghost" data-act="close">বাতিল</button>
+    </div>
+  </div>
+
+  <!-- Snackbar -->
+  <div class="snack" id="snack" role="status" aria-live="polite"><svg viewBox="0 0 24 24" class="stroke"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="snackText"></span></div>
+</div>
+</main>
+
+<script>
+/* ============================================================
+   Icons
+   ============================================================ */
+var FOLDER_PATH = 'M10.3549 1.35508C9.91159 0.911748 9.31659 0.666748 8.69825 0.666748H2.66659C1.38325 0.666748 0.344919 1.71675 0.344919 3.00008L0.333252 17.0001C0.333252 18.2834 1.38325 19.3334 2.66659 19.3334H21.3333C22.6166 19.3334 23.6666 18.2834 23.6666 17.0001V5.33341C23.6666 4.05008 22.6166 3.00008 21.3333 3.00008H11.9999L10.3549 1.35508Z';
+var IC = {
+  folder: '<svg viewBox="0 0 24 20" aria-hidden="true"><path d="' + FOLDER_PATH + '" fill="currentColor"/></svg>',
+  bookmark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5852 12.2565C20.5852 15.7436 20.0756 21.077 20.0756 21.2821C20.0756 21.4872 19.8718 21.7949 19.668 21.8975C19.5661 22 19.4642 22 19.2603 22C19.1584 22 19.0565 22 18.8527 21.8975L12.6361 18.6154C12.5342 18.6154 12.4323 18.6154 12.4323 18.6154L6.21575 21.8975C6.01193 22 5.70619 22 5.50237 21.8975C5.29855 21.7949 5.09473 21.5898 5.09473 21.2821C5.09473 21.077 4.58517 15.7436 4.58517 12.2565C4.68709 10 4.89091 7.02569 5.09473 4.87184C5.19664 3.53851 6.21575 2.51287 7.54059 2.30774C8.96734 2.20517 11.0056 2.00005 12.6361 2.00005C14.2667 2.00005 16.3049 2.20517 17.7317 2.30774C19.0565 2.4103 20.0756 3.53851 20.1775 4.87184C20.3814 7.02569 20.5852 10 20.5852 12.2565Z" fill="currentColor"/></svg>',
+  multi: '<svg viewBox="0 0 22 23" aria-hidden="true"><path d="M5.66663 15.9823V8.39849C5.66663 5.0679 5.66663 3.40261 6.74057 2.36793C7.81451 1.33325 9.54299 1.33325 13 1.33325C16.4569 1.33325 18.1855 1.33325 19.2593 2.36793C20.3333 3.40261 20.3333 5.0679 20.3333 8.39849V15.9823C20.3333 18.0961 20.3333 19.1529 19.6249 19.5312C18.2529 20.2637 15.6796 17.8197 14.4575 17.0838C13.7487 16.657 13.3943 16.4436 13 16.4436C12.6056 16.4436 12.2512 16.657 11.5425 17.0838C10.3204 17.8197 7.74697 20.2637 6.37507 19.5312C5.66663 19.1529 5.66663 18.0961 5.66663 15.9823Z" fill="#1AA483" fill-opacity="0.26"/><path d="M1.66663 18.9823V11.3985C1.66663 8.0679 1.66663 6.40261 2.74057 5.36793C3.81451 4.33325 5.54299 4.33325 8.99996 4.33325C12.4569 4.33325 14.1855 4.33325 15.2593 5.36793C16.3333 6.40261 16.3333 8.0679 16.3333 11.3985V18.9823C16.3333 21.0961 16.3333 22.1529 15.6249 22.5312C14.2529 23.2637 11.6796 20.8197 10.4575 20.0838C9.74869 19.657 9.39431 19.4436 8.99996 19.4436C8.60561 19.4436 8.25123 19.657 7.54246 20.0838C6.32036 20.8197 3.74697 23.2637 2.37507 22.5312C1.66663 22.1529 1.66663 21.0961 1.66663 18.9823Z" fill="#1AA483"/></svg>',
+  more: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="18.5" r="1.8" fill="currentColor"/></svg>',
+  check: '<svg viewBox="0 0 24 24" class="stroke" style="stroke-width:3" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  /* menu icons: two-tone in the app's style */
+  collection: '<svg viewBox="0 0 33 33" fill="none"><path d="M5 5.5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3V29l-9-5.5L5 29z" fill="#1AA483"/><path d="M5 5.5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3V9H5z" fill="#118C6E"/><circle cx="24.5" cy="23.5" r="7" fill="#FFB84D"/><path d="M24.5 20v7M21 23.5h7" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  remove: '<svg viewBox="0 0 33 33" fill="none"><path d="M7 10h19l-1.5 17.5a3 3 0 0 1-3 2.5h-10a3 3 0 0 1-3-2.5z" fill="#1AA483"/><rect x="4.5" y="6.5" width="24" height="4" rx="2" fill="#118C6E"/><path d="M12.5 6.5V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1.5" stroke="#FFB84D" stroke-width="2.4"/><rect x="12" y="14" width="2.4" height="11" rx="1.2" fill="#E6F7F1"/><rect x="18.6" y="14" width="2.4" height="11" rx="1.2" fill="#E6F7F1"/></svg>',
+  note: '<svg viewBox="0 0 33 33" fill="none"><rect x="5" y="3.5" width="19" height="25" rx="3" fill="#1AA483"/><rect x="5" y="3.5" width="19" height="5" rx="2.5" fill="#118C6E"/><path d="M9.5 14h10M9.5 19h6.5" stroke="#E6F7F1" stroke-width="2.2" stroke-linecap="round"/><path d="M20 28.5l.8-3.6 6.4-6.4a1.8 1.8 0 0 1 2.5 2.5l-6.4 6.4z" fill="#FFB84D"/></svg>',
+  copyT: '<svg viewBox="0 0 33 33" fill="none"><rect x="10" y="3.5" width="18" height="21" rx="3" fill="#118C6E"/><rect x="5" y="8.5" width="18" height="21" rx="3" fill="#1AA483"/><path d="M9 15h10M9 19.5h10M9 24h6" stroke="#E6F7F1" stroke-width="2" stroke-linecap="round"/><circle cx="25.5" cy="25.5" r="5" fill="#FFB84D"/><path d="M23.3 25.5h4.4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>',
+  copyA: '<svg viewBox="0 0 33 33" fill="none"><rect x="10" y="3.5" width="18" height="21" rx="3" fill="#118C6E"/><rect x="5" y="8.5" width="18" height="21" rx="3" fill="#1AA483"/><path d="M19 15h-10M19 19.5c-3 0-4 2-7 2M19 24h-5" stroke="#E6F7F1" stroke-width="2" stroke-linecap="round"/><path d="M25.5 20.5a5 5 0 1 0 3.6 8.5 4 4 0 1 1 0-7z" fill="#FFB84D"/></svg>',
+  copyH: '<svg viewBox="0 0 33 33" fill="none"><rect x="10" y="3.5" width="18" height="21" rx="3" fill="#118C6E"/><rect x="5" y="8.5" width="18" height="21" rx="3" fill="#1AA483"/><path d="M9 14.5h10M9 19h10M9 23.5h10" stroke="#E6F7F1" stroke-width="2" stroke-linecap="round"/><rect x="21" y="3" width="8" height="5" rx="2" fill="#FFB84D"/></svg>',
+  info: '<svg viewBox="0 0 33 33" fill="none"><circle cx="16.5" cy="16.5" r="13" fill="#1AA483"/><path d="M16.5 3.5a13 13 0 0 1 0 26z" fill="#118C6E"/><circle cx="16.5" cy="10.5" r="2" fill="#FFB84D"/><rect x="14.8" y="14.5" width="3.4" height="10" rx="1.7" fill="#fff"/></svg>',
+  book: '<svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M7 8a3 3 0 0 1 3-3h17a3 3 0 0 1 3 3v25H10a3 3 0 0 1-3-3z" fill="#1AA483"/><path d="M7 30a3 3 0 0 1 3-3h20v6H10a3 3 0 0 1-3-3z" fill="#118C6E"/><circle cx="29" cy="27" r="8" fill="#FFB84D"/><path d="M29 22.5v8M25.8 27.6 29 30.8l3.2-3.2" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+var EMPTY_ART = '<svg viewBox="0 0 160 120" aria-hidden="true"><ellipse cx="80" cy="108" rx="58" ry="7" fill="var(--soft)"/><path d="M28 30a8 8 0 0 1 8-8h26l9 9h53a8 8 0 0 1 8 8v56a8 8 0 0 1-8 8H36a8 8 0 0 1-8-8z" fill="#118C6E" opacity=".9"/><path d="M24 46a8 8 0 0 1 8-8h96a8 8 0 0 1 8 8l-5 49a8 8 0 0 1-8 8H37a8 8 0 0 1-8-8z" fill="#1AA483"/><path d="M68 56h24v30l-12-7-12 7z" fill="#E8F6F3"/><circle cx="124" cy="30" r="11" fill="#FFB84D"/><path d="M120 26l8 8M128 26l-8 8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><path d="M46 70h12M46 78h8" stroke="#E8F6F3" stroke-width="3" stroke-linecap="round" opacity=".6"/></svg>';
+
+/* ============================================================
+   Data
+   ============================================================ */
+var PALETTE = ['#66BB6A','#7986CB','#4FC3F7','#4DB6AC','#9CCC65','#DCE775','#FFB74D','#FF8A65','#BA68C8','#F06292','#E57373','#BCAAA4','#90A4AE'];
+var folders = [
+  {id:'f1', name:'নামাজের হাদিস',  color:'#66BB6A', count:12, type:'b', created:1, modified:5},
+  {id:'f2', name:'রমজান',          color:'#FFB74D', count:5,  type:'b', created:2, modified:2},
+  {id:'f3', name:'পরিবার ও আখলাক', color:'#7986CB', count:8,  type:'b', created:3, modified:4},
+  {id:'f4', name:'দোয়া ও যিকির',   color:'#4FC3F7', count:3,  type:'b', created:4, modified:3},
+  {id:'f5', name:'পরে পড়ব',        color:'#F06292', count:0,  type:'b', created:5, modified:1}
+];
+var HADITH = {
+  h1:{book:'সহিহ বুখারি', num:1, ar:'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ', bn:'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।'},
+  h2:{book:'সহিহ মুসলিম', num:223, ar:'الطُّهُورُ شَطْرُ الإِيمَانِ', bn:'পবিত্রতা ঈমানের অর্ধেক।'},
+  h3:{book:'সহিহ বুখারি', num:6018, ar:'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ', bn:'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।'},
+  h4:{book:'সুনানে আবু দাউদ', num:4985, missing:true}
+};
+var CARD_ORDER = ['h1','h2','h3'];
+/* which hadiths are inside which folder (only the sample ones are shown) */
+var items = {f1:['h1','h2','h4'], f2:['h4'], f3:['h1'], f4:['h4'], f5:[]};
+
+var state = {
+  screen:'card', chip:'card', folderTab:'b', colTab:'b', emptyDemo:false,
+  sortFolders:'name', sortDetails:'name', sortCtx:'folders', sortPick:'name',
+  menuHadith:null, menuFromFolder:false, colHadith:'h3', colSel:{},
+  newType:'b', newColor:PALETTE[0], editId:null, editColor:null, manageId:null,
+  detailId:'f1', deleteKind:null, clock:10
+};
+
+/* ============================================================
+   Helpers
+   ============================================================ */
+var BN = '০১২৩৪৫৬৭৮৯';
+function bn(n){ return String(n).replace(/\d/g, function(d){ return BN[d]; }); }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function $(id){ return document.getElementById(id); }
+function countText(n){ return n > 0 ? bn(n) + 'টি হাদিস' : 'কোন হাদিস যুক্ত করা হয়নি'; }
+function folderById(id){ for (var i = 0; i < folders.length; i++) if (folders[i].id === id) return folders[i]; return null; }
+function foldersOf(hid){ return folders.filter(function(f){ return (items[f.id] || []).indexOf(hid) > -1; }); }
+function norm(s){ return String(s || '').trim().toLowerCase(); }
+function sortFolders(list, mode){
+  var l = list.slice();
+  if (mode === 'name') l.sort(function(a, b){ return a.name.localeCompare(b.name, 'bn'); });
+  else if (mode === 'created') l.sort(function(a, b){ return b.created - a.created; });
+  else l.sort(function(a, b){ return b.modified - a.modified; });
+  return l;
+}
+
+/* ============================================================
+   Render: hadith card
+   ============================================================ */
+function hadithCard(hid, inFolder){
+  var h = HADITH[hid];
+  var n = foldersOf(hid).length;
+  var bm = n > 1 ? '<span class="bm" title="একাধিক ফোল্ডারে আছে">' + IC.multi + '</span>'
+        : n === 1 ? '<span class="bm" title="বুকমার্ক করা">' + IC.bookmark + '</span>' : '';
+  var top = '<div class="hc-top"><span class="hc-ref">' + h.book + '<span class="dot">·</span>হাদিস ' + bn(h.num) + '</span>' +
+    (h.missing ? '' : '<span class="grade">সহিহ</span>') + '<span class="spacer"></span>' + bm +
+    '<button class="icon-btn sm" data-act="hmenu" data-h="' + hid + '" data-infolder="' + (inFolder ? 1 : 0) + '" aria-label="আরও অপশন">' + IC.more + '</button></div>';
+  if (h.missing) {
+    return '<article class="hcard">' + top + '<div class="hc-missing">' + IC.book +
+      '<h3>বুকমার্ক করা হাদিস লোড করা যায়নি</h3><p>এই বুকমার্কের হাদিসের বইটি ডাউনলোড করা হয়নি। হাদিস দেখতে বইটি ডাউনলোড করুন।</p>' +
+      '<button class="btn btn-out btn-sm" data-act="noop">ডাউনলোডে যান</button></div></article>';
+  }
+  return '<article class="hcard">' + top + '<div class="hc-body"><p class="ar" dir="rtl" lang="ar">' + h.ar + '</p><p class="bn">' + h.bn + '</p></div></article>';
+}
+function renderCards(){ $('cardList').innerHTML = CARD_ORDER.map(function(h){ return hadithCard(h, false); }).join(''); }
+
+/* ============================================================
+   Render: collection page grid
+   ============================================================ */
+function emptyBlock(title){ return '<div class="empty">' + EMPTY_ART + '<h3>' + title + '</h3></div>'; }
+function renderFolders(){
+  var grid = $('folderGrid'), q = norm($('fSearch').value), tab = state.folderTab;
+  $('fSearch').placeholder = tab === 'p' ? 'পিন সার্চ করুন' : tab === 'n' ? 'নোট সার্চ করুন' : 'বুকমার্ক সার্চ করুন';
+  document.querySelectorAll('[data-act=ftab]').forEach(function(b){ b.setAttribute('aria-selected', b.dataset.tab === tab); });
+  if (tab === 'n') { grid.innerHTML = emptyBlock('কোন নোট পাওয়া যায়নি'); return; }
+  var list = state.emptyDemo ? [] : folders.filter(function(f){ return f.type === tab; });
+  if (!list.length) { grid.innerHTML = emptyBlock(tab === 'p' ? 'কোন পিন পাওয়া যায়নি' : 'কোন বুকমার্ক পাওয়া যায়নি'); return; }
+  list = sortFolders(list.filter(function(f){ return norm(f.name).indexOf(q) > -1; }), state.sortFolders);
+  if (!list.length) { grid.innerHTML = emptyBlock('কোন সার্চ রেজাল্ট পাওয়া যায়নি'); return; }
+  grid.innerHTML = list.map(function(f){
+    return '<div class="ftile" style="--c:' + f.color + '">' +
+      '<button class="ft-main" data-act="open-folder" data-f="' + f.id + '" aria-label="' + esc(f.name) + ', ' + countText(f.count) + '">' +
+      '<span class="ft-icon">' + IC.folder + '</span><span class="ft-name">' + esc(f.name) + '</span><span class="ft-count">' + countText(f.count) + '</span></button>' +
+      '<button class="icon-btn sm ft-more" data-act="fmenu" data-f="' + f.id + '" aria-label="অন্যান্য অপশন">' + IC.more + '</button></div>';
+  }).join('');
+}
+
+/* ============================================================
+   Render: folder details
+   ============================================================ */
+function renderDetails(){
+  var f = folderById(state.detailId); if (!f) return;
+  $('band').style.setProperty('--c', f.color);
+  $('dIcon').style.setProperty('--c', f.color);
+  $('dIcon').innerHTML = IC.folder;
+  $('dName').textContent = f.name;
+  $('dCount').textContent = countText(f.count);
+  var q = norm($('dSearch').value);
+  var list = (items[f.id] || []).slice();
+  if (state.sortDetails === 'name') list.sort(function(a, b){ return HADITH[a].book.localeCompare(HADITH[b].book, 'bn') || HADITH[a].num - HADITH[b].num; });
+  else if (state.sortDetails === 'modified') list.reverse();
+  list = list.filter(function(id){ var h = HADITH[id]; return !q || norm(h.book + ' ' + (h.bn || '') + ' ' + bn(h.num)).indexOf(q) > -1; });
+  $('detailList').innerHTML = list.length ? list.map(function(id){ return hadithCard(id, true); }).join('')
+    : '<div class="empty">' + EMPTY_ART + '<h3>' + (q ? 'কোন সার্চ রেজাল্ট পাওয়া যায়নি' : 'কোন বুকমার্ক পাওয়া যায়নি') + '</h3></div>';
+}
+
+/* ============================================================
+   Render: collection sheet tiles
+   ============================================================ */
+function renderCollection(){
+  var tab = state.colTab, q = norm($('cSearch').value);
+  $('cSearch').placeholder = tab === 'p' ? 'পিন সার্চ করুন' : 'বুকমার্ক সার্চ করুন';
+  $('cSearch').setAttribute('aria-label', $('cSearch').placeholder);
+  document.querySelectorAll('[data-act=ctab]').forEach(function(b){ b.setAttribute('aria-selected', b.dataset.tab === tab); });
+  var all = folders.filter(function(f){ return f.type === tab; });
+  var list = sortFolders(all.filter(function(f){ return norm(f.name).indexOf(q) > -1; }), 'name');
+  $('cGrid').innerHTML = !all.length ? '<div class="cempty">' + (tab === 'p' ? 'কোন পিন পাওয়া যায়নি' : 'কোন বুকমার্ক পাওয়া যায়নি') + '</div>'
+    : !list.length ? '<div class="cempty">কোন সার্চ রেজাল্ট পাওয়া যায়নি</div>'
+    : list.map(function(f){
+      var on = !!state.colSel[f.id];
+      return '<button class="ctile" role="checkbox" aria-checked="' + on + '" data-act="ctoggle" data-f="' + f.id + '" style="--c:' + f.color + '">' +
+        '<span class="ft-icon">' + IC.folder + '</span><span class="ct-text"><span class="ct-name">' + esc(f.name) + '</span><span class="ct-count">' + countText(f.count) + '</span></span>' +
+        '<span class="ct-check">' + IC.check + '</span></button>';
+    }).join('');
+}
+
+/* ============================================================
+   Screens + status bar
+   ============================================================ */
+var BAR = {
+  card:    {bg:'var(--appbar)', fg:'var(--onAppbar)'},
+  folders: {bg:'var(--scaffold)', fg:'var(--title)'},
+  details: null
+};
+function show(name){
+  state.screen = name;
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.toggle('active', s.id === 's-' + name); });
+  var ph = $('phone');
+  if (name === 'details') {
+    var f = folderById(state.detailId);
+    ph.style.setProperty('--sb', 'color-mix(in srgb,' + (f ? f.color : '#1AA483') + ' var(--tint-strong),var(--scaffold))');
+    ph.style.setProperty('--sb-text', 'var(--title)');
+  } else {
+    ph.style.setProperty('--sb', BAR[name].bg);
+    ph.style.setProperty('--sb-text', BAR[name].fg);
+  }
+  if (name === 'card') renderCards();
+  if (name === 'folders') renderFolders();
+  if (name === 'details') renderDetails();
+  $('s-' + name).scrollTop = 0;
+}
+function setChip(id){
+  state.chip = id;
+  document.querySelectorAll('.tb-chip').forEach(function(c){ c.setAttribute('aria-pressed', c.dataset.id === id); });
+}
+
+/* ============================================================
+   Overlays (one sheet/dialog at a time)
+   ============================================================ */
+var lastFocus = null;
+function closeAll(){
+  document.querySelectorAll('.sheet.open,.dialog.open').forEach(function(e){ e.classList.remove('open'); });
+  $('scrim').classList.remove('on');
+}
+function openOverlay(id){
+  closeAll();
+  var el = $(id);
+  el.classList.add('open');
+  $('scrim').classList.add('on');
+  setTimeout(function(){ var f = el.querySelector('button,input'); if (f && !('ontouchstart' in window)) f.focus({preventScroll:true}); }, 60);
+}
+var snackTimer;
+function snack(text){
+  $('snackText').textContent = text;
+  var s = $('snack'); s.classList.add('on');
+  clearTimeout(snackTimer);
+  snackTimer = setTimeout(function(){ s.classList.remove('on'); }, 2500);
+}
+
+/* menu sheet */
+function openMenu(hid, inFolder){
+  state.menuHadith = hid; state.menuFromFolder = inFolder;
+  var h = HADITH[hid];
+  $('menuRef').textContent = h.book + ' · হাদিস ' + bn(h.num);
+  var acts = [['collection','বুকমার্ক / পিন','m-collection'],['note','নোট','close'],['copyT','অনুবাদ কপি','close'],['copyA','আরবি কপি','close'],['copyH','হাদিস কপি','close'],['info','বিস্তারিত','close']];
+  if (inFolder) acts.push(['remove','বুকমার্ক সরান','m-remove']);
+  $('menuGrid').innerHTML = acts.map(function(a){ return '<button class="mitem" data-act="' + a[2] + '"><span class="mi">' + IC[a[0]] + '</span>' + a[1] + '</button>'; }).join('');
+  openOverlay('sh-menu'); setChip('menu');
+}
+
+/* collection sheet */
+function openCollection(hid, keepSel){
+  state.colHadith = hid;
+  if (!keepSel) {
+    state.colSel = {};
+    foldersOf(hid).forEach(function(f){ state.colSel[f.id] = true; });
+    $('cSearch').value = '';
+  }
+  renderCollection();
+  openOverlay('sh-collection'); setChip('collection');
+}
+function saveCollection(){
+  var hid = state.colHadith;
+  folders.forEach(function(f){
+    var arr = items[f.id] || (items[f.id] = []);
+    var has = arr.indexOf(hid) > -1, want = !!state.colSel[f.id];
+    if (want && !has) { arr.push(hid); f.count++; f.modified = ++state.clock; }
+    if (!want && has) { arr.splice(arr.indexOf(hid), 1); f.count = Math.max(0, f.count - 1); f.modified = ++state.clock; }
+  });
+  closeAll();
+  if (state.screen === 'card') renderCards(); else if (state.screen === 'details') renderDetails(); else renderFolders();
+  snack('বুকমার্ক সেভ করা হয়েছে');
+}
+
+/* create sheet */
+function swatchesHtml(sel){
+  return PALETTE.map(function(c, i){ return '<button class="sw" role="radio" aria-checked="' + (c === sel) + '" aria-label="রং ' + bn(i + 1) + '" data-c="' + c + '" style="--c:' + c + '">' + IC.check + '</button>'; }).join('');
+}
+function updatePreview(){
+  $('nPreview').style.setProperty('--c', state.newColor);
+  $('nPrevIcon').innerHTML = IC.folder;
+  $('nPrevName').textContent = $('nName').value.trim() || 'নামাজের হাদিস';
+  $('nOk').disabled = !$('nName').value.trim();
+}
+function openCreate(){
+  state.newType = state.colTab; state.newColor = PALETTE[folders.length % PALETTE.length];
+  $('nName').value = '';
+  document.querySelectorAll('[data-act=ntype]').forEach(function(b){ b.setAttribute('aria-checked', b.dataset.type === state.newType); });
+  $('nSwatches').innerHTML = swatchesHtml(state.newColor);
+  updatePreview();
+  openOverlay('sh-create'); setChip('create');
+}
+function createOk(){
+  var name = $('nName').value.trim(); if (!name) return;
+  var id = 'f' + Date.now();
+  state.clock++;
+  folders.push({id:id, name:name, color:state.newColor, count:0, type:state.newType, created:state.clock, modified:state.clock});
+  items[id] = [];
+  state.colTab = state.newType;
+  state.colSel[id] = true;
+  openCollection(state.colHadith, true);
+  if (state.screen === 'folders') renderFolders();
+}
+
+/* folder more sheet, edit, delete */
+function openManage(fid){
+  var f = folderById(fid); if (!f) return;
+  state.manageId = fid;
+  var h = $('mHead'); h.style.setProperty('--c', f.color);
+  h.innerHTML = '<span class="ft-icon">' + IC.folder + '</span><span><b>' + esc(f.name) + '</b><small>' + countText(f.count) + '</small></span>';
+  openOverlay('sh-manage'); setChip('manage');
+}
+function openEdit(){
+  var f = folderById(state.manageId); if (!f) return;
+  state.editColor = f.color;
+  $('eName').value = f.name;
+  $('eSwatches').innerHTML = swatchesHtml(f.color);
+  openOverlay('dlg-edit');
+}
+function editOk(){
+  var f = folderById(state.manageId), name = $('eName').value.trim();
+  if (!f || !name) { $('eName').focus(); return; }
+  f.name = name; f.color = state.editColor; f.modified = ++state.clock;
+  closeAll(); renderFolders(); snack('বুকমার্ক আপডেট করা হয়েছে');
+}
+function deleteOk(){
+  if (state.deleteKind === 'folder') {
+    folders = folders.filter(function(f){ return f.id !== state.manageId; });
+    delete items[state.manageId];
+    closeAll(); renderFolders();
+  } else {
+    var f = folderById(state.detailId), arr = items[state.detailId] || [];
+    var i = arr.indexOf(state.menuHadith);
+    if (i > -1) { arr.splice(i, 1); f.count = Math.max(0, f.count - 1); f.modified = ++state.clock; }
+    closeAll();
+    if (!arr.length) { show('folders'); setChip('folders'); } else renderDetails();
+  }
+  snack('বুকমার্ক মুছে ফেলা হয়েছে');
+}
+
+/* sort sheet */
+function openSort(ctx){
+  state.sortCtx = ctx;
+  state.sortPick = ctx === 'details' ? state.sortDetails : state.sortFolders;
+  markSort();
+  openOverlay('sh-sort'); setChip('sort');
+}
+function markSort(){ document.querySelectorAll('[data-act=sortpick]').forEach(function(b){ b.setAttribute('aria-checked', b.dataset.sort === state.sortPick); }); }
+
+/* ============================================================
+   Toolbar chips / direct screen entry
+   ============================================================ */
+var CHIPS = [['card','হাদিস কার্ড'],['menu','মেনু শিট'],['collection','কালেকশন শিট'],['create','নতুন ফোল্ডার'],['folders','ফোল্ডার লিস্ট'],['details','ফোল্ডারের ভেতরে'],['manage','এডিট ও ডিলিট'],['sort','সাজানো'],['empty','খালি অবস্থা']];
+$('chips').innerHTML = CHIPS.map(function(c){ return '<button class="tb-chip" data-id="' + c[0] + '" aria-pressed="false">' + c[1] + '</button>'; }).join('');
+
+function firstFolderId(){ var b = folders.filter(function(f){ return f.type === 'b'; }); return folderById('f1') ? 'f1' : (b[0] && b[0].id); }
+function goTo(id){
+  closeAll();
+  state.emptyDemo = false;
+  $('fSearch').value = ''; $('dSearch').value = '';
+  switch (id) {
+    case 'card': show('card'); break;
+    case 'menu': show('card'); openMenu('h3', false); break;
+    case 'collection': show('card'); state.colTab = 'b'; openCollection('h3'); break;
+    case 'create': show('card'); state.colTab = 'b'; state.colHadith = 'h3'; state.colSel = {}; foldersOf('h3').forEach(function(f){ state.colSel[f.id] = true; }); openCreate(); break;
+    case 'folders': state.folderTab = 'b'; show('folders'); break;
+    case 'details': var fid = firstFolderId(); if (fid) { state.detailId = fid; show('details'); } else { state.emptyDemo = true; show('folders'); } break;
+    case 'manage': state.folderTab = 'b'; show('folders'); var m = firstFolderId(); if (m) openManage(m); break;
+    case 'sort': state.folderTab = 'b'; show('folders'); openSort('folders'); break;
+    case 'empty': state.folderTab = 'b'; state.emptyDemo = true; show('folders'); break;
+    default: id = 'card'; show('card');
+  }
+  setChip(id);
+}
+
+/* ============================================================
+   Events (delegated)
+   ============================================================ */
+document.addEventListener('click', function(e){
+  var chip = e.target.closest('.tb-chip');
+  if (chip) { goTo(chip.dataset.id); return; }
+  var sw = e.target.closest('.sw');
+  if (sw) {
+    var box = sw.parentNode;
+    box.querySelectorAll('.sw').forEach(function(s){ s.setAttribute('aria-checked', s === sw); });
+    if (box.id === 'nSwatches') { state.newColor = sw.dataset.c; updatePreview(); } else state.editColor = sw.dataset.c;
+    return;
+  }
+  var t = e.target.closest('[data-act]'); if (!t) return;
+  var a = t.dataset.act;
+  switch (a) {
+    case 'noop': break;
+    case 'scrim': case 'close': closeAll(); break;
+    case 'go-folders': state.emptyDemo = false; show('folders'); setChip('folders'); break;
+    case 'go-card': show('card'); setChip('card'); break;
+    case 'hmenu': openMenu(t.dataset.h, t.dataset.infolder === '1'); break;
+    case 'm-collection': state.colTab = 'b'; openCollection(state.menuHadith); break;
+    case 'm-remove': state.deleteKind = 'hadith'; openOverlay('dlg-delete'); break;
+    case 'ctab': state.colTab = t.dataset.tab; $('cSearch').value = ''; renderCollection(); break;
+    case 'ctoggle': state.colSel[t.dataset.f] = !state.colSel[t.dataset.f]; t.setAttribute('aria-checked', !!state.colSel[t.dataset.f]); break;
+    case 'save-collection': saveCollection(); break;
+    case 'create': openCreate(); break;
+    case 'ntype': state.newType = t.dataset.type; document.querySelectorAll('[data-act=ntype]').forEach(function(b){ b.setAttribute('aria-checked', b === t); }); break;
+    case 'create-cancel': openCollection(state.colHadith, true); break;
+    case 'create-ok': createOk(); break;
+    case 'ftab': state.folderTab = t.dataset.tab; $('fSearch').value = ''; renderFolders(); break;
+    case 'open-folder': state.detailId = t.dataset.f; $('dSearch').value = ''; show('details'); setChip('details'); break;
+    case 'fmenu': openManage(t.dataset.f); break;
+    case 'edit': openEdit(); break;
+    case 'edit-ok': editOk(); break;
+    case 'delete-folder': state.deleteKind = 'folder'; openOverlay('dlg-delete'); break;
+    case 'delete-ok': deleteOk(); break;
+    case 'sort': openSort(t.dataset.ctx); break;
+    case 'sortpick': state.sortPick = t.dataset.sort; markSort(); break;
+    case 'sort-ok':
+      if (state.sortCtx === 'details') { state.sortDetails = state.sortPick; closeAll(); renderDetails(); }
+      else { state.sortFolders = state.sortPick; closeAll(); renderFolders(); }
+      break;
+    case 'login': var lb = $('loginBox'); lb.style.display = ''; lb.classList.add('flash'); setTimeout(function(){ lb.classList.remove('flash'); }, 900); break;
+    case 'login-ok': $('loginBox').style.display = 'none'; break;
+    case 'io': openOverlay('dlg-io'); break;
+  }
+});
+$('fSearch').addEventListener('input', renderFolders);
+$('dSearch').addEventListener('input', renderDetails);
+$('cSearch').addEventListener('input', renderCollection);
+$('nName').addEventListener('input', updatePreview);
+$('nName').addEventListener('keydown', function(e){ if (e.key === 'Enter') createOk(); });
+$('eName').addEventListener('keydown', function(e){ if (e.key === 'Enter') editOk(); });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeAll(); });
+
+/* theme toggle */
+$('themeBtn').addEventListener('click', function(){
+  var r = document.documentElement;
+  r.setAttribute('data-theme', r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+
+/* parent viewer: postMessage({type:'screen', id}) */
+window.addEventListener('message', function(e){
+  var d = e.data;
+  if (d && d.type === 'screen' && d.id) goTo(d.id);
+});
+
+/* initial screen (?screen=<id>) */
+(function(){
+  var id = 'card';
+  try { var p = new URLSearchParams(location.search).get('screen'); if (p) id = p; } catch(e) {}
+  goTo(id);
+})();
+</script>
+</body>
+</html>

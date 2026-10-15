@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>হুকম / গ্রেড ট্যাগ — ডেমো ২ · বটম শিটে দুই ট্যাব</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Hadith card (HadithListItem): top bar, Arabic, narrator, translation ===== */
+.hc{cursor:pointer}
+.hc .hadith-head{margin-right:-4px}
+.hc .narrator{color:var(--primary);font-size:14.5px;margin:4px 0 2px}
+.hc .arabic{font-size:21px;margin:10px 0 2px}
+.meta-b{display:flex;align-items:center;gap:6px}
+.sample-tag{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:20px;border:1px dashed var(--hint);color:var(--hint);font-size:11px;font-weight:500;line-height:1;white-space:nowrap}
+.sample-note{margin:10px 0 0;font-size:14px;line-height:1.6;color:var(--hint)}
+
+/* ===== Grade badge: colour always from grade data (--gc), name always written ===== */
+.grade{display:inline-flex;align-items:center;gap:4px;font-weight:500;line-height:1.7;background:var(--gc);color:var(--on-appbar);cursor:pointer}
+.grade svg{width:14px;height:14px}
+
+/* ===== Grade details parts (shared by every direction) ===== */
+.illo{display:block;margin:0 auto}
+.gname{margin:14px 0 10px;text-align:center;font-size:22px;font-weight:700;line-height:1.35;color:var(--title)}
+.def{margin:0;text-align:justify;font-size:16px;line-height:1.65;color:var(--body)}
+.def.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.more-btn{display:block;padding:4px 0;color:var(--primary);font-size:14px;font-weight:700}
+.sec-h{display:flex;align-items:center;gap:8px;margin:18px 0 2px;font-size:15px;font-weight:700;color:var(--title)}
+.mrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--divider)}
+.mrow:last-child{border-bottom:0}
+.av{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark);font-size:14px;font-weight:700}
+:root[data-theme="dark"] .av{color:var(--primary)}
+.mt{flex:1;min-width:0}
+.mt b{display:block;font-size:14.5px;line-height:1.35;color:var(--title)}
+.mt small{display:flex;align-items:center;gap:4px;font-size:12.5px;color:var(--hint)}
+.mt small svg{width:13px;height:13px}
+.rb{flex:none;padding:0 8px;border-radius:20px;background:var(--gc);color:var(--on-appbar);font-size:11.5px;line-height:1.75;white-space:nowrap}
+.why{margin-top:14px;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--grade-weak) 9%,var(--card));border-inline-start:3px solid var(--grade-weak)}
+.why .sec-h{margin:0 0 2px}
+.why p{margin:0;font-size:14.5px;line-height:1.6;color:var(--body)}
+.verify{display:flex;align-items:center;gap:6px;margin:14px 0 0;font-size:13px;color:var(--hint)}
+.verify svg,.net-note svg,.net-bar svg{width:16px;height:16px;flex:none}
+.net-note{display:flex;align-items:center;gap:6px;margin:10px 0 0;padding:8px 10px;border-radius:10px;background:var(--surface-2);font-size:13px;color:var(--hint)}
+.net-bar{display:flex;align-items:center;gap:8px;margin:10px 12px 0;padding:8px 12px;border-radius:10px;border:1px solid var(--divider);background:var(--surface-2);font-size:13px;color:var(--hint)}
+.loading{display:grid;place-items:center;min-height:200px}
+.spin{width:34px;height:34px;border-radius:50%;border:3.5px solid var(--divider);border-top-color:var(--primary-dark);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.count{margin:12px 16px 2px;font-size:13px;color:var(--hint)}
+
+/* ===== Offline toggle in the demo toolbar (outside the phone) ===== */
+.net-tg{flex:none;font-size:13px;padding:4px 12px;border-radius:20px;border:1px solid var(--page-line);color:var(--page-text)}
+.net-tg[aria-pressed="true"]{background:var(--page-text);color:var(--page)}
+
+/* ===== Tahkik page (TahkikListTab): rounded body, search, grouped cards ===== */
+.screen.tk{background:var(--appbar)}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0}
+.tk-search{padding:15px 14px}
+.tk-search .field{height:48px}
+.tk-h{position:sticky;top:0;z-index:1;margin:0;padding:14px 18px 8px;font-size:15px;font-weight:700;color:var(--title);background:var(--scaffold)}
+.tk-card{margin:0 14px;border-radius:10px;background:var(--card);overflow:hidden}
+.tk-row{display:block;width:100%;padding:12px 14px;border-bottom:1px solid var(--divider);text-align:left;transition:background .4s}
+.tk-row:last-child{border-bottom:0}
+.tk-row.flash{background:var(--tint)}
+.tk-top{display:flex;align-items:center;gap:12px}
+.tk-dot{width:9px;height:9px;flex:none;border-radius:50%;background:var(--gc)}
+.tk-t{flex:1;font-size:17px;font-weight:600;color:var(--title)}
+.tk-chev{color:var(--hint);transition:transform .3s}
+.tk-row[aria-expanded="true"] .tk-chev{transform:rotate(180deg)}
+.tk-d{display:block;margin:2px 0 0 21px;font-size:15px;line-height:1.6;color:var(--body)}
+.tk-row[aria-expanded="false"] .tk-d{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ===== Demo 2: badge with an info mark; details in a bottom sheet with two tabs ===== */
+.grade.g2{padding-right:6px}
+.grab{width:40px;height:4px;border-radius:4px;background:var(--divider);margin:10px auto 0;flex:none}
+#info .sheet-head{align-items:center;gap:12px;padding:10px 8px 6px 16px}
+.hi{flex:none;width:56px;height:56px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--gc) 12%,var(--card))}
+.ht{flex:1;min-width:0}
+.ht h2{margin:0;font-size:19px;line-height:1.35;color:var(--title)}
+.ht small{display:block;font-size:12.5px;color:var(--hint)}
+.seg{flex:none;display:flex;gap:4px;margin:6px 16px 10px;padding:4px;border-radius:12px;background:var(--surface-2)}
+.seg button{flex:1;height:36px;border-radius:9px;font-size:14px;font-weight:600;color:var(--hint)}
+.seg button[aria-selected="true"]{background:var(--card);color:var(--title);box-shadow:var(--shadow)}
+#info .sheet-body{flex:1;min-height:120px;padding-bottom:16px}
+.agree{display:flex;gap:3px;height:8px;margin:4px 0 6px}
+.agree i{flex:1;border-radius:4px;background:var(--gc)}
+.agree-cap{display:flex;align-items:center;gap:8px;margin:0;font-size:13px;color:var(--hint)}
+.to-op{display:flex;align-items:center;gap:4px;margin-top:12px;color:var(--primary);font-size:14px;font-weight:700}
+.to-op svg{width:18px;height:18px;transform:rotate(-90deg)}
+#info .sheet-foot{align-items:center}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Chapter list (HadithVerticalList) ===== -->
+      <section class="screen" data-screen="chapter">
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-icon="back" data-snack="এটা ডেমোর প্রথম স্ক্রিন"></button><h1>সহীহ বুখারী<small>অধ্যায়ের হাদিস</small></h1><button class="icon-btn" data-go="search" aria-label="সার্চ" data-icon="search"></button></header>
+        <div class="scroll" id="chapList" data-cards style="padding-top:10px"></div>
+      </section>
+      <!-- ===== Search results ===== -->
+      <section class="screen" data-screen="search">
+        <header class="appbar"><button class="icon-btn" data-go="chapter" aria-label="পেছনে" data-icon="back"></button><h1>সার্চ</h1></header>
+        <div style="padding:12px 12px 0"><label class="field"><span data-icon="search"></span><input id="q" placeholder="হাদিস সার্চ করুন" aria-label="হাদিস সার্চ"></label></div>
+        <div class="chip-row" style="padding-top:10px" id="qChips"><button class="chip on" data-q="">সব</button><button class="chip" data-q="নিয়ত">নিয়ত</button><button class="chip" data-q="রাগ">রাগ</button><button class="chip" data-q="দুর্বল">দুর্বল</button><button class="chip" data-q="জাকাত">জাকাত</button></div>
+        <div class="scroll" id="searchList" data-cards></div>
+      </section>
+      <!-- ===== Hadith details page ===== -->
+      <section class="screen" data-screen="detail">
+        <header class="appbar"><button class="icon-btn" data-back="list" aria-label="পেছনে" data-icon="back"></button><h1>হাদিসের বিস্তারিত</h1><button class="icon-btn" aria-label="শেয়ার" data-icon="share" data-snack="শেয়ার করার অপশন খুলবে"></button></header>
+        <div class="scroll" id="detailBody" style="padding-top:10px"></div>
+      </section>
+      <!-- ===== Home → তাহকিক page (TahkikListTab) ===== -->
+      <section class="screen tk" data-screen="tahkik">
+        <header class="appbar"><button class="icon-btn" data-back aria-label="পেছনে" data-icon="back"></button><h1>তাহকিক</h1></header>
+        <div class="rbody"><div class="tk-search"><label class="field"><input id="tkq" placeholder="তাহকিক সার্চ করুন" aria-label="তাহকিক সার্চ করুন" maxlength="40"><span data-icon="search"></span></label></div>
+        <div class="scroll" id="tkList"></div></div>
+      </section>
+      <!-- ===== Grade details bottom sheet: head (illustration + name + reference), tabs, body, footer ===== -->
+      <div class="sheet" id="info" role="dialog" aria-label="মানের বিস্তারিত"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+(function () {
+  const { bn, icons, $, $$ } = Kit;
+
+  /* ---------- Data: grades — titles, descriptions, colours from hadith.db → grades (language_id='bn').
+     Colour key: s = sahih/hasan, u = undetermined, w = weak/fabricated, o = other. ---------- */
+  const GV = { s: 'var(--grade-sahih)', u: 'var(--grade-undetermined)', w: 'var(--grade-weak)', o: 'var(--grade-other)' };
+  const SB = 'যে হাদীসের সানাদ অবিচ্ছিন্ন হয়, বর্ণনাকারীরা ন্যায়পরায়ণ ও পূর্ণ আয়ত্বশক্তির অধিকারী হন এবং সানাদটি শা’জ ও মু’আল্লাল না হয় সে হাদীসকে সহীহ হাদিস বলা হয়।';
+  const HB = 'যে হাদীসের বর্ণনাকারীর স্মরণশক্তিতে কিছুটা ঘাটতি রয়েছে কিন্তু সহীহ হাদীসের অবশিষ্ট চারটি শর্ত বহাল আছে তাকে হাসান লিযাতিহী হাদীস বলা হয়।';
+  const WB = 'যে হাদীসে হাসান লি গাইরিহী হাদীসের শর্ত পাওয়া যায় না তাকে যঈফ বা দুর্বল হাদীস বলে।';
+  const GR = {
+    2: { t: 'সহিহ হাদিস', c: 's', d: 'যে হাদীসের সানাদ অবিচ্ছিন্ন হয়, বর্ণনাকারীরা ন্যায়পরায়ণ ও পূর্ণ আয়ত্বশক্তির অধিকারী হন এবং সানাদটি শা’জ ও মু’আল্লাল না হয় সে হাদীসকে সহীহ বা সহীহ লিযাতিহী। গ্রহণযোগ্য হাদীসগুলোর মধ্যে সহীহ লিযাতিহী’র মর্যাদা সবচেয়ে বেশী।' },
+    7: { t: 'সহিহ লিগাইরিহি', c: 's', d: 'যদি হাসান হাদীসের সানাদ সংখ্যা অধিক হয় তখন এর দ্বারা হাসান রাবীর মাঝে যে ঘাটতি ছিল তা পূরণ হয়ে যায়। এরূপ অধিক সানাদে বর্ণিত হাসান হাদীসকে সহীহ লিগাইরিহী বলা হয়।' },
+    10: { t: 'সহিহ মারফু', c: 's', d: SB + ' নাবী (স.)-এর কথা বা কাজ বা সমর্থনকে বলা হয় মারফু হাদীস।' },
+    3: { t: 'হাসান হাদিস', c: 's', d: HB },
+    15: { t: 'হাসান লিগাইরিহি', c: 's', d: 'অজ্ঞাত ব্যক্তির হাদীস একাধিক সানাদে বর্ণিত হলে তাকে হাসান লিগাইরিহী বলা হয়। এটি মূলত দুর্বল হাদীস। কিন্তু যখন তা একাধিক সূত্রে বর্ণিত হয় এবং এর বর্ণনাকারী ফাসিক ও মিথ্যার দোষে দোষী না হয় তখন এটি অন্যান্য সূত্রগুলোর কারণে হাসান এর পর্যায়ভুক্ত হয়ে যায়। কিন্তু এর মান হাসান লিযাতিহী’র চেয়ে নিম্ন পর্যায়ের।' },
+    4: { t: 'দুর্বল হাদিস', c: 'w', d: WB + ' এরূপ হাদীস অগ্রহণযোগ্য। প্রধানতঃ দু’টি কারণে হাদীস প্রত্যাখ্যাত হয়। (১) সানাদ থেকে বর্ণনাকারী বাদ পড়ে যাওয়া, (২) বর্ণনাকারী সম্পর্কে কোন অভিযোগ থাকা। এই অভিযোগ বর্ণনাকারীর দ্বীনদারী সম্পর্কিত হতে পারে আবার আয়ত্বশক্তি সম্পর্কিতও হতে পারে। যঈফ হাদিস অগ্রহণযোগ্য হাদীসের অন্তর্ভুক্ত।' },
+    5: { t: 'জাল হাদিস', c: 'w', d: 'যে ব্যক্তি ইচ্ছাকৃতভাবে রসূলের নামে বানোয়াট হাদীস তৈরী করে তবে তার হাদীসকে মাওযু বা বানোয়াট বলা হয়। বানোয়াট হাদীস সর্বতোভাবে পরিত্যাজ্য এবং তা বর্ণনা করা হারাম। হাদীস জালকারী খাটি মনে তাওবাহ করলেও তার হাদিস গ্রহণ করা হবে না।' },
+    16: { t: 'খুবই দুর্বল', c: 'w', d: WB + ' এরূপ হাদীস অগ্রহণযোগ্য।' },
+    20: { t: 'শায', c: 'w', d: 'একজন গ্রহণযোগ্য ব্যক্তির বর্ণনা যদি তার চেয়ে অধিকতর গ্রহণযোগ্য ব্যক্তির বর্ণনা সাথে গড়মিল হয় (বিপরীত হয়) তাহলে তাকে শা’য বলা হয়। শা’য হাদীস সহীহ নয়। এটি হাদীস শাস্ত্রের জন্য দোষণীয়।' },
+    32: { t: 'বাতিল', c: 'w', d: 'এরূপ হাদীস অগ্রহণযোগ্য।' },
+    6: { t: 'অন্যান্য', c: 'o', d: 'আমাদের অ্যাপে যেসব হাদিসের মান সুনির্দিষ্ট নয়, বা অস্পষ্ট সেসব হাদিসের মান দেয়া হয়েছে "অন্যান্য"। এসব হাদিসের মান দেখতে হলে হাদিসের শেষ অংশে দেখুন এবং একজন আলেমের সাথে পরামর্শ করে নিন।' },
+    1: { t: 'নির্ণীত নয়', c: 'u', d: 'আমাদের অ্যাপে, যেসব হাদিসের মান পাওয়া যায়নি সেসব হাদিসের মান দেয়া হয়েছে "নির্ণীত নয়"। এসব হাদিসের মান জানতে একজন আলেমের সাথে পরামর্শ করে নিন।' },
+  };
+  // Tahkik page groups (TahkikGroup ids), database order inside each group — a subset of the bn catalogue
+  const GROUPS = [['সহিহ', [2, 7, 10]], ['হাসান', [3, 15]], ['দুর্বল ও জাল', [4, 5, 16, 20, 32]], ['অন্যান্য', [6, 1]]];
+
+  /* ---------- Data: hadiths (safe list only) + neutral sample cards for the other grades ---------- */
+  const B = { book: 'সহীহ বুখারী', ab: 'বুখারী' };
+  const REAL = [
+    { id: 'b1', ...B, no: 1, ch: 'ওহীর সূচনা অধ্যায়', g: 2, op: 's', ar: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ', nar: '‘উমর ইবনুল খাত্তাব (রাঃ) থেকে বর্ণিত', tr: 'আমল (এর প্রাপ্য হবে) নিয়ত অনুযায়ী। আর মানুষ তার নিয়ত অনুযায়ী প্রতিফল পাবে।' },
+    { id: 'b1894', ...B, no: 1894, ch: 'সাওম', g: 2, op: 's', ar: 'الصِّيَامُ جُنَّةٌ', nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত', tr: 'আল্লাহর রসূল (ﷺ) বলেছেনঃ সিয়াম ঢাল স্বরূপ।' },
+    { id: 'b6018', ...B, no: 6018, ch: 'আচার-ব্যবহার', g: 2, op: 's', ar: 'فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ', nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত', tr: 'যে আল্লাহ এবং কেয়ামতের দিনে বিশ্বাস রাখে, সে যেন ভাল কথা বলে অথবা চুপ থাকে।' },
+    { id: 'b6116', ...B, no: 6116, ch: 'আচার-ব্যবহার', g: 2, op: null, ar: 'لاَ تَغْضَبْ', nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত', tr: 'এক ব্যক্তি নবী (ﷺ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বললেন, নবী (ﷺ) প্রত্যেক বারেই বললেন: রাগ করো না।' },
+  ];
+  const M223 = { id: 'm223', book: 'সহীহ মুসলিম', ab: 'মুসলিম', no: 223, ch: 'পবিত্রতা', g: 2, op: 's', ar: 'الطُّهُورُ شَطْرُ الإِيمَانِ', nar: 'আবূ মালিক আল আশ’আরী (রাঃ) থেকে বর্ণিত', tr: 'রাসূলুল্লাহ (ﷺ) বলেছেন: পবিত্রতা হল ঈমানের অর্ধেক অংশ।' };
+  const SAMPLE_TEXT = 'এই কার্ডটা শুধু ব্যাজ দেখানোর নমুনা। এতে কোনো আসল হাদিসের লেখা রাখা হয়নি।';
+  const SAMPLES = [[3, 'h'], [4, 'w'], [5, 'j'], [1, null], [6, null]].map(([g, op], i) =>
+    ({ id: 's' + (i + 1), book: 'নমুনা কিতাব', ab: 'নমুনা', no: 101 + i, ch: 'নমুনা', g, op, sample: true, tr: SAMPLE_TEXT }));
+  const ALL = [...REAL, M223, ...SAMPLES];
+  const byId = (id) => ALL.find((h) => h.id === id);
+
+  /* ---------- Data: muhaddith opinions + "কেন দুর্বল" — NOT in the app yet, so every row is a নমুনা ---------- */
+  const OPS = {
+    s: [['মুহাদ্দিস ১', 2, 'কিতাবের নাম ১'], ['মুহাদ্দিস ২', 2, 'কিতাবের নাম ২']],
+    h: [['মুহাদ্দিস ১', 3, 'কিতাবের নাম ১'], ['মুহাদ্দিস ২', 3, 'কিতাবের নাম ২'], ['মুহাদ্দিস ৩', 7, 'কিতাবের নাম ৩']],
+    w: [['মুহাদ্দিস ১', 4, 'কিতাবের নাম ১'], ['মুহাদ্দিস ২', 16, 'কিতাবের নাম ২'], ['মুহাদ্দিস ৩', 4, 'কিতাবের নাম ৩']],
+    j: [['মুহাদ্দিস ১', 5, 'কিতাবের নাম ১'], ['মুহাদ্দিস ২', 32, 'কিতাবের নাম ২']],
+  };
+  const WHY = {
+    w: 'সনদের একজন বর্ণনাকারীর স্মরণশক্তি দুর্বল, আর অন্য কোনো শক্ত সূত্রে এর সমর্থন পাওয়া যায়নি।',
+    j: 'সনদের একজন বর্ণনাকারীর বিরুদ্ধে মিথ্যা বর্ণনার অভিযোগ আছে।',
+  };
+  const opsOf = (h) => (h.op ? OPS[h.op] : null);
+
+  /* ---------- State ---------- */
+  const S = { hid: null, net: true, q: '', tkQ: '', tkExp: null, prev: 'chapter', listFrom: 'chapter', detail: 'b1', seen: {}, busy: false };
+
+  /* ---------- Small views ---------- */
+  const ic = (d) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  const IC = {
+    wifiOff: ic('<path d="M2 8.5a15 15 0 0 1 4.6-2.8M10.3 5A15 15 0 0 1 22 8.5M5 12a10 10 0 0 1 3.2-1.9M15 10.5A10 10 0 0 1 19 12M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18"/>'),
+    verified: ic('<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>'),
+    book: ic('<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>'),
+    down: ic('<path d="M6 9l6 6 6-6"/>'),
+  };
+  const SPIN = '<div class="loading"><span class="spin" role="progressbar" aria-label="লোড হচ্ছে"></span></div>';
+
+  // Grade illustration (same drawing as assets/images/svg/dialog/tahkik_*.svg, tinted by the grade colour)
+  function illo(c, size) {
+    const marks = {
+      s: '<path d="M83 48C87 48 89 52 92 54C95 56 100 55 102 59C104 62 102 66 104 70C106 73 109 75 108 79C107 83 103 84 101 87C99 90 100 95 96 97C92 99 89 97 85 99C82 101 79 104 75 102C71 101 71 96 67 94C64 92 59 93 57 89C55 85 58 82 56 78C54 74 52 71 54 68C56 64 60 64 63 61C65 58 64 54 68 52C72 50 75 52 78 50C80 49 81 48 83 48Z" fill="currentColor"/><path d="M69 75L78 84L93 66" style="stroke:var(--on-appbar)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>',
+      w: '<path d="M76 86L73 83C69 79 63 79 59 83L49 93C44 98 44 105 49 110C54 115 61 115 66 110L76 100M91 88L101 94C107 97 114 95 117 89C120 83 118 76 112 73L101 67C96 64 90 66 87 70" style="stroke:var(--card)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/><path d="M76 86L73 83C69 79 63 79 59 83L49 93C44 98 44 105 49 110C54 115 61 115 66 110L76 100M91 88L101 94C107 97 114 95 117 89C120 83 118 76 112 73L101 67C96 64 90 66 87 70" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M85 56L82 48M96 53L98 44M107 58L114 53M75 68L69 62" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+      u: '<path d="M108 101L119 113" stroke="currentColor" stroke-width="10" stroke-linecap="round"/><circle cx="84" cy="77" r="22" style="fill:var(--card)" stroke="currentColor" stroke-width="7"/><path d="M78 70C78 66 81 64 85 64C89 64 92 66 92 70C92 76 84 76 84 82" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><circle cx="84" cy="90" r="2.6" fill="currentColor"/>',
+      o: '<circle cx="85" cy="68" r="15" fill="currentColor" style="stroke:var(--card)" stroke-width="5"/><circle cx="72" cy="98" r="15" fill="currentColor" style="stroke:var(--card)" stroke-width="5"/><path d="M102 81C103 79 106 79 107 81L119 102C120 104 119 107 116 107H92C89 107 88 104 89 102L102 81Z" fill="currentColor" style="stroke:var(--card)" stroke-width="4" stroke-linejoin="round"/>',
+    };
+    return `<svg class="illo" width="${size}" height="${size}" viewBox="0 0 128 128" fill="none" style="color:${GV[c]}" aria-hidden="true">
+      <g transform="rotate(-7 53 65)"><path d="M22 20H78C85 20 90 26 90 34V96C90 105 83 112 74 112H34C27 112 22 107 22 100V20Z" fill="currentColor" fill-opacity=".2"/>
+      <path d="M39 39H76M39 51H75M39 63H61M39 75H54" stroke="currentColor" stroke-opacity=".6" stroke-width="4" stroke-linecap="round"/></g>${marks[c]}</svg>`;
+  }
+  // Meaning — long text is clamped with "আরো পড়ুন"
+  const defHTML = (g, lines) => {
+    const long = g.d.length > (lines ? 110 : 170);
+    return `<p class="def${long ? ' clamp' : ''}"${lines ? ` style="-webkit-line-clamp:${lines}"` : ''}>${g.d}</p>${long ? '<button class="more-btn" data-more>আরো পড়ুন</button>' : ''}`;
+  };
+  // One muhaddith row: name, ruling badge, kitab
+  const mrow = (o, i) => `<div class="mrow"><span class="av">${bn(i + 1)}</span><div class="mt"><b>${o[0]}</b><small>${IC.book}${o[2]}</small></div><span class="rb" style="--gc:${GV[GR[o[1]].c]}">${GR[o[1]].t}</span></div>`;
+  const opsHTML = (ops, title = 'তাহকিক') => `<div class="sec-h">${title} <span class="sample-tag">নমুনা</span></div><div class="mlist">${ops.map(mrow).join('')}</div>`;
+  const whyHTML = (h) => (WHY[h.op] ? `<div class="why"><div class="sec-h">কেন দুর্বল <span class="sample-tag">নমুনা</span></div><p>${WHY[h.op]}</p></div>` : '');
+  const verifyHTML = (h) => (opsOf(h) ? `<p class="verify">${IC.verified}আলেমদের যাচাই করা তথ্য</p>` : '');
+  const netHTML = () => (S.net ? '' : `<p class="net-note">${IC.wifiOff}ইন্টারনেট ছাড়া দেখানো হচ্ছে · বইটি ডাউনলোড করা আছে</p>`);
+  const ref = (h) => `${h.book} · হাদিস: ${bn(h.no)}`;
+
+  /* ---------- Hadith card (same badge on chapter, search and details) ---------- */
+  function card(h) {
+    const cls = typeof cardCls === 'function' ? cardCls(h) : '';
+    const after = typeof cardAfter === 'function' ? cardAfter(h) : '';
+    return `<article class="card hc ${cls}" data-hid="${h.id}" style="--gc:${GV[GR[h.g].c]}">
+      <div class="hadith-head"><span class="book-badge">${h.ab}</span>
+        <div class="hadith-meta"><b class="meta-b">${h.book}${h.sample ? ' <span class="sample-tag">নমুনা</span>' : ''}</b><span>হাদিস: ${bn(h.no)}</span></div>${chip(h)}</div>
+      ${h.sample ? `<p class="sample-note">${h.tr}</p>` : `<p class="arabic">${h.ar}</p><p class="narrator">${h.nar}</p><p class="translation">${h.tr}</p>`}${after}</article>`;
+  }
+  const netBar = () => (S.net ? '' : `<div class="net-bar">${IC.wifiOff}আপনি অফলাইনে আছেন · ডাউনলোড করা বই দেখানো হচ্ছে</div>`);
+
+  function renderChapter() {
+    const el = $('#chapList'); if (!el) return;
+    el.innerHTML = netBar() + REAL.map(card).join('') +
+      '<h3 class="section-title meta-b">অন্য মানের ব্যাজ <span class="sample-tag">নমুনা</span></h3>' + SAMPLES.map(card).join('');
+  }
+  function renderSearch() {
+    const el = $('#searchList'); if (!el) return;
+    const q = S.q.trim();
+    const hits = ALL.filter((h) => !q || [h.tr, h.book, h.ch, GR[h.g].t].join(' ').includes(q));
+    el.innerHTML = netBar() + (hits.length
+      ? `<p class="count">${bn(hits.length)}টি হাদিস</p>` + hits.map(card).join('')
+      : '<div class="empty"><h3>কোন সার্চ রেজাল্ট পাওয়া যায়নি</h3><p>অন্য শব্দ দিয়ে আবার সার্চ করুন</p></div>');
+  }
+  function renderDetail() {
+    const el = $('#detailBody'); if (!el) return;
+    const h = byId(S.detail);
+    el.innerHTML = netBar() + card(h) + (h.sample ? '' : `<div class="card"><p class="muted" style="margin:0">অধ্যায়: ${h.ch}</p></div>`);
+  }
+
+  /* ---------- Tahkik page: search + grouped, expandable rows ---------- */
+  function renderTahkik() {
+    const el = $('#tkList'); if (!el) return;
+    const q = S.tkQ.trim();
+    const secs = GROUPS.map(([name, ids]) => [name, ids.filter((id) => !q || GR[id].t.includes(q))]).filter((s) => s[1].length);
+    el.innerHTML = secs.length ? secs.map(([name, ids]) => `<section class="tk-sec"><h3 class="tk-h">${name}</h3><div class="tk-card">${ids.map((id) => {
+      const g = GR[id];
+      return `<button class="tk-row" data-tk="${id}" aria-expanded="${S.tkExp === id}" style="--gc:${GV[g.c]}"><span class="tk-top"><span class="tk-dot"></span><span class="tk-t">${g.t}</span><span class="tk-chev">${IC.down}</span></span><span class="tk-d">${g.d}</span></button>`;
+    }).join('')}</div></section>`).join('') + '<div style="height:16px"></div>'
+      : '<div class="empty"><h3>কোন সার্চ রেজাল্ট পাওয়া যায়নি</h3></div>';
+    const inp = $('#tkq'); if (inp && inp.value !== S.tkQ) inp.value = S.tkQ;
+    if (typeof afterTahkik === 'function') afterTahkik();
+  }
+  function goTahkik(gid) {
+    S.tkExp = gid ?? null; S.tkQ = '';
+    Kit.closeAll(); Kit.show('tahkik');
+    const row = gid && $(`.tk-row[data-tk="${gid}"]`);
+    if (row) { row.scrollIntoView({ block: 'center' }); row.classList.add('flash'); setTimeout(() => row.classList.remove('flash'), 900); }
+  }
+  function showDetail(hid) { S.detail = hid; renderDetail(); Kit.show('detail'); }
+
+  function renderAll() { renderChapter(); renderSearch(); renderDetail(); renderTahkik(); if (typeof renderExtra === 'function') renderExtra(); }
+
+  /* ---------- Toolbar states: open a screen, then the grade details in a given state ---------- */
+  const PSEUDO = {
+    'o-sahih': ['chapter', 'b1'], 'o-hasan': ['chapter', 's1'], 'o-weak': ['chapter', 's2'], 'o-jal': ['chapter', 's3'],
+    'o-none': ['chapter', 'b6116'], 'o-load': ['chapter', 'b1894', true],
+  };
+  function markChip(id) { $$('.kit-chip').forEach((c) => c.setAttribute('aria-pressed', c.dataset.go === id)); }
+  Kit.onScreen((id) => {
+    if (S.busy) return;
+    if (PSEUDO[id] || id === 'o-empty') {
+      setTimeout(() => {
+        S.busy = true;
+        if (id === 'o-empty') { S.tkExp = null; Kit.show('tahkik'); S.tkQ = 'জাকাত'; renderTahkik(); }
+        else { const [base, hid, slow] = PSEUDO[id]; S.prev = S.listFrom = base; Kit.show(base); openInfo(hid, { slow, state: id }); }
+        S.busy = false; markChip(id);
+      });
+      return;
+    }
+    if (id === 'chapter' || id === 'search') S.listFrom = id;
+    if (id === 'tahkik') { S.tkQ = ''; renderTahkik(); } else S.prev = id;
+    if (typeof onScreenExtra === 'function') onScreenExtra(id);
+  });
+
+  /* ---------- Events ---------- */
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+    const more = t.closest('[data-more]');
+    if (more) { more.previousElementSibling.classList.remove('clamp'); more.previousElementSibling.style.webkitLineClamp = 'unset'; more.remove(); return; }
+    const all = t.closest('[data-all]');
+    if (all) { goTahkik(S.hid ? byId(S.hid).g : null); return; }
+    const tk = t.closest('[data-tk]');
+    if (tk) { const id = +tk.dataset.tk; S.tkExp = S.tkExp === id ? null : id; renderTahkik(); return; }
+    const back = t.closest('[data-back]');
+    if (back) { Kit.show(back.dataset.back === 'list' ? S.listFrom : S.prev); return; }
+    const chip = t.closest('.grade[data-hid]');
+    if (chip) { openInfo(chip.dataset.hid, {}); return; }
+    const hc = t.closest('.hc[data-hid]');
+    if (hc && !t.closest('.gpanel') && hc.closest('[data-cards]')) showDetail(hc.dataset.hid);
+  });
+  document.addEventListener('input', (e) => {
+    if (e.target.id === 'q') { S.q = e.target.value; renderSearch(); $$('#qChips .chip').forEach((x) => x.classList.toggle('on', x.dataset.q === S.q)); }
+    if (e.target.id === 'tkq') { S.tkQ = e.target.value; renderTahkik(); }
+  });
+  const NET = '<button class="net-tg" id="netTg" type="button" aria-pressed="false">অফলাইন</button>';
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#netTg')) return;
+    S.net = !S.net; e.target.closest('#netTg').setAttribute('aria-pressed', !S.net);
+    renderAll(); if (typeof refreshInfo === 'function') refreshInfo();
+    Kit.snack(S.net ? 'আবার অনলাইনে' : 'অফলাইন — ডাউনলোড করা বই থেকে দেখানো হচ্ছে');
+  });
+  // Empty sections that the toolbar state chips point at
+  Object.keys(PSEUDO).concat('o-empty').forEach((id) => $('.viewport').insertAdjacentHTML('afterbegin', `<section class="screen" data-screen="${id}"></section>`));
+  $$('[data-icon]').forEach((b) => { b.innerHTML = icons[b.dataset.icon]; });
+  // Loading: the first open of each hadith reads from the book database
+  function load(hid, o, fill) {
+    const first = !S.seen[hid] || o.slow; S.seen[hid] = 1;
+    clearTimeout(S.timer);
+    if (!first) { fill(); return false; }
+    S.timer = setTimeout(fill, o.slow ? 2400 : 550);
+    return true;
+  }
+  // Search quick chips
+  document.addEventListener('click', (e) => {
+    const c = e.target.closest('[data-q]'); if (!c) return;
+    S.q = c.dataset.q; $('#q').value = S.q; renderSearch();
+    $$('#qChips .chip').forEach((x) => x.classList.toggle('on', x === c));
+  });
+  // Toolbar chips: real screens + the grade-details states
+  const SCREENS = [
+    { id: 'chapter', label: 'অধ্যায়' }, { id: 'search', label: 'সার্চ' }, { id: 'detail', label: 'বিস্তারিত পেজ' },
+    { id: 'o-sahih', label: 'সহিহ · মতসহ' }, { id: 'o-hasan', label: 'হাসান' }, { id: 'o-weak', label: 'দুর্বল' }, { id: 'o-jal', label: 'জাল' },
+    { id: 'o-none', label: 'মত নেই' }, { id: 'o-load', label: 'লোডিং' }, { id: 'tahkik', label: 'তাহকিক পেজ' }, { id: 'o-empty', label: 'খালি সার্চ' },
+  ];
+
+  /* ---------- Demo 2: badge = pill + small info mark, so it reads as tappable ---------- */
+  function chip(h) {
+    const g = GR[h.g];
+    return `<button class="grade g2" data-hid="${h.id}" style="--gc:${GV[g.c]}" aria-label="${g.t}, বিস্তারিত দেখুন">${g.t}${icons.info}</button>`;
+  }
+  /* ---------- Demo 2: bottom sheet. Tabs only when opinions exist; otherwise the meaning alone ---------- */
+  function openInfo(hid, o) {
+    S.hid = hid; S.tab = o.state === 'o-weak' || o.state === 'o-jal' ? 'op' : 'def';
+    Kit.open('info');
+    if (load(hid, o, fill)) $('#info').innerHTML = '<div class="grab"></div>' + SPIN;
+  }
+  function fill() {
+    const h = byId(S.hid), g = GR[h.g], ops = opsOf(h);
+    const tabs = ops ? `<div class="seg" role="tablist">${[['def', 'মানের অর্থ'], ['op', 'তাহকিক · ' + bn(ops.length)]].map(([k, l]) =>
+      `<button role="tab" data-tab="${k}" aria-selected="${S.tab === k}">${l}</button>`).join('')}</div>` : '';
+    const body = !ops || S.tab === 'def'
+      ? defHTML(g) + (ops ? `<button class="to-op" data-tab="op">মুহাদ্দিসদের মত দেখুন ${IC.down}</button>` : '')
+      : `<div class="agree">${ops.map((x) => `<i style="--gc:${GV[GR[x[1]].c]}"></i>`).join('')}</div>
+         <p class="agree-cap">${bn(ops.length)} জন মুহাদ্দিসের মত <span class="sample-tag">নমুনা</span></p>
+         ${opsHTML(ops)}${whyHTML(h)}${verifyHTML(h)}`;
+    $('#info').innerHTML = `<div class="grab"></div>
+      <div class="sheet-head"><span class="hi" style="--gc:${GV[g.c]}">${illo(g.c, 48)}</span><div class="ht"><h2>${g.t}</h2><small>${ref(h)}</small></div>
+        <button class="icon-btn" data-close aria-label="বন্ধ করুন">${icons.close}</button></div>
+      ${tabs}<div class="sheet-body">${body}${netHTML()}</div>
+      <div class="sheet-foot"><button class="btn text" data-all>সব মান দেখুন</button><span style="flex:1"></span><button class="btn" data-close>ঠিক আছে</button></div>`;
+  }
+  function refreshInfo() { if ($('#info.on') && S.hid && !$('#info .spin')) fill(); }
+  document.addEventListener('click', (e) => { const t = e.target.closest('[data-tab]'); if (t) { S.tab = t.dataset.tab; fill(); } });
+
+  renderAll();
+  Kit.init({ demo: 2, name: 'বটম শিটে দুই ট্যাব', screens: SCREENS, extra: NET });
+})();
+</script>
+</body>
+</html>
