@@ -214,9 +214,20 @@
         .observe(extra, { subtree: true, childList: true, attributes: true, characterData: true });
     }
 
-    const first = qs.get('screen') && screens.some((sc) => sc.id === qs.get('screen'))
-      ? qs.get('screen') : (screens[0] && screens[0].id);
-    if (first) show(first);
+    // ?screen=<id> (or ?screenLabel=<chip label> when the ids differ between
+    // demos) opens that screen; the viewer uses it to keep the screen when
+    // switching demos. Asked-for screens go through their chip, after the
+    // demo's own script has wired its chip handlers.
+    const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+    const want = screens.find((sc) => sc.id === qs.get('screen'))
+      || (qs.get('screenLabel') && screens.find((sc) => norm(sc.label) === norm(qs.get('screenLabel'))));
+    if (screens[0]) show(screens[0].id);
+    if (want && want !== screens[0]) {
+      setTimeout(() => {
+        const chip = $(`.kit-chip[data-go="${want.id}"]`);
+        if (chip) chip.click(); else show(want.id);
+      }, 0);
+    }
   }
 
   window.Kit = { init, show, open, close, closeAll, snack, bn, icons, $, $$, onScreen: (fn) => listeners.push(fn), get current() { return current; } };

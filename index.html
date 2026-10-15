@@ -428,11 +428,11 @@ const ICONS = {
   close: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
 };
 
-function paneHtml(f, idx, screen) {
+function paneHtml(f, idx, screen, label) {
   const d = f.demos[idx];
   if (!d) return `<div class="blank"><div><b>এখনো কোনো ডেমো নেই</b><code>feat_list/${esc(f.id)}/html/demo1.html</code> যোগ করুন।</div></div>`;
   if (d.empty) return `<div class="blank"><div><b>${esc(d.file)} এখনো খালি</b>ফাইলটায় HTML লিখলে এখানে আপনা থেকে দেখাবে।</div></div>`;
-  const sc = screen ? `&screen=${encodeURIComponent(screen)}` : '';
+  const sc = (screen ? `&screen=${encodeURIComponent(screen)}` : '') + (label ? `&screenLabel=${encodeURIComponent(label)}` : '');
   return `<iframe src="${d.url}?v=${d.mtime}&theme=${currentTheme()}&embed=1${sc}" title="${esc(d.title || d.file)}"></iframe>`;
 }
 
@@ -508,12 +508,19 @@ function renderSide(side) {
   renderScreens(side);
 }
 
-function mountPane(side, idx, screen) {
+// The screen a pane shows now, so another demo can open on the same one.
+function currentScreen(side) {
+  const info = frames[side];
+  const sc = info && info.current && info.screens.find((s) => s.id === info.current);
+  return sc ? { id: sc.id, label: sc.label } : null;
+}
+
+function mountPane(side, idx, screen, label) {
   const f = current();
   writeDemoThemeKeys(currentTheme());
   frames[side] = null;
   const body = $(`body-${side}`);
-  body.innerHTML = paneHtml(f, idx, screen);
+  body.innerHTML = paneHtml(f, idx, screen, label);
   const d = f.demos[idx];
   mtimes[side] = d ? d.mtime : 0;
   const frame = body.querySelector('iframe');
@@ -670,8 +677,10 @@ function selectDemo(i, side = state.side, screen = null) {
   if (demoIndex(side) === i && screen && frames[side]) {
     showScreen(side, screen);   // same demo already open: just switch screen
   } else {
+    // Keep the screen being looked at, so the same screen can be compared across demos.
+    const keep = screen ? null : currentScreen(side);
     if (side === 'b') state.demoB = i; else state.demo = i;
-    mountPane(side, i, screen);
+    mountPane(side, i, screen || keep?.id, keep?.label);
   }
   setActiveSide(side);
   renderSides();
@@ -760,8 +769,8 @@ async function poll() {
     if (prevIds !== nextIds) { renderAll(); return; }
     if (f.mdMtime !== mtimes.md) { renderDoc(); $('title').textContent = f.title; renderSidebar(); }
     if (favChanged) { renderSides(); renderFavs(); renderSidebar(); }
-    if (f.demos[state.demo] && f.demos[state.demo].mtime !== mtimes.a) mountPane('a', state.demo);
-    if (state.compare && f.demos[state.demoB] && f.demos[state.demoB].mtime !== mtimes.b) mountPane('b', state.demoB);
+    if (f.demos[state.demo] && f.demos[state.demo].mtime !== mtimes.a) mountPane('a', state.demo, currentScreen('a')?.id);
+    if (state.compare && f.demos[state.demoB] && f.demos[state.demoB].mtime !== mtimes.b) mountPane('b', state.demoB, currentScreen('b')?.id);
   } catch {
     $('live').classList.add('off');
   }
