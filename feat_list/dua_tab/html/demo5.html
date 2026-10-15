@@ -3,99 +3,116 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>দোয়া ট্যাব — ডেমো ৫ · ট্যাবলেটে পাশাপাশি</title>
+<title>দোয়া ট্যাব — ডেমো ৫ · এক পেজে খুলে খুলে পড়া</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
-/* ===== Tablet frame (landscape 1024 × 720) ===== */
-.phone.tablet{width:1024px;height:720px;border-radius:26px;flex:none}
-@media (max-width:480px){.phone.tablet{width:1024px;height:720px;border-radius:26px}}
-
-/* ===== Home: quick actions ===== */
-.home-grid{padding:18px 20px}
-.qa{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:12px 0 10px;max-width:520px}
+/* ===== Home quick-action card (HomeSmallDashboard, 4 per row) ===== */
+.qa{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin:14px 12px;padding:12px 0 10px}
 .qa-row{display:grid;grid-template-columns:repeat(4,1fr)}
-.qa-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px 8px;border-radius:10px;font-size:15px;font-weight:700;color:var(--body);line-height:1.25}
+.qa-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px 8px;border-radius:10px;font-size:14px;font-weight:700;color:var(--body);line-height:1.25;text-align:center}
+.qa-tile:hover{background:var(--surface-2)}
 .qa-tile.new{outline:2px dashed var(--primary);outline-offset:-4px}
 
-/* ===== Dua page: search on top, then category list | duas ===== */
+/* ===== Dua page: flat app bar, search, one accordion list ===== */
+.pbody{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;background:var(--scaffold)}
+.top{flex:none;padding:12px 12px 8px;background:var(--card);border-bottom:1px solid var(--divider)}
+.field .clr{color:var(--hint);width:28px;height:28px;display:grid;place-items:center;border-radius:50%}
+.lhead{display:flex;justify-content:space-between;align-items:baseline;padding:12px 16px 6px;font-size:13.5px;color:var(--hint)}
+.lhead b{font-size:14.5px;color:var(--title)}
+
+/* ----- Level 1: category rows (expand inline, one open at a time) ----- */
+.acc{margin:0 12px 10px;background:var(--card);border-radius:12px;box-shadow:var(--shadow)}
+.cat+.cat{border-top:1px solid var(--divider)}
+.chead{display:flex;align-items:center;gap:12px;width:100%;padding:13px 12px 13px 16px;text-align:left;background:var(--card)}
+.cat:first-child .chead{border-radius:12px 12px 0 0}
+.cat:last-child:not(.open) .chead{border-radius:0 0 12px 12px}
+.chead b{flex:1;min-width:0;font-size:16px;font-weight:400;line-height:1.35;color:var(--title)}
+.chead .cnt{flex:none;min-width:30px;height:24px;padding:0 8px;border-radius:12px;display:grid;place-items:center;font-size:13px;color:var(--body);background:var(--surface-2)}
+.chead>svg{flex:none;width:20px;height:20px;color:var(--hint);transition:transform .2s}
+.cat.open .chead{position:sticky;top:0;z-index:2;background:linear-gradient(var(--tint),var(--tint)),var(--card);border-bottom:1px solid var(--divider)}
+.cat.open .chead b{font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .cat.open .chead b{color:var(--primary)}
+.cat.open .chead .cnt{background:var(--primary);color:var(--on-appbar)}
+.cat.open .chead>svg{transform:rotate(180deg);color:var(--primary)}
+.cbody{padding:4px 0 6px}
+.cnote{margin:6px 16px 2px;font-size:13px;color:var(--hint)}
+
+/* ----- Level 2: dua rows (expand inline into the full dua) ----- */
+.dua{margin:0 8px;border-radius:10px}
+.dua+.dua{border-top:1px solid var(--divider)}
+.dua.open{background:var(--surface-2);border-top-color:transparent}
+.dua.open+.dua{border-top-color:transparent}
+.drow{display:flex;align-items:center;gap:10px;padding:10px 6px 10px 8px}
+.drow .tap{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left}
+.num{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12.5px;color:var(--primary-dark);border:1px solid var(--primary)}
+:root[data-theme="dark"] .num{color:var(--primary)}
+.dt{flex:1;min-width:0}
+.dt b{display:block;font-size:15px;font-weight:700;line-height:1.4;color:var(--title)}
+.dt span{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;margin-top:1px;font-size:13px;color:var(--body)}
+.dua.open .dt span{display:none}
+.play{width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .play{color:var(--primary)}
+.play[aria-pressed="true"]{background:var(--primary);color:var(--on-appbar)}
+.play svg{width:17px;height:17px}
+.dbody{padding:0 12px 6px 44px}
+.dbody .arabic{font-size:23px;line-height:1.9;margin:2px 0 6px;text-align:right}
+.lbl{display:block;margin-top:8px;font-size:13px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .lbl{color:var(--primary)}
+.txt{margin:2px 0 0;color:var(--title);font-size:15px;line-height:1.65}
+.ref{margin:10px 0 0;font-size:13.5px;color:var(--body)}
+.ref-link{color:var(--primary);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.acts{display:flex;gap:6px;margin-top:8px}
+.acts button{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:18px;font-size:14px;font-weight:700;color:var(--primary)}
+.acts button:hover{background:var(--tint)}
+.acts svg{width:17px;height:17px}
+mark.hl{background:var(--tint);color:var(--primary-dark);border-radius:3px;padding:0 1px}
+:root[data-theme="dark"] mark.hl{color:var(--primary)}
+
+/* ===== Small link to the Dua & Ruqyah app (end of the list) ===== */
+.applink{display:flex;align-items:center;gap:6px;margin:4px auto 18px;padding:8px 12px;font-size:14px;color:var(--body)}
+.applink img{width:24px;height:24px;border-radius:5px}
+.applink b{color:var(--primary)}
+.applink svg{width:16px;height:16px;color:var(--primary)}
+
+/* ===== Audio message at the bottom of the screen ===== */
+.amsg{position:absolute;left:12px;right:12px;bottom:14px;z-index:5;display:flex;align-items:center;gap:8px;padding:10px 8px 10px 14px;border-radius:10px;background:var(--title);color:var(--card);font-size:14px;line-height:1.45;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.amsg span{flex:1}
+.amsg .rt{flex:none;font-weight:700;color:var(--primary);padding:4px 6px}
+.amsg .x{flex:none;color:inherit;opacity:.7;width:28px;height:28px;display:grid;place-items:center}
+
+/* ===== Empty state (NoSearchResultFound) ===== */
+.nores{display:flex;flex-direction:column;align-items:center;gap:30px;padding:70px 24px;text-align:center}
+.nores h3{margin:0;font-size:20px;font-weight:700;color:var(--title)}
+
+/* ===== Hadith page (HadithDetailsPage) ===== */
 .rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
 .panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
-.top{flex:none;padding:14px 20px 12px}
-.top .field{max-width:340px}
-.split{flex:1;min-height:0;display:grid;grid-template-columns:340px 1fr;gap:14px;padding:0 20px 16px}
-.pane{min-height:0;display:flex;flex-direction:column;background:var(--card);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;position:relative}
-.pane .scroll{padding-bottom:0}
-.phead{flex:none;display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:12px 16px 10px;border-bottom:1px solid var(--divider)}
-.phead b{font-size:15px;color:var(--title)}
-.phead span{font-size:13px;color:var(--hint)}
-
-/* ----- left: category list ----- */
-.crow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 10px 11px 16px;border-bottom:1px solid var(--divider)}
-.crow:hover{background:var(--surface-2)}
-.crow[aria-current="true"]{background:var(--tint);box-shadow:inset 3px 0 0 var(--primary)}
-.crow b{flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.35;color:var(--title)}
-.crow[aria-current="true"] b{font-weight:700}
-.crow span{flex:none;font-size:13px;color:var(--hint)}
-.crow>svg{flex:none;width:16px;height:16px;color:var(--hint)}
-.applink{flex:none;display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--divider);text-align:left;font-size:13.5px;color:var(--body);width:100%}
-.applink img{width:30px;height:30px;border-radius:6px}
-.applink b{color:var(--primary)}
-.applink svg{margin-left:auto;width:16px;height:16px;color:var(--hint)}
-
-/* ----- right: the category's duas as cards ----- */
-.rlist{padding:6px 18px 18px}
-.ghd{margin:14px 2px 6px;font-size:14px;font-weight:700;color:var(--primary-dark)}
-:root[data-theme="dark"] .ghd{color:var(--primary)}
-.det{border:1px solid var(--divider);border-radius:12px;padding:14px 18px 16px;margin-top:12px}
-.det-head{display:flex;align-items:center;gap:14px}
-.det-head h3{flex:1;margin:0;font-size:17px;color:var(--title);line-height:1.35}
-.det-head .btn{height:38px;padding:0 14px}
-.det-head svg{width:17px;height:17px}
-.det-head .btn[aria-pressed="true"]{background:var(--primary);color:#fff}
-.det .arabic{font-size:26px;line-height:2;text-align:center;margin:12px 0 10px;padding:8px 16px;background:var(--surface-2);border-radius:12px}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.lbl{display:block;font-size:13px;font-weight:700;color:var(--primary-dark)}
-:root[data-theme="dark"] .lbl{color:var(--primary)}
-.txt{margin:2px 0 0;color:var(--title);font-size:15px;line-height:1.7}
-.foot{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid var(--divider)}
-.ref{flex:1;margin:0;font-size:14px;color:var(--body)}
-.ref-link{color:var(--primary);font-weight:700;text-decoration:underline;text-underline-offset:3px}
-.foot .icon-btn{color:var(--primary)}
-.foot .icon-btn svg{width:19px;height:19px}
-.amsg{position:absolute;left:16px;right:16px;bottom:14px;display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;border-radius:10px;background:var(--title);color:var(--card);font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.2)}
-.amsg span{flex:1}
-.amsg button{font-weight:700;color:var(--primary)}
-.amsg .x{color:inherit;opacity:.7;width:28px;height:28px;display:grid;place-items:center}
-
-/* ===== Empty, hadith page ===== */
-.nores{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;flex:1;text-align:center;padding:40px}
-.nores h3{margin:0;font-size:20px;color:var(--title)}
-.hwrap{max-width:760px;margin:0 auto;padding-top:16px}
 .sec{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:0 12px 10px;padding:12px var(--pad);font-size:15px;font-weight:700;color:var(--title)}
 .sec b{color:var(--primary)}
 .sec span{display:block;font-weight:400;font-size:13.5px;color:var(--body)}
 .hcard .book-badge{font-size:15px;font-weight:600}
 .hcard .narrator{color:var(--primary);font-size:15px;margin:8px 0 2px}
 .grade.sahih{background:var(--grade-sahih)}.grade.undetermined{background:var(--grade-undetermined)}.grade.weak{background:var(--grade-weak)}.grade.other{background:var(--grade-other)}
-.dialog{left:50%;right:auto;width:440px;transform:translate(-50%,-50%) scale(.96)}
-.dialog.on{transform:translate(-50%,-50%)}
-.dialog .head{display:flex;gap:14px;align-items:center;margin-bottom:10px}
-.dialog img{width:48px;height:48px;border-radius:8px}
-.dialog p{margin:0;color:var(--body);font-size:14.5px;text-align:justify}
+
+/* ===== App dialog ===== */
+.dialog .head{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.dialog img{width:46px;height:46px;border-radius:8px}
+.dialog p{margin:0;color:var(--body);font-size:14.5px;line-height:1.6;text-align:justify}
 </style>
 </head>
 <body>
 <main class="kit-stage">
-  <div class="phone tablet">
+  <div class="phone">
     <div class="viewport">
 
-      <!-- ===== Screen: home (tablet) ===== -->
+      <!-- ===== Screen: home with the quick-action grid ===== -->
       <section class="screen" data-screen="home">
         <header class="appbar"><h1>আল হাদিস</h1></header>
         <div class="scroll" id="home-body"></div>
       </section>
 
-      <!-- ===== Dua page states (#pg moves between them) ===== -->
+      <!-- ===== Dua page states: the same page (#pg) moves between these ===== -->
+      <section class="screen" data-screen="cats"></section>
       <section class="screen" data-screen="duas"></section>
       <section class="screen" data-screen="search"></section>
       <section class="screen" data-screen="empty"></section>
@@ -103,32 +120,31 @@
       <!-- ===== Screen: original hadith ===== -->
       <section class="screen" data-screen="hadith">
         <header class="appbar"><button class="icon-btn" id="h-back" data-i="back" aria-label="পেছনে"></button><h1 id="h-title"></h1></header>
-        <div class="rbody"><div class="panel"><div class="scroll"><div class="hwrap" id="h-body"></div></div></div></div>
+        <div class="rbody"><div class="panel"><div class="scroll" id="h-body" style="padding-top:14px"></div></div></div>
       </section>
 
       <!-- ===== Dialog: Dua & Ruqyah app not installed ===== -->
       <div class="dialog" id="dlg-app" role="dialog" aria-label="দোয়া ও রুকিয়াহ">
         <div class="head"><img id="app-ic" alt=""><h2 style="margin:0">দোয়া ও রুকিয়াহ (হিসনুল মুসলিম)</h2></div>
         <p>দোয়া ও রুকিয়াহ তে রয়েছে কুরআন এবং হাদিস থেকে সংকলিত সহীহ দোয়া ও যিকিরের সবচেয়ে বড় সংগ্রহ। এতে মোট ৪১ টি ক্যাটাগরিতে ৮৯০+ টি দোয়া ও যিকির পাবেন।</p>
-        <p class="muted" style="margin-top:8px">অ্যাপটি এই ডিভাইসে ইনস্টল করা নেই।</p>
+        <p class="muted" style="margin-top:8px">অ্যাপটি এই ফোনে ইনস্টল করা নেই।</p>
         <div class="actions"><button class="btn text" data-close>বাতিল</button><button class="btn" id="btn-dl">ডাউনলোড অ্যাপ</button></div>
       </div>
     </div>
   </div>
 </main>
 
+<!-- ===== The dua page: search box, then the accordion list ===== -->
 <template id="pg-tpl">
   <div id="pg" style="display:flex;flex-direction:column;flex:1;min-height:0">
     <header class="appbar"><button class="icon-btn" id="pg-back" data-i="back" aria-label="পেছনে"></button><h1>দোয়া</h1></header>
-    <div class="rbody"><div class="panel">
+    <div class="pbody">
       <div class="top">
-        <label class="field"><span data-i="search"></span><input id="q" type="search" placeholder="সার্চ করুন" aria-label="দোয়ার নাম বা অর্থ দিয়ে সার্চ"><button class="icon-btn" id="q-clr" data-i="close" aria-label="মুছুন" style="width:30px;height:30px" hidden></button></label>
+        <label class="field"><span data-i="search"></span><input id="q" type="search" placeholder="সার্চ করুন" aria-label="দোয়ার নাম বা অর্থ দিয়ে সার্চ"><button class="clr" id="q-clr" data-i="close" aria-label="মুছুন" hidden></button></label>
       </div>
-      <div class="split" id="split">
-        <div class="pane" id="lpane"></div>
-        <div class="pane" id="rpane"></div>
-      </div>
-    </div></div>
+      <div class="scroll" id="list"></div>
+      <div id="amsg"></div>
+    </div>
   </div>
 </template>
 
@@ -139,88 +155,103 @@
   const ic = (k, w) => (w ? I[k].replace('width="24" height="24"', `width="${w}" height="${w}"`) : I[k]);
   const paintIcons = (root = document) => $$('[data-i]', root).forEach((b) => { b.innerHTML = ic(b.dataset.i, b.classList.contains('icon-btn') ? 0 : 20); });
 
-  /* ---------- State ---------- */
-  const START_CAT = 6; // ঘুম — first in the list, selected when the page opens
-  const S = { cat: START_CAT, q: '', installed: false, playing: null, err: null, hk: 'tirmidhi:3446', back: 'duas' };
+  /* ---------- State: which category is open, which dua inside it is open ---------- */
+  const TRAVEL = 17; // সফর — the user flow's example
+  const S = { open: null, dua: null, q: '', installed: false, playing: null, err: null, hk: 'tirmidhi:3446', back: 'cats' };
   const norm = (s) => s.normalize('NFD').replace(/্‌/g, '').replace(/[‌‍]/g, '');
   const catById = (id) => D.cats.find((c) => c.id === +id);
   const plain = (d) => `${d.t}\n\n${d.ar}\n\nউচ্চারণ: ${d.tr}\n\nঅর্থ: ${d.m}\n\nরেফারেন্স: ${d.ref}`;
-  const results = () => { const q = norm(S.q.trim()); return D.cats.flatMap((c) => c.duas).filter((id) => norm(D.duas[id].t + ' ' + D.duas[id].m).includes(q)); };
+  const matches = (id) => norm(D.duas[id].t + ' ' + D.duas[id].m).includes(norm(S.q.trim()));
+  const results = () => D.cats.flatMap((c) => c.duas).filter(matches);
 
-  /* ---------- Home ---------- */
+  /* ---------- Home: দোয়া joins row 2; সাদাকা stays in row 1 ---------- */
   const QA = [['latest', 'সর্বশেষ'], ['goTo', 'জাম্প'], ['prayer', 'ওয়াক্ত'], ['sadaqa', 'সাদাকা'], ['dua', 'দোয়া'], ['feed', 'ফিড'], ['reels', 'রিলস'], ['quiz', 'কুইজ']];
-  const DUA_ICON = '<svg width="34" height="34" viewBox="0 0 33 33" fill="none"><path d="M5.5 30.5c-1.6-5.2-2-11 .2-16.6.9-2.2 3.8-1.8 4 .6l.5 5.6 2.6-9.4c.7-2.3 4-1.8 3.9.6l-.2 19.2z" fill="#1AA483"/><path d="M27.5 30.5c1.6-5.2 2-11-.2-16.6-.9-2.2-3.8-1.8-4 .6l-.5 5.6-2.6-9.4c-.7-2.3-4-1.8-3.9.6l.2 19.2z" fill="#118C6E"/><path d="M16.5 1.8l1.4 2.9 3.1.4-2.3 2.1.6 3.1-2.8-1.6-2.8 1.6.6-3.1-2.3-2.1 3.1-.4z" fill="#FFB84D"/></svg>';
+  const DUA_ICON = '<svg width="30" height="30" viewBox="0 0 33 33"><path d="M5.5 30.5c-1.6-5.2-2-11 .2-16.6.9-2.2 3.8-1.8 4 .6l.5 5.6 2.6-9.4c.7-2.3 4-1.8 3.9.6l-.2 19.2z" style="fill:var(--primary)"/><path d="M27.5 30.5c1.6-5.2 2-11-.2-16.6-.9-2.2-3.8-1.8-4 .6l-.5 5.6-2.6-9.4c-.7-2.3-4-1.8-3.9.6l.2 19.2z" style="fill:var(--primary-dark)"/><path d="M16.5 1.8l1.4 2.9 3.1.4-2.3 2.1.6 3.1-2.8-1.6-2.8 1.6.6-3.1-2.3-2.1 3.1-.4z" style="fill:var(--accent)"/></svg>';
   function renderHome() {
     const tile = ([k, label]) => (k === 'dua' ? `<button class="qa-tile new" id="qa-dua">${DUA_ICON}${label}</button>`
-      : `<button class="qa-tile" data-snack="${label} খুলবে — এই ফিচারের অংশ নয়">${D.homeIcons[k].replace('width="30" height="30"', 'width="34" height="34"')}${label}</button>`);
+      : `<button class="qa-tile" data-snack="${label} খুলবে — এই ফিচারের অংশ নয়">${D.homeIcons[k]}${label}</button>`);
     const rows = []; for (let i = 0; i < QA.length; i += 4) rows.push(`<div class="qa-row">${QA.slice(i, i + 4).map(tile).join('')}</div>`);
-    $('#home-body').innerHTML = `<div class="home-grid"><div class="qa">${rows.join('')}</div></div>`;
-    $('#qa-dua').onclick = () => { S.q = ''; S.cat = START_CAT; go('duas'); };
+    $('#home-body').innerHTML = `<div class="qa">${rows.join('')}</div>`;
+    $('#qa-dua').onclick = () => { S.q = ''; S.open = null; S.dua = null; go('cats'); };
   }
 
+  /* ---------- Helpers: reference links, search highlight ---------- */
   function refHtml(d) {
     let h = d.ref.replace(/\n/g, '<br>');
     d.links.forEach(([txt, key]) => { h = h.replace(txt, `<button class="ref-link" data-h="${key}">${txt}</button>`); });
     return h;
   }
-
-  /* ---------- Right pane card: title + play → Arabic → উচ্চারণ | অর্থ → রেফারেন্স + কপি/শেয়ার ---------- */
-  function card(id) {
-    const d = D.duas[id], on = S.playing === id;
-    return `<article class="det" data-id="${id}"><div class="det-head"><h3>${d.t}</h3>
-        <button class="btn tonal" data-play="${id}" aria-pressed="${on}" aria-label="${on ? 'থামান' : 'শুনুন'}">${ic(on ? 'pause' : 'play')}${on ? 'থামান' : 'শুনুন'}</button></div>
-      <p class="arabic">${d.ar}</p>
-      <div class="cols"><div><span class="lbl">উচ্চারণ</span><p class="txt">${d.tr}</p></div><div><span class="lbl">অর্থ</span><p class="txt">${d.m}</p></div></div>
-      <div class="foot"><p class="ref">রেফারেন্স: ${refHtml(d)}</p>
-        <button class="icon-btn" data-copy="${id}" aria-label="কপি">${ic('copy')}</button><button class="icon-btn" data-share="${id}" aria-label="শেয়ার">${ic('share')}</button></div></article>`;
+  function hl(text) {
+    const q = S.q.trim(); if (!q) return text;
+    const i = text.indexOf(q); if (i < 0) return text;
+    return `${text.slice(0, i)}<mark class="hl">${q}</mark>${text.slice(i + q.length)}`;
   }
 
-  /* ---------- Dua page: left = categories (or categories with matches), right = their duas ---------- */
+  /* ---------- Dua row: number + title (+ one line of meaning) + play; open = Arabic → উচ্চারণ → অর্থ → রেফারেন্স → কপি | শেয়ার ---------- */
+  function duaItem(id, i) {
+    const d = D.duas[id], open = S.dua === id, on = S.playing === id;
+    return `<div class="dua${open ? ' open' : ''}" data-dua="${id}">
+      <div class="drow"><button class="tap" data-toggle="${id}" aria-expanded="${open}"><span class="num">${bn(i + 1)}</span>
+          <span class="dt"><b>${hl(d.t)}</b><span>${hl(d.m)}</span></span></button>
+        <button class="play" data-play="${id}" aria-pressed="${on}" aria-label="${on ? 'থামান' : 'শুনুন'}">${ic(on ? 'pause' : 'play')}</button></div>
+      ${open ? `<div class="dbody"><p class="arabic">${d.ar}</p>
+        <span class="lbl">উচ্চারণ</span><p class="txt">${d.tr}</p>
+        <span class="lbl">অর্থ</span><p class="txt">${hl(d.m)}</p>
+        <p class="ref">রেফারেন্স: ${refHtml(d)}</p>
+        <div class="acts"><button data-copy="${id}">${ic('copy')}কপি</button><button data-share="${id}">${ic('share')}শেয়ার</button></div></div>` : ''}
+    </div>`;
+  }
+
+  /* ---------- Category row: name + count; open = its duas right under it ---------- */
+  function catItem(c, ids, searching) {
+    const open = searching || S.open === c.id;
+    return `<div class="cat${open ? ' open' : ''}" id="cat-${c.id}">
+      <button class="chead" data-cat="${c.id}" aria-expanded="${open}"><b>${c.name}</b><span class="cnt">${bn(searching ? ids.length : c.count)}</span>${ic('down')}</button>
+      ${open ? `<div class="cbody">${ids.map(duaItem).join('')}</div>` : ''}
+    </div>`;
+  }
+
+  /* ---------- Dua page: whole list, or only the categories/duas that match ---------- */
   const pg = $('#pg-tpl').content.firstElementChild.cloneNode(true);
   paintIcons(pg);
   function renderPage() {
     const q = $('#q', pg); if (q.value !== S.q) q.value = S.q;
     $('#q-clr', pg).hidden = !S.q;
-    const searching = !!S.q.trim();
-    const L = $('#lpane', pg), R = $('#rpane', pg), split = $('#split', pg);
-    const link = `<button class="applink" data-applink><img src="${D.appIcon}" alt=""><span>আরও দোয়া দেখুন <b>দোয়া ও রুকিয়াহ</b> অ্যাপে</span>${ic('chevron')}</button>`;
-    split.style.gridTemplateColumns = ''; R.hidden = false;
+    const L = $('#list', pg), searching = !!S.q.trim();
+    const link = `<button class="applink" data-applink><img src="${D.appIcon}" alt="">আরও দোয়া দেখুন <b>দোয়া ও রুকিয়াহ</b> অ্যাপে${ic('chevron')}</button>`;
     if (!searching) {
-      const c = catById(S.cat);
-      L.innerHTML = `<div class="phead"><b>ক্যাটাগরি</b><span>${bn(D.cats.length)} টি</span></div>
-        <div class="scroll">${D.cats.map((x) => `<button class="crow" data-cat="${x.id}" aria-current="${x.id === S.cat}"><b>${x.name}</b><span>${bn(x.count)}</span>${ic('chevron')}</button>`).join('')}</div>${link}`;
-      R.innerHTML = `<div class="phead"><b>${c.name}</b><span>${bn(c.count)} টি দোয়া</span></div>
-        <div class="scroll" id="rscroll"><div class="rlist">${c.duas.map(card).join('')}</div></div><div id="amsg"></div>`;
-      const cur = $('.crow[aria-current="true"]', L); if (cur) cur.scrollIntoView({ block: 'nearest' });
-      return paintMsg();
+      L.innerHTML = `<div class="lhead"><b>ক্যাটাগরি</b><span>${bn(D.cats.length)} টি</span></div>
+        <div class="acc">${D.cats.map((c) => catItem(c, c.duas, false)).join('')}</div>${link}`;
+    } else {
+      const r = results();
+      if (!r.length) {
+        L.innerHTML = `<div class="nores"><svg width="112" height="70" viewBox="0 0 112 70" fill="none"><rect x="12" y="2" width="78" height="52" rx="4" style="stroke:var(--primary)" stroke-width="2.5"/><path d="M12 13h78" style="stroke:var(--primary)" stroke-width="2.5"/><circle cx="84" cy="48" r="13" style="fill:var(--card);stroke:var(--primary-dark)" stroke-width="3"/><path d="m93 57 9 9" style="stroke:var(--primary-dark)" stroke-width="4" stroke-linecap="round"/></svg><h3>কোন সার্চ রেজাল্ট পাওয়া যায়নি</h3></div>`;
+      } else {
+        const hits = D.cats.map((c) => ({ c, ids: c.duas.filter(matches) })).filter((x) => x.ids.length);
+        L.innerHTML = `<div class="lhead"><b>সার্চ রেজাল্ট</b><span>${bn(hits.length)} ক্যাটাগরিতে ${bn(r.length)} টি দোয়া</span></div>
+          <div class="acc">${hits.map(({ c, ids }) => catItem(c, ids, true)).join('')}</div>${link}`;
+      }
     }
-    const r = results();
-    if (!r.length) {
-      split.style.gridTemplateColumns = '1fr'; R.hidden = true;
-      L.innerHTML = `<div class="nores"><svg width="112" height="70" viewBox="0 0 112 70" fill="none"><rect x="12" y="2" width="78" height="52" rx="4" stroke="var(--primary)" stroke-width="2.5"/><path d="M12 13h78" stroke="var(--primary)" stroke-width="2.5"/><circle cx="84" cy="48" r="13" fill="var(--card)" stroke="var(--primary-dark)" stroke-width="3"/><path d="m93 57 9 9" stroke="var(--primary-dark)" stroke-width="4" stroke-linecap="round"/></svg><h3>কোন সার্চ রেজাল্ট পাওয়া যায়নি</h3></div>`;
-      return;
-    }
-    const hits = D.cats.map((c) => ({ c, ids: r.filter((id) => c.duas.includes(id)) })).filter((x) => x.ids.length);
-    L.innerHTML = `<div class="phead"><b>যেসব ক্যাটাগরিতে পাওয়া গেছে</b><span>${bn(hits.length)} টি</span></div>
-      <div class="scroll">${hits.map(({ c, ids }) => `<button class="crow" data-jump="${c.id}"><b>${c.name}</b><span>${bn(ids.length)} টি</span>${ic('chevron')}</button>`).join('')}</div>${link}`;
-    R.innerHTML = `<div class="phead"><b>সার্চ রেজাল্ট</b><span>${bn(r.length)} টি দোয়া</span></div>
-      <div class="scroll" id="rscroll"><div class="rlist">${hits.map(({ c, ids }) => `<h4 class="ghd" id="grp-${c.id}">${c.name}</h4>${ids.map(card).join('')}`).join('')}</div></div><div id="amsg"></div>`;
     paintMsg();
   }
+  // After opening a category or a dua, bring it into view under the sticky header
+  function reveal(sel) {
+    const el = $(sel, pg); if (!el) return;
+    const L = $('#list', pg), top = el.getBoundingClientRect().top - L.getBoundingClientRect().top;
+    if (top < 0 || top > L.clientHeight - 120) L.scrollTop += top - 8;
+  }
 
-  /* ---------- Audio + message at the bottom of the right pane ---------- */
+  /* ---------- Audio: play ↔ pause on the same button; ends by itself; message at the bottom ---------- */
   // Demo only: dua 142 (ঘুম) fails on its first play (no internet) so the message with "আবার চেষ্টা করুন" can be seen
   const failed = new Set();
   const failsNow = (id) => id === 142 && !failed.has(id) && failed.add(id);
   let timer;
   function paintAudio() {
-    $$('[data-play]', pg).forEach((b) => { const on = S.playing === +b.dataset.play; b.setAttribute('aria-pressed', on); b.setAttribute('aria-label', on ? 'থামান' : 'শুনুন');
-      b.innerHTML = ic(on ? 'pause' : 'play') + (on ? 'থামান' : 'শুনুন'); });
+    $$('[data-play]', pg).forEach((b) => { const on = S.playing === +b.dataset.play; b.setAttribute('aria-pressed', on); b.setAttribute('aria-label', on ? 'থামান' : 'শুনুন'); b.innerHTML = ic(on ? 'pause' : 'play'); });
     paintMsg();
   }
   function paintMsg() {
-    const box = $('#amsg', pg); if (!box) return;
-    box.innerHTML = S.err ? `<div class="amsg" role="alert"><span>${S.err.text}</span>${S.err.retry ? '<button id="a-retry">আবার চেষ্টা করুন</button>' : ''}<button class="x" id="a-x" aria-label="বন্ধ করুন">${ic('close', 16)}</button></div>` : '';
+    $('#amsg', pg).innerHTML = S.err ? `<div class="amsg" role="alert"><span>${S.err.text}</span>${S.err.retry ? '<button class="rt" id="a-retry">আবার চেষ্টা করুন</button>' : ''}<button class="x" id="a-x" aria-label="বন্ধ করুন">${ic('close', 16)}</button></div>` : '';
   }
   function stop() { clearTimeout(timer); S.playing = null; paintAudio(); }
   function play(id) {
@@ -234,54 +265,72 @@
     timer = setTimeout(stop, Math.min(10, Math.max(3, d.ar.length / 14)) * 1000);
   }
 
-  /* ---------- Hadith page ---------- */
+  /* ---------- Hadith page (translation only) ---------- */
   function renderHadith() {
     const h = D.hadith[S.hk];
     $('#h-title').innerHTML = `${h.book}<small>হাদিস: ${h.no}</small>`;
     $('#h-body').innerHTML = `<div class="sec"><b>অধ্যায়:</b> ${h.ch}<span>${h.sec}</span></div>
       <article class="card hcard"><div class="hadith-head"><span class="book-badge" style="background:${h.color}">${h.abbr}</span>
         <div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${h.no}</span></div><span class="grade ${h.gc}">${h.grade}</span></div>
-        <p class="arabic">${h.ar}</p><p class="narrator">${h.nar} থেকে বর্ণিত:</p>${h.tr.split(/\n+/).map((p) => `<p class="translation">${p}</p>`).join('')}</article>`;
+        <p class="narrator">${h.nar} থেকে বর্ণিত:</p>${h.tr.split(/\n+/).map((p) => `<p class="translation">${p}</p>`).join('')}</article>`;
   }
 
-  /* ---------- Navigation between page states ---------- */
-  const STATES = { duas: {}, search: { q: 'আশ্রয়' }, empty: { q: 'যাকাত' } };
-  let internal = false;
-  function go(id) { internal = true; Kit.show(id); internal = false; }
+  /* ---------- Navigation: cats = all closed, duas = one category open, search / empty = typed text ---------- */
+  const STATES = { cats: {}, duas: { open: TRAVEL }, search: { q: 'আশ্রয়' }, empty: { q: 'যাকাত' } };
+  let internal = false, keepTop = 0;
+  function go(id) { keepTop = $('#list', pg).scrollTop; internal = true; Kit.show(id); internal = false; }
   Kit.onScreen((id) => {
-    stop(); S.err = null;
     if (STATES[id]) {
       $(`.screen[data-screen="${id}"]`).appendChild(pg);
-      if (!internal) { S.q = STATES[id].q || ''; S.cat = START_CAT; }
+      if (!internal) {
+        stop(); S.err = null;
+        S.q = STATES[id].q || ''; S.open = STATES[id].open || null;
+        S.dua = S.open ? catById(S.open).duas[0] : null;
+      }
       renderPage();
-    }
-    // The ref link opened from the chip belongs to সফর's first dua
-    if (id === 'hadith') { if (!internal) { S.back = 'duas'; S.q = ''; S.cat = 17; S.hk = 'tirmidhi:3446'; } renderHadith(); }
+      $('#list', pg).scrollTop = internal ? keepTop : 0;
+      if (!internal && S.open) reveal(`#cat-${S.open}`);
+    } else stop();
+    // The ref chip opens সফর's first dua's hadith
+    if (id === 'hadith') { if (!internal) { S.back = 'duas'; S.q = ''; S.open = TRAVEL; S.dua = catById(TRAVEL).duas[0]; S.hk = 'tirmidhi:3446'; } renderHadith(); }
   });
+  const pageState = () => (S.q.trim() ? (results().length ? 'search' : 'empty') : S.open ? 'duas' : 'cats');
+  function refresh() { const want = pageState(); if (want !== Kit.current) go(want); else renderPage(); }
 
-  /* ---------- Events ---------- */
+  /* ---------- In-phone events ---------- */
   pg.addEventListener('input', (e) => {
     if (e.target.id !== 'q') return;
-    S.q = e.target.value;
-    const want = !S.q.trim() ? 'duas' : results().length ? 'search' : 'empty';
-    if (want !== Kit.current) { go(want); const q = $('#q', pg); q.focus(); q.setSelectionRange(q.value.length, q.value.length); } else renderPage();
+    S.q = e.target.value; S.dua = null;
+    refresh();
+    const q = $('#q', pg); q.focus(); q.setSelectionRange(q.value.length, q.value.length);
   });
   pg.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-cat],[data-jump],[data-play],[data-copy],[data-share],[data-h],[data-applink],#q-clr,#a-retry,#a-x,#pg-back');
+    const t = e.target.closest('[data-cat],[data-toggle],[data-play],[data-copy],[data-share],[data-h],[data-applink],#q-clr,#a-retry,#a-x,#pg-back');
     if (!t) return;
-    if (t.dataset.cat) { if (S.cat !== +t.dataset.cat) { stop(); S.err = null; S.cat = +t.dataset.cat; renderPage(); $('#rscroll', pg).scrollTop = 0; } }
-    else if (t.dataset.jump) $(`#grp-${t.dataset.jump}`, pg).scrollIntoView({ block: 'start', behavior: 'smooth' });
+    if (t.dataset.cat) {
+      const id = +t.dataset.cat;
+      // In search, a category head leaves the search and opens that whole category
+      if (S.q.trim()) { S.q = ''; S.open = id; S.dua = null; refresh(); $('#list', pg).scrollTop = 0; return reveal(`#cat-${id}`); }
+      const opening = S.open !== id;
+      S.open = opening ? id : null; S.dua = null;
+      refresh();
+      if (opening) reveal(`#cat-${id}`);
+    } else if (t.dataset.toggle) {
+      const id = +t.dataset.toggle; S.dua = S.dua === id ? null : id;
+      renderPage(); if (S.dua) reveal(`[data-dua="${id}"]`);
+    }
     else if (t.dataset.play) play(+t.dataset.play);
     else if (t.dataset.copy) { Promise.resolve().then(() => navigator.clipboard.writeText(plain(D.duas[t.dataset.copy]))).catch(() => { /* not allowed in this frame */ }); Kit.snack('কপি হয়েছে'); }
-    else if (t.dataset.share) Kit.snack('ডিভাইসের শেয়ার মেনু খুলবে');
+    else if (t.dataset.share) Kit.snack('ফোনের শেয়ার মেনু খুলবে');
     else if (t.dataset.h) { S.hk = t.dataset.h; S.back = Kit.current; go('hadith'); }
     else if (t.dataset.applink !== undefined) S.installed ? Kit.snack('দোয়া ও রুকিয়াহ অ্যাপ খুলছে') : Kit.open('dlg-app');
-    else if (t.id === 'q-clr') { S.q = ''; go('duas'); }
+    else if (t.id === 'q-clr') { S.q = ''; S.dua = null; refresh(); }
     else if (t.id === 'a-retry') play(S.err.id);
     else if (t.id === 'a-x') { S.err = null; paintMsg(); }
-    else if (t.id === 'pg-back') go('home');
+    else if (t.id === 'pg-back') { stop(); S.err = null; go('home'); }
   });
-  $('#h-back').onclick = () => go(S.back);
+  // Back from the hadith returns to the same open category and dua
+  $('#h-back').onclick = () => { internal = true; Kit.show(S.back); internal = false; reveal(`[data-dua="${S.dua}"]`); };
   $('#btn-dl').onclick = () => { Kit.close('dlg-app'); Kit.snack('প্লে স্টোরে দোয়া ও রুকিয়াহ খুলবে'); };
   $('#app-ic').src = D.appIcon;
 
@@ -293,9 +342,9 @@
 
   paintIcons();
   renderHome();
-  Kit.init({ demo: 5, name: 'ট্যাবলেটে পাশাপাশি',
+  Kit.init({ demo: 5, name: 'এক পেজে খুলে খুলে পড়া',
     extra: '<button class="kit-chip" id="tg-app" type="button"></button>',
-    screens: [{ id: 'home', label: 'হোম' }, { id: 'duas', label: 'ক্যাটাগরি ও দোয়া' }, { id: 'search', label: 'সার্চ' }, { id: 'empty', label: 'খালি' }, { id: 'hadith', label: 'মূল হাদিস' }] });
+    screens: [{ id: 'home', label: 'হোম' }, { id: 'cats', label: 'ক্যাটাগরি' }, { id: 'duas', label: 'খোলা ক্যাটাগরি' }, { id: 'search', label: 'সার্চ' }, { id: 'empty', label: 'খালি' }, { id: 'hadith', label: 'মূল হাদিস' }] });
   $('#tg-app').onclick = () => { S.installed = !S.installed; syncBar(); };
   syncBar();
 </script>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>অটো রিজিউম — ডেমো ৪ · ট্যাবলেটে ভাসমান কার্ড</title>
+<title>অটো রিজিউম — ডেমো ৪ · কার্ডের স্তূপ</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
 /* ===== Home (HadithBookListTab): green band, quick-action card, book list ===== */
@@ -51,43 +51,47 @@
 .lr b{display:block;color:var(--title);font-size:16px;font-weight:700}
 .lr span{font-size:13px;color:var(--body);opacity:.75}
 
-/* ===== Demo 4: tablet landscape — the card floats at the bottom-right of the content, fixed width ===== */
-.phone.tab{width:1000px;height:680px;border-radius:30px}
+/* ===== Demo 4: a stack of cards at the bottom — the latest read in front, the two before it peek out behind.
+   Swipe sideways (or tap a dot / a peeking edge) to bring another one forward. ===== */
 .home{--dock-pad:262px}
-.phone.tab .band{height:96px}
-.phone.tab .dash{margin:12px 16px}
-.phone.tab .qa{grid-template-columns:repeat(8,1fr)}
-.phone.tab .section-title{margin:18px 20px 10px}
-.books{display:grid;grid-template-columns:1fr 1fr;padding:0 4px}
-.dock{left:auto;right:24px;bottom:24px;width:400px}
-.tc{background:var(--card);border:1px solid var(--divider);border-radius:18px;box-shadow:var(--float);padding:8px 16px 16px;cursor:pointer}
-.tc-top{display:flex;align-items:center;gap:2px;margin-right:-8px}
-.tc-top h2{flex:1;margin:0;font-size:14px;font-weight:700;color:var(--primary-dark)}
-:root[data-theme="dark"] .tc-top h2{color:var(--primary)}
-.tc-top .btn.text{height:32px;font-size:13.5px}
-.tc-top .icon-btn{width:34px;height:34px;color:var(--hint)}
-.tc-row{display:flex;gap:12px;align-items:center;margin-top:6px}
-.tc-meta{flex:1;min-width:0}
-.tc-meta b{display:block;font-size:16px;line-height:1.35;color:var(--title)}
-.tc-meta span{font-size:13px;color:var(--hint)}
-.tc-no{flex:none;text-align:right;font-size:12px;color:var(--hint);line-height:1.2}
-.tc-no b{display:block;font-size:24px;color:var(--primary)}
-.tc p{margin:10px 0 14px;font-size:14.5px;line-height:1.6;color:var(--body);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.tc .btn{height:40px}
-/* Reader, সর্বশেষ and the dialog keep a readable width on the tablet */
-.phone.tab #r-body .hcard,.phone.tab #r-body .sec{max-width:720px;margin-left:auto;margin-right:auto}
-.phone.tab .lr{max-width:720px;margin:7px auto}
-.phone.tab .dialog{left:50%;right:auto;width:440px;transform:translate(-50%,-50%) scale(.96)}
-.phone.tab .dialog.on{transform:translate(-50%,-50%)}
-.phone.tab .snack{left:auto;right:24px;width:400px}
-/* Highlight: outline ring around the hadith, fading after ~3 s */
-.hcard{outline:2px solid transparent;outline-offset:3px;transition:outline-color 1.2s ease,background-color 1.2s ease}
+.dock{padding:0 12px 14px}
+.deck{position:relative;display:grid;padding-top:20px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.deck>*{grid-area:1/1}
+/* Cards behind: same size, pushed up and narrowed so only their top edge shows */
+.dk-back{border-radius:18px;background:var(--card);border:1px solid var(--divider);box-shadow:0 2px 8px color-mix(in srgb,var(--scrim) 20%,transparent);cursor:pointer;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.dk-back.b1{transform:translateY(-10px) scale(.94);z-index:1}
+.dk-back.b2{transform:translateY(-20px) scale(.88);z-index:0;background:var(--surface-2)}
+/* Front card */
+.dk{position:relative;z-index:2;background:var(--card);border:1px solid var(--divider);border-radius:18px;box-shadow:var(--float);padding:8px 14px 12px;cursor:pointer}
+.dk.in-l{animation:dk-l .3s cubic-bezier(.2,.8,.2,1)}
+.dk.in-r{animation:dk-r .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes dk-l{from{transform:translateX(40%) rotate(4deg);opacity:0}}
+@keyframes dk-r{from{transform:translateX(-40%) rotate(-4deg);opacity:0}}
+.dk-top{display:flex;align-items:center;gap:2px;margin-right:-8px}
+.dk-top h2{flex:1;margin:0;font-size:13.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .dk-top h2{color:var(--primary)}
+.dk-top .btn.text{height:32px;font-size:13.5px}
+.dk-top .icon-btn{width:34px;height:34px;color:var(--hint)}
+.dk-row{display:flex;gap:12px;align-items:center;margin-top:4px}
+.dk-meta{flex:1;min-width:0}
+.dk-meta b{display:block;color:var(--title);font-size:15.5px;line-height:1.35}
+.dk-meta span{font-size:13px;color:var(--hint)}
+.dk p{margin:8px 0 10px;color:var(--body);font-size:14px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dk-foot{display:flex;align-items:center;gap:10px}
+.dots{flex:1;display:flex;align-items:center;gap:2px}
+.dots button{width:22px;height:22px;display:grid;place-items:center}
+.dots button i{width:7px;height:7px;border-radius:4px;background:var(--divider);transition:width .2s,background .2s}
+.dots button[aria-current="true"] i{width:18px;background:var(--primary)}
+.dots small{margin-left:4px;font-size:12px;color:var(--hint)}
+.dk-foot .btn{height:38px;padding:0 16px;font-size:14px}
+/* Highlight: dashed primary outline around the hadith you came back to, fading after ~3 s */
+.hcard{outline:2px dashed transparent;outline-offset:3px;transition:outline-color 1.2s ease,background-color 1.2s ease}
 .hcard.hl{outline-color:var(--primary);background:var(--tint)}
 </style>
 </head>
 <body>
 <main class="kit-stage">
-  <div class="phone tab">
+  <div class="phone">
     <div class="viewport"></div>
   </div>
 </main>
@@ -120,15 +124,58 @@
   const paras = (k) => H[k].tr.split(/\n+/).length;
   const label = (h, b) => `চালিয়ে যান: ${b.name}, হাদিস ${h.no}`;
 
-  /* ---------- Demo 4 tablet: floating card at the bottom-right of the main content area ---------- */
-  // Card (400px, bottom-right): label + সব দেখুন + ✕ | badge + book + chapter + big hadith number | first line | চালিয়ে যান
+  /* ---------- Demo 4 card stack: up to three recent reads, newest in front ---------- */
+  // Front: label + সব দেখুন + ✕ | badge + "বই, হাদিস নং" + chapter | first line | dots + চালিয়ে যান.
+  // Behind: the two reads before it, only their top edge shows. ✕ hides the whole stack.
+  let fi = 0, dir = '';                     // index of the front card in the history, slide direction
+  const deckItems = () => S.hist.slice(0, 3);
   const D = {
-    card: (t, h, b) => `<div class="tc" data-act="resume" role="button" tabindex="0" aria-label="${label(h, b)}">
-      <div class="tc-top"><h2>যেখানে ছেড়েছিলেন</h2><button class="btn text" data-act="all">সব দেখুন</button><button class="icon-btn" data-act="hide" aria-label="কার্ড লুকান">${ic('close', 18)}</button></div>
-      <div class="tc-row">${badge(b)}<div class="tc-meta"><b>${b.name}</b><span>অধ্যায়: ${h.ch}</span></div><span class="tc-no">হাদিস<b>${h.no}</b></span></div>
-      <p>${firstLine(t.id)}</p>
-      <button class="btn block" data-act="resume">চালিয়ে যান ${ic('chevron', 18)}</button></div>`,
+    card: (t) => {
+      if (t) fi = 0;                        // a fresh render (launch, back to home) always starts at the newest read
+      const items = deckItems(); if (fi >= items.length) fi = 0;
+      const e = items[fi], h = H[e.id], b = bookOf(e.id), n = items.length;
+      const behind = [1, 2].filter((d) => d < n).map((d) => `<div class="dk-back b${d}" data-act="front" data-i="${(fi + d) % n}" aria-hidden="true"></div>`).join('');
+      const dots = n > 1 ? items.map((_, i) => `<button data-act="front" data-i="${i}" aria-label="${bn(i + 1)} নম্বর পড়া" aria-current="${i === fi}"><i></i></button>`).join('') + `<small>${bn(fi + 1)}/${bn(n)}</small>` : '';
+      return `<div class="deck" aria-roledescription="কার্ডের স্তূপ">${behind}
+        <div class="dk ${dir}" data-act="go" data-id="${e.id}" role="button" tabindex="0" aria-label="${label(h, b)}">
+          <div class="dk-top"><h2>${fi === 0 ? 'যেখানে ছেড়েছিলেন' : 'এর আগে পড়েছিলেন'}</h2><button class="btn text" data-act="all">সব দেখুন</button><button class="icon-btn" data-act="hide" aria-label="কার্ড লুকান">${ic('close', 18)}</button></div>
+          <div class="dk-row">${badge(b)}<div class="dk-meta"><b>${b.name}, হাদিস ${h.no}</b><span>অধ্যায়: ${h.ch}</span></div></div>
+          <p>${firstLine(e.id)}</p>
+          <div class="dk-foot"><div class="dots">${dots}</div><button class="btn" data-act="go" data-id="${e.id}">চালিয়ে যান ${ic('chevron', 18)}</button></div>
+        </div></div>`;
+    },
+    acts: {
+      // Resume whichever read is in front (the newest one unless the user swiped)
+      go: (el) => { const e = S.hist.find((x) => x.id === el.dataset.id); if (e) openHadith(e.id, e.p, S.home); },
+      front: (el) => bringFront(+el.dataset.i),
+    },
+    // Swipe left = older read, swipe right = newer read; the stack goes back to the newest on every launch
+    afterDock: (sec, dock, t) => {
+      dir = '';
+      const deck = $('.deck', dock);
+      if (!deck || !t) return;
+      let x0 = null;
+      deck.onpointerdown = (ev) => { x0 = ev.clientX; swiped = false; };
+      deck.onpointerup = (ev) => {
+        if (x0 === null) return;
+        const dx = ev.clientX - x0; x0 = null;
+        if (Math.abs(dx) < 40 || deckItems().length < 2) return;
+        swiped = true;
+        const n = deckItems().length;
+        bringFront(dx < 0 ? (fi + 1) % n : (fi - 1 + n) % n, dx < 0 ? 'in-l' : 'in-r');
+      };
+      deck.onpointercancel = () => { x0 = null; };
+    },
   };
+  let swiped = false;                       // a swipe must not also count as a tap on the card
+  document.addEventListener('click', (e) => { if (swiped && e.target.closest('.deck')) { swiped = false; e.stopPropagation(); } }, true);
+  function bringFront(i, d) {
+    if (i === fi) return;
+    dir = d || (i > fi ? 'in-l' : 'in-r'); fi = i;
+    const dock = $('.dock', homeSec());
+    dock.innerHTML = D.card();
+    D.afterDock(homeSec(), dock, top());
+  }
 
   /* ---------- Shared app logic: history, resume, hadith list, সর্বশেষ, dialogs ---------- */
   const OUT = (n) => `${n} খুলবে — এই ফিচারের অংশ নয়`;
@@ -317,7 +364,7 @@
     if (id === 'reader' && chip) { reset('home'); renderReader('m420', 3); }
   });
 
-  Kit.init({ demo: 4, name: 'ট্যাবলেটে ভাসমান কার্ড', extra: '<button class="kit-chip" id="kit-relaunch" type="button">অ্যাপ আবার খুলুন</button>', screens: [
+  Kit.init({ demo: 4, name: 'কার্ডের স্তূপ', extra: '<button class="kit-chip" id="kit-relaunch" type="button">অ্যাপ আবার খুলুন</button>', screens: [
     { id: 'home', label: 'হোম' }, { id: 'reader', label: 'হাদিসে ফেরা' }, { id: 'latest', label: 'সর্বশেষ' }, { id: 'nobook', label: 'বই নেই' },
   ]});
 })();

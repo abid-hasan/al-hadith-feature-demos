@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>বুকমার্ক — ডেমো ৫ · মিনিমাল ও ট্যাবলেট ভিউ</title>
+<title>বুকমার্ক — ডেমো ৫ · মিনিমাল গ্রুপড তালিকা</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
 /* =========================================================
@@ -11,13 +11,6 @@
    ========================================================= */
 :root{--track:rgba(0,0,0,.045); --hover:rgba(0,0,0,.04); --accent-text:var(--primary-dark)}
 :root[data-theme="dark"]{--track:rgba(255,255,255,.06); --hover:rgba(255,255,255,.05); --accent-text:var(--primary)}
-
-/* =========================================================
-   TABLET FRAME (the "ট্যাবলেটে পাশাপাশি" screen)
-   ========================================================= */
-.phone.tablet{width:1180px;height:820px;border-radius:34px}
-.phone.tablet .statusbar{height:26px;padding:0 22px;font-size:12px}
-.phone.tablet .snack{left:50%;right:auto;width:420px;margin-left:-210px}
 
 /* =========================================================
    APP PRIMITIVES
@@ -57,15 +50,12 @@
 .login .tbtn{margin-top:6px}
 .tbtn{font-size:14px;color:var(--accent-text);font-weight:600;padding:4px 2px}
 
-/* folder list (shared by page + tablet rail) */
+/* folder list: one inset group, hairlines start after the icon */
 .group{background:var(--card);border:1px solid var(--divider);border-radius:var(--r-card);overflow:hidden}
 .frow{display:flex;align-items:center;padding-right:4px;position:relative}
 .frow+.frow::before{content:"";position:absolute;top:0;left:68px;right:0;border-top:1px solid var(--divider)}
 .frow-main{flex:1;display:flex;align-items:center;gap:14px;min-width:0;padding:12px 0 12px 14px;text-align:start}
 .frow:hover{background:var(--hover)}
-.frow.sel{background:var(--tint)}
-.frow.sel .fname{color:var(--accent-text)}
-.frow.sel::after{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--primary)}
 .ftint{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none}
 .ftint svg{width:20px;height:17px}
 .ftxt{min-width:0}
@@ -102,13 +92,10 @@
 .quiet{color:var(--hint);font-size:14px;text-align:center;padding:40px 12px}
 
 /* =========================================================
-   OVERLAYS: kit .sheet (phone) / .dialog (dialogs, and every
-   overlay on the tablet)
+   OVERLAYS: kit .sheet (bottom sheets) / .dialog (dialogs)
    ========================================================= */
 .sheet{border-top:1px solid var(--divider)}
 #ov-dlg{padding:0;display:flex;flex-direction:column;max-height:86%;border-radius:var(--r-sheet);border:1px solid var(--divider)}
-.phone.tablet #ov-dlg{left:calc(50% - 170px);right:auto;width:340px}
-.phone.tablet #ov-dlg.wide{left:calc(50% - 260px);width:520px}
 .handle{width:36px;height:4px;border-radius:2px;background:var(--divider);margin:10px auto 2px;flex:none}
 .dialog .handle{display:none}
 .sh-head{display:flex;align-items:center;gap:8px;padding:10px 12px 10px 20px;flex:none}
@@ -170,26 +157,11 @@
 .lrow svg{width:22px;height:22px;color:var(--body)}
 .lrow:hover{background:var(--hover)}
 
-/* =========================================================
-   TABLET LANDSCAPE (rail + detail)
-   ========================================================= */
-.t-body{flex:1;display:flex;min-height:0}
-.t-rail{width:380px;flex:none;display:flex;flex-direction:column;border-right:1px solid var(--divider)}
-.t-rail .scroll{padding:16px 18px 24px}
-.t-detail{flex:1;min-width:0;display:flex;flex-direction:column}
-.t-dhead{display:flex;align-items:center;gap:16px;padding:18px 28px 12px}
-.t-dhead .tt{flex:1;min-width:0}
-.t-dhead h2{margin:0;font-size:22px;font-weight:600;color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.t-dhead small{font-size:13px;color:var(--hint)}
-.t-dhead .srow{margin:0;width:340px}
-.t-detail .scroll{padding:4px 28px 28px}
-.t-col{max-width:780px}
-.t-ph{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
 <main class="kit-stage">
-  <div class="phone" id="device">
+  <div class="phone">
     <div class="viewport">
       <!-- One rendered view moves into whichever chip screen is shown -->
       <section class="screen" data-screen="card" data-status="light"><div class="pg" id="view"></div></section>
@@ -197,7 +169,6 @@
       <section class="screen" data-screen="folders" data-status="light"></section>
       <section class="screen" data-screen="details" data-status="light"></section>
       <section class="screen" data-screen="manage" data-status="light"></section>
-      <section class="screen" data-screen="tablet" data-status="light"></section>
       <div class="sheet" id="ov-sheet" role="dialog" aria-modal="true"></div>
       <div class="dialog" id="ov-dlg" role="dialog" aria-modal="true"></div>
     </div>
@@ -243,13 +214,13 @@ const I = {
 const COLORS = ['#66BB6A','#7986CB','#4FC3F7','#4DB6AC','#9CCC65','#DCE775','#FFB74D','#FF8A65','#BA68C8','#F06292','#E57373','#BCAAA4','#90A4AE'];
 let clock = 100; const now = () => ++clock;
 const S = {
-  device:'phone', base:'folders', tab:0, q:'', dq:'', sortF:'name', sortH:'name',
+  base:'folders', tab:0, q:'', dq:'', sortF:'name', sortH:'name',
   folderId:1, showLogin:true, overlays:[], nextId:7,
   folders:[
     {id:1, name:'নামাজের হাদিস',  color:'#66BB6A', count:12, type:'b', created:1, modified:9},
     {id:2, name:'রমজান',         color:'#FFB74D', count:5,  type:'b', created:2, modified:6},
     {id:3, name:'পরিবার ও আখলাক', color:'#7986CB', count:8,  type:'b', created:3, modified:8},
-    {id:4, name:'দোয়া ও যিকির',   color:'#4FC3F7', count:3,  type:'b', created:4, modified:5},
+    {id:4, name:'ধৈর্য ও সংযম',    color:'#4FC3F7', count:3,  type:'b', created:4, modified:5},
     {id:5, name:'পরে পড়ব',       color:'#F06292', count:0,  type:'b', created:5, modified:7},
     {id:6, name:'প্রতিদিন পড়ি',   color:'#4DB6AC', count:2,  type:'p', created:6, modified:4}
   ],
@@ -259,7 +230,7 @@ const S = {
     {id:3, book:'সহিহ বুখারি', no:6018, tr:'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।', f:[], dl:true, added:0},
     {id:4, book:'সুনানে আবু দাউদ', no:4985, f:[1], dl:false, added:4},
     {id:5, book:'সহিহ বুখারি', no:1894, tr:'রোজা ঢালস্বরূপ।', f:[2], dl:true, added:6},
-    {id:6, book:'সহিহ বুখারি', no:6407, tr:'যে তার রবকে স্মরণ করে আর যে করে না, তাদের দৃষ্টান্ত জীবিত ও মৃতের মতো।', f:[4,6], dl:true, added:7}
+    {id:6, book:'সহিহ বুখারি', no:6116, tr:'রাগ করো না।', f:[4,6], dl:true, added:7}
   ]
 };
 const CARD_PAGE = [1,6,3];   // hadiths on the "সহিহ বুখারি" list page
@@ -276,7 +247,6 @@ const countText = c => c > 0 ? `${bn(c)}টি হাদিস` : 'কোন হ
 const folder = id => S.folders.find(f => f.id === id);
 const hadith = id => S.hadiths.find(h => h.id === id);
 const topOv = () => S.overlays[S.overlays.length - 1];
-const isTablet = () => S.device === 'tablet';
 const match = (txt, q) => !q.trim() || txt.toLowerCase().includes(q.trim().toLowerCase());
 const bmFolders = h => h.f.filter(id => folder(id) && folder(id).type === 'b');
 const segMem = {};
@@ -322,8 +292,8 @@ function searchRow(key, value, placeholder, sortTarget){
 function folderIcon(f){
   return `<span class="ftint" style="background:${hexA(f.color,.16)};color:${f.color}">${I.folder}</span>`;
 }
-function folderRow(f, selected){
-  return `<div class="frow${selected ? ' sel' : ''}">
+function folderRow(f){
+  return `<div class="frow">
     <button class="frow-main" data-act="open" data-id="${f.id}" aria-label="${esc(f.name)}, ${countText(f.count)}">
       ${folderIcon(f)}<span class="ftxt"><span class="fname">${esc(f.name)}</span><span class="fcount">${countText(f.count)}</span></span>
     </button>
@@ -340,13 +310,12 @@ function emptyState(q, type, small){
   const text = q.trim() ? 'কোন সার্চ রেজাল্ট পাওয়া যায়নি' : (type === 'p' ? 'কোন পিন পাওয়া যায়নি' : 'কোন বুকমার্ক পাওয়া যায়নি');
   return `<div class="empty${small ? ' small' : ''}">${I.empty}<p>${text}</p></div>`;
 }
-/* folder list for the current tab (page + tablet rail) */
+/* folder list for the current tab */
 function tabContent(){
   const type = S.tab === 0 ? 'b' : 'p';
   const list = visibleFolders(type, S.q);
-  const sel = isTablet() ? selectedFolderId() : null;
   return searchRow('q', S.q, type === 'b' ? 'বুকমার্ক সার্চ করুন' : 'পিন সার্চ করুন', 'f') +
-    (list.length ? `<div class="group">${list.map(f => folderRow(f, f.id === sel)).join('')}</div>` : emptyState(S.q, type, isTablet()));
+    (list.length ? `<div class="group">${list.map(f => folderRow(f)).join('')}</div>` : emptyState(S.q, type));
 }
 function hadithCard(h, inFolder){
   const n = bmFolders(h).length;
@@ -389,31 +358,7 @@ function cardPage(){
 }
 
 /* =========================================================
-   PAGES — tablet landscape (left rail + right detail)
-   ========================================================= */
-function selectedFolderId(){
-  const type = S.tab === 0 ? 'b' : 'p';
-  const f = folder(S.folderId);
-  if (f && f.type === type) return f.id;
-  const first = visibleFolders(type, '')[0];
-  return first ? first.id : null;
-}
-function tabletPage(){
-  const fid = selectedFolderId(), f = fid && folder(fid);
-  const right = f
-    ? `<div class="t-dhead"><div class="tt"><h2>${esc(f.name)}</h2><small>${countText(f.count)}</small></div>
-        ${searchRow('dq', S.dq, 'হাদিস সার্চ করুন', 'h')}</div>
-        <div class="scroll" data-keep="tdetail"><div class="t-col">${detailList(f.id)}</div></div>`
-    : `<div class="t-ph">${emptyState('', S.tab === 0 ? 'b' : 'p')}</div>`;
-  return `${appBar('কালেকশন', '', collectionActions)}
-    <div class="t-body">
-      <aside class="t-rail"><div class="scroll" data-keep="rail">${loginBox()}${seg('main', ['বুকমার্কস','পিনস'], S.tab)}${tabContent()}</div></aside>
-      <section class="t-detail">${right}</section>
-    </div>`;
-}
-
-/* =========================================================
-   OVERLAYS — sheets on the phone, dialogs on the tablet
+   OVERLAYS — bottom sheets and dialogs
    ========================================================= */
 const SHEETS = ['menu','coll','create','manage','sort'];
 const closeBtn = `<button class="ib sm" data-act="close" aria-label="বন্ধ করুন">${I.close}</button>`;
@@ -522,16 +467,15 @@ function slideSegs(root){
 function renderPage(){
   const v = $('#view');
   const scrolls = {}; v.querySelectorAll('[data-keep]').forEach(el => scrolls[el.dataset.keep] = el.scrollTop);
-  withFocus(() => { v.innerHTML = isTablet() ? tabletPage() : phonePage(); });
+  withFocus(() => { v.innerHTML = phonePage(); });
   v.querySelectorAll('[data-keep]').forEach(el => { if (scrolls[el.dataset.keep]) el.scrollTop = scrolls[el.dataset.keep]; });
   slideSegs(v);
 }
 function renderOverlay(){
   const o = topOv();
   if (!o){ Kit.close('ov-sheet'); Kit.close('ov-dlg'); return; }
-  const asDialog = isTablet() || !SHEETS.includes(o.t);
+  const asDialog = !SHEETS.includes(o.t);
   const host = $(asDialog ? '#ov-dlg' : '#ov-sheet');
-  host.classList.toggle('wide', asDialog && isTablet() && SHEETS.includes(o.t));
   withFocus(() => { host.innerHTML = OVERLAYS[o.t](o); });
   slideSegs(host);
   Kit.open(host.id);
@@ -551,29 +495,22 @@ const snack = text => Kit.snack(text);
 
 /* =========================================================
    SCREENS — chips map to a page (+ an overlay for the sheet
-   steps); "ট্যাবলেট" switches the frame to the tablet layout
+   steps)
    ========================================================= */
-const BASE_OF = {card:'card', collection:'card', folders:'folders', details:'details', manage:'folders', tablet:'folders'};
+const BASE_OF = {card:'card', collection:'card', folders:'folders', details:'details', manage:'folders'};
 let internal = false;
 function go(id){ internal = true; Kit.show(id); internal = false; }
 /* in-app navigation that changes the page moves the chip too */
-function sync(){ if (!isTablet() && BASE_OF[Kit.current] !== S.base) go(S.base); else renderPage(); }
-function setDevice(d){
-  if (S.device === d) return;
-  S.device = d;
-  $('#device').classList.toggle('tablet', d === 'tablet');
-  window.dispatchEvent(new Event('resize'));   // the kit re-fits the frame
-}
+function sync(){ if (BASE_OF[Kit.current] !== S.base) go(S.base); else renderPage(); }
 function collFor(hid){ delete segMem.coll; return {t:'coll', h:hid, tab:0, q:'', ticks:hadith(hid).f.slice()}; }
 
 Kit.onScreen(id => {
   $(`.screen[data-screen="${id}"]`).appendChild($('#view'));
   clearTimeout(closeTimer); closing = false; S.overlays = [];
-  setDevice(id === 'tablet' ? 'tablet' : 'phone');
   if (!internal){ /* a chip resets the demo state for its step */
     S.q = ''; S.dq = ''; S.tab = 0; S.showLogin = true; S.base = BASE_OF[id];
     if (!folder(S.folderId) || folder(S.folderId).type !== 'b'){ const f = visibleFolders('b','')[0]; if (f) S.folderId = f.id; }
-    if ((id === 'details' || id === 'tablet') && folder(1)) S.folderId = 1;
+    if (id === 'details' && folder(1)) S.folderId = 1;
     if (id === 'collection') S.overlays = [collFor(3)];
     if (id === 'manage' && folder(S.folderId)) S.overlays = [{t:'manage', f:S.folderId}];
   }
@@ -585,7 +522,6 @@ Kit.onScreen(id => {
    ========================================================= */
 const ACT = {
   back(){
-    if (isTablet()) return;
     S.base = S.base === 'details' ? 'folders' : S.base === 'folders' ? 'card' : 'folders';
     S.dq = ''; sync();
   },
@@ -598,7 +534,7 @@ const ACT = {
   },
   open(b){ S.folderId = +b.dataset.id; S.base = 'details'; S.dq = ''; sync(); },
   fmore(b){ push({t:'manage', f:+b.dataset.id}); },
-  hmore(b){ push({t:'menu', h:+b.dataset.id, inFolder:b.dataset.inf === '1', f:isTablet() ? selectedFolderId() : S.folderId}); },
+  hmore(b){ push({t:'menu', h:+b.dataset.id, inFolder:b.dataset.inf === '1', f:S.folderId}); },
   sort(b){ const t = b.dataset.target; push({t:'sort', target:t, sel:t === 'f' ? S.sortF : S.sortH}); },
   'sort-pick'(b){ topOv().sel = b.dataset.k; renderOverlay(); },
   'sort-ok'(){ const o = topOv(); closeTop(() => { if (o.target === 'f') S.sortF = o.sel; else S.sortH = o.sel; }); },
@@ -617,7 +553,7 @@ const ACT = {
       const h = hadith(o.h), f = folder(o.f);
       h.f = h.f.filter(id => id !== o.f);
       /* last hadith removed → back to the folder list */
-      if (f){ f.count = Math.max(0, f.count - 1); f.modified = now(); if (!folderHadiths(f.id, '').length){ f.count = 0; if (!isTablet()){ S.base = 'folders'; S.dq = ''; } } }
+      if (f){ f.count = Math.max(0, f.count - 1); f.modified = now(); if (!folderHadiths(f.id, '').length){ f.count = 0; S.base = 'folders'; S.dq = ''; } }
       snack('বুকমার্ক মুছে ফেলা হয়েছে');
     });
   },
@@ -656,7 +592,7 @@ const ACT = {
     closeTop(() => {
       S.folders = S.folders.filter(f => f.id !== o.f);
       S.hadiths.forEach(h => h.f = h.f.filter(id => id !== o.f));
-      if (S.folderId === o.f && S.base === 'details' && !isTablet()) S.base = 'folders';
+      if (S.folderId === o.f && S.base === 'details') S.base = 'folders';
       snack('বুকমার্ক মুছে ফেলা হয়েছে');
     });
   }
@@ -686,13 +622,12 @@ document.addEventListener('compositionend', e => {
   if (k === 'cq') renderOverlay(); else if (k === 'q' || k === 'dq') renderPage();
 });
 
-Kit.init({ demo: 5, name: 'মিনিমাল ও ট্যাবলেট ভিউ', screens: [
+Kit.init({ demo: 5, name: 'মিনিমাল গ্রুপড তালিকা', screens: [
   { id: 'card', label: 'হাদিস কার্ড' },
   { id: 'collection', label: 'কালেকশন শিট' },
   { id: 'folders', label: 'ফোল্ডার লিস্ট' },
   { id: 'details', label: 'ফোল্ডারের ভেতরে' },
-  { id: 'manage', label: 'এডিট ও ডিলিট' },
-  { id: 'tablet', label: 'ট্যাবলেটে পাশাপাশি' }
+  { id: 'manage', label: 'এডিট ও ডিলিট' }
 ]});
 </script>
 </body>

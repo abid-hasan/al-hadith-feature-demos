@@ -3,45 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ছোট টেকঅ্যাওয়ে — ডেমো ৫ · ট্যাবলেটে পাশাপাশি</title>
+<title>ছোট টেকঅ্যাওয়ে — ডেমো ৫ · রঙিন সিঁড়ি</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <link rel="stylesheet" href="common.css">
 <style>
-/* ===== Tablet (landscape). List card shows the box above the translation (Arabic is
-   hidden in these demos). Details page puts "মূল শিক্ষা" and
-   "শিক্ষণীয় বিষয়" in a side column next to the hadith. ===== */
-.phone.tablet{width:min(1040px,calc(100vw - 48px));height:720px;border-radius:30px}
-.phone.tablet .card{margin-left:20px;margin-right:20px}
-.phone.tablet .sheet{left:50%;right:auto;width:560px;margin-left:-280px}
+/* ===== Colourful: a solid primary card above the translation. The three points are
+   a vertical stepper (numbered dots joined by a line). Collapsed, the whole card
+   shrinks to a small pill "মূল শিক্ষা · ৩টি পয়েন্ট" that sits left, not full width. ===== */
+.kp{--on:var(--on-appbar);margin:14px 0 4px;border-radius:14px;background:var(--primary);color:var(--on);overflow:hidden;
+  transition:border-radius .2s}
+:root[data-theme="dark"] .kp{background:var(--primary-dark)}
 
-/* The box (list): wide, points side by side in one row */
-.kt{margin:12px 0 4px;border-radius:10px;background:var(--tint)}
-.kt-head{display:flex;align-items:center;gap:6px;width:100%;min-height:40px;padding:6px 8px 6px 14px;text-align:left;font-size:calc(var(--fs) * .88);font-weight:700;color:var(--primary-dark)}
-:root[data-theme="dark"] .kt-head{color:var(--primary)}
-.kt-head .chev{margin-left:auto;width:28px;height:28px;display:grid;place-items:center;transition:transform .2s}
-.kt-head .chev svg{width:18px;height:18px}
-.kt-line{display:none;flex:1;min-width:0;font-weight:400;color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kt-body{display:flex;align-items:center;gap:20px;padding:0 14px 10px;flex-wrap:wrap}
-.kt-body .tlist{display:flex;gap:28px;flex:1}
-.kt-body .tlist li{margin:0;font-size:calc(var(--fs) * .94)}
-.kt-note{display:flex;align-items:center;gap:5px;margin:0;font-size:12.5px;color:var(--hint)}
-.kt-note svg{width:14px;height:14px}
-.kt.collapsed .kt-body{display:none}
-.kt.collapsed .kt-line{display:block}
-.kt.collapsed .chev{transform:rotate(-90deg)}
+/* Title row: icon, "মূল শিক্ষা", নমুনা tag, count (only when collapsed), arrow */
+.kp-head{display:flex;align-items:center;gap:6px;width:100%;min-height:42px;padding:6px 6px 6px 14px;text-align:left;
+  font-size:calc(var(--fs) * .9);font-weight:700;color:var(--on)}
+.kp-head .tag{color:var(--on);border-color:rgba(255,255,255,.45)}
+.kp-count{display:none;font-weight:400;opacity:.85}
+.kp-head .chev{margin-left:auto;flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;
+  background:rgba(255,255,255,.16);transition:transform .2s}
+.kp-head .chev svg{width:18px;height:18px}
 
-/* Details: two panes; the side column stays in view while the hadith scrolls */
-.dgrid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:0;align-items:start}
-.dgrid>main .card{margin-right:10px}
-.aside{position:sticky;top:0;padding-right:20px}
-.aside .dcard{margin:0 0 12px}
-.aside .kt{margin:0;background:var(--card)}
-.aside .kt-body{display:block;padding:0 14px 12px}
-.aside .kt-body .tlist{display:block}
-.aside .kt-body .tlist li{margin-bottom:8px}
-.aside .kt-note{margin-top:10px;padding-top:8px;border-top:1px solid var(--divider)}
-.aside .kt-head{padding-top:10px;padding-bottom:10px}
-@media (max-width:760px){ .dgrid{grid-template-columns:1fr} .aside{position:static;padding:0 20px} }
+/* Stepper: dot + line on the left, the point on the right */
+.kp-steps{margin:0;padding:2px 14px 6px;list-style:none}
+.kp-steps li{position:relative;display:flex;align-items:center;gap:12px;min-height:40px;font-size:calc(var(--fs) * .98);line-height:1.4}
+.kp-steps li::before{content:"";position:absolute;left:13px;top:0;bottom:0;width:2px;background:rgba(255,255,255,.3)}
+.kp-steps li:first-child::before{top:50%}
+.kp-steps li:last-child::before{bottom:50%}
+.kp-steps b{position:relative;flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+  background:var(--on);color:var(--primary-dark);font-size:14px}
+
+/* "আলেমদের যাচাই করা" on a slightly darker strip at the bottom of the card */
+.kp-note{display:flex;align-items:center;gap:6px;margin:0;padding:8px 14px;background:rgba(0,0,0,.12);font-size:12.5px;opacity:.95}
+.kp-note svg{width:14px;height:14px}
+
+/* Collapsed = pill: card shrinks to its title row, sized to its content */
+.kp.collapsed{display:inline-block;border-radius:999px}
+.kp.collapsed .kp-steps,.kp.collapsed .kp-note,.kp.collapsed .tag{display:none}
+.kp.collapsed .kp-count{display:inline}
+.kp.collapsed .kp-head{min-height:36px;padding:3px 4px 3px 12px}
+.kp.collapsed .chev{transform:rotate(-90deg);width:28px;height:28px}
 </style>
 </head>
 <body>
@@ -54,31 +54,29 @@
 <script src="common.js"></script>
 <script>
 (function () {
-  const { bulb, sample, tlist, ic } = BST;
+  const { bn, bulb, sample, ic } = BST;
 
-  /* ---------- The box: title row → points → verified note. Collapsed: one line ---------- */
+  /* ---------- The card: title row → 3-step stepper → verified strip. Collapsed: pill ---------- */
   function box(h) {
     if (!h.points) return '';                      // nothing verified → card stays as today
-    return `<div class="kt" data-box="${h.id}" role="note" aria-label="মূল শিক্ষা">
-      <button class="kt-head" data-toggle="${h.id}" aria-expanded="true">${bulb()}মূল শিক্ষা${sample}
-        <span class="kt-line">${h.points.join(' · ')}</span>
+    return `<div class="kp-wrap"><div class="kp" data-box="${h.id}" role="note" aria-label="মূল শিক্ষা">
+      <button class="kp-head" data-toggle="${h.id}" aria-expanded="true">${bulb()}মূল শিক্ষা${sample}
+        <span class="kp-count">· ${bn(h.points.length)}টি পয়েন্ট</span>
         <span class="chev" aria-hidden="true">${ic('down')}</span></button>
-      <div class="kt-body">${tlist(h.points)}<p class="kt-note">${ic('check')}আলেমদের যাচাই করা</p></div>
-    </div>`;
+      <ol class="kp-steps">${h.points.map((p, i) => `<li><b>${bn(i + 1)}</b><span>${p}</span></li>`).join('')}</ol>
+      <p class="kp-note">${ic('check')}আলেমদের যাচাই করা</p>
+    </div></div>`;
   }
 
   BST.init({
-    demo: 5, name: 'ট্যাবলেটে পাশাপাশি', phoneClass: 'tablet',
+    demo: 5, name: 'রঙিন সিঁড়ি',
     hooks: {
-      // List: box across both columns, then translation | Arabic
-      card: (h, p, ctx) => p.head + (ctx === 'list' ? box(h) : '') + p.local,
-      // Details: hadith on the left, "মূল শিক্ষা" + "শিক্ষণীয় বিষয়" on the right
-      details: (h, p) => `<div class="dgrid"><main>${p.card}</main>
-        <div class="aside">${h.points ? `<div class="dcard" style="padding:0">${box(h)}</div>` : ''}${p.teach}</div></div>`,
+      // Same spot on the list card and the details page: right above the translation
+      slots: (h) => ({ mid: box(h) }),
     },
     screens: [
       { id: 'list', label: 'হাদিস লিস্ট' },
-      { id: 'collapsed', label: 'গোটানো' },
+      { id: 'collapsed', label: 'গোটানো (পিল)' },
       { id: 'details', label: 'হাদিসের বিস্তারিত' },
       { id: 'nobox', label: 'বক্স নেই' },
     ],

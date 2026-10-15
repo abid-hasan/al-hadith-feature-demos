@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>পার্সোনাল নোট — ডেমো ২ · ডায়েরির টাইমলাইন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Page frame (green app bar, rounded panel) ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.pg{display:flex;flex-direction:column;flex:1;min-height:0}
+.hcard .narrator{color:var(--primary);font-size:15px;margin:12px 0 2px}
+.hcard .translation{line-height:1.7}
+
+/* ===== Card: the latest note as a diary entry on a coloured rule ===== */
+.tl{display:block;width:100%;text-align:left;margin-top:14px;padding:2px 0 2px 14px;border-left:3px solid var(--nc)}
+.tl-top{display:flex;align-items:baseline;gap:8px}
+.tl-top b{font-size:15px;color:var(--title)}
+.tl-top span{font-size:12.5px;color:var(--hint)}
+.tl h4{margin:4px 0 0;font-size:14.5px;color:var(--title)}
+.tl p{margin:3px 0 0;font-size:14.5px;line-height:1.6;color:var(--body);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tl .more{display:inline-flex;align-items:center;margin-top:8px;height:28px;padding:0 12px;border-radius:14px;background:var(--tint);color:var(--primary-dark);font-size:13px;font-weight:700}
+:root[data-theme="dark"] .tl .more{color:var(--primary)}
+.add{display:flex;justify-content:flex-end;margin-top:12px}
+.add .btn{height:36px;padding:0 14px;font-size:14px}
+.add svg{width:18px;height:18px}
+
+/* ===== Editor: a tall diary page (top bar with close and সেভ, big date, lined paper) ===== */
+#sh-edit{height:96%;max-height:96%}
+.dbar{display:flex;align-items:center;gap:4px;padding:10px 8px 6px;border-bottom:1px solid var(--divider)}
+.dbar h2{flex:1;margin:0;font-size:17px;color:var(--title)}
+.dbar .btn{font-size:16px}
+.ddate{display:flex;align-items:center;gap:12px;margin:16px 0 6px}
+.ddate b{font-size:44px;line-height:1;color:var(--primary)}
+.ddate span{font-size:14px;line-height:1.4;color:var(--title)}
+.ddate small{display:block;color:var(--hint);font-size:13px}
+.dtitle{display:block;width:100%;height:44px;border:0;border-bottom:1px solid var(--divider);background:none;outline:0;font-size:17px;font-weight:700;color:var(--title)}
+.dtitle::placeholder,.paper textarea::placeholder{color:var(--hint);font-weight:400}
+.paper{margin-top:10px;border-radius:6px}
+.paper textarea{display:block;width:100%;min-height:270px;border:0;outline:0;resize:none;padding:0 4px 0 22px;color:var(--title);font-size:16px;line-height:32px;
+  background:linear-gradient(to right,transparent 12px,var(--tint) 12px 14px,transparent 14px),repeating-linear-gradient(to bottom,transparent 0 31px,var(--divider) 31px 32px);background-attachment:local}
+.paper.err{box-shadow:0 0 0 1.5px var(--error)}
+.count{text-align:right;font-size:12px;color:var(--hint);margin-top:4px}
+.dcol{margin:14px 0 10px}
+.dcol span{display:block;font-size:13.5px;font-weight:700;color:var(--title);margin-bottom:8px}
+.colors{display:flex;flex-wrap:wrap;gap:9px}
+.colors button{width:26px;height:26px;border-radius:50%;background:var(--sw)}
+.colors button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--sw)}
+.colors svg{display:none}
+
+/* ===== নোট বেছে নিন: a short timeline ===== */
+.tli{position:relative;display:block;width:100%;text-align:left;padding:0 0 16px 26px}
+.tli::before{content:"";position:absolute;left:5px;top:7px;width:12px;height:12px;border-radius:50%;background:var(--nc)}
+.tli::after{content:"";position:absolute;left:10px;top:22px;bottom:2px;width:2px;background:var(--divider)}
+.tli:last-child::after{display:none}
+.tli b{display:block;font-size:14px;color:var(--primary-dark)}
+:root[data-theme="dark"] .tli b{color:var(--primary)}
+.tli span{display:block;font-size:15px;color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ===== আমার কালেকশন: underline tabs in the green bar ===== */
+.utabs{display:flex;background:var(--appbar);padding:0 8px}
+.utabs button{flex:1;height:44px;font-size:15px;font-weight:700;color:var(--on-appbar);opacity:.7;border-bottom:3px solid transparent}
+.utabs button[aria-selected="true"]{opacity:1;border-bottom-color:var(--on-appbar)}
+.srow{display:flex;gap:10px;padding:14px 14px 4px}
+.srow .field{flex:1;height:46px;border-radius:23px}
+.srow .clr{width:28px;height:28px;display:grid;place-items:center}
+.srow .icon-btn{width:46px;height:46px;background:var(--card);border:1px solid var(--divider);color:var(--body)}
+
+/* ===== Notes: month headers, day column, rail, entry ===== */
+.mon{margin:14px 16px 6px;font-size:14px;font-weight:700;color:var(--hint)}
+.ent{display:flex;gap:0;width:100%;text-align:left;padding:0 14px 0 8px}
+.day{width:46px;flex:none;text-align:center;padding-top:10px}
+.day b{display:block;font-size:22px;line-height:1.1;color:var(--title)}
+.day small{font-size:11.5px;color:var(--hint)}
+.rail{position:relative;width:18px;flex:none}
+.rail::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--divider)}
+.rail::after{content:"";position:absolute;left:3px;top:18px;width:12px;height:12px;border-radius:50%;background:var(--nc);box-shadow:0 0 0 3px var(--scaffold)}
+.ebody{flex:1;min-width:0;margin:6px 0 8px 6px;padding:10px 12px;border-radius:10px;background:var(--card);box-shadow:var(--shadow)}
+.ebody b{display:block;font-size:15px;color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ebody p{margin:2px 0 0;font-size:14px;color:var(--body);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ebody small{display:inline-block;margin-top:6px;font-size:12px;color:var(--primary-dark);background:var(--tint);border-radius:6px;padding:0 7px}
+:root[data-theme="dark"] .ebody small{color:var(--primary)}
+.empty svg{color:var(--primary)}
+
+/* ===== Sort sheet ===== */
+.rrow{display:flex;align-items:center;gap:16px;width:100%;min-height:52px;font-size:16px;color:var(--title);text-align:left;border-bottom:1px solid var(--divider)}
+.rrow:last-child{border-bottom:0}
+.radio{order:2;margin-left:auto;width:22px;height:22px;display:grid;place-items:center}
+.radio.on::after{content:"";width:12px;height:7px;border-left:2.5px solid var(--primary);border-bottom:2.5px solid var(--primary);transform:rotate(-45deg) translate(1px,-2px)}
+
+/* ===== Note details: diary page with its own buttons ===== */
+.dpage{margin:0 12px;padding:6px 16px 16px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);border-top:4px solid var(--nc)}
+.dpage h3{margin:8px 0 0;font-size:18px;color:var(--title)}
+.lined{margin:8px 0 0;font-size:16px;line-height:32px;color:var(--body);white-space:pre-line;background:repeating-linear-gradient(to bottom,transparent 0 31px,var(--divider) 31px 32px)}
+.edited{margin:10px 0 0;font-size:12.5px;color:var(--hint)}
+.dact{display:flex;gap:10px;margin-top:16px}
+.dact .btn{flex:1;height:40px;font-size:14px}
+.dact svg{width:18px;height:18px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screens: the pages below move into the active screen ===== -->
+      <section class="screen" data-screen="card"></section>
+      <section class="screen" data-screen="create"></section>
+      <section class="screen" data-screen="picker"></section>
+      <section class="screen" data-screen="notes"></section>
+      <section class="screen" data-screen="empty"></section>
+      <section class="screen" data-screen="detail"></section>
+      <section class="screen" data-screen="delete"></section>
+
+      <div id="hold" hidden>
+      <!-- ===== Page: hadith list ===== -->
+      <div class="pg" id="pg-card">
+        <header class="appbar"><button class="icon-btn" data-act="to-notes" data-i="back" aria-label="পেছনে"></button><h1>সহীহ বুখারী<small>আচার-ব্যবহার</small></h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="card-list" style="padding-top:14px"></div></div></div>
+      </div>
+
+      <!-- ===== Page: আমার কালেকশন › নোটস (timeline) ===== -->
+      <div class="pg" id="pg-notes">
+        <header class="appbar"><button class="icon-btn" data-act="to-card" data-i="back" aria-label="পেছনে"></button><h1>আমার কালেকশন</h1></header>
+        <div class="utabs" role="tablist" aria-label="কালেকশন">
+          <button role="tab" aria-selected="false" data-snack="বুকমার্কস খুলবে — এই ফিচারের অংশ নয়">বুকমার্কস</button>
+          <button role="tab" aria-selected="false" data-snack="পিনস খুলবে — এই ফিচারের অংশ নয়">পিনস</button>
+          <button role="tab" aria-selected="true">নোটস</button>
+        </div>
+        <div class="srow">
+          <label class="field"><span data-i="search"></span><input id="q" type="search" maxlength="40" placeholder="নোট সার্চ করুন" aria-label="নোট সার্চ করুন"><button class="clr" data-act="clear" data-i="close" aria-label="মুছুন" hidden></button></label>
+          <button class="icon-btn" data-act="sort" data-i="sort" aria-label="নোটগুলো সাজান"></button>
+        </div>
+        <div class="scroll" id="n-list"></div>
+      </div>
+
+      <!-- ===== Page: note details ===== -->
+      <div class="pg" id="pg-detail">
+        <header class="appbar"><button class="icon-btn" data-act="d-back" data-i="back" aria-label="পেছনে"></button><h1 id="d-title"></h1></header>
+        <div class="utabs" role="tablist" aria-label="হাদিস ও নোট">
+          <button role="tab" data-act="tab" data-t="hadith">হাদিস</button>
+          <button role="tab" data-act="tab" data-t="note">নোট</button>
+        </div>
+        <div class="scroll" id="d-body" style="padding-top:14px"></div>
+      </div>
+      </div>
+
+      <!-- ===== Sheet: diary page editor (নোট তৈরি করুন / নোট এডিট করুন) ===== -->
+      <div class="sheet" id="sh-edit" role="dialog" aria-labelledby="ed-title">
+        <div class="dbar"><button class="icon-btn" data-close data-i="close" aria-label="বাতিল"></button><h2 id="ed-title"></h2><button class="btn text" data-act="ed-save" id="ed-save"></button></div>
+        <div class="sheet-body">
+          <div class="ddate" id="ed-date"></div>
+          <input class="dtitle" id="ed-name" maxlength="100" placeholder="শিরোনাম (ঐচ্ছিক)" aria-label="নোট শিরোনাম ইনপুট">
+          <div class="paper"><textarea id="ed-text" maxlength="500" placeholder="নোট লিখুন..." aria-label="নোট বিবরণ ইনপুট"></textarea></div>
+          <div class="count" id="ed-count"></div>
+          <div class="dcol"><span>নোট রঙ নির্বাচন করুন</span><div class="colors" id="ed-colors"></div></div>
+        </div>
+      </div>
+
+      <!-- ===== Sheet: নোট বেছে নিন ===== -->
+      <div class="sheet" id="sh-pick" role="dialog" aria-label="নোট বেছে নিন">
+        <div class="sheet-head"><h2>নোট বেছে নিন</h2><button class="icon-btn" data-close data-i="close" aria-label="বন্ধ করুন"></button></div>
+        <div class="sheet-body" id="pick-list" style="padding-top:8px"></div>
+      </div>
+
+      <!-- ===== Sheet: নোটগুলো সাজান ===== -->
+      <div class="sheet" id="sh-sort" role="dialog" aria-label="নোটগুলো সাজান">
+        <div class="sheet-head"><h2>নোটগুলো সাজান</h2><button class="icon-btn" data-close data-i="close" aria-label="বন্ধ করুন"></button></div>
+        <div class="sheet-body" id="sort-list" style="padding-bottom:20px"></div>
+      </div>
+
+      <!-- ===== Dialog: delete ===== -->
+      <div class="dialog" id="dlg-del" role="alertdialog" aria-labelledby="del-h">
+        <h2 id="del-h">নোট ডিলিট করুন</h2>
+        <p style="margin:0">আপনি কি নিশ্চিত? নোট ডিলিট করতে চান?</p>
+        <div class="actions"><button class="btn text" data-close>বাতিল</button><button class="btn danger" data-act="del-ok">ডিলিট করুন</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+(function () {
+  const { bn, icons, $, $$ } = Kit;
+  const ic = (k, w) => (w ? icons[k].replace('width="24" height="24"', `width="${w}" height="${w}"`) : icons[k]);
+  // App asset ic_note.svg, stroke follows the note colour (currentColor)
+  const NOTE = (w = 20) => `<svg width="${w}" height="${Math.round(w * 1.2)}" viewBox="0 0 20 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.48 1.33v2.13M10.15 1.33v2.13M4.82 1.33v2.13"/><path d="M1.08 16.26V8.8c0-3.02 0-4.53.94-5.46.94-.94 2.45-.94 5.46-.94h5.33c3.02 0 4.53 0 5.46.94.94.94.94 2.45.94 5.46v3.2c0 5.03 0 7.54-1.56 9.1-1.56 1.57-4.08 1.57-9.1 1.57H7.48c-3.02 0-4.53 0-5.46-.94-.94-.94-.94-2.45-.94-5.46Z"/><path d="M5.88 15.2h4.27M5.88 9.87h8.53"/><path d="M19.21 14.66a2.67 2.67 0 0 1-2.67 2.67c-.53 0-1.16-.09-1.68.05-.46.12-.82.48-.94.94-.14.52-.05 1.15-.05 1.68a2.67 2.67 0 0 1-2.67 2.67"/></svg>`;
+
+  /* ---------- Data: books (colour + short code from hadith.db), safe hadiths only, Bangla only ---------- */
+  const BOOKS = { b: { name: 'সহীহ বুখারী', abbr: 'B', color: '#70bb65' }, m: { name: 'সহীহ মুসলিম', abbr: 'M', color: '#2d91c2' } };
+  const H = {
+    b6018: { bk: 'b', no: '৬০১৮', nar: 'আবূ হুরায়রা (রাঃ)', tr: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।' },
+    b6116: { bk: 'b', no: '৬১১৬', nar: 'আবূ হুরায়রা (রাঃ)', tr: 'এক ব্যক্তি নবী (ﷺ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বললেন, নবী (ﷺ) প্রত্যেক বারেই বললেন: রাগ করো না।' },
+    b1: { bk: 'b', no: '১', nar: 'উমর ইবনুল খাত্তাব (রাঃ)', tr: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' },
+    m223: { bk: 'm', no: '২২৩', nar: 'আবূ মালিক আল-আশ‘আরী (রাঃ)', tr: 'পবিত্রতা ঈমানের অর্ধেক।' },
+    b1894: { bk: 'b', no: '১৮৯৪', nar: 'আবূ হুরায়রা (রাঃ)', tr: 'রোজা ঢালস্বরূপ।' },
+  };
+  const LIST = ['b6018', 'b6116']; // the hadith list page: সহীহ বুখারী › আচার-ব্যবহার
+  // Note colours: availableColors in lib/core/static/constants.dart (the user's pick, not a status)
+  const COLORS = ['#66BB6A', '#7986CB', '#4FC3F7', '#4DB6AC', '#9CCC65', '#DCE775', '#FFB74D', '#FF8A65', '#BA68C8', '#F06292', '#E57373', '#BCAAA4', '#90A4AE'];
+  const t = (s) => new Date(s.replace(' ', 'T'));
+  const SEED = [
+    { id: 1, h: 'b6116', c: '2026-10-14 22:10', title: '', color: '#7986CB', text: 'ছোট ভাইয়ের সাথে তর্ক বাড়ছিল। থেমে গেলাম, রাগ কমলে কথা বললাম।\nঝগড়া আর বাড়েনি।' },
+    { id: 2, h: 'b6116', c: '2026-09-21 21:40', title: 'বারবার একই উপদেশ', color: '#BA68C8', text: 'লোকটি কয়েকবার চাইল, উত্তর একটাই। ঠিক করলাম, রাগ উঠলে আগে পানি খাব, তারপর কথা বলব।' },
+    { id: 3, h: 'b1', c: '2026-09-30 06:15', u: '2026-10-08 06:20', title: 'নিয়ত ঠিক করা', color: '#F06292', text: 'দান করার আগে একটু থেমে নিজেকে জিজ্ঞেস করি, কার জন্য করছি।\nআজ চুপচাপ দিলাম, কাউকে বলিনি।' },
+    { id: 4, h: 'm223', c: '2026-09-15 05:05', title: '', color: '#4DB6AC', text: 'অজু তাড়াহুড়া করে করতাম। এখন থেকে ধীরে, মন দিয়ে করার চেষ্টা শুরু করলাম।' },
+    { id: 5, h: 'b1894', c: '2026-08-27 18:30', title: 'রোজার দিনের ডায়েরি', color: '#4FC3F7', text: 'নফল রোজা রেখে আজ গিবত থেকে দূরে থাকার চেষ্টা করলাম। কঠিন ছিল, তবে পেরেছি।' },
+  ];
+  // What the reader "types" when the sheet opens (the .md example for the anger hadith)
+  const DRAFT = { b6116: 'আজ অফিসে রাগ উঠেছিল, এই হাদিসটা মনে করে চুপ ছিলাম।', b6018: 'আজ আড্ডায় একজনের সমালোচনা শুরু হলে চুপ থেকে কথার বিষয় বদলে দিলাম।' };
+
+  /* ---------- Helpers: dates, labels ---------- */
+  const MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+  const DAYS = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+  const fd = (d) => `${bn(d.getDate())} ${MONTHS[d.getMonth()]} ${bn(d.getFullYear())}`;
+  const fday = (d) => `${DAYS[d.getDay()]}, ${fd(d)}`;
+  const esc = (s) => s.replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+  const book = (k) => BOOKS[H[k].bk];
+  const short = (n) => `${book(n.h).name} - ${H[n.h].no}`;
+  const firstLine = (s) => s.split('\n').map((x) => x.trim()).filter(Boolean)[0] || '';
+  const headOf = (n) => n.title || firstLine(n.text);
+  const datesOf = (n) => `লেখা: ${fd(n.c)}${n.u ? ` · শেষ বদলানো: ${fd(n.u)}` : ''}`;
+  let clock = t('2026-10-15 20:45');
+  const now = () => (clock = new Date(clock.getTime() + 7 * 60000), new Date(clock));
+  const TODAY = t('2026-10-15 20:45');
+
+  /* ---------- State ---------- */
+  const S = { notes: SEED.map((n) => ({ ...n, c: t(n.c), u: n.u ? t(n.u) : null })), q: '', sort: 'created', cur: null, tab: 'note', back: 'card', ed: null, color: COLORS[1], next: 10 };
+  const get = (id) => S.notes.find((n) => n.id === id);
+  const notesOf = (k) => S.notes.filter((n) => n.h === k).sort((a, b) => b.c - a.c);
+  const SORTS = [['created', 'তৈরির তারিখ'], ['updated', 'সর্বশেষ পরিবর্তিত'], ['name', 'নাম অনুসারে (A–Z)']];
+  function visible() {
+    const q = S.q.trim();
+    const l = S.notes.filter((n) => !q || `${n.title} ${n.text} ${short(n)}`.includes(q));
+    if (S.sort === 'name') return l.sort((a, b) => headOf(a).localeCompare(headOf(b), 'bn'));
+    if (S.sort === 'updated') return l.sort((a, b) => (b.u || b.c) - (a.u || a.c));
+    return l.sort((a, b) => b.c - a.c);
+  }
+
+
+  /* ---------- Templates (demo 2: diary timeline) ---------- */
+  const DSHORT = ['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহস্পতি', 'শুক্র', 'শনি'];
+  const hadithHTML = (k, withNotes) => {
+    const h = H[k], b = book(k);
+    return `<article class="card hcard">
+      <div class="hadith-head"><span class="book-badge" style="background:${b.color}">${b.abbr}</span>
+        <div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${h.no}</span></div><span class="grade">সহিহ হাদিস</span></div>
+      <p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${h.tr}</p>
+      ${withNotes ? box(k) + `<div class="add"><button class="btn outline" data-act="add" data-h="${k}">${ic('plus')}নোট অ্যাড করুন</button></div>` : ''}</article>`;
+  };
+  // "আমার নোট": the latest entry on a rule in its colour, date first
+  function box(k) {
+    const l = notesOf(k);
+    if (!l.length) return '';
+    const n = l[0], more = l.length - 1;
+    return `<button class="tl" style="--nc:${n.color}" data-act="box" data-h="${k}" aria-label="আমার নোট">
+      <span class="tl-top"><b>${fd(n.c)}</b><span>আমার নোট</span></span>
+      ${n.title ? `<h4>${esc(n.title)}</h4>` : ''}<p>${esc(n.text)}</p>
+      ${more ? `<span class="more">আরও ${bn(more)}টি নোট</span>` : ''}</button>`;
+  }
+  const pickHTML = (n) => `<button class="tli" style="--nc:${n.color}" data-act="pick" data-id="${n.id}"><b>${fday(n.c)}</b><span>${esc(headOf(n))}</span></button>`;
+  const entHTML = (n) => `<button class="ent" data-act="open" data-id="${n.id}">
+      <span class="day"><b>${bn(n.c.getDate())}</b><small>${S.sort === 'name' ? MONTHS[n.c.getMonth()] : DSHORT[n.c.getDay()]}</small></span>
+      <span class="rail" style="--nc:${n.color}"></span>
+      <span class="ebody"><b>${esc(headOf(n))}</b>${n.title ? `<p>${esc(n.text)}</p>` : ''}<small>${short(n)}</small></span></button>`;
+  // Grouped by month (newest first); by name it is one plain run
+  function listHTML(l) {
+    if (S.sort === 'name') return l.map(entHTML).join('');
+    let last = '', out = '';
+    l.forEach((n) => {
+      const d = S.sort === 'updated' ? n.u || n.c : n.c, m = `${MONTHS[d.getMonth()]} ${bn(d.getFullYear())}`;
+      if (m !== last) { out += `<h3 class="mon">${m}</h3>`; last = m; }
+      out += entHTML(n);
+    });
+    return out;
+  }
+  const emptyHTML = `<div class="empty">${NOTE(64)}<h3>কোন নোট পাওয়া যায়নি</h3></div>`;
+  const bigDate = (d) => `<b>${bn(d.getDate())}</b><span>${MONTHS[d.getMonth()]} ${bn(d.getFullYear())}<small>${DAYS[d.getDay()]}</small></span>`;
+  const noteTabHTML = (n) => `<article class="dpage" style="--nc:${n.color}">
+      <div class="ddate">${bigDate(n.c)}</div>${n.title ? `<h3>${esc(n.title)}</h3>` : ''}
+      <p class="lined">${esc(n.text) || 'বিবরণ যোগ করা হয়নি'}</p>
+      ${n.u ? `<p class="edited">শেষ বদলানো: ${fd(n.u)}</p>` : ''}
+      <div class="dact"><button class="btn tonal" data-act="edit">${ic('edit')}নোট এডিট করুন</button><button class="btn outline" data-act="del">${ic('trash')}ডিলিট</button></div></article>`;
+  const edDate = (n) => bigDate(n ? n.c : TODAY) + (n && n.u ? `<span><small>শেষ বদলানো: ${fd(n.u)}</small></span>` : '');
+
+  /* ---------- Render ---------- */
+  function renderCard() { $('#card-list').innerHTML = LIST.map((k) => hadithHTML(k, true)).join(''); }
+  function renderNotes() {
+    const q = $('#q');
+    if (q.value !== S.q) q.value = S.q;
+    $('[data-act="clear"]').hidden = !S.q;
+    const l = visible();
+    $('#n-list').innerHTML = l.length ? listHTML(l) : emptyHTML;
+  }
+  function renderDetail() {
+    const n = get(S.cur);
+    if (!n) return;
+    $('#d-title').innerHTML = `${esc(headOf(n))}<small>${short(n)}</small>`;
+    $$('#pg-detail [data-t]').forEach((b) => b.setAttribute('aria-selected', b.dataset.t === S.tab));
+    $('#d-body').innerHTML = S.tab === 'hadith' ? hadithHTML(n.h, false) : noteTabHTML(n);
+  }
+  function renderSort() {
+    $('#sort-list').innerHTML = SORTS.map(([k, l]) => `<button class="rrow" data-act="sortpick" data-k="${k}"><span class="radio${S.sort === k ? ' on' : ''}"></span>${l}</button>`).join('');
+  }
+  function renderAll() { renderCard(); renderNotes(); renderDetail(); renderSort(); }
+
+  /* ---------- Editor sheet: new note (date on top) or edit ---------- */
+  function paintColors() {
+    $('#sh-edit').style.setProperty('--nc', S.color);
+    $('#ed-colors').innerHTML = COLORS.map((c) => `<button style="--sw:${c}" data-act="color" data-c="${c}" aria-label="রং" aria-pressed="${c === S.color}">${c === S.color ? ic('check') : ''}</button>`).join('');
+  }
+  function count() { $('#ed-count').textContent = `${bn($('#ed-text').value.length)}/${bn(500)}`; }
+  function openEditor(id, k) {
+    const n = id ? get(id) : null;
+    S.ed = { id, h: k };
+    S.color = n ? n.color : COLORS[1];
+    $('#ed-title').textContent = n ? 'নোট এডিট করুন' : 'নোট তৈরি করুন';
+    $('#ed-date').innerHTML = edDate(n);
+    $('#ed-save').textContent = n ? 'আপডেট করুন' : 'সেভ করুন';
+    $('#ed-text').value = n ? n.text : DRAFT[k] || '';
+    $('#ed-name').value = n ? n.title : '';
+    $('.paper').classList.remove('err');
+    paintColors(); count();
+    Kit.open('sh-edit');
+  }
+  function save() {
+    const text = $('#ed-text').value.trim(), title = $('#ed-name').value.trim();
+    if (!text && !title) { $('.paper').classList.add('err'); $('#ed-text').focus(); return; }
+    if (S.ed.id) Object.assign(get(S.ed.id), { text, title, color: S.color, u: now() });
+    else S.notes.push({ id: S.next++, h: S.ed.h, c: now(), u: null, title, text, color: S.color });
+    Kit.close('sh-edit');
+    renderAll();
+    Kit.snack(S.ed.id ? 'নোট আপডেট করা হয়েছে' : 'নোট সেভ করা হয়েছে');
+  }
+  function openPicker(k) { $('#pick-list').innerHTML = notesOf(k).map(pickHTML).join(''); Kit.open('sh-pick'); }
+
+  /* ---------- Navigation: pages move into whichever screen is on ---------- */
+  const PAGE = { card: 'pg-card', create: 'pg-card', picker: 'pg-card', notes: 'pg-notes', empty: 'pg-notes', detail: 'pg-detail', delete: 'pg-detail' };
+  let internal = false;
+  const go = (id) => { internal = true; Kit.show(id); internal = false; };
+  const openDetail = (id, tab, back) => { S.cur = id; S.tab = tab; S.back = back; go('detail'); };
+  const latest = () => [...S.notes].sort((a, b) => b.c - a.c)[0];
+  Kit.onScreen((id) => {
+    $(`.screen[data-screen="${id}"]`).appendChild($('#' + PAGE[id]));
+    if (!internal) { // a toolbar chip: set up that step
+      if (id === 'notes') S.q = '';
+      if (id === 'empty') S.q = 'যাকাত';
+      if (id === 'detail' || id === 'delete') { const n = latest(); if (!n) return go('notes'); S.cur = n.id; S.tab = id === 'delete' ? 'note' : 'hadith'; S.back = 'notes'; }
+    }
+    renderAll();
+    if (internal) return;
+    if (id === 'create') openEditor(null, 'b6116');
+    if (id === 'picker') openPicker('b6116');
+    if (id === 'delete') Kit.open('dlg-del');
+  });
+
+  /* ---------- In-phone actions ---------- */
+  const ACT = {
+    add: (el) => openEditor(null, el.dataset.h),
+    box: (el) => { const l = notesOf(el.dataset.h); l.length > 1 ? openPicker(el.dataset.h) : openDetail(l[0].id, 'note', 'card'); },
+    pick: (el) => openDetail(+el.dataset.id, 'note', 'card'),
+    open: (el) => openDetail(+el.dataset.id, 'hadith', 'notes'),
+    tab: (el) => { S.tab = el.dataset.t; renderDetail(); },
+    edit: () => openEditor(S.cur),
+    del: () => Kit.open('dlg-del'),
+    'del-ok': () => { S.notes = S.notes.filter((n) => n.id !== S.cur); go(S.back); Kit.snack('নোট মুছে ফেলা হয়েছে'); },
+    color: (el) => { S.color = el.dataset.c; paintColors(); },
+    'ed-save': save,
+    sort: () => { renderSort(); Kit.open('sh-sort'); },
+    sortpick: (el) => { S.sort = el.dataset.k; renderSort(); renderNotes(); },
+    clear: () => { S.q = ''; renderNotes(); },
+    'to-notes': () => { S.q = ''; go('notes'); },
+    'to-card': () => go('card'),
+    'd-back': () => go(S.back),
+  };
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-act]');
+    if (el && el.closest('.phone') && ACT[el.dataset.act]) ACT[el.dataset.act](el);
+  });
+  $('#q').addEventListener('input', (e) => { S.q = e.target.value; renderNotes(); });
+  $('#ed-text').addEventListener('input', () => { count(); $('.paper').classList.remove('err'); });
+
+
+  /* ---------- Boot ---------- */
+  $$('[data-i]').forEach((b) => { b.innerHTML = ic(b.dataset.i, b.classList.contains('icon-btn') ? 0 : 20); });
+  Kit.init({ demo: 2, name: 'ডায়েরির টাইমলাইন', screens: [
+    { id: 'card', label: 'হাদিস কার্ড' },
+    { id: 'create', label: 'ডায়েরির পাতা' },
+    { id: 'picker', label: 'নোট বেছে নিন' },
+    { id: 'notes', label: 'নোটস টাইমলাইন' },
+    { id: 'empty', label: 'খালি অবস্থা' },
+    { id: 'detail', label: 'নোটের বিস্তারিত' },
+    { id: 'delete', label: 'ডিলিট' },
+  ] });
+})();
+</script>
+</body>
+</html>

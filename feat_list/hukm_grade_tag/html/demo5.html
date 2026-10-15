@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>হুকম / গ্রেড ট্যাগ — ডেমো ৫ · ট্যাবলেটে পাশাপাশি</title>
+<title>হুকম / গ্রেড ট্যাগ — ডেমো ৫ · ভাসমান ট্যাগ কার্ড</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
 /* ===== Hadith card (HadithListItem): top bar, narrator, translation ===== */
@@ -24,14 +24,8 @@
 .def.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .more-btn{display:block;padding:4px 0;color:var(--primary);font-size:14px;font-weight:700}
 .sec-h{display:flex;align-items:center;gap:8px;margin:18px 0 2px;font-size:15px;font-weight:700;color:var(--title)}
-.mrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--divider)}
-.mrow:last-child{border-bottom:0}
 .av{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark);font-size:14px;font-weight:700}
 :root[data-theme="dark"] .av{color:var(--primary)}
-.mt{flex:1;min-width:0}
-.mt b{display:block;font-size:14.5px;line-height:1.35;color:var(--title)}
-.mt small{display:flex;align-items:center;gap:4px;font-size:12.5px;color:var(--hint)}
-.mt small svg{width:13px;height:13px}
 .rb{flex:none;padding:0 8px;border-radius:20px;background:var(--gc);color:var(--on-appbar);font-size:11.5px;line-height:1.75;white-space:nowrap}
 .why{margin-top:14px;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--grade-weak) 9%,var(--card));border-inline-start:3px solid var(--grade-weak)}
 .why .sec-h{margin:0 0 2px}
@@ -54,39 +48,60 @@
 .tk-row[aria-expanded="true"] .tk-chev{transform:rotate(180deg)}
 .tk-d{display:block;margin:2px 0 0 21px;font-size:15px;line-height:1.6;color:var(--body)}
 .tk-row[aria-expanded="false"] .tk-d{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* ===== Demo 5: tablet landscape — list on the left, grade details pinned on the right ===== */
-.phone.tab{width:min(1040px,calc(100vw - 32px));height:700px;border-radius:28px}
-.split{flex:1;min-height:0;display:flex}
-.lp{flex:1.25;min-width:0;display:flex;flex-direction:column}
-.lp.scroll,.lp .scroll{padding-top:10px}
-.rp{flex:1;min-width:0;display:flex;flex-direction:column;margin:10px 12px 12px 0;border-radius:12px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
-.rp-head{flex:none;display:flex;align-items:center;gap:8px;padding:8px 6px 8px 16px;border-bottom:1px solid var(--divider)}
-.rp-head b{flex:1;font-size:15px;color:var(--title)}
-.rp-body{flex:1;min-height:0;overflow-y:auto;padding:14px 18px 16px}
-.rp-body .href{margin:-6px 0 12px;text-align:center;font-size:13px;color:var(--hint)}
-.rp-foot{flex:none;display:flex;gap:8px;justify-content:flex-end;padding:10px 14px;border-top:1px solid var(--divider)}
-.rp[hidden]{display:none}
-.grade.g5{font-size:13px;padding:2px 10px}
-.hc.sel{box-shadow:0 0 0 2px var(--primary)}
-#tkList{padding:0 4px}
-.tk-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 4px;align-items:start}
-.tk-cols .tk-h{position:static}
-@media (max-width:760px){
-  .phone.tab{width:100%;height:calc(100vh - 49px);border-radius:0;box-shadow:none}
-  .split{flex-direction:column}.rp{margin:0 12px 12px;max-height:55%}.tk-cols{grid-template-columns:1fr}
-}
+/* ===== Demo 5: tag-shaped badge; details in a floating card under the badge, opinions swiped one by one ===== */
+.grade.g5{position:relative;padding:1px 10px 1px 17px;border-radius:0 7px 7px 0;clip-path:polygon(9px 0,100% 0,100% 100%,9px 100%,0 50%);font-size:12.5px}
+.grade.g5::before{content:"";position:absolute;left:8px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:var(--card)}
+.hc.focus{box-shadow:0 0 0 2px var(--gc)}
+.fl-catch{position:absolute;inset:0;z-index:20}
+.float{position:absolute;left:12px;right:12px;z-index:21;display:flex;flex-direction:column;background:var(--card);border-radius:16px;
+  border-top:4px solid var(--gc);box-shadow:0 14px 40px rgba(0,0,0,.28),0 0 0 1px var(--divider);animation:pop .2s cubic-bezier(.2,.8,.2,1)}
+.float.up{animation-name:popup}
+@keyframes pop{from{opacity:0;transform:translateY(-8px) scale(.98)}}
+@keyframes popup{from{opacity:0;transform:translateY(8px) scale(.98)}}
+.nub{position:absolute;width:14px;height:14px;background:var(--gc);transform:rotate(45deg);top:-9px;border-radius:2px}
+.float.up .nub{top:auto;bottom:-7px;background:var(--card);box-shadow:2px 2px 0 0 var(--divider)}
+.fl-body{position:relative;flex:1;min-height:0;overflow-y:auto;padding:12px 14px 4px;border-radius:12px 12px 0 0;background:var(--card)}
+.fl-top{display:flex;align-items:center;gap:10px}
+.fl-top .illo{margin:0}
+.fl-top div{flex:1;min-width:0}
+.fl-top b{display:block;font-size:18px;line-height:1.3;color:var(--title)}
+.fl-top small{font-size:12.5px;color:var(--hint)}
+.fl-body .def{margin-top:8px;font-size:15px}
+.fl-foot{flex:none;display:flex;justify-content:flex-end;gap:6px;padding:8px 10px 10px;border-top:1px solid var(--divider)}
+.fl-foot .btn{height:38px}
+/* Opinions: one card per muhaddith, swipe sideways (scroll-snap) */
+.op-h{display:flex;align-items:center;gap:8px;margin:14px 0 6px;font-size:15px;font-weight:700;color:var(--title)}
+.op-h .cnt{margin-left:auto;font-size:12.5px;font-weight:400;color:var(--hint)}
+.car{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;border-radius:12px}
+.car::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:start;padding:12px;border-radius:12px;background:var(--surface-2)}
+.sl-top{display:flex;align-items:center;gap:10px}
+.sl-top b{flex:1;font-size:15px;color:var(--title)}
+.sl-r{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px;color:var(--hint)}
+.sl-r svg{width:15px;height:15px;flex:none}
+.sl-r .rb{font-size:12.5px}
+.sl-k{color:var(--body)}
+.car-nav{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px}
+.car-nav .icon-btn{width:32px;height:32px;color:var(--title)}
+.car-nav .icon-btn svg{width:18px;height:18px}
+.car-nav .icon-btn:disabled{opacity:.3;cursor:default}
+.dot{width:8px;height:8px;border-radius:8px;background:var(--gc);opacity:.35;transition:all .2s}
+.dot[aria-current="true"]{width:20px;opacity:1}
+.prev-ic{transform:scaleX(-1)}
 </style>
 </head>
 <body>
 <main class="kit-stage">
-  <div class="phone tab">
+  <div class="phone">
     <div class="viewport">
-      <!-- ===== Chapter list + details panel ===== -->
+      <!-- ===== Chapter list (HadithVerticalList) + floating grade card ===== -->
       <section class="screen" data-screen="chapter">
         <header class="appbar"><h1 style="margin-left:12px">সহীহ বুখারী<small>অধ্যায়ের হাদিস</small></h1></header>
-        <div class="split"><div class="scroll lp" id="chapList"></div><aside class="rp"></aside></div>
+        <div class="scroll" id="chapList" style="padding-top:10px"></div>
+        <div class="fl-catch" data-dismiss hidden></div>
+        <div class="float" id="float" role="dialog" aria-label="মানের বিস্তারিত" hidden></div>
       </section>
-      <!-- ===== তাহকিক page, two columns (TahkikListTabletLandscapeLayout) ===== -->
+      <!-- ===== Home → তাহকিক page (TahkikListTab) ===== -->
       <section class="screen tk" data-screen="tahkik">
         <header class="appbar"><button class="icon-btn" data-back aria-label="পেছনে" data-icon="back"></button><h1>তাহকিক</h1></header>
         <div class="rbody"><div class="scroll" id="tkList"></div></div>
@@ -175,9 +190,6 @@
     const long = g.d.length > (lines ? 110 : 170);
     return `<p class="def${long ? ' clamp' : ''}"${lines ? ` style="-webkit-line-clamp:${lines}"` : ''}>${g.d}</p>${long ? '<button class="more-btn" data-more>আরো পড়ুন</button>' : ''}`;
   };
-  // One muhaddith row: name, ruling badge, kitab
-  const mrow = (o, i) => `<div class="mrow"><span class="av">${bn(i + 1)}</span><div class="mt"><b>${o[0]}</b><small>${IC.book}${o[2]}</small></div><span class="rb" style="--gc:${GV[GR[o[1]].c]}">${GR[o[1]].t}</span></div>`;
-  const opsHTML = (ops, title = 'তাহকিক') => `<div class="sec-h">${title} <span class="sample-tag">নমুনা</span></div><div class="mlist">${ops.map(mrow).join('')}</div>`;
   const whyHTML = (h) => (WHY[h.op] ? `<div class="why"><div class="sec-h">কেন দুর্বল <span class="sample-tag">নমুনা</span></div><p>${WHY[h.op]}</p></div>` : '');
   const verifyHTML = (h) => (opsOf(h) ? `<p class="verify">${IC.verified}আলেমদের যাচাই করা তথ্য</p>` : '');
   const ref = (h) => `${h.book} · হাদিস: ${bn(h.no)}`;
@@ -263,38 +275,92 @@
     if (p.offsetParent && p.scrollHeight <= p.clientHeight + 2) { p.classList.remove('clamp'); b.remove(); }
   })).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
 
-  /* ---------- Demo 5: badge = filled pill, tablet size (chipFontSize / chipPadding) ---------- */
+
+  /* ---------- Demo 5: badge = tag shape (notch + hole), filled with the grade colour ---------- */
   function chip(h) {
     const g = GR[h.g];
-    return `<button class="grade g5" data-hid="${h.id}" style="--gc:${GV[g.c]}" aria-label="${g.t}, বিস্তারিত দেখুন">${g.t}</button>`;
+    return `<button class="grade g5" data-hid="${h.id}" style="--gc:${GV[g.c]}" aria-expanded="${S.hid === h.id}" aria-label="${g.t}, বিস্তারিত দেখুন">${g.t}</button>`;
   }
-  const cardCls = (h) => (S.hid === h.id ? 'sel' : '');
-  /* ---------- Demo 5: the right panel (hidden once closed) ---------- */
-  function panel() {
-    if (!S.hid) return '';
-    const h = byId(S.hid), g = GR[h.g], ops = opsOf(h);
-    const head = `<div class="rp-head"><b>মানের বিস্তারিত</b><button class="icon-btn" data-dismiss aria-label="বন্ধ করুন">${icons.close}</button></div>`;
-    return head + `<div class="rp-body">${illo(g.c, 112)}<h2 class="gname">${g.t}</h2><p class="href">${ref(h)}</p>${defHTML(g)}
-      ${ops ? opsHTML(ops) : ''}${whyHTML(h)}${verifyHTML(h)}</div>
-      <div class="rp-foot"><button class="btn text" data-all>সব মান দেখুন</button><button class="btn tonal" data-dismiss>ঠিক আছে</button></div>`;
-  }
-  function renderExtra() { $$('.rp').forEach((p) => { p.innerHTML = panel(); p.hidden = !S.hid; }); }
-  // Tablet tahkik page: sections split into two columns
-  function afterTahkik() {
-    const secs = $$('#tkList .tk-sec'); if (!secs.length) return;
-    const half = Math.ceil(secs.length / 2);
-    $('#tkList').insertAdjacentHTML('afterbegin', '<div class="tk-cols"><div class="c1"></div><div class="c2"></div></div>');
-    secs.forEach((x, i) => $(i < half ? '#tkList .c1' : '#tkList .c2').appendChild(x));
-  }
-  function openInfo(hid) {
-    S.hid = hid; renderAll();
-    const c = $('.screen.on .hc.sel'); if (c) c.scrollIntoView({ block: 'nearest' });
-  }
-  document.addEventListener('click', (e) => { if (e.target.closest('[data-dismiss]')) { S.hid = null; renderAll(); } });
+  const cardCls = (h) => (S.hid === h.id ? 'focus' : '');
 
-  S.hid = 'b1';
+  /* ---------- Demo 5: floating card content ---------- */
+  const IC5 = { next: icons.chevron, prev: `<span class="prev-ic">${icons.chevron}</span>` };
+  function slide(o, i, n) {
+    const r = GR[o[1]];
+    return `<div class="slide" role="group" aria-label="মত ${bn(i + 1)} / ${bn(n)}">
+      <div class="sl-top"><span class="av">${bn(i + 1)}</span><b>${o[0]}</b></div>
+      <div class="sl-r">রায়: <span class="rb" style="--gc:${GV[r.c]}">${r.t}</span></div>
+      <div class="sl-r">${IC.book}<span class="sl-k">${o[2]}</span></div></div>`;
+  }
+  function opsCarousel(ops) {
+    const n = ops.length;
+    return `<div class="op-h">তাহকিক <span class="sample-tag">নমুনা</span><span class="cnt" id="opCnt">${bn(n)} জন মুহাদ্দিসের মত</span></div>
+      <div class="car" id="car">${ops.map((o, i) => slide(o, i, n)).join('')}</div>
+      <div class="car-nav"><button class="icon-btn" data-step="-1" aria-label="আগের মত">${IC5.prev}</button>
+        ${ops.map((o, i) => `<button class="dot" data-dot="${i}" style="--gc:${GV[GR[o[1]].c]}" aria-label="মত ${bn(i + 1)}"></button>`).join('')}
+        <button class="icon-btn" data-step="1" aria-label="পরের মত">${IC5.next}</button></div>`;
+  }
+  function floatHTML() {
+    const h = byId(S.hid), g = GR[h.g], ops = opsOf(h);
+    return `<span class="nub"></span><div class="fl-body">
+      <div class="fl-top">${illo(g.c, 56)}<div><b>${g.t}</b><small>${ref(h)}</small></div><button class="icon-btn" data-dismiss aria-label="বন্ধ করুন">${icons.close}</button></div>
+      ${defHTML(g, 3)}${ops ? opsCarousel(ops) : ''}${whyHTML(h)}${verifyHTML(h)}<div style="height:8px"></div></div>
+      <div class="fl-foot"><button class="btn text" data-all>সব মান দেখুন</button><button class="btn tonal" data-dismiss>ঠিক আছে</button></div>`;
+  }
+
+  /* ---------- Demo 5: carousel — dots follow the swipe; arrows and dots jump ---------- */
+  function carIndex() { const c = $('#car'); return c ? Math.round(c.scrollLeft / c.clientWidth) : 0; }
+  function syncDots() {
+    const i = carIndex(), n = $$('#float .dot').length;
+    $$('#float .dot').forEach((d, k) => d.setAttribute('aria-current', k === i));
+    const [p, nx] = $$('#float [data-step]');
+    if (p) { p.disabled = i === 0; nx.disabled = i === n - 1; }
+  }
+  function goSlide(i) { const c = $('#car'); if (c) c.scrollTo({ left: i * c.clientWidth, behavior: 'smooth' }); }
+
+  /* ---------- Demo 5: place the card under the badge (above it when there is no room) ---------- */
+  function placeFloat() {
+    const fl = $('#float'), scr = fl.closest('.screen'), list = $('#chapList');
+    const card = $(`#chapList .hc[data-hid="${S.hid}"]`), badge = card && $('.grade', card);
+    if (!badge) return;
+    list.scrollTop = card.offsetTop - list.offsetTop - 8;         // bring the card to the top first
+    const sr = scr.getBoundingClientRect(), z = sr.height / scr.offsetHeight || 1;
+    const br = badge.getBoundingClientRect();
+    const bTop = (br.top - sr.top) / z, bBot = (br.bottom - sr.top) / z, bMid = (br.left + br.width / 2 - sr.left) / z;
+    const H = scr.offsetHeight, room = H - bBot - 22;
+    const up = room < 340;
+    fl.classList.toggle('up', up);
+    fl.style.top = up ? '' : `${bBot + 10}px`;
+    fl.style.bottom = up ? `${H - bTop + 10}px` : '';
+    fl.style.maxHeight = `${up ? bTop - 70 : room}px`;
+    $('.nub', fl).style.left = `${Math.max(14, Math.min(bMid - 12 - 7, fl.offsetWidth - 28))}px`;
+  }
+
+  function renderExtra() {
+    const fl = $('#float'), on = !!S.hid;
+    fl.hidden = !on; $('.fl-catch').hidden = !on;
+    if (!on) return;
+    fl.style.setProperty('--gc', GV[GR[byId(S.hid).g].c]);
+    fl.innerHTML = floatHTML();
+    placeFloat(); syncDots();
+    $('#car')?.addEventListener('scroll', syncDots, { passive: true });
+  }
+  function openInfo(hid, o) {
+    if (S.hid === hid && !o.state) { S.hid = null; renderAll(); return; }
+    S.hid = hid; renderAll();
+  }
+  function onScreenExtra() { if (S.hid) { S.hid = null; renderAll(); } }
+
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+    if (t.closest('[data-dismiss]')) { S.hid = null; renderAll(); return; }
+    const st = t.closest('[data-step]'); if (st) { goSlide(carIndex() + +st.dataset.step); return; }
+    const d = t.closest('[data-dot]'); if (d) goSlide(+d.dataset.dot);
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.hid) { S.hid = null; renderAll(); } });
+
   renderAll();
-  Kit.init({ demo: 5, name: 'ট্যাবলেটে পাশাপাশি', screens: SCREENS });
+  Kit.init({ demo: 5, name: 'ভাসমান ট্যাগ কার্ড', screens: SCREENS });
 })();
 </script>
 </body>

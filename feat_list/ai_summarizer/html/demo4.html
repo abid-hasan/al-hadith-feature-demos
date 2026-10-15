@@ -3,93 +3,96 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>হাদিসের সারাংশ — ডেমো ৪ · ট্যাবলেটে পাশাপাশি</title>
+<title>হাদিসের সারাংশ — ডেমো ৪ · ফ্রেমে লেবেল আর পপআপ মেনু</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
-/* ===== Tablet frame (landscape) ===== */
-.phone.tab{width:1000px;height:680px;border-radius:28px}
-@media (max-width:480px){.phone.tab{width:1000px;height:680px;border-radius:28px}}
-
-/* ===== Two panes: hadith list on the start side, হাদিসের বিস্তারিত on the end side ===== */
-.panes{flex:1;min-height:0;display:grid;grid-template-columns:400px 1fr}
-.pane{min-height:0;overflow-y:auto;padding-bottom:24px}
-.pane::-webkit-scrollbar{width:0}
-.pane.right{border-left:1px solid var(--divider);background:var(--surface-2)}
-.phead{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface-2);border-bottom:1px solid var(--divider);font-weight:700;color:var(--title)}
-.phead small{font-weight:400;color:var(--hint);font-size:12.5px}
-.top-gap{height:12px}
-
-/* ===== Hadith card ===== */
-.hcard{padding-top:8px;cursor:pointer;border:2px solid transparent}
-.hcard.sel{border-color:var(--primary)}
+/* ===== Hadith card (HadithListItem) ===== */
+.hcard{position:relative;padding-top:8px}
 .hcard .hadith-head{margin-right:-10px}
-.hcard .narrator{color:var(--primary);font-size:15px;margin:8px 0 2px}
+.hcard .narrator{color:var(--primary);font-size:15px;margin:8px 0 2px;scroll-margin-top:12px}
 .hcard .book-badge{font-size:15px;font-weight:600}
 .hcard .translation{line-height:1.7}
+.top-gap{height:12px}
 
-/* ===== Summary ===== */
-.sum{margin:10px 0 4px;padding:8px 12px;border-radius:10px;background:var(--tint)}
-.sum-head{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--primary-dark)}
-:root[data-theme="dark"] .sum-head{color:var(--primary)}
-.sum-text{margin:2px 0 0;color:var(--title);font-size:14.5px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.sum-note{margin:2px 0 0;font-size:12px;color:var(--hint)}
-.tag{margin-left:auto;font-size:10.5px;font-weight:400;padding:0 6px;border-radius:6px;border:1px solid var(--divider);color:var(--hint)}
-/* details pane: wide summary card with a side label */
-.dsum{display:grid;grid-template-columns:120px 1fr;gap:16px;margin:14px 12px 12px;padding:14px 16px;background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow)}
-.dsum .lab{font-weight:700;color:var(--primary);font-size:15px;border-right:1px solid var(--divider)}
-.dsum .lab .tag{display:inline-block;margin:6px 0 0}
-.dsum .sum-text{font-size:17px;-webkit-line-clamp:unset;margin:0}
-.flash{animation:flash 1s ease-out}
-@keyframes flash{from{box-shadow:0 0 0 3px var(--primary)}to{box-shadow:var(--shadow)}}
+/* ===== Summary frame: outlined box, the label is cut into the top border (no fill) ===== */
+.frame{position:relative;margin:20px 0 6px;padding:14px 12px 8px;border:1.5px solid var(--primary);border-radius:12px}
+.frame .lab{position:absolute;top:-11px;left:10px;display:flex;align-items:center;gap:6px;padding:0 6px;background:var(--card);font-size:13.5px;font-weight:700;color:var(--primary-dark);line-height:20px}
+:root[data-theme="dark"] .frame .lab{color:var(--primary)}
+.frame .lab svg{width:15px;height:15px}
+.tag{font-size:11px;font-weight:400;padding:0 7px;border-radius:6px;border:1px solid var(--divider);color:var(--hint);line-height:17px}
+.frame .txt{margin:0;color:var(--title);font-size:15.5px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.frame .foot{display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--divider)}
+.frame .foot span{flex:1;font-size:12.5px;color:var(--hint)}
+.jump{display:inline-flex;align-items:center;gap:2px;font-size:12.5px;font-weight:700;color:var(--primary)}
+.jump svg{width:15px;height:15px}
+.hilite{animation:hl 1.2s ease-out}
+@keyframes hl{from{background:var(--tint)}to{background:transparent}}
 
-/* ===== Menu: centred sheet on tablet, only the two items this feature uses ===== */
-#sheet-more{left:50%;right:auto;width:560px;transform:translate(-50%,105%)}
-#sheet-more.on{transform:translate(-50%,0)}
-.mhead{display:flex;align-items:center;padding:18px 12px 8px 22px}
-.mhead div{flex:1}
-.mhead h2{margin:0;font-size:17px;font-weight:800;color:var(--title)}
-.mhead p{margin:0;font-size:12px;color:var(--hint)}
-.xbtn{width:36px;height:36px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;color:var(--title)}
-.xbtn svg{width:18px;height:18px}
-.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:8px 16px 22px}
-.mtile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px 12px;border-radius:18px;background:var(--surface-2);font-size:13.5px;font-weight:700;color:var(--title)}
-.mtile svg{width:28px;height:28px;color:var(--primary)}
+/* ===== Details page: the frame sits on the page above the hadith card, wider type ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.rbody>.scroll{background:var(--scaffold);border-radius:20px 20px 0 0;padding-top:16px}
+.dframe{margin:10px 12px 14px}
+.dframe .lab{background:var(--scaffold)}
+.dframe .txt{font-size:17px;-webkit-line-clamp:unset}
 
-/* ===== Report: side panel from the end edge ===== */
-#sheet-report{left:auto;right:0;top:0;bottom:0;width:420px;max-height:none;border-radius:20px 0 0 20px;transform:translateX(105%)}
-#sheet-report.on{transform:none}
-.rlab{display:flex;align-items:center;gap:6px;margin:16px 0 8px;font-weight:700;color:var(--title);font-size:14.5px}
+/* ===== Popup menu: anchored to the card's 3-dot button (no sheet), only the two items this feature uses ===== */
+.pop{position:absolute;top:44px;right:8px;z-index:6;min-width:196px;padding:6px 0;background:var(--card);border-radius:12px;
+  box-shadow:0 8px 28px rgba(0,0,0,.18),0 0 0 1px var(--divider);transform-origin:top right;transform:scale(.9);opacity:0;pointer-events:none;transition:all .16s}
+.pop.on{transform:none;opacity:1;pointer-events:auto}
+.pop button{display:flex;align-items:center;gap:12px;width:100%;padding:11px 16px;font-size:15px;color:var(--title);text-align:left}
+.pop button:hover{background:var(--surface-2)}
+.pop button svg{width:20px;height:20px;color:var(--primary)}
+.more-btn[aria-expanded="true"]{background:var(--tint);color:var(--primary)}
+
+/* ===== Report dialog (centre of the screen instead of a sheet) ===== */
+#dlg-report{padding:18px 18px 14px}
+.dhead{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.dhead span{width:34px;height:34px;border-radius:50%;background:var(--tint);color:var(--primary);display:grid;place-items:center;flex:none}
+.dhead span svg{width:18px;height:18px}
+.dhead h2{margin:0;font-size:18px}
+.rref{border:1px solid var(--divider);border-radius:10px;padding:10px 12px;font-size:13.5px;color:var(--body)}
+.rlab{display:flex;align-items:center;margin:12px 0 6px;font-weight:700;color:var(--title);font-size:14px}
 .rlab .cnt{margin-left:auto;font-weight:400;font-size:12.5px;color:var(--hint)}
-.rref{border:1px solid var(--divider);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--body)}
-.rta{width:100%;height:160px;resize:none;display:block;border:1px solid var(--divider);border-radius:10px;padding:12px 14px;background:transparent;color:var(--title);font-size:14.5px;outline:none}
+.rta{width:100%;height:104px;resize:none;display:block;border:1px solid var(--divider);border-radius:10px;padding:10px 12px;background:transparent;color:var(--title);font-size:14.5px;font-family:inherit;outline:none}
 .rta:focus{border-color:var(--primary)}
-#sheet-report .sheet-body{flex:1}
 </style>
 </head>
 <body>
 <main class="kit-stage">
-  <div class="phone tab">
+  <div class="phone">
     <div class="viewport">
-      <!-- One two-pane screen per state; panes are filled by JS -->
-      <section class="screen" data-screen="list"><header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-snack="বইয়ের তালিকায় ফিরে যাবে" data-i="back"></button><h1>সহীহ মুসলিম</h1></header><div class="panes"><div class="pane scroll" id="list-l"></div><div class="pane right" id="list-r"></div></div></section>
-      <section class="screen" data-screen="nosum"><header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="list" data-i="back"></button><h1>সহীহ বুখারী</h1></header><div class="panes"><div class="pane scroll" id="nosum-l"></div><div class="pane right" id="nosum-r"></div></div></section>
 
-      <!-- ===== Sheet: অন্যান্য অপশন (centred) ===== -->
-      <div class="sheet" id="sheet-more" role="dialog" aria-label="অন্যান্য অপশন">
-        <div class="mhead"><div><h2>অন্যান্য অপশন</h2><p id="m-ref"></p></div><button class="xbtn" data-close aria-label="বন্ধ করুন" data-i="close"></button></div>
-        <div class="mgrid" id="m-grid"></div>
-      </div>
+      <!-- ===== Screen: hadith list (one long hadith with summary, one without) ===== -->
+      <section class="screen" data-screen="list">
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-snack="বইয়ের তালিকায় ফিরে যাবে" data-i="back"></button><h1>সহীহ মুসলিম</h1></header>
+        <div class="scroll" id="list-body"></div>
+      </section>
 
-      <!-- ===== Side panel: সমস্যা রিপোর্ট করুন ===== -->
-      <div class="sheet" id="sheet-report" role="dialog" aria-label="সমস্যা রিপোর্ট করুন">
-        <div class="sheet-head"><h2>সমস্যা রিপোর্ট করুন</h2><button class="icon-btn" data-close aria-label="বন্ধ করুন" data-i="close"></button></div>
-        <div class="sheet-body">
-          <div class="rlab" style="margin-top:4px">রিপোর্টের শিরোনাম</div>
-          <div class="rref" id="r-ref"></div>
-          <div class="rlab">যে সমস্যাটি রিপোর্ট করছেন<span class="cnt" id="r-cnt">০/৫০০</span></div>
-          <textarea class="rta" id="r-text" maxlength="500" placeholder="আপনি যে সমস্যাটি খুঁজে পেয়েছেন তা বিস্তারিত লিখুন..."></textarea>
-        </div>
-        <div class="sheet-foot"><button class="btn block" id="r-submit">জমা দিন</button></div>
+      <!-- ===== Screen: no summary anywhere — cards look exactly as today ===== -->
+      <section class="screen" data-screen="nosum">
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="list" data-i="back"></button><h1>সহীহ বুখারী</h1></header>
+        <div class="scroll" id="nosum-body"></div>
+      </section>
+
+      <!-- ===== Screen: same list with the report dialog open (for the রিপোর্ট chip) ===== -->
+      <section class="screen" data-screen="report">
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-snack="বইয়ের তালিকায় ফিরে যাবে" data-i="back"></button><h1>সহীহ মুসলিম</h1></header>
+        <div class="scroll" id="report-body"></div>
+      </section>
+
+      <!-- ===== Screen: হাদিসের বিস্তারিত ===== -->
+      <section class="screen" data-screen="details">
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" id="d-back" data-i="back"></button><h1 id="d-title"></h1></header>
+        <div class="rbody"><div class="scroll" id="d-body"></div></div>
+      </section>
+
+      <!-- ===== Dialog: সমস্যা রিপোর্ট করুন ===== -->
+      <div class="dialog" id="dlg-report" role="dialog" aria-label="সমস্যা রিপোর্ট করুন">
+        <div class="dhead"><span data-i="info"></span><h2>সমস্যা রিপোর্ট করুন</h2></div>
+        <div class="rref" id="r-ref"></div>
+        <div class="rlab">যে সমস্যাটি রিপোর্ট করছেন<span class="cnt" id="r-cnt">০/৫০০</span></div>
+        <textarea class="rta" id="r-text" maxlength="500" placeholder="আপনি যে সমস্যাটি খুঁজে পেয়েছেন তা বিস্তারিত লিখুন..."></textarea>
+        <div class="actions"><button class="btn text" data-close>বাতিল</button><button class="btn" id="r-submit">জমা দিন</button></div>
       </div>
     </div>
   </div>
@@ -111,105 +114,119 @@
     b6116: { ...BOOKS.b, no: "৬১১৬", grade: "সহিহ হাদিস", nar: "আবূ হুরায়রা (রাঃ)", tr: "এক ব্যক্তি নবী (ﷺ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বললেন, নবী (ﷺ) প্রত্যেক বারেই বললেন: রাগ করো না।" },
   };
   const LISTS = { list: ['m1', 'm422'], nosum: ['b1', 'b6116'] };
+  LISTS.report = LISTS.list;   // the report chip shows the same list with the dialog open
 
   /* ---------- Card text pieces, same order and labels as HadithListItem ---------- */
   const badge = (h) => `<span class="book-badge" style="background:${h.color}" aria-label="${h.book}">${h.abbr}</span>`;
-  const narLine = (h) => `<p class="narrator">${h.nar} থেকে বর্ণিত:</p>`;            // HadithListItemNarrator
   const paras = (s) => s.split(/\n{2,}/).map((p) => `<p class="translation">${p}</p>`).join('');
-  const sel = { list: 'm1', nosum: 'b1' }; // hadith shown in the details pane
+  const sm = (k) => icons[k].replace('width="24" height="24"', 'width="16" height="16"');
 
-  let cur = 'm1', scr = 'list';
-  const ic = (k) => icons[k];
-  const head = (id) => { const h = H[id]; return `<div class="hadith-head">
-      ${badge(h)}
-      <div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${bn(h.no)}</span></div>
-      <span class="grade">${h.grade}</span>
-      <button class="icon-btn" data-more="${id}" aria-label="হাদিস নং ${bn(h.no)}-এর অপশন">${ic('more')}</button></div>`; };
+  let cur = 'm1';          // hadith the menu / details / report act on
+  let from = 'list';       // list screen to return to
 
-  /* ---------- List-pane card: head → summary → narrator → translation ---------- */
-  function card(id, screen) {
+  /* ---------- Summary frame ("সংক্ষেপে") — only when a reviewed summary exists.
+     The foot link jumps down to the full hadith in the same card. ---------- */
+  function frame(h, cls = '') {
+    if (!h.sum) return '';
+    return `<div class="frame ${cls}" role="note" aria-label="সংক্ষেপে">
+      <div class="lab">${sm('info')}সংক্ষেপে<span class="tag">নমুনা</span></div>
+      <p class="txt">${h.sum}</p>
+      <div class="foot"><span>এটা সারাংশ, মূল হাদিস পড়ুন</span>${cls ? '' : `<button class="jump" data-jump>মূল হাদিস${sm('down')}</button>`}</div></div>`;
+  }
+
+  /* ---------- Hadith card: head → summary frame → narrator → translation, popup menu inside ---------- */
+  function card(id, opts = {}) {
     const h = H[id];
-    const sum = h.sum ? `<div class="sum" role="note" aria-label="সংক্ষেপে"><div class="sum-head">সংক্ষেপে<span class="tag">নমুনা</span></div><p class="sum-text">${h.sum}</p><p class="sum-note">এটা সারাংশ, মূল হাদিস পড়ুন</p></div>` : '';
-    return `<article class="card hcard${sel[screen] === id ? ' sel' : ''}" data-pick="${id}">${head(id)}${sum}${narLine(h)}${paras(h.tr)}</article>`;
+    return `<article class="card hcard" data-id="${id}">
+      <div class="hadith-head">
+        ${badge(h)}
+        <div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${bn(h.no)}</span></div>
+        <span class="grade">${h.grade}</span>
+        <button class="icon-btn more-btn" data-more="${id}" aria-haspopup="menu" aria-expanded="false" aria-label="হাদিস নং ${bn(h.no)}-এর অপশন">${icons.more}</button>
+      </div>
+      ${opts.noSum ? '' : frame(h)}
+      <p class="narrator">${h.nar} থেকে বর্ণিত:</p>${paras(h.tr)}
+      <div class="pop" role="menu">
+        ${opts.inDetails ? '' : `<button role="menuitem" data-act="details">${icons.book}বিস্তারিত</button>`}
+        <button role="menuitem" data-act="report">${icons.info}রিপোর্ট</button>
+      </div></article>`;
   }
 
-  /* ---------- Details pane: wide summary card above the hadith card ---------- */
-  function detail(screen) {
-    const id = sel[screen], h = H[id];
-    return `<div class="phead">হাদিসের বিস্তারিত <small>· ${h.book} · হাদিস: ${bn(h.no)}</small></div>
-      ${h.sum ? `<div class="dsum" role="note" aria-label="সংক্ষেপে"><div class="lab">সংক্ষেপে<br><span class="tag">নমুনা</span></div><div><p class="sum-text">${h.sum}</p><p class="sum-note">এটা সারাংশ, মূল হাদিস পড়ুন</p></div></div>` : '<div style="height:14px"></div>'}
-      <article class="card hcard" style="cursor:default">${head(id)}${narLine(h)}${paras(h.tr)}</article>`;
+  function renderList(screen) {
+    $(`#${screen}-body`).innerHTML = '<div class="top-gap"></div>' + LISTS[screen].map((id) => card(id)).join('');
   }
 
-  function render(screen) {
-    $(`#${screen}-l`).innerHTML = '<div class="top-gap"></div>' + LISTS[screen].map((id) => card(id, screen)).join('');
-    $(`#${screen}-r`).innerHTML = detail(screen);
+  /* ---------- Details page: frame on the page → hadith card ---------- */
+  function renderDetails() {
+    const h = H[cur];
+    $('#d-title').innerHTML = `${h.book}<small>হাদিস: ${bn(h.no)}</small>`;
+    $('#d-body').innerHTML = frame(h, 'dframe') + card(cur, { noSum: true, inDetails: true });
   }
-  const refresh = () => ['list', 'nosum'].forEach(render);
+  function openDetails(id) { cur = id; renderDetails(); Kit.show('details'); }
 
-  function pick(id, flash) {
-    sel[scr] = id; cur = id; render(scr);
-    if (flash) { const d = $(`#${scr}-r .dsum`) || $(`#${scr}-r .hcard`); d?.classList.add('flash'); $(`#${scr}-r`).scrollTop = 0; }
+  /* ---------- Popup menu: opens under the 3-dot button, closes on any outside tap ---------- */
+  function closePops() {
+    $$('.pop.on').forEach((p) => p.classList.remove('on'));
+    $$('.more-btn[aria-expanded="true"]').forEach((b) => b.setAttribute('aria-expanded', 'false'));
   }
-
-  /* ---------- Menu: বিস্তারিত + রিপোর্ট ---------- */
-  const ACTIONS = [['details', 'বিস্তারিত', 'book'], ['report', 'রিপোর্ট', 'info']];
-  function openMenu(id, inDetail) {
-    cur = id;
-    $('#m-ref').textContent = `${H[id].book} · হাদিস: ${bn(H[id].no)}`;
-    $('#m-grid').innerHTML = ACTIONS.filter(([k]) => !(inDetail && k === 'details')).map(([k, t, i]) => `<button class="mtile" data-act="${k}">${ic(i)}${t}</button>`).join('');
-    Kit.open('sheet-more');
+  function togglePop(btn) {
+    const pop = btn.closest('.hcard').querySelector('.pop');
+    const wasOn = pop.classList.contains('on');
+    closePops();
+    if (!wasOn) { cur = btn.dataset.more; pop.classList.add('on'); btn.setAttribute('aria-expanded', 'true'); }
   }
   function act(k) {
-    Kit.close('sheet-more');
-    if (k === 'details') return pick(cur, true);
+    closePops();
+    if (k === 'details') return openDetails(cur);
     if (k === 'report') return openReport();
   }
 
-  /* ---------- Report side panel ---------- */
+  /* ---------- Report dialog: description → জমা দিন ---------- */
   function openReport() {
     $('#r-ref').textContent = `${H[cur].book} -> হাদিস নং ${bn(H[cur].no)}`;
     $('#r-text').value = ''; $('#r-cnt').textContent = '০/৫০০';
-    Kit.open('sheet-report');
+    Kit.open('dlg-report');
   }
   function submit() {
     if (!$('#r-text').value.trim()) return Kit.snack('অনুগ্রহ করে বিস্তারিত লিখুন');
-    Kit.close('sheet-report'); Kit.snack('রিপোর্ট সফলভাবে জমা হয়েছে');
+    Kit.close('dlg-report'); Kit.snack('রিপোর্ট সফলভাবে জমা হয়েছে');
+  }
+
+  /* ---------- "মূল হাদিস" link: scroll to the narrator line and flash it ---------- */
+  function jump(btn) {
+    const nar = btn.closest('.hcard').querySelector('.narrator');
+    nar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    nar.classList.remove('hilite'); void nar.offsetWidth; nar.classList.add('hilite');
   }
 
   /* ---------- Wiring ---------- */
   $$('[data-i]').forEach((el) => { el.innerHTML = icons[el.dataset.i]; });
-  refresh();
+  ['list', 'nosum', 'report'].forEach(renderList);
 
   document.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-more],[data-act],#r-submit,[data-pick]');
-    if (!t) return;
-    if (t.dataset.more) openMenu(t.dataset.more, !!t.closest('.right'));
+    const t = e.target.closest('[data-more],[data-act],[data-jump],#d-back,#r-submit');
+    if (!t) { if (!e.target.closest('.pop')) closePops(); return; }
+    if (t.dataset.more) togglePop(t);
     else if (t.dataset.act) act(t.dataset.act);
+    else if (t.dataset.jump !== undefined) jump(t);
+    else if (t.id === 'd-back') Kit.show(from);
     else if (t.id === 'r-submit') submit();
-    else if (t.dataset.pick) pick(t.dataset.pick);
   });
   $('#r-text').addEventListener('input', (e) => { $('#r-cnt').textContent = `${bn(e.target.value.length)}/৫০০`; });
-  Kit.onScreen((id) => { scr = id; if (sel[id]) cur = sel[id]; });
 
-  /* Chips that act on the list screen instead of opening their own screen */
-  const VIRTUAL = {
-    details: () => { Kit.show('list'); pick('m1', true); },
-    report: () => { Kit.show('list'); cur = 'm1'; openReport(); },
-  };
-  const press = (id) => $$('.kit-chip').forEach((c) => c.setAttribute('aria-pressed', c.dataset.go === id));
-  const runVirtual = (id) => { if (VIRTUAL[id]) { VIRTUAL[id](); press(id); } };
+  Kit.onScreen((id) => {
+    closePops();
+    if (id === 'list' || id === 'nosum') from = id;
+    if (id === 'details') { if (!LISTS[from].includes(cur)) cur = LISTS[from][0]; renderDetails(); }
+    if (id === 'report') { cur = 'm1'; openReport(); }
+  });
 
-  Kit.init({ demo: 4, name: 'ট্যাবলেটে পাশাপাশি', screens: [
-    { id: 'list', label: 'লিস্ট + বিস্তারিত' },
+  Kit.init({ demo: 4, name: 'ফ্রেমে লেবেল আর পপআপ মেনু', screens: [
+    { id: 'list', label: 'হাদিস লিস্ট' },
     { id: 'details', label: 'হাদিসের বিস্তারিত' },
     { id: 'report', label: 'রিপোর্ট' },
     { id: 'nosum', label: 'সারাংশ নেই' },
   ]});
-  document.addEventListener('click', (e) => { const c = e.target.closest('.kit-chip'); if (c) runVirtual(c.dataset.go); });
-  window.addEventListener('message', (e) => { const m = e.data || {}; if (m.type === 'screen') runVirtual(m.id); });
-  runVirtual(new URLSearchParams(location.search).get('screen'));
-  if (!Kit.current) Kit.show('list');
 })();
 </script>
 </body>

@@ -3,111 +3,122 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>জীবনের পরিস্থিতি দিয়ে সার্চ — ডেমো ৫ · ট্যাবলেটে পাশাপাশি</title>
+<title>জীবনের পরিস্থিতি দিয়ে সার্চ — ডেমো ৫ · সোয়াইপ করে এক এক করে</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
-/* ===== Tablet frame (landscape) — overrides the kit phone size for this demo only ===== */
-.phone{width:min(1000px,calc(100vw - 40px));height:680px;border-radius:30px}
-.statusbar{height:30px;font-size:12.5px}
-
-/* ===== Two panes: search (left) | situation (right) ===== */
-.split{flex:1;min-height:0;display:flex;background:var(--appbar)}
-.left{width:350px;flex:none;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 0 0 0;border-right:1px solid var(--divider)}
-.right{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--scaffold)}
-.left>.scroll{padding:14px 0 20px}
-.right>.scroll{padding:16px 8px 24px}
-
-/* ===== Left: NewSearchPage card ===== */
-.scard{background:var(--card);border-radius:12px;margin:0 14px 14px;padding:14px}
-.stitle{margin:0 0 8px;font-size:15.5px;font-weight:700;color:var(--title)}
-.sfield{display:flex;align-items:center;gap:8px;height:44px;padding:0 12px;border-radius:10px;border:.8px solid var(--divider);background:var(--tint)}
+/* ===== Search page card + field (NewSearchPage) ===== */
+.scard{background:var(--card);border-radius:12px;margin:14px 16px 0;padding:14px}
+.sfield{display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 12px;border-radius:10px;border:.8px solid var(--divider);background:var(--tint)}
 .sfield:focus-within{border-color:var(--primary)}
 .sfield svg{width:18px;height:18px;color:var(--hint);flex:none}
 .sfield input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:14.5px}
 .sfield input::placeholder{color:var(--hint)}
+.sfield .clr{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--hint)}
+.stitle{display:flex;align-items:baseline;justify-content:space-between;margin:20px 16px 10px}
+.stitle h2{margin:0;font-size:16px;font-weight:700;color:var(--title)}
+.stitle span{font-size:13px;color:var(--hint)}
 
-/* ===== NEW: situation list with a selected row ===== */
-.srows{display:flex;flex-direction:column;gap:4px;margin:0 -6px}
-.sr{display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:10px;text-align:left;width:100%}
-.sr:hover{background:var(--surface-2)}
-.sr[aria-current="true"]{background:var(--tint)}
-.sr .ic{width:36px;height:36px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark)}
-.sr[aria-current="true"] .ic{background:var(--primary);color:var(--on-appbar)}
-:root[data-theme="dark"] .sr .ic{color:var(--primary)}
-:root[data-theme="dark"] .sr[aria-current="true"] .ic{color:var(--on-appbar)}
-.sr .ic svg{width:20px;height:20px}
-.sr b{display:block;font-size:14px;color:var(--title);line-height:1.3}
-.sr small{font-size:12px;color:var(--hint)}
+/* ===== NEW: "জীবনের পরিস্থিতি" — one big card per swipe, peeking neighbours ===== */
+.deck{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:4px 40px 8px}
+.deck::-webkit-scrollbar{display:none}
+.slide{flex:none;width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:20px 18px 16px;border-radius:18px;background:var(--card);box-shadow:var(--shadow);text-align:left;border:1.5px solid transparent;transition:transform .25s,border-color .25s}
+.slide:not(.cur){transform:scale(.94)}
+.slide.cur{border-color:var(--primary)}
+.big-ic{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .big-ic{color:var(--primary)}
+.big-ic svg{width:30px;height:30px}
+.slide b{font-size:19px;line-height:1.3;color:var(--title)}
+.slide .nm{font-size:13.5px;color:var(--hint)}
+.slide .cnt{margin-top:4px;font-size:13px;color:var(--body)}
+.slide .open{margin-top:6px;align-self:stretch}
+.dots{display:flex;justify-content:center;gap:6px;padding:4px 0 12px}
+.dots button{width:8px;height:8px;border-radius:50%;background:var(--divider);transition:width .2s}
+.dots button.on{width:20px;border-radius:5px;background:var(--primary)}
 
-/* ===== Right: header, sections, two-column dua grid ===== */
-.rhead{display:flex;gap:14px;align-items:center;margin:0 8px 6px;padding:16px;background:var(--card);border-radius:12px}
-.rhead .ic{width:56px;height:56px;flex:none;border-radius:16px;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark)}
-:root[data-theme="dark"] .rhead .ic{color:var(--primary)}
-.rhead .ic svg{width:30px;height:30px}
-.rhead h2{margin:0;font-size:20px;color:var(--title);line-height:1.3}
-.rhead p{margin:4px 0 0;font-size:14.5px;color:var(--body);line-height:1.55}
-.tag{display:inline-block;margin-left:6px;padding:0 7px;border-radius:6px;border:1px solid var(--divider);font-size:11.5px;color:var(--hint)}
-.sec-h{margin:16px 12px 8px;font-size:16px;font-weight:700;color:var(--title)}
-.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 8px}
-.dgrid .card{margin:0}
-.right .card{margin-left:8px;margin-right:8px}
-.dgrid .card{margin:0}
+/* ===== Situation page: compact header ===== */
+.shead{display:flex;gap:12px;align-items:center;margin:12px 12px 0;padding:12px 14px;background:var(--card);border-radius:12px}
+.shead .big-ic{width:46px;height:46px;flex:none;border-radius:14px}
+.shead .big-ic svg{width:26px;height:26px}
+.shead p{margin:0;font-size:14px;color:var(--body);line-height:1.55}
+.tag{display:inline-block;margin-left:6px;padding:0 7px;border-radius:6px;border:1px solid var(--divider);font-size:11.5px;color:var(--hint);vertical-align:1px}
 
-/* ===== Dua card (Dua tab look) ===== */
-.dua{padding:12px 14px 0;display:flex;flex-direction:column}
-.dua h4{margin:4px 0 0;font-size:15px;line-height:1.4;color:var(--title)}
-.lbl{display:block;margin-top:6px;font-size:12.5px;font-weight:700;color:var(--primary-dark)}
+/* ===== Step bar: one segment per dua/hadith, section titles as tappable steps ===== */
+.segs{display:flex;gap:4px;margin:14px 14px 0}
+.segs i{flex:1;height:4px;border-radius:4px;background:var(--divider);transition:background .2s}
+.segs i.past,.segs i.on{background:var(--primary)}
+.segs i.past{opacity:.45}
+.steps{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px 14px 4px}
+.steps::-webkit-scrollbar{display:none}
+.steps .chip{flex:none}
+.steps .chip[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:var(--on-appbar)}
+
+/* ===== One card at a time ===== */
+.stage{flex:1;min-height:0;overflow-y:auto;padding:6px 0 12px;touch-action:pan-y}
+.stage::-webkit-scrollbar{width:0}
+.stage.in-l>*{animation:inL .28s ease}
+.stage.in-r>*{animation:inR .28s ease}
+@keyframes inL{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes inR{from{transform:translateX(-40px);opacity:0}to{transform:none;opacity:1}}
+.kind{margin:6px 16px 6px;font-size:12.5px;font-weight:700;color:var(--hint)}
+.foot{flex:none;display:flex;align-items:center;gap:10px;padding:10px 12px 14px;background:var(--card);border-top:1px solid var(--divider)}
+.foot .pos{flex:1;text-align:center;font-weight:700;color:var(--title);font-size:14.5px}
+.foot .pos small{display:block;font-weight:400;font-size:12px;color:var(--hint)}
+.foot .btn{min-width:96px}
+
+/* ===== Dua card (Dua tab look): title → উচ্চারণ → অর্থ → সূত্র → কপি | শেয়ার ===== */
+.dua{padding:14px 16px 0}
+.dua h4{margin:0;font-size:16px;line-height:1.4;color:var(--title)}
+.lbl{display:block;margin-top:10px;font-size:13px;font-weight:700;color:var(--primary-dark)}
 :root[data-theme="dark"] .lbl{color:var(--primary)}
-.txt{margin:2px 0 0;color:var(--title);font-size:14.5px;line-height:1.6}
-.ref{margin:8px 0 0;font-size:13px;color:var(--hint)}
-.acts{display:flex;margin-top:auto;padding-top:10px}
-.acts>div{display:flex;flex:1;border-top:1px solid var(--divider)}
-.acts button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:40px;font-size:14px;font-weight:700;color:var(--primary)}
+.txt{margin:2px 0 0;color:var(--title);font-size:15.5px;line-height:1.7}
+.ref{margin:12px 0 0;font-size:13.5px;color:var(--body)}
+.acts{display:flex;margin-top:12px;border-top:1px solid var(--divider)}
+.acts button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:44px;font-size:14px;font-weight:700;color:var(--primary)}
 .acts button+button{border-left:1px solid var(--divider)}
-.acts svg{width:17px;height:17px}
+.acts svg{width:18px;height:18px}
 
-/* ===== Hadith card + detail in the right pane ===== */
+/* ===== Hadith card (HadithListItem) + full page ===== */
 .hcard{cursor:pointer}
-.hcard .translation{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.crumb{display:flex;align-items:center;gap:4px;margin:0 8px 10px;font-size:14px;color:var(--primary);font-weight:700}
-.crumb svg{width:20px;height:20px}
-.chap{background:var(--card);border-radius:var(--r-card);margin:0 8px 10px;padding:12px var(--pad);font-weight:700;color:var(--title)}
+.hcard .more-hint{display:flex;align-items:center;gap:4px;margin-top:10px;font-size:13.5px;font-weight:700;color:var(--primary)}
+.hcard .more-hint svg{width:18px;height:18px}
+.chap{background:var(--card);border-radius:var(--r-card);margin:12px 12px 10px;padding:12px var(--pad);font-weight:700;color:var(--title)}
 .chap span{display:block;font-weight:400;font-size:13px;color:var(--hint)}
-
-/* ===== Right pane before a situation is picked ===== */
-.pick{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;height:100%;text-align:center;color:var(--hint);font-size:14.5px;padding:24px}
-.pick .row{display:flex;gap:10px;color:var(--primary-dark)}
-:root[data-theme="dark"] .pick .row{color:var(--primary)}
-.pick .row span{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--tint)}
-.pick h3{margin:6px 0 0;font-size:17px;color:var(--title)}
-
-/* ===== Hadith copy / share menu ===== */
-.list-row svg{color:var(--hint)}
 </style>
 </head>
 <body>
 <main class="kit-stage">
   <div class="phone">
     <div class="viewport">
-      <!-- ===== One tablet layout, moved into whichever screen is open ===== -->
+      <!-- ===== Screen: search page ===== -->
       <section class="screen" data-screen="search">
-        <div id="tab" style="display:contents">
-          <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-snack="হোম পেজে ফিরবে" data-i="back"></button><h1>সার্চ</h1></header>
-          <div class="split">
-            <div class="left"><div class="scroll" id="left"></div></div>
-            <div class="right"><div class="scroll" id="right"></div></div>
-          </div>
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-snack="হোম পেজে ফিরবে" data-i="back"></button><h1>সার্চ</h1></header>
+        <div class="scroll" id="search-body"></div>
+      </section>
+
+      <!-- ===== Screen: situation page (one card at a time) ===== -->
+      <section class="screen" data-screen="sit">
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="search" data-i="back"></button><h1 id="sit-name">ঋণ<small>ঋণে ডুবে আছি</small></h1></header>
+        <div id="sit-top"></div>
+        <div class="stage" id="stage"></div>
+        <div class="foot">
+          <button class="btn outline" id="prev">আগের</button>
+          <span class="pos" id="pos"></span>
+          <button class="btn" id="next">পরের</button>
         </div>
       </section>
-      <section class="screen" data-screen="sit"></section>
-      <section class="screen" data-screen="hadith"></section>
 
-      <!-- ===== Hadith copy / share menu ===== -->
-      <div class="sheet" id="menu" role="dialog" aria-label="অন্যান্য অপশন" style="left:auto;width:420px;right:24px">
-        <div class="sheet-head"><h2 id="menu-title"></h2><button class="icon-btn" data-close aria-label="বন্ধ করুন" data-i="close"></button></div>
+      <!-- ===== Screen: full hadith page ===== -->
+      <section class="screen" data-screen="hadith">
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="sit" data-i="back"></button><h1>সহীহ বুখারী<small id="h-ch">আচার-ব্যবহার</small></h1></header>
+        <div class="scroll" id="h-body"></div>
+      </section>
+
+      <!-- ===== Sheet: hadith menu (copy / share only) ===== -->
+      <div class="sheet" id="sheet-h" role="dialog" aria-label="অন্যান্য অপশন">
+        <div class="sheet-head"><h2 id="sheet-h-title">সহীহ বুখারী, হাদিস নং ৬১১৬</h2><button class="icon-btn" data-close aria-label="বন্ধ করুন" data-i="close"></button></div>
         <div class="sheet-body">
-          <button class="list-row" data-act="full"><span data-i="copy"></span>কপি</button>
-          <button class="list-row" data-act="share"><span data-i="share"></span>শেয়ার</button>
+          <button class="list-row" data-hm="full"><span data-i="copy"></span>কপি</button>
+          <button class="list-row" data-hm="share"><span data-i="share"></span>শেয়ার</button>
         </div>
       </div>
     </div>
@@ -117,93 +128,148 @@
 <script src="situations_data.js"></script>
 <script>
 (function () {
-  const { $, $$, icons } = Kit;
+  const { $, $$, icons, bn } = Kit;
   const ic = (n) => icons[n];
-  const S = { sit: 'debt', hadith: '6116', view: 'search' };
+  const S = { sit: 'debt', hadith: '6116', q: '', slide: 0, step: 0 };
 
-  /* ---------- Left pane ---------- */
-  function renderLeft() {
-    const sel = S.view === 'search' ? null : S.sit;
-    $('#left').innerHTML = `
-      <div class="scard">
-        <label class="sfield">${ic('search')}<input id="q" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন" aria-label="সার্চ"></label>
-        <!-- NEW: জীবনের পরিস্থিতি -->
-        <h2 class="stitle" style="margin-top:14px">জীবনের পরিস্থিতি</h2>
-        <div class="srows">${LS.SITUATIONS.map((s) => `<button class="sr" data-sit="${s.id}" aria-current="${sel === s.id}"><span class="ic">${LS.ICON[s.id]}</span><span><b>${s.phrase}</b><small>${s.name}</small></span></button>`).join('')}</div>
-      </div>`;
+  /* ---------- Search page: swipe deck of situation cards ---------- */
+  function countText(s) {
+    const c = LS.counts(s);
+    return [c.d ? `${bn(c.d)}টি দোয়া` : '', c.h ? `${bn(c.h)}টি হাদিস` : ''].filter(Boolean).join(' · ');
   }
+  function renderSearch() {
+    const list = LS.SITUATIONS;
+    $('#search-body').innerHTML = `
+      <div class="scard"><label class="sfield">${ic('search')}<input id="q" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন" value="${S.q}" aria-label="সার্চ">
+        <button class="clr" id="q-clr" aria-label="মুছুন" ${S.q ? '' : 'hidden'}>${ic('close')}</button></label></div>
+      <!-- NEW: জীবনের পরিস্থিতি -->
+      <div class="stitle"><h2>জীবনের পরিস্থিতি</h2><span id="deck-pos">${bn(S.slide + 1)} / ${bn(list.length)}</span></div>
+      <div class="deck" id="deck">${list.map((s, i) => `<div class="slide ${i === S.slide ? 'cur' : ''}" data-slide="${i}">
+        <span class="big-ic">${LS.ICON[s.id]}</span><b>${s.phrase}</b><span class="nm">${s.name}</span>
+        <span class="cnt">${countText(s)}</span><button class="btn tonal open" data-sit="${s.id}">দেখুন</button></div>`).join('')}</div>
+      <div class="dots">${list.map((s, i) => `<button class="${i === S.slide ? 'on' : ''}" data-dot="${i}" aria-label="${s.name}"></button>`).join('')}</div>`;
+    const deck = $('#deck');
+    const step = () => deck.querySelector('.slide').offsetWidth + 12;
+    deck.scrollLeft = S.slide * step();
+    deck.onscroll = () => {
+      const i = Math.round(deck.scrollLeft / step());
+      if (i === S.slide || i < 0 || i >= list.length) return;
+      S.slide = i;
+      $$('.slide').forEach((el, k) => el.classList.toggle('cur', k === i));
+      $$('.dots button').forEach((el, k) => el.classList.toggle('on', k === i));
+      $('#deck-pos').textContent = `${bn(i + 1)} / ${bn(list.length)}`;
+    };
+  }
+  function goSlide(i) { const deck = $('#deck'); deck.scrollTo({ left: i * (deck.querySelector('.slide').offsetWidth + 12), behavior: 'smooth' }); }
 
-  /* ---------- Right pane ---------- */
+  /* ---------- Situation page: flatten sections into steps ---------- */
+  const stepsOf = (s) => s.sections.flatMap((x, si) => [...(x.duas || []).map((id) => ({ si, dua: id })), ...(x.hadiths || []).map((no) => ({ si, h: no }))]);
   function duaCard(id) {
     const d = window.LS_DUAS[id];
     return `<article class="card dua"><h4>${d.t}</h4>
       <span class="lbl">উচ্চারণ</span><p class="txt">${d.tr}</p>
       <span class="lbl">অর্থ</span><p class="txt">${d.m}</p>
       <p class="ref">সূত্র: ${d.ref}</p>
-      <div class="acts"><div><button data-dcopy="${id}">${ic('copy')}কপি</button><button data-dshare="${id}">${ic('share')}শেয়ার</button></div></div></article>`;
+      <div class="acts"><button data-dcopy="${id}">${ic('copy')}কপি</button><button data-dshare="${id}">${ic('share')}শেয়ার</button></div></article>`;
   }
   function hadithCard(no, full) {
     const h = window.LS_HADITHS[no];
-    return `<article class="card ${full ? '' : 'hcard'}" ${full ? '' : `data-h="${no}"`}>
+    return `<article class="card ${full ? '' : 'hcard'}" ${full ? '' : `data-h="${no}" tabindex="0"`}>
       <div class="hadith-head"><span class="book-badge">${LS.BOOK.abbr}</span>
         <div class="hadith-meta"><b>${LS.BOOK.name}</b><span>হাদিস: ${h.no}</span></div>
         <span class="grade">${LS.BOOK.grade}</span>
-        <button class="icon-btn" aria-label="অন্যান্য অপশন" data-hmenu="${no}">${ic('more')}</button></div>
-      <p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${LS.nl(h.tr)}</p></article>`;
+        <button class="icon-btn" aria-label="অন্যান্য অপশন" data-hmore="${no}">${ic('more')}</button></div>
+      <p class="narrator">${h.nar} থেকে বর্ণিত:</p>
+      <p class="translation">${LS.nl(h.tr)}</p>
+      ${full ? '' : `<span class="more-hint">পুরো হাদিস দেখুন${ic('chevron')}</span>`}</article>`;
   }
-  const head = (s) => `<div class="rhead"><span class="ic">${LS.ICON[s.id]}</span><div><h2>${s.name} · ${s.phrase}</h2>
-    <p>${s.comfort}<span class="tag">নমুনা</span></p></div></div>`;
-  function renderRight() {
-    const r = $('#right'), s = LS.byId(S.sit);
-    r.scrollTop = 0;
-    if (S.view === 'search') {
-      r.innerHTML = `<div class="pick"><div class="row">${['debt', 'worry', 'sick'].map((k) => `<span>${LS.ICON[k]}</span>`).join('')}</div>
-        <h3>জীবনের পরিস্থিতি</h3><p style="margin:0">বাঁ দিক থেকে একটা পরিস্থিতি বেছে নিন, তার দোয়া আর হাদিস এখানে খুলবে।</p></div>`;
-    } else if (S.view === 'hadith') {
-      const h = window.LS_HADITHS[S.hadith];
-      r.innerHTML = `<button class="crumb" id="crumb">${ic('back')}${s.name}</button>
-        <div class="chap">অধ্যায় ${h.ch}<span>${LS.BOOK.name}</span></div>${hadithCard(S.hadith, true)}`;
-    } else {
-      r.innerHTML = head(s) + s.sections.map((x) => `<h3 class="sec-h">${x.title}</h3>${x.duas
-        ? `<div class="dgrid">${x.duas.map(duaCard).join('')}</div>` : x.hadiths.map((n) => hadithCard(n)).join('')}`).join('');
-      r.scrollTop = S.keep || 0;
-    }
+  function renderSitTop() {
+    const s = LS.byId(S.sit);
+    $('#sit-name').innerHTML = `${s.name}<small>${s.phrase}</small>`;
+    $('#sit-top').innerHTML = `<div class="shead"><span class="big-ic">${LS.ICON[s.id]}</span><p>${s.comfort}<span class="tag">নমুনা</span></p></div>
+      <div class="segs" id="segs"></div><div class="steps" id="steps"></div>`;
   }
-  function render() { renderLeft(); renderRight(); }
-  function pick(id) { S.sit = id; S.keep = 0; Kit.show('sit'); }
+  function renderStep(dir) {
+    const s = LS.byId(S.sit), all = stepsOf(s), cur = all[S.step], sec = s.sections[cur.si];
+    $('#segs').innerHTML = all.map((_, i) => `<i class="${i < S.step ? 'past' : i === S.step ? 'on' : ''}"></i>`).join('');
+    $('#steps').innerHTML = s.sections.map((x, i) => `<button class="chip" data-sec="${i}" aria-pressed="${i === cur.si}">${x.title}</button>`).join('');
+    const row = $('#steps'), on = row.querySelector('[aria-pressed="true"]');
+    row.scrollLeft = on.offsetLeft - row.offsetLeft - (row.clientWidth - on.offsetWidth) / 2;
+    const st = $('#stage');
+    st.className = 'stage' + (dir ? ` in-${dir}` : '');
+    st.innerHTML = `<div class="kind">${cur.dua ? 'দোয়া' : 'হাদিস'} · ${sec.title}</div>${cur.dua ? duaCard(cur.dua) : hadithCard(cur.h)}`;
+    st.scrollTop = 0;
+    $('#pos').innerHTML = `${bn(S.step + 1)} / ${bn(all.length)}<small>${s.name}</small>`;
+    $('#prev').disabled = S.step === 0;
+    $('#next').textContent = S.step === all.length - 1 ? 'অন্য পরিস্থিতি' : 'পরের';
+  }
+  function move(d) {
+    const n = stepsOf(LS.byId(S.sit)).length;
+    if (d > 0 && S.step === n - 1) return Kit.show('search'); // শেষ কার্ডের পর পরিস্থিতির তালিকায় ফেরা
+    const to = Math.min(n - 1, Math.max(0, S.step + d));
+    if (to !== S.step) { S.step = to; renderStep(d > 0 ? 'l' : 'r'); }
+  }
+  // বাঁয়ে টানলে পরের কার্ড, ডানে টানলে আগের কার্ড
+  let x0 = null;
+  $('#stage').addEventListener('pointerdown', (e) => { x0 = e.clientX; });
+  $('#stage').addEventListener('pointerup', (e) => { if (x0 === null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 50) { S.swipedAt = Date.now(); move(dx < 0 ? 1 : -1); } });
+
+  /* ---------- Full hadith page ---------- */
+  function renderHadith() {
+    const h = window.LS_HADITHS[S.hadith];
+    $('#h-ch').textContent = h.ch.replace(/^[^ ]+ /, '');
+    $('#h-body').innerHTML = `<div class="chap">অধ্যায় ${h.ch}<span>${LS.BOOK.name}</span></div>${hadithCard(S.hadith, true)}`;
+  }
+
+  function openSit(id) { S.sit = id; S.step = 0; S.fresh = true; Kit.show('sit'); }
 
   /* ---------- Events ---------- */
   document.addEventListener('click', (e) => {
-    const t = e.target.closest('button,[data-h]');
+    if (Date.now() - (S.swipedAt || 0) < 350) return; // সোয়াইপের শেষে কার্ড চাপা ধরা হবে না
+    const t = e.target.closest('button,[data-h],.slide');
     if (!t) return;
-    if (t.dataset.sit) return pick(t.dataset.sit);
-    if (t.dataset.dcopy) { LS.copy(LS.duaText(t.dataset.dcopy)); return Kit.snack('কপি হয়েছে'); }
+    if (t.dataset.sit) return openSit(t.dataset.sit);
+    if (t.dataset.slide) { const i = +t.dataset.slide; return i === S.slide ? openSit(LS.SITUATIONS[i].id) : goSlide(i); }
+    if (t.dataset.dot) return goSlide(+t.dataset.dot);
+    if (t.id === 'q-clr') { e.preventDefault(); S.q = ''; $('#q').value = ''; t.hidden = true; return; }
+    if (t.id === 'prev') return move(-1);
+    if (t.id === 'next') return move(1);
+    if (t.dataset.sec) { const i = stepsOf(LS.byId(S.sit)).findIndex((x) => x.si === +t.dataset.sec); const d = i > S.step ? 'l' : 'r'; S.step = i; return renderStep(d); }
+    if (t.dataset.dcopy) { LS.copy(LS.duaText(t.dataset.dcopy)); return Kit.snack('দোয়া কপি হয়েছে'); }
     if (t.dataset.dshare) return Kit.snack('শেয়ার করার অপশন খুলেছে');
-    if (t.dataset.hmenu) { e.stopPropagation(); S.menu = t.dataset.hmenu; $('#menu-title').textContent = `${LS.BOOK.name}, হাদিস নং ${window.LS_HADITHS[S.menu].no}`; return Kit.open('menu'); }
-    if (t.dataset.act) {
-      const k = t.dataset.act; Kit.close('menu');
-      if (k === 'share') return Kit.snack('শেয়ার করার অপশন খুলেছে');
-      LS.copy(LS.hadithText(S.menu, k));
+    if (t.dataset.hmore) { e.stopPropagation(); S.menu = t.dataset.hmore; $('#sheet-h-title').textContent = `${LS.BOOK.name}, হাদিস নং ${window.LS_HADITHS[S.menu].no}`; return Kit.open('sheet-h'); }
+    if (t.dataset.hm) {
+      const m = t.dataset.hm; Kit.close('sheet-h');
+      if (m === 'share') return Kit.snack('শেয়ার করার অপশন খুলেছে');
+      LS.copy(LS.hadithText(S.menu, m));
       return Kit.snack('হাদিস কপি হয়েছে');
     }
-    if (t.dataset.h) { S.hadith = t.dataset.h; S.keep = $('#right').scrollTop; S.back = true; return Kit.show('hadith'); }
-    if (t.id === 'crumb') { S.back = true; return Kit.show('sit'); }
+    if (t.dataset.h) { S.hadith = t.dataset.h; return Kit.show('hadith'); }
   });
   document.addEventListener('keydown', (e) => {
-    if (e.target.id === 'q' && e.key === 'Enter') Kit.snack(e.target.value.trim() ? `"${e.target.value}" এর সার্চ ফলাফল খুলবে` : 'সার্চ করতে কিছু লিখুন');
+    if (e.target.id !== 'q' || e.key !== 'Enter') return;
+    Kit.snack(e.target.value.trim() ? `"${e.target.value}" এর সার্চ ফলাফল খুলবে` : 'সার্চ করতে কিছু লিখুন');
   });
+  document.addEventListener('input', (e) => { if (e.target.id === 'q') { S.q = e.target.value; $('#q-clr').hidden = !S.q; } });
 
-  /* ---------- Screens: same layout, the right pane changes ---------- */
+  /* ---------- Screens ---------- */
   Kit.onScreen((id) => {
-    if (id === 'hadith' && !LS.byId(S.sit).sections.some((x) => (x.hadiths || []).includes(S.hadith))) S.sit = 'anger';
-    if (!S.back && id === 'sit') S.keep = 0;
-    S.back = false;
-    S.view = id;
-    $(`.screen[data-screen="${id}"]`).appendChild($('#tab'));
-    render();
+    if (id === 'search') { S.fromHadith = false; renderSearch(); }
+    if (id === 'sit') {
+      // টুলবার থেকে সরাসরি এলে প্রথম কার্ড; পুরো হাদিস থেকে ফিরলে যেখানে ছিল সেখানেই
+      if (!S.fresh && !S.fromHadith) S.step = 0;
+      S.fresh = S.fromHadith = false;
+      renderSitTop(); renderStep();
+    }
+    if (id === 'hadith') {
+      const s = LS.byId(S.sit), i = stepsOf(s).findIndex((x) => x.h === S.hadith);
+      if (i < 0) { S.sit = 'anger'; S.step = stepsOf(LS.byId('anger')).findIndex((x) => x.h === S.hadith); } else S.step = i;
+      S.fromHadith = true;
+      renderHadith();
+    }
   });
   $$('[data-i]').forEach((b) => { b.innerHTML = icons[b.dataset.i]; });
-  Kit.init({ demo: 5, name: 'ট্যাবলেটে পাশাপাশি', screens: [
+  Kit.init({ demo: 5, name: 'সোয়াইপ করে এক এক করে', screens: [
     { id: 'search', label: 'সার্চ পেজ' },
     { id: 'sit', label: 'পরিস্থিতির পেজ' },
     { id: 'hadith', label: 'পুরো হাদিস' },
