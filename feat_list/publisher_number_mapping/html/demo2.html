@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>প্রকাশনী নম্বর মিলানো — ডেমো ২ · নিচের শিট</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): scroll body, home tiles, search, card, "নমুনা" tag ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:24px}
+.body::-webkit-scrollbar{width:0}
+.tag{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;line-height:18px;padding:0 7px;border-radius:20px;background:var(--surface-2);color:var(--hint);border:1px solid var(--divider);vertical-align:middle;white-space:nowrap}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 12px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px 10px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-size:13.5px;font-weight:600;color:var(--body)}
+.tile svg{color:var(--primary)}
+button.tile{font-weight:700;color:var(--title)}
+.hc{margin:10px 12px}
+.hc .narrator{margin:12px 0 0}
+.hc[data-res]{cursor:pointer}
+.sbox{display:flex;gap:8px;padding:14px 12px 6px}
+.sf{flex:1;display:flex;align-items:center;height:44px;border-radius:10px;border:1px solid var(--divider);background:var(--card);color:var(--hint)}
+.sf:focus-within{border-color:var(--primary)}
+.sf .i{width:38px;display:grid;place-items:center}
+.sf .i svg{width:18px;height:18px}
+.sf input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.sf input::placeholder{color:var(--hint)}
+.sbox .btn{height:44px;padding:0 14px}
+.ov{background:var(--card);border-radius:10px;padding:10px 14px;margin:8px 12px 4px}
+.ov p{margin:0}
+.ov .ql{font-size:15.5px;font-weight:600;color:var(--title)}
+.ov .ql b{color:var(--primary)}
+.ov .ct{font-size:13px;color:var(--body)}
+.num::placeholder{color:var(--hint)}
+.dim{position:absolute;inset:0;z-index:5;background:var(--scrim)}
+
+/* ===== Demo 2: "হাদিসে যান" as a bottom sheet over home — book chips, publisher segments ===== */
+.bs{position:absolute;left:0;right:0;bottom:0;z-index:6;max-height:92%;overflow-y:auto;background:var(--card);border-radius:24px 24px 0 0;padding:8px 16px 18px;box-shadow:var(--shadow)}
+.grab{display:block;width:40px;height:4px;border-radius:4px;background:var(--divider);margin:0 auto 6px}
+.bs-h{display:flex;align-items:center}
+.bs-h h2{flex:1;margin:0;font-size:20px;font-weight:700;color:var(--title)}
+.lbl{margin:14px 0 8px;font-size:13.5px;font-weight:700;color:var(--hint)}
+.bk-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.bk{display:inline-flex;align-items:center;gap:8px;flex:none;height:48px;padding:0 14px 0 6px;border-radius:24px;border:1px solid var(--divider);background:var(--card);font-size:15px;font-weight:600;color:var(--title)}
+.bk .book-badge{width:34px;height:34px;font-size:9.5px}
+.bk[aria-pressed="true"]{border-color:var(--primary);background:var(--tint)}
+.seg{display:flex;padding:4px;gap:4px;border-radius:14px;background:var(--surface-2);border:1px solid var(--divider)}
+.seg button{flex:1;min-height:46px;padding:4px 6px;border-radius:10px;font-size:13.5px;font-weight:600;line-height:1.25;color:var(--body)}
+.seg button[aria-checked="true"]{background:var(--card);color:var(--primary-dark);box-shadow:var(--shadow);font-weight:700}
+:root[data-theme="dark"] .seg button[aria-checked="true"]{color:var(--primary)}
+.seg.ask{border-color:var(--primary);animation:ask 1.2s ease-out 2}
+@keyframes ask{0%{box-shadow:0 0 0 0 var(--tint)}100%{box-shadow:0 0 0 8px transparent}}
+.big{display:block;width:100%;height:64px;border:0;border-bottom:2px solid var(--divider);background:none;text-align:center;font-size:30px;font-weight:700;letter-spacing:2px;color:var(--title);outline:none}
+.big:focus{border-color:var(--primary)}
+.big::placeholder{font-size:20px;letter-spacing:0;font-weight:600}
+.bs .btn.block{margin-top:18px;height:50px}
+.btn:disabled{opacity:.45;cursor:default}
+/* ===== না মেলার মেসেজ ===== */
+.nf{margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--surface-2);font-size:14px;color:var(--body)}
+.nf p{margin:0}
+.nf b{color:var(--title)}
+/* ===== মিলের লেখা: strip that continues the app bar ===== */
+.strip{flex:none;padding:0 16px 12px;background:var(--appbar);color:var(--on-appbar);border-radius:0 0 18px 18px;font-size:14px}
+.strip small{display:block;font-size:12px;opacity:.85}
+.strip b{font-size:15.5px}
+.strip .tag{background:color-mix(in srgb,var(--on-appbar) 18%,transparent);color:var(--on-appbar);border-color:transparent}
+/* ===== Tappable "হাদিস নং" ===== */
+.hn{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:var(--primary-dark);text-decoration:underline;text-underline-offset:3px}
+:root[data-theme="dark"] .hn{color:var(--primary)}
+.hn svg{width:15px;height:15px}
+/* ===== Sheets: big number rows, radio cards ===== */
+.sub{margin:-2px var(--pad) 8px;font-size:13.5px;color:var(--hint)}
+.nt{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--divider)}
+.nt small{display:block;font-size:12.5px;color:var(--hint)}
+.nt b{font-size:15px;color:var(--title)}
+.nt .v{font-size:26px;font-weight:700;color:var(--title)}
+.nt.own{border-color:var(--primary);background:var(--tint)}
+.nt.no{border-style:dashed}
+.nt.no .v{font-size:14px;font-weight:600;color:var(--hint)}
+.rc{display:flex;gap:12px;width:100%;margin-bottom:8px;padding:12px;border-radius:12px;border:1px solid var(--divider);text-align:left}
+.rc[aria-checked="true"]{border-color:var(--primary);background:var(--tint)}
+.rd{width:20px;height:20px;margin-top:2px;border-radius:50%;border:2px solid var(--hint);flex:none;display:grid;place-items:center}
+[aria-checked="true"] .rd{border-color:var(--primary)}
+[aria-checked="true"] .rd::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--primary)}
+.rc b{display:block;font-size:15px;color:var(--title)}
+.rc p{margin:2px 0 0;font-size:14px;color:var(--body)}
+/* ===== প্রকাশনীর চিপ: outlined ===== */
+.pcs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pc{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:14px;border:1px solid var(--primary);color:var(--primary-dark);font-size:12.5px;font-weight:600}
+:root[data-theme="dark"] .pc{color:var(--primary)}
+.pc small{font-size:11.5px;color:var(--hint)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="home"></section>
+      <section class="screen" data-screen="jump"></section>
+      <section class="screen" data-screen="multi"></section>
+      <section class="screen" data-screen="hadith"></section>
+      <section class="screen" data-screen="numbers"></section>
+      <section class="screen" data-screen="notfound"></section>
+      <section class="screen" data-screen="search"></section>
+
+      <!-- ===== Sheet: একাধিক মিল (filled by D.multi) ===== -->
+      <div class="sheet" id="sheet-multi" role="dialog" aria-label="একাধিক হাদিস মিলেছে"></div>
+      <!-- ===== Sheet: সব প্রকাশনীর নম্বর (filled by D.numbers) ===== -->
+      <div class="sheet" id="sheet-numbers" role="dialog" aria-label="সব প্রকাশনীর নম্বর"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, number matching, the flow and
+   screen wiring. Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const BND = '০১২৩৪৫৬৭৮৯';
+const toEn = (s) => String(s).replace(/[০-৯]/g, (d) => BND.indexOf(d));
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+
+/* ---------- Publishers. Today the app has one per book and language:
+   বুখারী = তাওহীদ পাবলিকেশন্স, মুসলিম = হাদীস একাডেমী (books.publication). ---------- */
+const PUB = {
+  tw: { name: 'তাওহীদ পাবলিকেশন্স', short: 'তাওহীদ' },
+  ha: { name: 'হাদীস একাডেমী', short: 'হাদীস একাডেমী' },
+  fd: { name: 'ইসলামিক ফাউন্ডেশন', short: 'ইসলামিক ফাউন্ডেশন' },
+  intl: { name: 'আন্তর্জাতিক', short: 'আন্তর্জাতিক' },
+};
+
+/* ---------- Books: own = the publisher whose number the app shows; max = last number per publisher ---------- */
+const BOOKS = {
+  bukhari: { name: 'সহীহ বুখারী', abbr: 'বুখারী', by: 'ইমাম বুখারি', own: 'tw', pubs: ['tw', 'fd', 'intl'], max: { tw: 7563, fd: 7042, intl: 7563 } },
+  muslim: { name: 'সহীহ মুসলিম', abbr: 'মুসলিম', by: 'ইমাম মুসলিম', own: 'ha', pubs: ['ha', 'fd', 'intl'], max: { ha: 7547, fd: 7453, intl: 3033 } },
+};
+
+/* ---------- Demo hadith (text only from the safe list, no Arabic).
+   no = number per publisher; null = not in that publisher's edition.
+   The app shows মুসলিম ২২৩ (আন্তর্জাতিক) as হাদিস ৪২২. Other numbers are samples. ---------- */
+const HADITH = {
+  b1: { book: 'bukhari', ch: 'ওহীর সূচনা', no: { tw: 1, fd: 1, intl: 1 }, nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত',
+    text: 'সকল কাজ নিয়তের ওপর নির্ভরশীল, আর মানুষ তার নিয়ত অনুযায়ী প্রতিফল পাবে।' },
+  b1894: { book: 'bukhari', ch: 'সাওম', no: { tw: 1894, fd: null, intl: 1894 }, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত',
+    text: 'সাওম ঢাল স্বরূপ।' },
+  b6018: { book: 'bukhari', ch: 'আদব', no: { tw: 6018, fd: 5594, intl: 6018 }, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত',
+    text: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।' },
+  b6116: { book: 'bukhari', ch: 'আদব', no: { tw: 6116, fd: 5594, intl: 6116 }, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত',
+    text: 'এক ব্যক্তি নবী (সা.)-কে বলল, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বলল, তিনি প্রতিবারই বললেন, রাগ করো না।' },
+  m223: { book: 'muslim', ch: 'পবিত্রতা', no: { ha: 422, fd: 427, intl: 223 }, nar: 'আবু মালিক আশআরি (রা.) থেকে বর্ণিত',
+    text: 'পবিত্রতা ঈমানের অর্ধেক।' },
+};
+const appNo = (id) => HADITH[id].no[BOOKS[HADITH[id].book].own];
+
+/* ---------- Matching: one hadith, several (split), out of range, or a number this demo has no text for ---------- */
+function resolve(book, pub, n) {
+  const ids = Object.keys(HADITH).filter((id) => HADITH[id].book === book && HADITH[id].no[pub] === n);
+  if (ids.length > 1) return { type: 'multi', ids };
+  if (ids.length) return { type: 'one', id: ids[0] };
+  if (!(n >= 1 && n <= BOOKS[book].max[pub])) return { type: 'none' };
+  return { type: 'demo' };
+}
+const demoNos = (book, pub) => [...new Set(Object.values(HADITH).filter((h) => h.book === book && h.no[pub]).map((h) => bn(h.no[pub])))].join(', ');
+
+/* ---------- Search: a number matches the app's own number or any publisher's ---------- */
+function searchHits(q) {
+  const t = q.trim();
+  if (!t) return [];
+  const n = /^[0-9০-৯]+$/.test(t) ? +toEn(t) : null;
+  const out = [];
+  for (const id of Object.keys(HADITH)) {
+    const h = HADITH[id], b = BOOKS[h.book];
+    if (n !== null) {
+      if (h.no[b.own] === n) out.push({ id, own: true });
+      else {
+        const via = b.pubs.filter((p) => h.no[p] === n).map((p) => ({ p, name: PUB[p].name, n }));
+        if (via.length) out.push({ id, via });
+      }
+    } else if (t.split(/\s+/).some((w) => w.length > 1 && h.text.includes(w))) out.push({ id, own: true });
+  }
+  return out.sort((a, b) => (b.own ? 1 : 0) - (a.own ? 1 : 0));
+}
+
+/* ---------- State ---------- */
+const S = { book: 'muslim', pub: 'intl', num: '২২৩', cur: null, match: null, multi: [], from: 'jump', q: '৫৫৯৪' };
+const BASE = { multi: 'jump', notfound: 'jump', numbers: 'hadith' };
+
+/* ---------- Flow: হাদিসে যান ---------- */
+function setBook(id) {
+  if (S.book !== id) { S.book = id; S.pub = BOOKS[id].own; S.num = ''; }
+  S.multi = [];
+  if (Kit.current === 'notfound') Kit.show('jump'); else refresh();
+}
+function setPub(p) {
+  S.pub = p; S.multi = [];
+  if (Kit.current === 'notfound') Kit.show('jump'); else refresh();
+}
+function setNum(v) {
+  S.num = String(v).replace(/[0-9]/g, (d) => BND[d]).replace(/[^০-৯]/g, '').replace(/^০+/, '').slice(0, 8);
+  S.multi = [];
+}
+function submit() {
+  if (!S.book) { Kit.snack('প্রথমে বই নির্বাচন করুন'); return; }
+  if (!S.num) { Kit.snack('হাদিস নম্বর দিন'); return; }
+  const n = +toEn(S.num), r = resolve(S.book, S.pub, n);
+  if (r.type === 'one') openHadith(r.id, { pub: S.pub, n }, 'jump');
+  else if (r.type === 'multi') { S.multi = r.ids; Kit.show('multi'); }
+  else if (r.type === 'none') Kit.show('notfound');
+  else Kit.snack(`ডেমোতে ${PUB[S.pub].short} নম্বর আছে: ${demoNos(S.book, S.pub)}`);
+}
+function openHadith(id, match, from) { S.cur = id; S.match = match; S.from = from; Kit.show('hadith'); }
+
+/* ---------- Models handed to the demo's look ---------- */
+function jumpModel(nf) {
+  const b = S.book ? BOOKS[S.book] : null;
+  const m = { b, book: S.book, pub: S.pub, num: S.num, books: Object.keys(BOOKS), pubs: b ? b.pubs : [],
+    range: b ? `${bn(1)} - ${bn(b.max[S.pub])}` : 'হাদিসের নাম্বার', nf: null };
+  if (nf && b) m.nf = { text: `${PUB[S.pub].name} নম্বরে ${S.num} পাওয়া যায়নি।`,
+    hint: `এই প্রকাশনীতে হাদিস ${bn(1)} থেকে ${bn(b.max[S.pub])} পর্যন্ত। অন্য প্রকাশনী বেছে দেখুন।`,
+    others: b.pubs.filter((p) => p !== S.pub) };
+  return m;
+}
+function bannerInfo() {
+  const h = HADITH[S.cur], b = BOOKS[h.book], m = S.match;
+  if (!m || m.pub === b.own) return null;
+  const to = appNo(S.cur);
+  return { from: { name: PUB[m.pub].name, n: bn(m.n) }, to: { name: PUB[b.own].short, n: bn(to) },
+    text: `${PUB[m.pub].name} ${bn(m.n)} = ${PUB[b.own].short} ${bn(to)}` };
+}
+function numbersModel() {
+  const h = HADITH[S.cur], b = BOOKS[h.book];
+  return { h, b, rows: b.pubs.map((p) => ({ p, name: PUB[p].name, n: h.no[p] ? bn(h.no[p]) : '', own: p === b.own, hit: !!S.match && S.match.pub === p })) };
+}
+function multiModel() {
+  const b = BOOKS[S.book];
+  return { b, from: `${PUB[S.pub].name} ${S.num}`, to: PUB[b.own].short,
+    list: S.multi.map((id) => ({ id, n: bn(appNo(id)), ch: HADITH[id].ch, text: HADITH[id].text, nar: HADITH[id].nar })) };
+}
+
+/* ---------- Shared markup: app bar, home, hadith card, hadith page, search ---------- */
+const appbar = (title, back, extra = '') => `<header class="appbar">${back ? `<button class="icon-btn" aria-label="পেছনে" data-act="${back}">${icons.back}</button>` : ''}<h1>${title}</h1>${extra}</header>`;
+const HOME_TILES = [
+  ['সর্বশেষ', icons.clock],
+  ['জাম্প', svg('<path d="M4 12h11M11 6l6 6-6 6M20 4v16"/>', 24), true],
+  ['ওয়াক্ত', icons.sun],
+  ['সাদাকা', svg('<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>', 24)],
+];
+function homeHTML() {
+  return `${appbar('আল হাদিস', '', `<button class="icon-btn" aria-label="সার্চ" data-go="search">${icons.search}</button>`)}
+    <div class="body"><div class="tiles">${HOME_TILES.map(([label, ic, live]) => live
+      ? `<button class="tile" data-go="jump">${ic}${label}</button>`
+      : `<div class="tile">${ic}${label}</div>`).join('')}</div></div>`;
+}
+function cardHTML(id, numHTML, extra = '', attrs = '') {
+  const h = HADITH[id], b = BOOKS[h.book];
+  return `<article class="card hc" ${attrs}>
+    <div class="hadith-head"><span class="book-badge">${b.abbr}</span><div class="hadith-meta"><b>${b.name}</b>${numHTML}</div><span class="grade">সহিহ হাদিস</span></div>
+    ${extra}<p class="narrator">${h.nar}</p><p class="translation">${h.text}</p></article>`;
+}
+const plainNo = (id) => `<span>হাদিস: ${bn(appNo(id))}</span>`;
+function hadithHTML() {
+  const h = HADITH[S.cur], b = BOOKS[h.book], info = bannerInfo();
+  const bar = D.hadithBar ? D.hadithBar(h, b, info) : appbar(`${b.name}<small>অধ্যায়: ${h.ch}</small>`, 'back-hadith');
+  return `${bar}<div class="body">${D.banner(info)}${cardHTML(S.cur, D.numBtn(S.cur))}</div>`;
+}
+function searchHTML() {
+  const hits = searchHits(S.q);
+  const anyVia = hits.some((x) => x.via);
+  return `${appbar('সার্চ', 'home')}
+    <div class="body"><div class="sbox"><label class="sf"><span class="i">${icons.search}</span><input class="q" type="search" enterkeyhint="search" autocomplete="off" value="${esc(S.q)}" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন" aria-label="হাদিস সার্চ ইনপুট"></label><button class="btn" data-act="run">সার্চ করুন</button></div>
+    ${S.q.trim() ? `<div class="ov"><p class="ql">আপনি ( <b>${esc(S.q.trim())}</b> ) লিখে সার্চ করেছেন</p><p class="ct">সর্বমোট ফলাফল পাওয়া গেছে : ${bn(hits.length)} টি${anyVia ? ' <span class="tag">নমুনা</span>' : ''}</p></div>` : ''}
+    ${hits.map((x) => cardHTML(x.id, plainNo(x.id), x.via ? D.chip(x.via) : '', `data-res="${x.id}" role="button" tabindex="0"`)).join('')}</div>`;
+}
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  const base = BASE[id] || id;
+  sec.innerHTML = base === 'home' ? homeHTML() : base === 'jump' ? D.jump(jumpModel(id === 'notfound'))
+    : base === 'hadith' ? hadithHTML() : searchHTML();
+}
+function refresh() { render(Kit.current); }
+function onScreen(id) {
+  // A toolbar chip can open any screen: fill in the example state it needs.
+  if (id === 'multi' && S.multi.length < 2) Object.assign(S, { book: 'bukhari', pub: 'fd', num: '৫৫৯৪', multi: ['b6018', 'b6116'] });
+  if (id === 'notfound' && (!S.book || !S.num || resolve(S.book, S.pub, +toEn(S.num)).type !== 'none')) Object.assign(S, { book: 'bukhari', pub: 'fd', num: '৭৫০০', multi: [] });
+  if (id === 'hadith' && !S.cur) Object.assign(S, { cur: 'm223', match: { pub: 'intl', n: 223 }, from: 'jump' });
+  if (id === 'numbers' && !S.cur) Object.assign(S, { cur: 'b1894', match: null, from: 'jump' });
+  render(id);
+  if (id === 'multi') { $('#sheet-multi').innerHTML = D.multi(multiModel()); Kit.open('sheet-multi'); }
+  if (id === 'numbers') { $('#sheet-numbers').innerHTML = D.numbers(numbersModel()); Kit.open('sheet-numbers'); }
+  D.after?.(id);
+}
+
+/* ---------- Wiring ---------- */
+const ACT = {
+  home: () => Kit.show('home'),
+  ok: submit,
+  nums: () => Kit.show('numbers'),
+  'back-hadith': () => Kit.show(S.from),
+  'to-hadith': () => Kit.show('hadith'),
+  'to-jump': () => Kit.show('jump'),
+  run: () => { S.q = $('.screen.on .q')?.value || ''; refresh(); },
+};
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('scrim')) { const b = BASE[Kit.current]; if (b) Kit.show(b); return; }
+  const t = e.target.closest('[data-act],[data-book],[data-pub],[data-pick],[data-res],[data-key]');
+  if (!t || t.disabled) return;
+  const d = t.dataset;
+  if (d.book) { setBook(d.book); D.picked?.(); }
+  else if (d.pub) { setPub(d.pub); D.picked?.(); }
+  else if (d.pick) openHadith(d.pick, { pub: S.pub, n: +toEn(S.num) }, 'jump');
+  else if (d.res) {
+    const x = searchHits(S.q).find((r) => r.id === d.res);
+    openHadith(d.res, x && x.via ? { pub: x.via[0].p, n: x.via[0].n } : null, 'search');
+  }
+  else if (d.key) { setNum(d.key === 'del' ? S.num.slice(0, -1) : S.num + d.key); if (Kit.current === 'notfound') Kit.show('jump'); else refresh(); }
+  else ACT[d.act]?.(t);
+});
+document.addEventListener('input', (e) => {
+  if (e.target.matches('.num')) {
+    setNum(e.target.value);
+    e.target.value = S.num;
+    $$('.screen.on .nf').forEach((x) => { x.hidden = true; });
+  }
+  if (e.target.matches('.q')) S.q = e.target.value;
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.matches('.num')) { e.preventDefault(); submit(); }
+  if (e.key === 'Enter' && e.target.matches('.q')) { e.preventDefault(); S.q = e.target.value; refresh(); }
+  if (e.key === 'Enter' && e.target.matches('[data-res]')) e.target.click();
+});
+/* ======================================================================
+   DEMO 2 — নিচের শিট: "জাম্প" opens a bottom sheet instead of a dialog.
+   Books are chips, the publisher is a three-way segment, the number is
+   one big field. The match note continues the green app bar.
+   ====================================================================== */
+let pickSel = null;   // chosen row in the multi-match sheet
+const D = {
+  jump(m) {
+    const nf = m.nf ? `<div class="nf" role="status"><p><b>${m.nf.text}</b></p><p>${m.nf.hint}</p></div>` : '';
+    return `${homeHTML()}<div class="dim" data-act="home"></div>
+      <div class="bs" role="dialog" aria-label="হাদিসে যান"><span class="grab"></span>
+        <div class="bs-h"><h2>হাদিসে যান</h2><button class="icon-btn" data-act="home" aria-label="বাতিল করুন">${icons.close}</button></div>
+        <p class="lbl">বই</p>
+        <div class="bk-row">${m.books.map((id) => `<button class="bk" data-book="${id}" aria-pressed="${m.book === id}"><span class="book-badge">${BOOKS[id].abbr}</span>${BOOKS[id].name}</button>`).join('')}</div>
+        <p class="lbl">কোন প্রকাশনীর নম্বর</p>
+        <div class="seg ${m.nf ? 'ask' : ''}" role="radiogroup" aria-label="প্রকাশনী">${m.pubs.map((p) => `<button role="radio" aria-checked="${m.pub === p}" data-pub="${p}">${PUB[p].short}</button>`).join('')}</div>
+        <p class="lbl">হাদিসের নাম্বার</p>
+        <input class="big num" type="text" inputmode="numeric" autocomplete="off" aria-label="হাদিসের নাম্বার" placeholder="${m.range}" value="${m.num}">
+        ${nf}
+        <button class="btn block" data-act="ok">ঠিক আছে</button>
+      </div>`;
+  },
+  hadithBar(h, b, i) {
+    const bar = appbar(`${b.name}<small>অধ্যায়: ${h.ch}</small>`, 'back-hadith');
+    return i ? `${bar}<div class="strip"><small>মিলেছে<span class="tag">নমুনা</span></small><b>${i.from.name} ${i.from.n}</b> → <b>${i.to.name} ${i.to.n}</b></div>` : bar;
+  },
+  banner: () => '',
+  numBtn: (id) => `<button class="hn" data-act="nums" aria-label="সব প্রকাশনীর নম্বর দেখুন">হাদিস: ${bn(appNo(id))}${icons.info}</button>`,
+  numbers(m) {
+    return `<div class="sheet-head"><h2>সব প্রকাশনীর নম্বর<span class="tag">নমুনা</span></h2><button class="icon-btn" data-act="to-hadith" aria-label="বন্ধ করুন">${icons.close}</button></div>
+      <p class="sub">${m.b.name} · অধ্যায়: ${m.h.ch}</p>
+      <div class="sheet-body">${m.rows.map((r) => `<div class="nt ${r.own ? 'own' : ''} ${r.n ? '' : 'no'}"><div><small>${r.own ? 'অ্যাপে এই নম্বর' : r.hit ? 'আপনি এই নম্বর দিয়েছেন' : 'প্রকাশনী'}</small><b>${r.name}</b></div><span class="v">${r.n || 'এই প্রকাশনীতে নেই'}</span></div>`).join('')}</div>`;
+  },
+  multi(m) {
+    return `<div class="sheet-head"><h2>একাধিক হাদিস মিলেছে<span class="tag">নমুনা</span></h2><button class="icon-btn" data-act="to-jump" aria-label="বন্ধ করুন">${icons.close}</button></div>
+      <p class="sub">${m.from} মিলেছে ${m.to} নম্বরের ${bn(m.list.length)}টি হাদিসের সাথে। একটি বেছে নিন।</p>
+      <div class="sheet-body" role="radiogroup" aria-label="মেলা হাদিস">${m.list.map((x) => `<button class="rc" role="radio" aria-checked="${pickSel === x.id}" data-sel="${x.id}"><span class="rd"></span><span><b>${m.b.name} · হাদিস: ${x.n}</b><p>${x.text}</p></span></button>`).join('')}</div>
+      <div class="sheet-foot"><button class="btn block" ${pickSel ? `data-pick="${pickSel}"` : 'disabled'}>এই হাদিসটি খুলুন</button></div>`;
+  },
+  chip: (via) => `<div class="pcs">${via.map((v) => `<span class="pc"><small>মিলেছে</small>${v.name} ${bn(v.n)}</span>`).join('')}</div>`,
+  after(id) { if (id !== 'multi') pickSel = null; },
+};
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-sel]');
+  if (!t) return;
+  pickSel = t.dataset.sel;
+  $('#sheet-multi').innerHTML = D.multi(multiModel());
+});
+Kit.onScreen(onScreen);
+Kit.init({ demo: 2, name: 'নিচের শিট', screens: [
+  { id: 'home', label: 'হোম' },
+  { id: 'jump', label: 'হাদিসে যান' },
+  { id: 'multi', label: 'একাধিক মিল' },
+  { id: 'hadith', label: 'হাদিস পেজ' },
+  { id: 'numbers', label: 'সব নম্বর' },
+  { id: 'notfound', label: 'না মিললে' },
+  { id: 'search', label: 'নম্বরে সার্চ' },
+]});
+</script>
+</body>
+</html>

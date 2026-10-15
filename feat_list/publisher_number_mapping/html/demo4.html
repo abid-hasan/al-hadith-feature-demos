@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>প্রকাশনী নম্বর মিলানো — ডেমো ৪ · গ্রিড আর চিপ</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): scroll body, home tiles, search, card, "নমুনা" tag ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:24px}
+.body::-webkit-scrollbar{width:0}
+.tag{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;line-height:18px;padding:0 7px;border-radius:20px;background:var(--surface-2);color:var(--hint);border:1px solid var(--divider);vertical-align:middle;white-space:nowrap}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 12px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px 10px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-size:13.5px;font-weight:600;color:var(--body)}
+.tile svg{color:var(--primary)}
+button.tile{font-weight:700;color:var(--title)}
+.hc{margin:10px 12px}
+.hc .narrator{margin:12px 0 0}
+.hc[data-res]{cursor:pointer}
+.sbox{display:flex;gap:8px;padding:14px 12px 6px}
+.sf{flex:1;display:flex;align-items:center;height:44px;border-radius:10px;border:1px solid var(--divider);background:var(--card);color:var(--hint)}
+.sf:focus-within{border-color:var(--primary)}
+.sf .i{width:38px;display:grid;place-items:center}
+.sf .i svg{width:18px;height:18px}
+.sf input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.sf input::placeholder{color:var(--hint)}
+.sbox .btn{height:44px;padding:0 14px}
+.ov{background:var(--card);border-radius:10px;padding:10px 14px;margin:8px 12px 4px}
+.ov p{margin:0}
+.ov .ql{font-size:15.5px;font-weight:600;color:var(--title)}
+.ov .ql b{color:var(--primary)}
+.ov .ct{font-size:13px;color:var(--body)}
+.num::placeholder{color:var(--hint)}
+.dim{position:absolute;inset:0;z-index:5;background:var(--scrim)}
+
+/* ===== Demo 4: compact dialog — book tiles in a grid, publisher chips ===== */
+.gd{position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);z-index:6;max-height:calc(100% - 28px);overflow-y:auto;background:var(--card);border-radius:18px;padding:14px 14px 16px}
+.gd-h{display:flex;align-items:center;margin-bottom:6px}
+.gd-h h2{flex:1;margin:0;font-size:20px;font-weight:700;color:var(--title)}
+.lbl{margin:12px 0 8px;font-size:13.5px;font-weight:700;color:var(--hint)}
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:14px;border:1.5px solid var(--divider);text-align:center}
+.bt b{font-size:15px;color:var(--title);line-height:1.3}
+.bt small{font-size:12px;color:var(--hint)}
+.bt[aria-pressed="true"]{border-color:var(--primary);background:var(--tint)}
+.pchips{display:flex;flex-wrap:wrap;gap:8px}
+.pchips .chip{height:36px;font-size:14px}
+.pchips.ask .chip:not(.on){border-color:var(--primary)}
+.nfield{display:flex;align-items:center;height:52px;border-radius:12px;border:1px solid var(--divider);background:var(--surface-2);padding:0 14px;gap:10px}
+.nfield:focus-within{border-color:var(--primary)}
+.nfield span{font-size:14px;font-weight:700;color:var(--hint)}
+.nfield input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:19px;font-weight:700;color:var(--title)}
+.nfield input::placeholder{font-size:16px;font-weight:600}
+.acts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+/* ===== না মেলার মেসেজ ===== */
+.nf{display:flex;gap:8px;margin-top:10px;font-size:13.5px;color:var(--body)}
+.nf>svg{flex:none;width:18px;height:18px;margin-top:2px;color:var(--primary)}
+.nf p{margin:0}
+.nf b{color:var(--title)}
+/* ===== মিলের লেখা: floating pill on top of the hadith page ===== */
+.fp{position:sticky;top:8px;z-index:2;display:flex;justify-content:center;margin:10px 12px 0}
+.fp div{display:inline-flex;align-items:center;gap:8px;max-width:100%;padding:7px 8px 7px 14px;border-radius:24px;background:var(--card);box-shadow:0 2px 12px var(--divider);border:1px solid var(--divider);font-size:13.5px;font-weight:700;color:var(--title)}
+.fp svg{flex:none;width:16px;height:16px;color:var(--primary)}
+.fp .tag{margin-left:0}
+/* ===== Tappable "হাদিস নং": tinted pill ===== */
+.hn{display:inline-flex;align-items:center;gap:2px;margin-top:2px;height:24px;padding:0 6px 0 10px;border-radius:12px;background:var(--tint);font-size:12.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .hn{color:var(--primary)}
+.hn svg{width:14px;height:14px}
+/* ===== Sheets: number tiles, preview cards ===== */
+.sub{margin:-2px var(--pad) 8px;font-size:13.5px;color:var(--hint)}
+.ngrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-bottom:6px}
+.ntile{display:flex;flex-direction:column;justify-content:space-between;gap:8px;min-height:96px;padding:10px;border-radius:14px;background:var(--surface-2);border:1px solid var(--divider)}
+.ntile small{font-size:12px;font-weight:600;color:var(--body);line-height:1.3}
+.ntile b{font-size:22px;color:var(--title)}
+.ntile.own{background:var(--tint);border-color:var(--primary)}
+.ntile.own b{color:var(--primary-dark)}
+:root[data-theme="dark"] .ntile.own b{color:var(--primary)}
+.ntile.no{background:none;border-style:dashed}
+.ntile.no b{font-size:13px;font-weight:600;color:var(--hint)}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-bottom:8px}
+.mc{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:14px;border:1px solid var(--divider);background:var(--surface-2);text-align:left}
+.mc b{font-size:15px;color:var(--title)}
+.mc p{margin:0;font-size:13.5px;color:var(--body);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.mc span{margin-top:auto;font-size:13px;font-weight:700;color:var(--primary)}
+/* ===== প্রকাশনীর চিপ: filled pill ===== */
+.pcs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pc{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:13px;background:var(--primary);color:var(--on-appbar);font-size:12.5px;font-weight:700}
+.pc svg{width:13px;height:13px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="home"></section>
+      <section class="screen" data-screen="jump"></section>
+      <section class="screen" data-screen="multi"></section>
+      <section class="screen" data-screen="hadith"></section>
+      <section class="screen" data-screen="numbers"></section>
+      <section class="screen" data-screen="notfound"></section>
+      <section class="screen" data-screen="search"></section>
+
+      <!-- ===== Sheet: একাধিক মিল (filled by D.multi) ===== -->
+      <div class="sheet" id="sheet-multi" role="dialog" aria-label="একাধিক হাদিস মিলেছে"></div>
+      <!-- ===== Sheet: সব প্রকাশনীর নম্বর (filled by D.numbers) ===== -->
+      <div class="sheet" id="sheet-numbers" role="dialog" aria-label="সব প্রকাশনীর নম্বর"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, number matching, the flow and
+   screen wiring. Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const BND = '০১২৩৪৫৬৭৮৯';
+const toEn = (s) => String(s).replace(/[০-৯]/g, (d) => BND.indexOf(d));
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+
+/* ---------- Publishers. Today the app has one per book and language:
+   বুখারী = তাওহীদ পাবলিকেশন্স, মুসলিম = হাদীস একাডেমী (books.publication). ---------- */
+const PUB = {
+  tw: { name: 'তাওহীদ পাবলিকেশন্স', short: 'তাওহীদ' },
+  ha: { name: 'হাদীস একাডেমী', short: 'হাদীস একাডেমী' },
+  fd: { name: 'ইসলামিক ফাউন্ডেশন', short: 'ইসলামিক ফাউন্ডেশন' },
+  intl: { name: 'আন্তর্জাতিক', short: 'আন্তর্জাতিক' },
+};
+
+/* ---------- Books: own = the publisher whose number the app shows; max = last number per publisher ---------- */
+const BOOKS = {
+  bukhari: { name: 'সহীহ বুখারী', abbr: 'বুখারী', by: 'ইমাম বুখারি', own: 'tw', pubs: ['tw', 'fd', 'intl'], max: { tw: 7563, fd: 7042, intl: 7563 } },
+  muslim: { name: 'সহীহ মুসলিম', abbr: 'মুসলিম', by: 'ইমাম মুসলিম', own: 'ha', pubs: ['ha', 'fd', 'intl'], max: { ha: 7547, fd: 7453, intl: 3033 } },
+};
+
+/* ---------- Demo hadith (text only from the safe list, no Arabic).
+   no = number per publisher; null = not in that publisher's edition.
+   The app shows মুসলিম ২২৩ (আন্তর্জাতিক) as হাদিস ৪২২. Other numbers are samples. ---------- */
+const HADITH = {
+  b1: { book: 'bukhari', ch: 'ওহীর সূচনা', no: { tw: 1, fd: 1, intl: 1 }, nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত',
+    text: 'সকল কাজ নিয়তের ওপর নির্ভরশীল, আর মানুষ তার নিয়ত অনুযায়ী প্রতিফল পাবে।' },
+  b1894: { book: 'bukhari', ch: 'সাওম', no: { tw: 1894, fd: null, intl: 1894 }, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত',
+    text: 'সাওম ঢাল স্বরূপ।' },
+  b6018: { book: 'bukhari', ch: 'আদব', no: { tw: 6018, fd: 5594, intl: 6018 }, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত',
+    text: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।' },
+  b6116: { book: 'bukhari', ch: 'আদব', no: { tw: 6116, fd: 5594, intl: 6116 }, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত',
+    text: 'এক ব্যক্তি নবী (সা.)-কে বলল, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বলল, তিনি প্রতিবারই বললেন, রাগ করো না।' },
+  m223: { book: 'muslim', ch: 'পবিত্রতা', no: { ha: 422, fd: 427, intl: 223 }, nar: 'আবু মালিক আশআরি (রা.) থেকে বর্ণিত',
+    text: 'পবিত্রতা ঈমানের অর্ধেক।' },
+};
+const appNo = (id) => HADITH[id].no[BOOKS[HADITH[id].book].own];
+
+/* ---------- Matching: one hadith, several (split), out of range, or a number this demo has no text for ---------- */
+function resolve(book, pub, n) {
+  const ids = Object.keys(HADITH).filter((id) => HADITH[id].book === book && HADITH[id].no[pub] === n);
+  if (ids.length > 1) return { type: 'multi', ids };
+  if (ids.length) return { type: 'one', id: ids[0] };
+  if (!(n >= 1 && n <= BOOKS[book].max[pub])) return { type: 'none' };
+  return { type: 'demo' };
+}
+const demoNos = (book, pub) => [...new Set(Object.values(HADITH).filter((h) => h.book === book && h.no[pub]).map((h) => bn(h.no[pub])))].join(', ');
+
+/* ---------- Search: a number matches the app's own number or any publisher's ---------- */
+function searchHits(q) {
+  const t = q.trim();
+  if (!t) return [];
+  const n = /^[0-9০-৯]+$/.test(t) ? +toEn(t) : null;
+  const out = [];
+  for (const id of Object.keys(HADITH)) {
+    const h = HADITH[id], b = BOOKS[h.book];
+    if (n !== null) {
+      if (h.no[b.own] === n) out.push({ id, own: true });
+      else {
+        const via = b.pubs.filter((p) => h.no[p] === n).map((p) => ({ p, name: PUB[p].name, n }));
+        if (via.length) out.push({ id, via });
+      }
+    } else if (t.split(/\s+/).some((w) => w.length > 1 && h.text.includes(w))) out.push({ id, own: true });
+  }
+  return out.sort((a, b) => (b.own ? 1 : 0) - (a.own ? 1 : 0));
+}
+
+/* ---------- State ---------- */
+const S = { book: 'muslim', pub: 'intl', num: '২২৩', cur: null, match: null, multi: [], from: 'jump', q: '৫৫৯৪' };
+const BASE = { multi: 'jump', notfound: 'jump', numbers: 'hadith' };
+
+/* ---------- Flow: হাদিসে যান ---------- */
+function setBook(id) {
+  if (S.book !== id) { S.book = id; S.pub = BOOKS[id].own; S.num = ''; }
+  S.multi = [];
+  if (Kit.current === 'notfound') Kit.show('jump'); else refresh();
+}
+function setPub(p) {
+  S.pub = p; S.multi = [];
+  if (Kit.current === 'notfound') Kit.show('jump'); else refresh();
+}
+function setNum(v) {
+  S.num = String(v).replace(/[0-9]/g, (d) => BND[d]).replace(/[^০-৯]/g, '').replace(/^০+/, '').slice(0, 8);
+  S.multi = [];
+}
+function submit() {
+  if (!S.book) { Kit.snack('প্রথমে বই নির্বাচন করুন'); return; }
+  if (!S.num) { Kit.snack('হাদিস নম্বর দিন'); return; }
+  const n = +toEn(S.num), r = resolve(S.book, S.pub, n);
+  if (r.type === 'one') openHadith(r.id, { pub: S.pub, n }, 'jump');
+  else if (r.type === 'multi') { S.multi = r.ids; Kit.show('multi'); }
+  else if (r.type === 'none') Kit.show('notfound');
+  else Kit.snack(`ডেমোতে ${PUB[S.pub].short} নম্বর আছে: ${demoNos(S.book, S.pub)}`);
+}
+function openHadith(id, match, from) { S.cur = id; S.match = match; S.from = from; Kit.show('hadith'); }
+
+/* ---------- Models handed to the demo's look ---------- */
+function jumpModel(nf) {
+  const b = S.book ? BOOKS[S.book] : null;
+  const m = { b, book: S.book, pub: S.pub, num: S.num, books: Object.keys(BOOKS), pubs: b ? b.pubs : [],
+    range: b ? `${bn(1)} - ${bn(b.max[S.pub])}` : 'হাদিসের নাম্বার', nf: null };
+  if (nf && b) m.nf = { text: `${PUB[S.pub].name} নম্বরে ${S.num} পাওয়া যায়নি।`,
+    hint: `এই প্রকাশনীতে হাদিস ${bn(1)} থেকে ${bn(b.max[S.pub])} পর্যন্ত। অন্য প্রকাশনী বেছে দেখুন।`,
+    others: b.pubs.filter((p) => p !== S.pub) };
+  return m;
+}
+function bannerInfo() {
+  const h = HADITH[S.cur], b = BOOKS[h.book], m = S.match;
+  if (!m || m.pub === b.own) return null;
+  const to = appNo(S.cur);
+  return { from: { name: PUB[m.pub].name, n: bn(m.n) }, to: { name: PUB[b.own].short, n: bn(to) },
+    text: `${PUB[m.pub].name} ${bn(m.n)} = ${PUB[b.own].short} ${bn(to)}` };
+}
+function numbersModel() {
+  const h = HADITH[S.cur], b = BOOKS[h.book];
+  return { h, b, rows: b.pubs.map((p) => ({ p, name: PUB[p].name, n: h.no[p] ? bn(h.no[p]) : '', own: p === b.own, hit: !!S.match && S.match.pub === p })) };
+}
+function multiModel() {
+  const b = BOOKS[S.book];
+  return { b, from: `${PUB[S.pub].name} ${S.num}`, to: PUB[b.own].short,
+    list: S.multi.map((id) => ({ id, n: bn(appNo(id)), ch: HADITH[id].ch, text: HADITH[id].text, nar: HADITH[id].nar })) };
+}
+
+/* ---------- Shared markup: app bar, home, hadith card, hadith page, search ---------- */
+const appbar = (title, back, extra = '') => `<header class="appbar">${back ? `<button class="icon-btn" aria-label="পেছনে" data-act="${back}">${icons.back}</button>` : ''}<h1>${title}</h1>${extra}</header>`;
+const HOME_TILES = [
+  ['সর্বশেষ', icons.clock],
+  ['জাম্প', svg('<path d="M4 12h11M11 6l6 6-6 6M20 4v16"/>', 24), true],
+  ['ওয়াক্ত', icons.sun],
+  ['সাদাকা', svg('<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>', 24)],
+];
+function homeHTML() {
+  return `${appbar('আল হাদিস', '', `<button class="icon-btn" aria-label="সার্চ" data-go="search">${icons.search}</button>`)}
+    <div class="body"><div class="tiles">${HOME_TILES.map(([label, ic, live]) => live
+      ? `<button class="tile" data-go="jump">${ic}${label}</button>`
+      : `<div class="tile">${ic}${label}</div>`).join('')}</div></div>`;
+}
+function cardHTML(id, numHTML, extra = '', attrs = '') {
+  const h = HADITH[id], b = BOOKS[h.book];
+  return `<article class="card hc" ${attrs}>
+    <div class="hadith-head"><span class="book-badge">${b.abbr}</span><div class="hadith-meta"><b>${b.name}</b>${numHTML}</div><span class="grade">সহিহ হাদিস</span></div>
+    ${extra}<p class="narrator">${h.nar}</p><p class="translation">${h.text}</p></article>`;
+}
+const plainNo = (id) => `<span>হাদিস: ${bn(appNo(id))}</span>`;
+function hadithHTML() {
+  const h = HADITH[S.cur], b = BOOKS[h.book], info = bannerInfo();
+  const bar = D.hadithBar ? D.hadithBar(h, b, info) : appbar(`${b.name}<small>অধ্যায়: ${h.ch}</small>`, 'back-hadith');
+  return `${bar}<div class="body">${D.banner(info)}${cardHTML(S.cur, D.numBtn(S.cur))}</div>`;
+}
+function searchHTML() {
+  const hits = searchHits(S.q);
+  const anyVia = hits.some((x) => x.via);
+  return `${appbar('সার্চ', 'home')}
+    <div class="body"><div class="sbox"><label class="sf"><span class="i">${icons.search}</span><input class="q" type="search" enterkeyhint="search" autocomplete="off" value="${esc(S.q)}" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন" aria-label="হাদিস সার্চ ইনপুট"></label><button class="btn" data-act="run">সার্চ করুন</button></div>
+    ${S.q.trim() ? `<div class="ov"><p class="ql">আপনি ( <b>${esc(S.q.trim())}</b> ) লিখে সার্চ করেছেন</p><p class="ct">সর্বমোট ফলাফল পাওয়া গেছে : ${bn(hits.length)} টি${anyVia ? ' <span class="tag">নমুনা</span>' : ''}</p></div>` : ''}
+    ${hits.map((x) => cardHTML(x.id, plainNo(x.id), x.via ? D.chip(x.via) : '', `data-res="${x.id}" role="button" tabindex="0"`)).join('')}</div>`;
+}
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  const base = BASE[id] || id;
+  sec.innerHTML = base === 'home' ? homeHTML() : base === 'jump' ? D.jump(jumpModel(id === 'notfound'))
+    : base === 'hadith' ? hadithHTML() : searchHTML();
+}
+function refresh() { render(Kit.current); }
+function onScreen(id) {
+  // A toolbar chip can open any screen: fill in the example state it needs.
+  if (id === 'multi' && S.multi.length < 2) Object.assign(S, { book: 'bukhari', pub: 'fd', num: '৫৫৯৪', multi: ['b6018', 'b6116'] });
+  if (id === 'notfound' && (!S.book || !S.num || resolve(S.book, S.pub, +toEn(S.num)).type !== 'none')) Object.assign(S, { book: 'bukhari', pub: 'fd', num: '৭৫০০', multi: [] });
+  if (id === 'hadith' && !S.cur) Object.assign(S, { cur: 'm223', match: { pub: 'intl', n: 223 }, from: 'jump' });
+  if (id === 'numbers' && !S.cur) Object.assign(S, { cur: 'b1894', match: null, from: 'jump' });
+  render(id);
+  if (id === 'multi') { $('#sheet-multi').innerHTML = D.multi(multiModel()); Kit.open('sheet-multi'); }
+  if (id === 'numbers') { $('#sheet-numbers').innerHTML = D.numbers(numbersModel()); Kit.open('sheet-numbers'); }
+  D.after?.(id);
+}
+
+/* ---------- Wiring ---------- */
+const ACT = {
+  home: () => Kit.show('home'),
+  ok: submit,
+  nums: () => Kit.show('numbers'),
+  'back-hadith': () => Kit.show(S.from),
+  'to-hadith': () => Kit.show('hadith'),
+  'to-jump': () => Kit.show('jump'),
+  run: () => { S.q = $('.screen.on .q')?.value || ''; refresh(); },
+};
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('scrim')) { const b = BASE[Kit.current]; if (b) Kit.show(b); return; }
+  const t = e.target.closest('[data-act],[data-book],[data-pub],[data-pick],[data-res],[data-key]');
+  if (!t || t.disabled) return;
+  const d = t.dataset;
+  if (d.book) { setBook(d.book); D.picked?.(); }
+  else if (d.pub) { setPub(d.pub); D.picked?.(); }
+  else if (d.pick) openHadith(d.pick, { pub: S.pub, n: +toEn(S.num) }, 'jump');
+  else if (d.res) {
+    const x = searchHits(S.q).find((r) => r.id === d.res);
+    openHadith(d.res, x && x.via ? { pub: x.via[0].p, n: x.via[0].n } : null, 'search');
+  }
+  else if (d.key) { setNum(d.key === 'del' ? S.num.slice(0, -1) : S.num + d.key); if (Kit.current === 'notfound') Kit.show('jump'); else refresh(); }
+  else ACT[d.act]?.(t);
+});
+document.addEventListener('input', (e) => {
+  if (e.target.matches('.num')) {
+    setNum(e.target.value);
+    e.target.value = S.num;
+    $$('.screen.on .nf').forEach((x) => { x.hidden = true; });
+  }
+  if (e.target.matches('.q')) S.q = e.target.value;
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.matches('.num')) { e.preventDefault(); submit(); }
+  if (e.key === 'Enter' && e.target.matches('.q')) { e.preventDefault(); S.q = e.target.value; refresh(); }
+  if (e.key === 'Enter' && e.target.matches('[data-res]')) e.target.click();
+});
+/* ======================================================================
+   DEMO 4 — গ্রিড আর চিপ: a compact dialog where books sit in a two-tile
+   grid and publishers are chips. The match note floats as a pill over
+   the hadith page; all numbers show as a grid of tiles.
+   ====================================================================== */
+const D = {
+  jump(m) {
+    const nf = m.nf ? `<div class="nf" role="status">${icons.info}<div><p><b>${m.nf.text}</b></p><p>${m.nf.hint}</p></div></div>` : '';
+    return `${homeHTML()}<div class="dim" data-act="home"></div>
+      <div class="gd" role="dialog" aria-label="হাদিসে যান">
+        <div class="gd-h"><h2>হাদিসে যান</h2><button class="icon-btn" data-act="home" aria-label="বাতিল করুন">${icons.close}</button></div>
+        <p class="lbl">বই</p>
+        <div class="bgrid">${m.books.map((id) => `<button class="bt" data-book="${id}" aria-pressed="${m.book === id}"><span class="book-badge">${BOOKS[id].abbr}</span><b>${BOOKS[id].name}</b><small>${BOOKS[id].by}</small></button>`).join('')}</div>
+        <p class="lbl">প্রকাশনী</p>
+        <div class="pchips ${m.nf ? 'ask' : ''}">${m.pubs.map((p) => `<button class="chip ${m.pub === p ? 'on' : ''}" aria-pressed="${m.pub === p}" data-pub="${p}">${m.pub === p ? icons.check.replace('width="24" height="24"', 'width="16" height="16"') : ''}${PUB[p].name}</button>`).join('')}</div>
+        <p class="lbl">হাদিসের নাম্বার</p>
+        <label class="nfield"><span>নং</span><input class="num" type="text" inputmode="numeric" autocomplete="off" aria-label="হাদিসের নাম্বার" placeholder="${m.range}" value="${m.num}"></label>
+        ${nf}
+        <div class="acts"><button class="btn text" data-act="home">বাতিল করুন</button><button class="btn" data-act="ok">ঠিক আছে</button></div>
+      </div>`;
+  },
+  banner: (i) => (i ? `<div class="fp"><div>${icons.link}${i.text}<span class="tag">নমুনা</span></div></div>` : ''),
+  numBtn: (id) => `<button class="hn" data-act="nums" aria-label="সব প্রকাশনীর নম্বর দেখুন">হাদিস: ${bn(appNo(id))}${icons.down}</button>`,
+  numbers(m) {
+    return `<div class="sheet-head"><h2>সব প্রকাশনীর নম্বর<span class="tag">নমুনা</span></h2><button class="icon-btn" data-act="to-hadith" aria-label="বন্ধ করুন">${icons.close}</button></div>
+      <p class="sub">${m.b.name} · অধ্যায়: ${m.h.ch}</p>
+      <div class="sheet-body"><div class="ngrid">${m.rows.map((r) => `<div class="ntile ${r.own ? 'own' : ''} ${r.n ? '' : 'no'}"><small>${r.name}${r.own ? ' · অ্যাপে' : ''}</small><b>${r.n || 'এই প্রকাশনীতে নেই'}</b></div>`).join('')}</div></div>`;
+  },
+  multi(m) {
+    return `<div class="sheet-head"><h2>একাধিক হাদিস মিলেছে<span class="tag">নমুনা</span></h2><button class="icon-btn" data-act="to-jump" aria-label="বন্ধ করুন">${icons.close}</button></div>
+      <p class="sub">${m.from} মিলেছে ${m.to} নম্বরের ${bn(m.list.length)}টি হাদিসের সাথে। একটি বেছে নিন।</p>
+      <div class="sheet-body"><div class="mgrid">${m.list.map((x) => `<button class="mc" data-pick="${x.id}"><b>হাদিস: ${x.n}</b><p>${x.text}</p><span>খুলুন</span></button>`).join('')}</div></div>`;
+  },
+  chip: (via) => `<div class="pcs">${via.map((v) => `<span class="pc">${icons.link}${v.name} ${bn(v.n)}</span>`).join('')}</div>`,
+};
+Kit.onScreen(onScreen);
+Kit.init({ demo: 4, name: 'গ্রিড আর চিপ', screens: [
+  { id: 'home', label: 'হোম' },
+  { id: 'jump', label: 'হাদিসে যান' },
+  { id: 'multi', label: 'একাধিক মিল' },
+  { id: 'hadith', label: 'হাদিস পেজ' },
+  { id: 'numbers', label: 'সব নম্বর' },
+  { id: 'notfound', label: 'না মিললে' },
+  { id: 'search', label: 'নম্বরে সার্চ' },
+]});
+</script>
+</body>
+</html>
