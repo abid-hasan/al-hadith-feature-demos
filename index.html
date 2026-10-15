@@ -62,10 +62,7 @@ aside{background:var(--surface);border-right:1px solid var(--line);display:flex;
 .f-title{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .f-id{display:block;font-size:11.5px;color:var(--hint);font-family:ui-monospace,Menlo,monospace}
 .f-count{font-size:12px;color:var(--hint);background:var(--surface-2);border:1px solid var(--line);border-radius:20px;padding:0 8px;flex:none}
-.side-foot{border-top:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--hint)}
-.live{display:inline-flex;align-items:center;gap:6px;flex:1}
-.live i{width:7px;height:7px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 3px var(--tint)}
-.live.off i{background:#F95B53;box-shadow:none}
+.side-foot{border-top:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;justify-content:flex-end;gap:8px;font-size:12px;color:var(--hint)}
 .icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;width:34px;height:34px;display:inline-grid;place-items:center;flex:none}
 .icon-btn:hover{background:var(--surface-2)}
 
@@ -222,7 +219,6 @@ kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;border:1px solid var
     <div class="side-label" id="side-label">ফিচার</div>
     <ul class="features" id="features"></ul>
     <div class="side-foot">
-      <span class="live" id="live" title="ফাইল বদলালে আপনা থেকে রিফ্রেশ হয়"><i></i><span>লাইভ</span></span>
       <button class="icon-btn" id="theme" aria-label="লাইট/ডার্ক মোড বদলান" title="লাইট/ডার্ক মোড">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16Z" fill="currentColor"/></svg>
       </button>
@@ -758,7 +754,6 @@ async function fetchFeatures() {
 async function poll() {
   try {
     const next = await fetchFeatures();
-    $('live').classList.remove('off');
     const prevIds = features.map((f) => f.id + ':' + f.demos.map((d) => d.file + (d.empty ? '0' : '1')).join()).join('|');
     const nextIds = next.map((f) => f.id + ':' + f.demos.map((d) => d.file + (d.empty ? '0' : '1')).join()).join('|');
     if (favSaving) next.forEach((n) => { const o = features.find((x) => x.id === n.id); if (o) n.favorites = o.favorites; });
@@ -772,7 +767,7 @@ async function poll() {
     if (f.demos[state.demo] && f.demos[state.demo].mtime !== mtimes.a) mountPane('a', state.demo, currentScreen('a')?.id);
     if (state.compare && f.demos[state.demoB] && f.demos[state.demoB].mtime !== mtimes.b) mountPane('b', state.demoB, currentScreen('b')?.id);
   } catch {
-    $('live').classList.add('off');
+    /* server stopped for a moment: try again on the next poll */
   }
 }
 
@@ -850,7 +845,6 @@ document.addEventListener('keydown', (e) => {
   } catch {
     $('title').textContent = 'সার্ভার চালু নেই';
     $('doc').innerHTML = '<div class="blank"><div><b>ভিউয়ারটা সার্ভার দিয়ে খুলুন</b><code>python3 feat_list/viewer.py</code></div></div>';
-    $('live').classList.add('off');
     return;
   }
   if (!current()) state.feature = features[0]?.id ?? null;

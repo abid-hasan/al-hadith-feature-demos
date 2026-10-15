@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সেভ করা কিন্তু না-পড়া তালিকা — ডেমো ৫ · রঙিন ব্যানার</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shell: green app bar over a rounded panel ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.pg{display:flex;flex-direction:column;flex:1;min-height:0}
+.appbar.np h1{margin-left:12px}
+
+/* ===== Demo 5: a coloured banner with the count, one card stepped below it ===== */
+.band{margin:16px 14px 0;padding:12px 8px 52px 16px;border-radius:16px;color:var(--on-appbar);
+  background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary-dark) 80%,var(--title)))}
+.band-h{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700}
+.band-h span{flex:1}
+.band-h .icon-btn{width:36px;height:36px}
+.band-h .icon-btn svg{width:20px;height:20px}
+.band-c{display:flex;align-items:center;gap:12px;margin-top:6px;padding-right:8px}
+.band-c strong{font-size:34px;line-height:1.1;font-weight:700}
+.band-c p{flex:1;margin:0;font-size:14px;line-height:1.45;opacity:.95}
+.band-c .btn{height:36px;padding:0 14px;font-size:13.5px;background:var(--on-appbar);color:var(--primary-dark)}
+.band-c .ok{width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--on-appbar) 20%,transparent)}
+.band-c .ok svg{width:26px;height:26px}
+/* Stepped card (overlaps the banner) */
+.step{position:relative;margin:-40px 24px 0;padding:12px 12px 10px 16px;border-radius:14px;background:var(--card);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.step-top{display:flex;align-items:center;gap:8px}
+.segs{flex:1;display:flex;gap:4px}
+.segs i{flex:1;height:4px;border-radius:4px;background:var(--divider)}
+.segs i.cur{background:color-mix(in srgb,var(--primary) 45%,var(--divider))}
+.segs i.read{background:var(--primary)}
+.step-top small{font-size:12.5px;color:var(--hint)}
+.step-top .icon-btn{width:34px;height:34px;color:var(--hint)}
+.step-top .icon-btn svg{width:20px;height:20px}
+.stamp{display:inline-flex;align-items:center;gap:4px;margin-top:6px;height:24px;padding:0 10px 0 6px;border-radius:20px;background:var(--tint);color:var(--primary-dark);font-size:12.5px;font-weight:700}
+:root[data-theme="dark"] .stamp{color:var(--primary)}
+.stamp svg{width:15px;height:15px}
+.step p{margin:8px 0 4px;min-height:80px;font-size:15.5px;line-height:1.7;color:var(--title);text-align:left;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.step-ref{font-size:12.5px;color:var(--hint)}
+.step-ref b{font-weight:600;color:var(--body)}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:6px;border-top:1px solid var(--divider)}
+.nav .btn.text{height:34px;font-size:14px;gap:2px}
+.nav .btn.text svg{width:18px;height:18px}
+.nav .btn.text:disabled{color:var(--disabled);cursor:default}
+.flip{display:inline-flex;transform:scaleX(-1)}
+
+/* ===== Tabs + folders below (context only) ===== */
+.seg{display:flex;height:50px;margin:16px 14px 0;padding:3px 4px;border:1.5px solid var(--primary);border-radius:10px;background:var(--card)}
+.seg span{flex:1;display:grid;place-items:center;border-radius:7px;font-size:14.5px;font-weight:700;color:var(--body)}
+.seg span.on{background:var(--primary);color:var(--on-appbar)}
+.fl{margin:14px 14px 0}
+.frow{display:flex;align-items:center;gap:15px;min-height:72px;padding:12px 16px;margin-bottom:12px;border-radius:10px;background:var(--card)}
+.frow>svg{width:30px;height:26px;color:var(--fc);flex:none}
+.frow b{display:block;font-size:16px;color:var(--title)}
+.frow small{font-size:13.5px;color:var(--body)}
+
+/* ===== Card menu sheet: hadith preview + one big action ===== */
+.mk-prev{padding:12px 14px;border-radius:10px;background:var(--surface-2);font-size:14.5px;line-height:1.65;color:var(--title)}
+.mk-prev small{display:block;margin-top:4px;font-size:12.5px;color:var(--hint)}
+.mk-prev p{margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ===== Hadith page ===== */
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+
+/* ===== না-পড়া হাদিস page: coloured summary + a compact index ===== */
+.sum{margin:16px 14px 12px;padding:14px 16px;border-radius:14px;color:var(--on-appbar);background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary-dark) 80%,var(--title)))}
+.sum strong{display:block;font-size:26px;line-height:1.2}
+.sum span{font-size:13.5px;opacity:.95}
+.idx{margin:0 14px;border-radius:12px;background:var(--card);overflow:hidden}
+.ir{display:flex;align-items:center;gap:12px;width:100%;padding:12px 10px 12px 14px;border-bottom:1px solid var(--divider);text-align:left}
+.ir:last-child{border-bottom:0}
+.ir .book-badge{width:34px;height:34px;font-size:10px}
+.ir div{flex:1;min-width:0}
+.ir b{display:block;font-size:15px;color:var(--title)}
+.ir small{font-size:12.5px;color:var(--hint)}
+.ir>svg{width:18px;height:18px;color:var(--hint);flex:none}
+.ord{display:inline-block;width:20px;font-size:13px;font-weight:700;color:var(--hint);text-align:center;flex:none}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screens (same ids in all 5 demos); pages move into the active one ===== -->
+      <section class="screen" data-screen="collection"></section>
+      <section class="screen" data-screen="mark"></section>
+      <section class="screen" data-screen="hadith"></section>
+      <section class="screen" data-screen="unread"></section>
+      <section class="screen" data-screen="done"></section>
+      <section class="screen" data-screen="hidden"></section>
+
+      <div id="hold" hidden>
+      <!-- ===== Page: কালেকশন ===== -->
+      <div class="pg" id="pg-col">
+        <header class="appbar np"><h1>কালেকশন</h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="col"></div></div></div>
+      </div>
+
+      <!-- ===== Page: hadith reader ===== -->
+      <div class="pg" id="pg-read">
+        <header class="appbar"><button class="icon-btn" data-act="read-back" data-i="back" aria-label="পেছনে"></button><h1 id="rd-title"></h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="rd" style="padding-top:14px"></div></div></div>
+      </div>
+
+      <!-- ===== Page: না-পড়া হাদিস ===== -->
+      <div class="pg" id="pg-un">
+        <header class="appbar"><button class="icon-btn" data-act="un-back" data-i="back" aria-label="পেছনে"></button><h1>না-পড়া হাদিস</h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="un"></div></div></div>
+      </div>
+      </div>
+
+      <!-- ===== Sheet: card menu ===== -->
+      <div class="sheet" id="sh-mark" role="dialog" aria-label="পড়ার চিহ্ন">
+        <div class="sheet-head"><h2>পড়ার চিহ্ন</h2><button class="icon-btn" data-close data-i="close" aria-label="বন্ধ করুন"></button></div>
+        <div class="sheet-body"><div class="mk-prev" id="mk-prev"></div></div>
+        <div class="sheet-foot" id="mk-foot"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+(function () {
+  const { bn, icons, $, $$ } = Kit;
+  const ic = (k, w) => (w ? icons[k].replace('width="24" height="24"', `width="${w}" height="${w}"`) : icons[k]);
+  const RENEW = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12a7.5 7.5 0 0 1-13.4 4.6M4.5 12a7.5 7.5 0 0 1 13.4-4.6"/><path d="M18.5 3.5v4.2h-4.2M5.5 20.5v-4.2h4.2"/></svg>';
+  const UNREAD_I = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/></svg>';
+  const FOLDER = icons.folder.replace('width="24" height="20"', 'width="30" height="26"');
+
+  /* ---------- Data: saved hadiths (safe list only, Bangla only) ---------- */
+  const H = {
+    b6116: { bk: 'সহীহ বুখারী', ab: 'B', no: '৬১১৬', ch: 'আচার-ব্যবহার', saved: '2026-04-02', nar: 'আবূ হুরায়রা (রাঃ)', tr: 'এক ব্যক্তি নবী (সাঃ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বলল, নবী (সাঃ) প্রত্যেক বারেই বললেন: রাগ করো না।' },
+    b1: { bk: 'সহীহ বুখারী', ab: 'B', no: '১', ch: 'ওহীর সূচনা', saved: '2026-05-20', nar: 'উমর ইবনুল খাত্তাব (রাঃ)', tr: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' },
+    m223: { bk: 'সহীহ মুসলিম', ab: 'M', no: '২২৩', ch: 'পবিত্রতা', saved: '2026-07-08', nar: 'আবূ মালিক আল-আশআরী (রাঃ)', tr: 'পবিত্রতা ঈমানের অর্ধেক।' },
+    b1894: { bk: 'সহীহ বুখারী', ab: 'B', no: '১৮৯৪', ch: 'সাওম', saved: '2026-08-30', nar: 'আবূ হুরায়রা (রাঃ)', tr: 'রোজা ঢালস্বরূপ।' },
+    b6018: { bk: 'সহীহ বুখারী', ab: 'B', no: '৬০১৮', ch: 'আচার-ব্যবহার', saved: '2026-09-28', nar: 'আবূ হুরায়রা (রাঃ)', tr: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।' },
+  };
+  const FOLDERS = [['প্রিয় হাদিস', 6, 'var(--primary)'], ['পরে পড়ব', 5, 'var(--primary-dark)'], ['রোজা ও রমজান', 3, 'var(--disabled)']];
+  const TODAY = new Date('2026-10-15T09:00');
+  const MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+  const sd = (k) => new Date(H[k].saved + 'T08:00');
+  const fd = (dt) => `${bn(dt.getDate())} ${MONTHS[dt.getMonth()]} ${bn(dt.getFullYear())}`;
+  function ago(k) {
+    const days = Math.round((TODAY - sd(k)) / 864e5);
+    if (days <= 0) return 'আজ সেভ করেছেন';
+    if (days === 1) return 'গতকাল সেভ করেছেন';
+    if (days < 30) return `${bn(days)} দিন আগে সেভ করেছেন`;
+    return `${bn(Math.floor(days / 30))} মাস আগে সেভ করেছেন`;
+  }
+  const SAVED = Object.keys(H).sort((a, b) => sd(a) - sd(b)); // oldest save first
+  const DECK = SAVED.slice(0, 3);
+  const ref = (k) => `${H[k].bk} ${H[k].no}`;
+
+  /* ---------- State ---------- */
+  const S = { read: new Set(), hidden: false, page: 0, menu: null, cur: null, back: 'collection' };
+  const unread = () => SAVED.filter((k) => !S.read.has(k));
+  const reset = () => { S.read = new Set(); S.hidden = false; S.page = 0; };
+
+  /* ---------- Templates ---------- */
+  function bandHTML() {
+    const n = unread().length;
+    const body = n
+      ? `<strong>${bn(n)}টি</strong><p>সেভ করা হাদিস এখনো পড়া হয়নি</p><button class="btn" data-act="all">সব দেখুন</button>`
+      : `<span class="ok">${ic('check')}</span><p>আলহামদুলিল্লাহ, সেভ করা সব হাদিস পড়া হয়ে গেছে</p>`;
+    return `<div class="band"><div class="band-h">${RENEW}<span>দৈনিক রিভিশন</span>
+      <button class="icon-btn" data-act="hide" aria-label="আজকের জন্য লুকান" title="আজকের জন্য লুকান">${ic('close')}</button></div>
+      <div class="band-c">${body}</div></div>`;
+  }
+  function stepHTML() {
+    const k = DECK[S.page], r = S.read.has(k);
+    return `<article class="step">
+      <div class="step-top"><span class="segs">${DECK.map((x, i) => `<i class="${S.read.has(x) ? 'read' : i === S.page ? 'cur' : ''}"></i>`).join('')}</span>
+        <small>${bn(S.page + 1)} / ${bn(DECK.length)}</small>
+        <button class="icon-btn" data-act="menu" data-k="${k}" aria-label="অন্যান্য অপশন">${ic('more')}</button></div>
+      ${r ? `<span class="stamp">${ic('check')}পড়া হয়েছে</span>` : ''}
+      <p data-act="open" data-k="${k}" role="button">${H[k].tr}</p>
+      <div class="step-ref"><b>${ref(k)}</b> · ${ago(k)}</div>
+      <div class="nav"><button class="btn text" data-act="prev"${S.page ? '' : ' disabled'}><span class="flip">${ic('chevron')}</span>আগের</button>
+        <button class="btn text" data-act="next"${S.page < DECK.length - 1 ? '' : ' disabled'}>পরের${ic('chevron')}</button></div></article>`;
+  }
+  const reviewHTML = () => (S.hidden ? '' : `<section aria-label="দৈনিক রিভিশন">${bandHTML()}${stepHTML()}</section>`);
+  const foldersHTML = () => `<div class="seg"><span class="on">বুকমার্কস</span><span>পিনস</span><span>নোটস</span></div>
+    <div class="fl">${FOLDERS.map(([n, c, col]) => `<div class="frow" style="--fc:${col}">${FOLDER}<div><b>${n}</b><small>${bn(c)}টি হাদিস</small></div></div>`).join('')}</div>`;
+  const hadithHTML = (k) => `<article class="card hc">
+      <div class="hadith-head"><span class="book-badge">${H[k].ab}</span>
+        <div class="hadith-meta"><b>${H[k].bk}</b><span>হাদিস: ${H[k].no}</span></div><span class="grade">সহিহ হাদিস</span></div>
+      <p class="narrator">${H[k].nar} থেকে বর্ণিত:</p><p class="translation">${H[k].tr}</p></article>`;
+  const irHTML = (k, i) => `<button class="ir" data-act="open" data-k="${k}"><span class="ord">${bn(i + 1)}</span><span class="book-badge">${H[k].ab}</span>
+      <div><b>${ref(k)}</b><small>${fd(sd(k))}-এ সেভ করেছেন</small></div>${ic('chevron')}</button>`;
+
+  /* ---------- Render ---------- */
+  function renderCol() { $('#col').innerHTML = reviewHTML() + foldersHTML(); }
+  function renderRead() {
+    const k = S.cur;
+    $('#rd-title').innerHTML = `${H[k].bk}<small>${H[k].ch}</small>`;
+    $('#rd').innerHTML = hadithHTML(k);
+  }
+  function renderUn() {
+    const l = unread();
+    $('#un').innerHTML = `<div class="sum"><strong>${bn(l.length)}টি হাদিস বাকি</strong><span>পুরোনো সেভ আগে · ট্যাপ করে পড়ুন</span></div>
+      <div class="idx">${l.map(irHTML).join('')}</div>`;
+  }
+  function openMenu(k) {
+    const r = S.read.has(k);
+    S.menu = k;
+    $('#mk-prev').innerHTML = `<p>${H[k].tr}</p><small>${ref(k)}</small>`;
+    $('#mk-foot').innerHTML = `<button class="btn ${r ? 'tonal' : ''} block" data-act="toggle" data-k="${k}">${r ? UNREAD_I : ic('check')}${r ? 'পড়া হয়নি হিসেবে চিহ্নিত করুন' : 'পড়া হয়েছে হিসেবে চিহ্নিত করুন'}</button>`;
+    Kit.open('sh-mark');
+  }
+
+  /* ---------- Read state ---------- */
+  function toggle(k) {
+    if (S.read.has(k)) { S.read.delete(k); Kit.snack('পড়া হয়নি হিসেবে চিহ্নিত হয়েছে'); }
+    else { S.read.add(k); Kit.snack('পড়া হয়েছে হিসেবে চিহ্নিত হয়েছে'); }
+    renderCol();
+  }
+
+  /* ---------- Navigation ---------- */
+  const PAGE = { collection: 'pg-col', mark: 'pg-col', done: 'pg-col', hidden: 'pg-col', hadith: 'pg-read', unread: 'pg-un' };
+  let internal = false;
+  const go = (id) => { internal = true; Kit.show(id); internal = false; };
+  Kit.onScreen((id) => {
+    $(`.screen[data-screen="${id}"]`).appendChild($('#' + PAGE[id]));
+    if (!internal) {
+      if (id === 'collection' || id === 'mark') reset();
+      if (id === 'done') { reset(); SAVED.forEach((k) => S.read.add(k)); }
+      if (id === 'hidden') { reset(); S.hidden = true; }
+      if (id === 'hadith') { reset(); S.cur = DECK[0]; S.back = 'collection'; }
+      if (id === 'unread' && !unread().length) reset();
+    }
+    if (PAGE[id] === 'pg-col') renderCol();
+    if (id === 'hadith') renderRead();
+    if (id === 'unread') renderUn();
+    if (!internal && id === 'mark') openMenu(DECK[0]);
+  });
+
+  /* ---------- In-phone actions ---------- */
+  const ACT = {
+    open: (el) => { S.cur = el.dataset.k; S.back = Kit.current === 'unread' ? 'unread' : 'collection'; go('hadith'); },
+    'read-back': () => {
+      const k = S.cur, fresh = !S.read.has(k);
+      S.read.add(k);
+      go(S.back === 'unread' && !unread().length ? 'collection' : S.back);
+      if (fresh) Kit.snack('পড়া হয়েছে হিসেবে চিহ্নিত হয়েছে');
+    },
+    prev: () => { if (S.page > 0) { S.page--; renderCol(); } },
+    next: () => { if (S.page < DECK.length - 1) { S.page++; renderCol(); } },
+    menu: (el) => openMenu(el.dataset.k),
+    toggle: (el) => { Kit.close('sh-mark'); toggle(el.dataset.k); },
+    all: () => go('unread'),
+    'un-back': () => go('collection'),
+    hide: () => { S.hidden = true; renderCol(); Kit.snack('আজকের জন্য লুকানো হয়েছে, কাল আবার আসবে'); },
+  };
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-act]');
+    if (el && el.closest('.phone') && ACT[el.dataset.act]) ACT[el.dataset.act](el);
+  });
+
+  /* ---------- Boot ---------- */
+  $$('[data-i]').forEach((b) => { b.innerHTML = ic(b.dataset.i); });
+  Kit.init({ demo: 5, name: 'রঙিন ব্যানার', screens: [
+    { id: 'collection', label: 'দৈনিক রিভিশন' },
+    { id: 'mark', label: 'পড়ার চিহ্ন' },
+    { id: 'hadith', label: 'হাদিস পড়া' },
+    { id: 'unread', label: 'না-পড়া লিস্ট' },
+    { id: 'done', label: 'সব পড়া শেষ' },
+    { id: 'hidden', label: 'আজকের জন্য লুকান' },
+  ] });
+})();
+</script>
+</body>
+</html>
