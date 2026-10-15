@@ -3,5 +3,10 @@
     "demo": "demo1.html",
     "screen": "cats",
     "label": "ক্যাটাগরি"
+  },
+  {
+    "demo": "demo1.html",
+    "screen": null,
+    "label": null
   }
 ]

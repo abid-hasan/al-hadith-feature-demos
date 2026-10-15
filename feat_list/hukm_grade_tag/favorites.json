@@ -3,5 +3,10 @@
     "demo": "demo1.html",
     "screen": "o-sahih",
     "label": "সহিহ · মতসহ"
+  },
+  {
+    "demo": "demo1.html",
+    "screen": null,
+    "label": null
   }
 ]
