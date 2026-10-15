@@ -1,7 +1,7 @@
 [
   {
     "demo": "demo1.html",
-    "screen": null,
-    "label": null
+    "screen": "cats",
+    "label": "ক্যাটাগরি"
   }
 ]

@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>জনপ্রিয় সার্চ — ডেমো 3 · নিচের শিটে সব</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): Arabic chip text, results page ===== */
+.ar{font-family:var(--font-ar);direction:rtl;unicode-bidi:isolate;font-size:1.12em;line-height:1.35}
+.body{flex:1;min-height:0;overflow-y:auto}
+.body::-webkit-scrollbar{width:0}
+.foot{flex:none;padding:8px 16px 14px;background:var(--scaffold)}
+.foot .btn.dim{opacity:.45;pointer-events:none}
+.swap{animation:swap .4s ease-out}
+@keyframes swap{from{opacity:.15;transform:translateY(4px)}to{opacity:1;transform:none}}
+mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-radius:4px;padding:0 2px}
+:root[data-theme="dark"] mark.hl{color:var(--primary)}
+.ov{background:var(--card);border-radius:10px;padding:10px 14px;margin:14px 14px 7px}
+.ov p{margin:0}
+.ov .ql{font-size:16px;font-weight:600;color:var(--title)}
+.ov .q-t{color:var(--primary)}
+.ov .ct{font-size:13px;color:var(--body)}
+.bks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bks span{font-size:12.5px;padding:1px 10px;border-radius:20px;background:var(--surface-2);color:var(--body);border:1px solid var(--divider)}
+.bks .mt{background:var(--tint);color:var(--primary-dark);border-color:transparent;font-weight:700}
+:root[data-theme="dark"] .bks .mt{color:var(--primary)}
+.hc{margin:7px 14px}
+.hc .narrator{margin:12px 0 0}
+.rd{width:20px;height:20px;border-radius:50%;border:2px solid var(--hint);flex:none;display:grid;place-items:center}
+[aria-checked="true"] .rd{border-color:var(--primary)}
+[aria-checked="true"] .rd::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--primary)}
+/* ===== Demo 3: two lines on the page, everything in a bottom sheet ===== */
+.page{padding:14px 16px}
+.lbl{display:flex;align-items:center;margin:20px 0 10px}
+.lbl h3{flex:1;margin:0;font-size:16px;font-weight:700;color:var(--title)}
+.more{display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:700;color:var(--primary);padding:4px 0 4px 8px}
+.more svg{width:18px;height:18px}
+
+/* ===== Search field: underline on the scaffold ===== */
+.uf{display:flex;align-items:center;gap:10px;height:52px;padding:0 14px;border-radius:14px;background:var(--card);border:1.5px solid var(--primary);color:var(--primary)}
+.uf svg{width:20px;height:20px;flex:none}
+.uf input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15.5px}
+.uf input::placeholder{color:var(--hint)}
+
+/* ===== History: plain rows ===== */
+.hl2{background:var(--card);border-radius:12px;overflow:hidden}
+.hr{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border-bottom:1px solid var(--divider);text-align:left;font-size:14.5px;color:var(--title)}
+.hr:last-child{border-bottom:0}
+.hr svg{width:18px;height:18px;flex:none;color:var(--hint)}
+.hr span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ===== Popular: outlined chips, two lines ===== */
+.oc-row{display:flex;flex-wrap:wrap;gap:8px}
+.oc{display:inline-flex;align-items:center;max-width:100%;height:36px;padding:0 14px;border-radius:18px;border:1.2px solid var(--primary);background:transparent;color:var(--primary-dark);font-size:14px;white-space:nowrap}
+:root[data-theme="dark"] .oc{color:var(--primary)}
+.oc .t{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.oc:not(.off):active{background:var(--tint)}
+.oc.off{border-color:var(--divider);color:var(--hint);cursor:not-allowed}
+.offnote{display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;font-size:14px;color:var(--body)}
+.offnote svg{width:18px;height:18px;flex:none;color:var(--primary);margin-top:2px}
+.offnote button{color:var(--primary);font-weight:700}
+
+/* ===== Scope row ===== */
+.scope{display:flex;gap:8px}
+.scope .chip{height:38px;padding:0 18px;font-size:14.5px}
+
+
+/* ===== Sheet: every chip as a row ===== */
+.grab{width:40px;height:4px;border-radius:2px;background:var(--divider);margin:10px auto 0}
+.sheet-head{padding-top:10px}
+.sr{display:flex;align-items:center;gap:12px;width:100%;padding:12px 2px;border-bottom:1px solid var(--divider);text-align:left;font-size:15px;color:var(--title)}
+.sr:last-child{border-bottom:0}
+.sr .ic{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.sr .ic svg{width:16px;height:16px}
+.sr .t{flex:1;min-width:0}
+.sr .ar{display:block;text-align:right}
+.sr>svg{width:18px;height:18px;color:var(--hint);flex:none}
+.sr.off{color:var(--hint);cursor:not-allowed}
+.sr.off .ic{background:var(--surface-2);color:var(--hint)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screen: NewSearchPage (popular chips collapsed to two lines) ===== -->
+      <section class="screen" data-screen="search">
+        <header class="appbar"><button class="icon-btn back" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body"></div>
+        <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
+      </section>
+
+      <!-- ===== Screen: same page after "সব দেখুন" ===== -->
+      <section class="screen" data-screen="expanded">
+        <header class="appbar"><button class="icon-btn back" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body"></div>
+        <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
+      </section>
+
+      <!-- ===== Screen: SearchPage (results after a chip tap) ===== -->
+      <section class="screen" data-screen="results">
+        <header class="appbar"><button class="icon-btn back" aria-label="পেছনে" data-go="search"></button><h1>সার্চ রেজাল্ট<small class="r-sub"></small></h1></header>
+        <div class="body"></div>
+      </section>
+
+      <!-- ===== Screen: offline scope, no downloaded book ===== -->
+      <section class="screen" data-screen="nobooks">
+        <header class="appbar"><button class="icon-btn back" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body"></div>
+        <div class="foot"><button class="btn block dim" aria-disabled="true">সার্চ করুন</button></div>
+      </section>
+
+      <!-- ===== Bottom sheet: every popular search ("সব দেখুন") ===== -->
+      <div class="sheet" id="sheet-all" role="dialog" aria-label="জনপ্রিয় সার্চ">
+        <div class="grab"></div>
+        <div class="sheet-head"><h2>জনপ্রিয় সার্চ</h2><button class="more" data-more="pop" aria-expanded="true">কম দেখুন</button></div>
+        <div class="sheet-body"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, the app's 12 chips per day,
+   the two-line chip layout and the search flow. Each demo's own look
+   lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ---------- Arabic chips: the app's own search strings (app_bn.arb) ---------- */
+const AR = {
+  phrase: '\u062e\u064a\u0631\u0643\u0645 \u0645\u0646 \u062a\u0639\u0644\u0645 \u0627\u0644\u0642\u0631\u0622\u0646',
+  general: '\u0641\u064e\u0644\u0652\u064a\u064e\u0642\u064f\u0644\u0652 \u062e\u064e\u064a\u0652\u0631\u064b\u0627 \u0623\u064e\u0648\u0652 \u0644\u0650\u064a\u064e\u0635\u0652\u0645\u064f\u062a\u0652',
+  ramadan: '\u0641\u064f\u062a\u0651\u0650\u062d\u064e\u062a\u0652 \u0623\u064e\u0628\u0652\u0648\u064e\u0627\u0628\u064f \u0627\u0644\u0652\u062c\u064e\u0646\u0651\u064e\u0629\u0650',
+  qadr: '\u062a\u064e\u062d\u064e\u0631\u0651\u064e\u0648\u0652\u0627 \u0644\u064e\u064a\u0652\u0644\u064e\u0629\u064e \u0627\u0644\u0652\u0642\u064e\u062f\u0652\u0631\u0650',
+  arafah: '\u0635\u0650\u064a\u064e\u0627\u0645\u0650 \u064a\u064e\u0648\u0652\u0645\u0650 \u0639\u064e\u0631\u064e\u0641\u064e\u0629\u064e',
+};
+
+/* ---------- Chip text: app_bn.arb popularSearch* ---------- */
+const TOPIC = {
+  Dua: 'দোয়া কবুল', Charity: 'গোপনে দান', Parents: 'পিতা-মাতার সঙ্গে সদাচরণ', Relationships: 'আত্মীয়তার সম্পর্ক রক্ষা',
+  Patience: 'বিপদের প্রথম আঘাতেই ধৈর্য', GoodDeeds: 'নিয়মিত আমল', Neighbor: 'প্রতিবেশীর সাথে সদ্ব্যবহার', Tawbah: 'আল্লাহ বান্দার তওবা কবুল করেন',
+  Zakat: 'যাকাত আদায়', Hereafter: 'তার হিসাব-নিকাশ সহজেই নেওয়া হবে', Family: 'পরিবারের জন্য ব্যয়', Prayer: 'জামাআতে সালাতের ফজিলত',
+  Fasting: 'সাওম ঢাল স্বরূপ', FridayPrayerRules: 'নীরবে মনোযোগ সহকারে খুতবা', Ghusl: 'জুমআর দিনের গোসল',
+  RamadanVirtues: 'জান্নাতের দরজাসমূহ খুলে দেয়া হয়', Suhoor: 'সাহরীতে বরকত', Iftar: 'শীঘ্র ইফতার', Tarawih: 'তারাবির সালাত', Quran: 'তোমরা কুরআন পাঠ কর',
+  Qadr: 'কদরের রাতে ইবাদত', Itikaf: 'রমজানের শেষ দশকে ইতিকাফ', LastTen: 'শেষ দশকের বেজোড় রাতে', Tahajjud: 'শেষ রাতে বিতর',
+  Forgiveness: 'আল্লাহর কাছে ক্ষমা চাচ্ছি', Dhikr: 'সুবহানাল্লাহ, আলহামদুলিল্লাহ', Arafah: 'আরাফার দিনের সাওম', Hajj: 'হজ্জের প্রতিদান',
+  Qurbani: 'সালাত আদায়ের পরে যবেহ', DhulHijjah: 'যিলহজ মাসের প্রথম দশ দিনের আমল', Takbir: 'সাত তাকবীর', Ihram: 'ইহরাম অবস্থায়', Talbiyah: 'তালবিয়া',
+};
+
+/* ---------- Topic pools: search_suggestions.dart (only the seasons shown here) ---------- */
+const POOL = {
+  general: ['Dua', 'Charity', 'Parents', 'Relationships', 'Patience', 'GoodDeeds', 'Neighbor', 'Tawbah'],
+  ramadan: ['RamadanVirtues', 'Fasting', 'Suhoor', 'Iftar', 'Tarawih', 'Zakat', 'Charity', 'Quran'],
+  qadr: ['Qadr', 'Itikaf', 'LastTen', 'Tahajjud', 'Dua', 'Forgiveness', 'Dhikr', 'Charity'],
+  arafah: ['Arafah', 'Fasting', 'Dua', 'Forgiveness', 'Dhikr', 'Charity', 'Hajj', 'Qurbani'],
+  dhul_hijjah: ['DhulHijjah', 'GoodDeeds', 'Takbir', 'Arafah', 'Hajj', 'Ihram', 'Talbiyah', 'Qurbani'],
+};
+/* Demo days (toolbar). The app picks the day from the user's own Hijri date. */
+const DAYS = [
+  { id: 'general', label: 'সাধারণ দিন', season: 'general', topics: POOL.general },
+  { id: 'friday', label: 'শুক্রবার', season: 'general', topics: ['FridayPrayerRules', 'Ghusl', ...POOL.general] },
+  { id: 'ramadan', label: 'রমজান', season: 'ramadan', topics: POOL.ramadan },
+  { id: 'qadr', label: 'শেষ দশক', season: 'qadr', topics: POOL.qadr },
+  { id: 'arafah', label: 'আরাফার দিন', season: 'arafah',
+    topics: [...POOL.arafah.slice(0, 4), ...POOL.dhul_hijjah.slice(0, 4), ...POOL.arafah, ...POOL.dhul_hijjah] },
+];
+
+/* ---------- buildSearchSuggestions(): 4 fixed + 7 rotating + 1 seasonal Arabic ---------- */
+function buildChips(day) {
+  const ar = AR[day.season];
+  const out = [
+    { q: '৬১১৬', key: 'num' },
+    { q: 'নামাজ', key: 'keyword' },
+    { q: AR.phrase, key: 'arPhrase', ar: true, exact: true },
+    { q: 'মানুষ তার নিয়ত অনুযায়ী প্রতিফল পাবে', key: 'niyyah', exact: true },
+  ];
+  const seen = new Set([...out.map((c) => c.q), ar]);
+  for (const t of [...day.topics, ...POOL.general, 'Zakat', 'Hereafter', 'Family', 'Prayer', 'Fasting']) {
+    if (!seen.has(TOPIC[t])) { seen.add(TOPIC[t]); out.push({ q: TOPIC[t], key: t }); }
+    if (out.length === 11) break;
+  }
+  out.push({ q: ar, key: 'ar_' + day.season, ar: true });
+  return out;
+}
+
+/* ---------- Demo results (hadith text only from the safe list) ---------- */
+const BOOKS = { bukhari: { name: 'সহিহ বুখারি', abbr: 'বুখারী' }, muslim: { name: 'সহিহ মুসলিম', abbr: 'মুসলিম' } };
+const HADITH = {
+  b1: { book: 'bukhari', num: 1, nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত', bn: 'সকল কাজ নিয়তের ওপর নির্ভরশীল, আর মানুষ তার নিয়ত অনুযায়ী প্রতিফল পাবে।' },
+  b1894: { book: 'bukhari', num: 1894, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'সাওম ঢাল স্বরূপ।' },
+  b6018: { book: 'bukhari', num: 6018, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।' },
+  b6116: { book: 'bukhari', num: 6116, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'এক ব্যক্তি নবী (সা.)-কে বলল, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বলল, তিনি প্রতিবারই বললেন, রাগ করো না।' },
+  m223: { book: 'muslim', num: 223, nar: 'আবু মালিক আশআরি (রা.) থেকে বর্ণিত', bn: 'পবিত্রতা ঈমানের অর্ধেক।' },
+};
+const RESULT_GROUPS = [
+  [['num'], ['b6116']],
+  [['niyyah', 'arPhrase'], ['b1']],
+  [['ar_general'], ['b6018']],
+  [['Fasting', 'Iftar', 'Suhoor', 'Tarawih', 'RamadanVirtues', 'Arafah', 'Qadr', 'LastTen', 'Itikaf', 'ar_ramadan', 'ar_qadr', 'ar_arafah'], ['b1894']],
+  [['keyword', 'Prayer', 'Ghusl', 'FridayPrayerRules', 'Tahajjud'], ['m223']],
+  [['Parents', 'Relationships', 'Neighbor', 'Patience'], ['b6018', 'b6116']],
+];
+function resultsFor(chip) {
+  const g = RESULT_GROUPS.find(([keys]) => keys.includes(chip.key));
+  if (g) return g[1];
+  if (chip.key === 'typed') {
+    const words = chip.q.split(/\s+/).filter((w) => w.length > 1);
+    const hit = Object.keys(HADITH).filter((id) => words.some((w) => HADITH[id].bn.includes(w)));
+    if (hit.length) return hit;
+  }
+  return ['b1', 'b6018'];
+}
+
+/* ---------- State ---------- */
+const S = {
+  day: DAYS[2], chips: [], expanded: false, histOpen: false, offline: false, text: '', last: null,
+  history: ['রাগ করো না', 'পবিত্রতা ঈমানের অর্ধেক', 'প্রতিবেশীর অধিকার', 'সালাতের সময়', 'সদকা'],
+};
+S.chips = buildChips(S.day);
+const SEARCH_SCREENS = ['search', 'expanded', 'nobooks'];
+const NO_BOOKS = { title: 'কোনো বই ডাউনলোড করা নেই', msg: 'অফলাইনে সার্চ করতে একটি বই ডাউনলোড করুন।', cta: 'ডাউনলোডে যান' };
+
+/* ---------- Flow ---------- */
+function search(chip) {
+  if (S.offline) return;                       // offline with no books: chips do nothing
+  S.history = [chip.q, ...S.history.filter((x) => x !== chip.q)].slice(0, 8);
+  S.text = '';
+  S.last = { chip, list: resultsFor(chip) };
+  Kit.show('results');
+}
+function searchTyped(sec) {
+  const v = ($('.q', sec)?.value || '').trim();
+  if (!v) { Kit.snack('সার্চ করার জন্য কিছু লিখুন'); return; }
+  const chip = S.chips.find((c) => c.q === v) || { q: v, key: 'typed' };
+  search(chip);
+}
+function setDay(id) {
+  S.day = DAYS.find((d) => d.id === id);
+  S.chips = buildChips(S.day);
+  markDays();
+  render(true);
+}
+function markDays() { $$('[data-day]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.day === S.day.id)); }
+
+/* ---------- Chip layout: SearchHistoryRow (max lines, wide chips last) ---------- */
+function flow(box, maxLines, wideLast) {
+  const kids = [...box.children];
+  kids.forEach((k) => { k.hidden = false; });
+  const W = box.clientWidth;
+  if (!W) return false;
+  const cs = getComputedStyle(box);
+  const gap = parseFloat(cs.columnGap) || 0;
+  let list = kids.map((k) => ({ k, w: Math.min(k.offsetWidth + 1, W) }));   // +1: sub-pixel safety
+  if (wideLast) {
+    list = [...list.filter((x) => x.w <= W / 2), ...list.filter((x) => x.w > W / 2)];
+    list.forEach((x) => box.appendChild(x.k));
+  }
+  let used = 0, line = 1, over = false;
+  for (const x of list) {
+    let start = used ? used + gap : 0;
+    if (x.w > W - start && (!maxLines || line < maxLines)) { line++; start = 0; }
+    if (over || x.w > W - start) { over = true; x.k.hidden = true; continue; }   // out of lines: hide the rest
+    used = start + x.w;
+  }
+  return over;
+}
+function layout(sec) {
+  $$('[data-flow]', sec).forEach((box) => {
+    const id = box.dataset.flow;
+    const open = 'fixed' in box.dataset ? false : id === 'hist' ? S.histOpen : S.expanded;   // data-fixed: always collapsed
+    const kids = [...box.children];
+    let over;
+    if (box.dataset.limit) {
+      const n = +box.dataset.limit;
+      over = kids.length > n;
+      kids.forEach((k, i) => { k.hidden = !open && i >= n; });
+    } else {
+      over = flow(box, +box.dataset.lines || 0, 'wide' in box.dataset);
+      if (open) kids.forEach((k) => { k.hidden = false; });
+    }
+    $$(`[data-more="${id}"]`, sec).forEach((b) => { b.hidden = !(over || open); b.setAttribute('aria-expanded', open); });
+  });
+}
+
+/* ---------- Render ---------- */
+function render(changed) {
+  const id = Kit.current;
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  const body = $('.body', sec);
+  if (SEARCH_SCREENS.includes(id)) {
+    body.innerHTML = D.page({ offline: S.offline, expanded: S.expanded });
+    const q = $('.q', sec);
+    if (q) q.value = S.text;
+    layout(sec);
+    if (changed) $$('[data-pop]', sec).forEach((b) => { b.classList.remove('swap'); void b.offsetWidth; b.classList.add('swap'); });
+  }
+  if (id === 'results') {
+    if (!S.last) S.last = { chip: S.chips.find((c) => c.key === 'Iftar') || S.chips[4], list: [] };
+    if (!S.last.list.length) S.last.list = resultsFor(S.last.chip);
+    body.innerHTML = D.results(S.last);
+  }
+  D.after?.(id, sec);
+}
+
+/* ---------- Shared render helpers ---------- */
+const chipText = (c) => (c.ar ? `<span class="ar" dir="rtl">${esc(c.q)}</span>` : esc(c.q));
+const popAttr = (i) => (S.offline ? 'aria-disabled="true" tabindex="-1"' : `data-chip="${i}"`);
+const moreLabel = (open) => (open ? 'কম দেখুন' : 'সব দেখুন');
+function hl(text, chip) {
+  if (chip.ar || chip.key === 'num') return esc(text);
+  const words = chip.exact ? [chip.q] : chip.q.split(/[\s,]+/).filter((w) => w.length > 1);
+  const re = words.length ? new RegExp(words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g') : null;
+  return re ? esc(text).replace(re, (m) => `<mark class="hl">${m}</mark>`) : esc(text);
+}
+const gradeTag = () => '<span class="grade" style="background:var(--grade-sahih)">সহিহ হাদিস</span>';
+function cardHTML(id, chip, cls = '') {
+  const h = HADITH[id], b = BOOKS[h.book];
+  return `<article class="card hc ${cls}">
+    <div class="hadith-head"><span class="book-badge">${b.abbr}</span><div class="hadith-meta"><b>${b.name}</b><span>হাদিস: ${bn(h.num)}</span></div>${gradeTag()}</div>
+    <p class="narrator">${h.nar}</p><p class="translation">${hl(h.bn, chip)}</p></article>`;
+}
+const countLine = (res) => `সর্বমোট ফলাফল পাওয়া গেছে : ${bn(res.list.length)} টি`;
+function overview(res) {
+  const by = Object.keys(BOOKS).map((k) => [k, res.list.filter((id) => HADITH[id].book === k).length]).filter((x) => x[1]);
+  return `<div class="ov"><p class="ql">আপনি ( <b class="q-t">${chipText(res.chip)}</b> ) লিখে সার্চ করেছেন</p><p class="ct">${countLine(res)}</p>
+    <div class="bks"><span class="mt">${res.chip.exact ? 'হুবহু মিল' : 'স্বাভাবিক'}</span>${by.map(([k, n]) => `<span>${BOOKS[k].name} · ${bn(n)}টি</span>`).join('')}</div></div>`;
+}
+
+/* ---------- Wiring ---------- */
+function startEngine() {
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-chip],[data-hist],[data-more],[data-scope],[data-run],[data-dl],[data-day],[data-clear]');
+    if (!t) return;
+    const sec = t.closest('.screen') || $(`.screen[data-screen="${Kit.current}"]`);
+    if (t.dataset.chip) search(S.chips[+t.dataset.chip]);
+    else if (t.dataset.hist) search(S.chips.find((c) => c.q === S.history[+t.dataset.hist]) || { q: S.history[+t.dataset.hist], key: 'typed' });
+    else if (t.dataset.more === 'hist') { S.histOpen = !S.histOpen; render(); }
+    else if (t.dataset.more) {
+      if (Kit.current === 'nobooks') { S.expanded = !S.expanded; render(); }
+      else Kit.show(S.expanded ? 'search' : 'expanded');
+    }
+    else if (t.dataset.scope) Kit.show(t.dataset.scope === 'offline' ? 'nobooks' : (S.expanded ? 'expanded' : 'search'));
+    else if (t.dataset.run !== undefined) { if (!S.offline) searchTyped(sec); }
+    else if (t.dataset.dl !== undefined) Kit.snack('ডাউনলোড ম্যানেজার খুলবে, বই নামালে চিপ আবার চাপা যাবে');
+    else if (t.dataset.day) setDay(t.dataset.day);
+    else if (t.dataset.clear !== undefined) { S.text = ''; render(); }
+  });
+  document.addEventListener('input', (e) => { if (e.target.matches('.q')) S.text = e.target.value; });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.matches('.q')) { e.preventDefault(); if (!S.offline) searchTyped(e.target.closest('.screen')); }
+  });
+  const onScreen = (id) => {
+    S.offline = id === 'nobooks';
+    if (id === 'expanded') S.expanded = true;
+    if (id === 'search') S.expanded = false;
+    markDays();
+    render();
+  };
+  Kit.onScreen(onScreen);
+  window.addEventListener('resize', () => render());
+  document.fonts?.ready.then(() => render());
+  if (Kit.current) onScreen(Kit.current);
+}
+const DAY_BUTTONS = DAYS.map((d) => `<button class="kit-chip" type="button" data-day="${d.id}" aria-pressed="false">${d.label}</button>`).join('');
+/* ======================================================================
+   DEMO 3 — নিচের শিটে সব: the page keeps two lines of outlined chips.
+   "সব দেখুন" opens a bottom sheet with every popular search as a row;
+   "কম দেখুন" (or a tap outside) closes it. Offline with no book: a tap
+   on a chip explains why it does nothing.
+   ====================================================================== */
+const offAttr = () => (S.offline ? 'data-offchip' : '');
+const D = {
+  page(m) {
+    const hist = S.history.map((h, i) => `<button class="hr" data-hist="${i}">${icons.clock}<span>${esc(h)}</span>${icons.search}</button>`).join('');
+    const pop = S.chips.map((c, i) => `<button class="oc ${m.offline ? 'off' : ''}" ${popAttr(i)} ${offAttr()} title="${esc(c.q)}"><span class="t">${chipText(c)}</span></button>`).join('');
+    return `<div class="page">
+      <label class="uf">${icons.search}<input class="q" type="search" enterkeyhint="search" autocomplete="off" aria-label="হাদিস সার্চ ইনপুট" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন"></label>
+      ${S.history.length ? `<div class="lbl"><h3>সার্চ হিস্ট্রি</h3><button class="more" data-more="hist" aria-expanded="${S.histOpen}" hidden>${moreLabel(S.histOpen)}</button></div>
+        <div class="hl2" data-flow="hist" data-limit="2">${hist}</div>` : ''}
+      <div class="lbl"><h3>জনপ্রিয় সার্চ</h3><button class="more" data-more="pop" aria-expanded="false" hidden>সব দেখুন${icons.down}</button></div>
+      <div class="oc-row" data-flow="pop" data-pop data-lines="2" data-wide data-fixed>${pop}</div>
+      ${m.offline ? `<p class="offnote">${icons.info}<span><b>${NO_BOOKS.title}।</b> ${NO_BOOKS.msg} <button data-dl>${NO_BOOKS.cta}</button></span></p>` : ''}
+      <div class="lbl"><h3>কোথায় সার্চ করবেন</h3></div>
+      <div class="scope" role="radiogroup" aria-label="কোথায় সার্চ করবেন">
+        <button class="chip ${m.offline ? '' : 'on'}" role="radio" data-scope="online" aria-checked="${!m.offline}">অনলাইন</button>
+        <button class="chip ${m.offline ? 'on' : ''}" role="radio" data-scope="offline" aria-checked="${m.offline}">অফলাইন</button></div>
+    </div>`;
+  },
+  sheet() {
+    return S.chips.map((c, i) => `<button class="sr ${S.offline ? 'off' : ''}" ${popAttr(i)} ${offAttr()}><span class="ic">${icons.search}</span><span class="t">${chipText(c)}</span>${icons.chevron}</button>`).join('');
+  },
+  results(res) {
+    return `${overview(res)}${res.list.map((id) => cardHTML(id, res.chip)).join('')}<div style="height:16px"></div>`;
+  },
+  after(id, sec) {
+    if (id === 'results') { $('.r-sub', sec).textContent = countLine(S.last); return; }
+    $('#sheet-all .sheet-body').innerHTML = D.sheet();
+    if (S.expanded) Kit.open('sheet-all'); else Kit.close('sheet-all');
+  },
+};
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-offchip]')) Kit.snack(NO_BOOKS.msg, { label: NO_BOOKS.cta, onClick: () => Kit.snack('ডাউনলোড ম্যানেজার খুলবে, বই নামালে চিপ আবার চাপা যাবে') });
+  if (e.target.classList.contains('scrim') && S.expanded) {   // tap outside the sheet = "কম দেখুন"
+    if (Kit.current === 'expanded') Kit.show('search'); else { S.expanded = false; render(); }
+  }
+});
+$$('.back').forEach((b) => { b.innerHTML = icons.back; });
+Kit.init({ demo: 3, name: 'নিচের শিটে সব', extra: DAY_BUTTONS, screens: [
+  { id: 'search', label: 'সার্চ পেজ' },
+  { id: 'expanded', label: 'সব দেখুন শিট' },
+  { id: 'results', label: 'সার্চ রেজাল্ট' },
+  { id: 'nobooks', label: 'বই না থাকলে' },
+]});
+startEngine();
+</script>
+</body>
+</html>
