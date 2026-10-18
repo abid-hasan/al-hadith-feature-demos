@@ -12,7 +12,7 @@
 .panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
 .panel>.scroll{padding-top:14px}
 
-/* ===== Search page (#13): _SearchSectionCard with the field and "জীবনের পরিস্থিতি" ===== */
+/* ===== Search page (#12): _SearchSectionCard with the field and "জীবনের পরিস্থিতি" ===== */
 .scard{background:var(--card);border-radius:12px;margin:0 16px 16px;padding:14px}
 .srow{display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px}
 .stitle{margin:0;font-size:16px;font-weight:700;color:var(--title)}
@@ -52,7 +52,7 @@
 .nores h3{margin:6px 0 0;font-size:18px;color:var(--title)}
 .nores p{margin:0;font-size:14px;color:var(--hint)}
 
-/* ===== Situation page (#13) header ===== */
+/* ===== Situation page (#12) header ===== */
 .shead{display:flex;gap:12px;align-items:flex-start}
 .shead .sit-ic{width:48px;height:48px}
 .shead h2{margin:0;font-size:18px;color:var(--title);line-height:1.3}
@@ -117,7 +117,7 @@
       </section>
 
       <div id="hold" hidden>
-        <!-- ===== Page: search (#13) ===== -->
+        <!-- ===== Page: search (#12) ===== -->
         <div class="pg" id="pg-search">
           <header class="appbar"><button class="icon-btn" data-i="back" aria-label="পেছনে" data-snack="হোম পেজে ফিরবে"></button><h1>সার্চ</h1></header>
           <div class="rbody"><div class="panel"><div class="scroll" id="s-body">
@@ -175,7 +175,7 @@
       ${SL.ofSit(s.id).map((l) => lrow(l)).join('')}`).join('');
   }
 
-  /* ---------- Situation page (#13) with the new "পাঠ" part at the bottom ---------- */
+  /* ---------- Situation page (#12) with the new "পাঠ" part at the bottom ---------- */
   function hadithCard(k) {
     const h = SL.HADITHS[k];
     return `<article class="card hc" data-h="${k}" tabindex="0">${head(h)}<p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${SL.nl(h.tr)}</p></article>`;

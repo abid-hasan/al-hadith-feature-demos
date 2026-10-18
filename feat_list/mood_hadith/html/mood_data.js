@@ -25,7 +25,7 @@
   };
 
   /* ---------- 5 moods, sheet order. pairs = one dua + one hadith shown together;
-     "নতুন হাদিস দেখান" moves to the next pair. sit = the #13 situation page name. ---------- */
+     "নতুন হাদিস দেখান" moves to the next pair. sit = the #12 situation page name. ---------- */
   const MOODS = [
     { id: 'sad', name: 'মন খারাপ', sit: 'মন খারাপ', help: true,
       line: 'মন ভারী লাগছে? একটু থামুন, ধীরে ধীরে এই দোয়াটা পড়ুন।',

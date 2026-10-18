@@ -11,7 +11,7 @@
   'use strict';
   const { bn, icons, $, $$ } = Kit;
 
-  /* ---------- Narrators (sahabis). intro: from #৩৯; null = no intro yet, show name only.
+  /* ---------- Narrators (sahabis). intro: from #৩৮; null = no intro yet, show name only.
      books: [name, badge, count, safe hadith keys with text] ---------- */
   const N = [
     { id: 'abuhurayra', name: 'আবু হুরায়রা (রাঃ)', aka: 'আবূ হুরায়রা আবু হুরাইরা',
@@ -70,7 +70,7 @@
   const book = () => cur().books[S.bk];
   const bookKeys = () => book()[3] || [];
 
-  /* ---------- Shared: hadith page and the #৩৯ intro sheet on the narrator's name ---------- */
+  /* ---------- Shared: hadith page and the #৩৮ intro sheet on the narrator's name ---------- */
   function hadithHTML(D) {
     const h = H[S.hk], n = narOf(S.hk);
     return `<header class="appbar"><button class="icon-btn" data-act="hback" aria-label="পেছনে">${icons.back}</button><h1>${h.book}<small>হাদিস: ${bn(h.no)}</small></h1></header>

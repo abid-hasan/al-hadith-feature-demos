@@ -118,7 +118,7 @@ function hadithCard(foot = '') {
   return `<article class="card hc"><div class="hadith-head"><span class="book-badge">${H.abbr}</span><div class="hadith-meta"><b>${H.book}</b><span>হাদিস: ${bn(H.no)}</span></div><span class="grade">${H.grade}</span></div>
     <p class="narrator">${H.nar}</p><p class="translation">${H.text}</p>${foot}</article>`;
 }
-/* Partner app: a reading card that quotes the hadith and links to it (#22 link) */
+/* Partner app: a reading card that quotes the hadith and links to it (#21 link) */
 function partnerHTML() {
   return `<header class="appbar flat pbar">${pIcon(30)}<h1>${P.name}</h1></header>
     <div class="body"><article class="card pc"><span class="ptag">${P.tag}</span><h2 class="ph">${P.item}</h2><p class="pb">${P.body}</p>

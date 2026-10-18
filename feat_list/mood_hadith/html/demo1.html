@@ -59,7 +59,7 @@
 .panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
 .panel>.scroll{padding-top:14px}
 
-/* ===== Situation page (#13): header card, then দোয়া and হাদিস sections ===== */
+/* ===== Situation page (#12): header card, then দোয়া and হাদিস sections ===== */
 .shead{display:flex;gap:12px;align-items:flex-start}
 .shead .sh-ic{width:48px;height:48px}
 .shead .sh-ic svg{width:26px;height:26px}
@@ -89,7 +89,7 @@
       <section class="screen" data-screen="home" data-keep-scroll></section>
       <section class="screen" data-screen="mood" data-keep-scroll></section>
 
-      <!-- ===== Screen: situation page (#13), opened by "আরো পড়ুন" ===== -->
+      <!-- ===== Screen: situation page (#12), opened by "আরো পড়ুন" ===== -->
       <section class="screen" data-screen="sit">
         <header class="appbar"><button class="icon-btn" data-go="home" data-i="back" aria-label="পেছনে"></button><h1 id="sit-title"></h1></header>
         <div class="rbody"><div class="panel"><div class="scroll" id="sit-body"></div></div></div>
@@ -189,7 +189,7 @@
   $('#b-next').innerHTML = `${MH.ICON.refresh}নতুন হাদিস দেখান`;
   $('#b-more').textContent = 'আরো পড়ুন';
 
-  /* ---------- Situation page (#13) ---------- */
+  /* ---------- Situation page (#12) ---------- */
   function renderSit() {
     const m = mood();
     $('#sit-title').textContent = m.sit;

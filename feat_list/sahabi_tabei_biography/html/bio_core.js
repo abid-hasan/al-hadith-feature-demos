@@ -185,7 +185,7 @@
     Kit.init({ demo: opts.demo, name: opts.name, screens: SCREENS });
   }
 
-  /* ---------- Shared body of "তাঁর বর্ণিত হাদিস" (#৬০-এর পেজ): total, books, cards ----------
+  /* ---------- Shared body of "তাঁর বর্ণিত হাদিস" (#৫৯-এর পেজ): total, books, cards ----------
      Only safe-list hadiths have text, so only those books open. */
   const fmt = (n) => bn(n.toLocaleString('en-US'));
   function hisBody(p) {
