@@ -56,8 +56,9 @@ aside{background:var(--surface);border-right:1px solid var(--line);display:flex;
 .feature[aria-current="true"]{background:var(--tint)}
 .feature[aria-current="true"] .f-title{color:var(--primary-dark)}
 :root[data-theme="dark"] .feature[aria-current="true"] .f-title{color:var(--primary)}
-.f-dot{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
-.feature[aria-current="true"] .f-dot{background:var(--primary)}
+.f-num{min-width:26px;height:26px;padding:0 6px;border-radius:8px;display:inline-grid;place-items:center;flex:none;font-size:13px;font-weight:700;color:var(--body);background:var(--surface-2);border:1px solid var(--line)}
+.feature[aria-current="true"] .f-num{background:var(--primary);border-color:var(--primary);color:#fff}
+.heading .h-num{color:var(--primary)}
 .f-text{flex:1;min-width:0}
 .f-title{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .f-id{display:block;font-size:11.5px;color:var(--hint);font-family:ui-monospace,Menlo,monospace}
@@ -380,12 +381,15 @@ function writeHash() {
 /* ---------- Sidebar ---------- */
 function renderSidebar() {
   const q = $('q').value.trim().toLowerCase();
-  const list = features.filter((f) => !q || f.title.toLowerCase().includes(q) || f.id.includes(q));
+  // Search also matches the feature number, in Bangla or English digits.
+  const qNum = q.replace(/[০-৯]/g, (d) => String(BN.indexOf(d)));
+  const list = features.filter((f) => !q || f.title.toLowerCase().includes(q) || f.id.includes(q)
+    || String(f.number) === qNum);
   $('side-label').textContent = `ফিচার · ${bn(features.length)}টি`;
   $('features').innerHTML = list.map((f) => {
     const ready = f.demos.filter((d) => !d.empty).length;
     return `<li><button class="feature" data-id="${esc(f.id)}" aria-current="${f.id === state.feature}">
-      <span class="f-dot"></span>
+      <span class="f-num" title="ফিচার নম্বর">${bn(f.number)}</span>
       <span class="f-text"><span class="f-title">${esc(f.title)}</span><span class="f-id">${esc(f.id)}/</span></span>
       ${favsOf(f).length ? `<span class="f-fav" title="ফেভারিট">★${bn(favsOf(f).length)}</span>` : ''}
       <span class="f-count" title="ডেমো">${bn(ready)}/${bn(f.demos.length)}</span>
@@ -636,12 +640,16 @@ function renderFavs() {
 }
 
 /* ---------- Page ---------- */
+function setTitle(f) {
+  $('title').innerHTML = `<span class="h-num">${bn(f.number)}.</span> ${esc(f.title)}`;
+}
+
 function renderAll() {
   const f = current();
   if (!f) { $('title').textContent = 'কোনো ফিচার নেই'; return; }
-  $('title').textContent = f.title;
+  setTitle(f);
   $('path').textContent = `feat_list/${f.id}/${f.mdFile || ''}`;
-  document.title = `${f.title} · ফিচার ভিউয়ার`;
+  document.title = `${bn(f.number)}. ${f.title} · ফিচার ভিউয়ার`;
   renderSidebar();
   renderDoc();
   renderPreview();
@@ -762,7 +770,7 @@ async function poll() {
     const f = current();
     if (!f) { state.feature = features[0]?.id ?? null; renderAll(); return; }
     if (prevIds !== nextIds) { renderAll(); return; }
-    if (f.mdMtime !== mtimes.md) { renderDoc(); $('title').textContent = f.title; renderSidebar(); }
+    if (f.mdMtime !== mtimes.md) { renderDoc(); setTitle(f); renderSidebar(); }
     if (favChanged) { renderSides(); renderFavs(); renderSidebar(); }
     if (f.demos[state.demo] && f.demos[state.demo].mtime !== mtimes.a) mountPane('a', state.demo, currentScreen('a')?.id);
     if (state.compare && f.demos[state.demoB] && f.demos[state.demoB].mtime !== mtimes.b) mountPane('b', state.demoB, currentScreen('b')?.id);
