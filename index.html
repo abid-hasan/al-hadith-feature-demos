@@ -90,6 +90,9 @@ main{display:flex;min-width:0;min-height:0}
 .doc-wrap{max-width:820px;width:100%;margin:0 auto;padding:26px 26px 60px}
 .doc-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
 .chip{font-size:12.5px;border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:2px 10px;color:var(--body)}
+.chip.num{background:var(--tint);color:var(--primary-dark);border-color:transparent;font-weight:700}
+:root[data-theme="dark"] .chip.num{color:var(--primary)}
+.doc h1 .h-num{color:var(--primary)}
 .chip.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
 .doc{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px 32px;box-shadow:var(--shadow);color:var(--body)}
 .doc h1{font-size:26px;color:var(--text);margin:0 0 10px}
@@ -384,12 +387,12 @@ function renderSidebar() {
   // Search also matches the feature number, in Bangla or English digits.
   const qNum = q.replace(/[০-৯]/g, (d) => String(BN.indexOf(d)));
   const list = features.filter((f) => !q || f.title.toLowerCase().includes(q) || f.id.includes(q)
-    || String(f.number) === qNum);
+    || String(f.number) === qNum || (f.improvements || []).some((n) => String(n) === qNum));
   $('side-label').textContent = `ফিচার · ${bn(features.length)}টি`;
   $('features').innerHTML = list.map((f) => {
     const ready = f.demos.filter((d) => !d.empty).length;
     return `<li><button class="feature" data-id="${esc(f.id)}" aria-current="${f.id === state.feature}">
-      <span class="f-num" title="ফিচার নম্বর">${bn(f.number)}</span>
+      <span class="f-num" title="শিটের ফিচার নম্বর">${numLabel(f)}</span>
       <span class="f-text"><span class="f-title">${esc(f.title)}</span><span class="f-id">${esc(f.id)}/</span></span>
       ${favsOf(f).length ? `<span class="f-fav" title="ফেভারিট">★${bn(favsOf(f).length)}</span>` : ''}
       <span class="f-count" title="ডেমো">${bn(ready)}/${bn(f.demos.length)}</span>
@@ -410,10 +413,18 @@ function renderDoc() {
     const sections = (f.markdown.match(/^##\s/gm) || []).length;
     meta.push(`<span class="chip${sections === 3 ? '' : ' warn'}" title="লক্ষ্য: ৩টি সেকশন">${bn(sections)}টি সেকশন</span>`);
   }
-  $('doc-meta').innerHTML = meta.join('');
+  const sheet = [];
+  if (f.number != null) sheet.push(`<span class="chip num" title="শিটের ফিচার নম্বর">ফিচার নম্বর ${bn(f.number)}</span>`);
+  if ((f.improvements || []).length) {
+    sheet.push(`<span class="chip" title="ফেজ ২-এর শিটে এই ফিচারের উন্নয়নের সারি">ফেজ ২-এ উন্নয়ন: ${f.improvements.map((n) => `#${bn(n)}`).join(', ')}</span>`);
+  }
+  $('doc-meta').innerHTML = sheet.concat(meta).join('');
   $('doc').innerHTML = f.markdown
     ? renderMarkdown(f.markdown)
     : `<div class="blank"><div><b>রিকোয়ারমেন্ট ফাইল নেই</b><code>feat_list/${esc(f.id)}/${esc(f.id)}.md</code> তৈরি করুন।</div></div>`;
+  // Number in front of the document's title too, as in the sheet.
+  const h1 = $('doc').querySelector('h1');
+  if (h1 && f.number != null) h1.insertAdjacentHTML('afterbegin', `<span class="h-num">${bn(f.number)}.</span> `);
 }
 
 /* ---------- UI preview ----------
@@ -640,8 +651,11 @@ function renderFavs() {
 }
 
 /* ---------- Page ---------- */
+const numLabel = (f) => (f.number == null ? '–' : bn(f.number));
+
 function setTitle(f) {
-  $('title').innerHTML = `<span class="h-num">${bn(f.number)}.</span> ${esc(f.title)}`;
+  $('title').innerHTML = f.number == null ? esc(f.title)
+    : `<span class="h-num">${bn(f.number)}.</span> ${esc(f.title)}`;
 }
 
 function renderAll() {
@@ -649,7 +663,7 @@ function renderAll() {
   if (!f) { $('title').textContent = 'কোনো ফিচার নেই'; return; }
   setTitle(f);
   $('path').textContent = `feat_list/${f.id}/${f.mdFile || ''}`;
-  document.title = `${bn(f.number)}. ${f.title} · ফিচার ভিউয়ার`;
+  document.title = `${f.number == null ? '' : `${bn(f.number)}. `}${f.title} · ফিচার ভিউয়ার`;
   renderSidebar();
   renderDoc();
   renderPreview();
