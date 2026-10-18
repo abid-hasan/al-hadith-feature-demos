@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>রাবির নাম দিয়ে সার্চ — ডেমো ২ · ট্যাব আর চিপ</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): rounded body, hadith page, tappable narrator, intro sheet ===== */
+.icon-btn svg,.btn svg{flex:none}
+.screen.g{background:var(--appbar)}
+.rb{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+.nar{font-weight:700;color:var(--primary);text-decoration:underline dotted;text-underline-offset:4px;text-decoration-thickness:1.5px}
+.ns-s{display:block;font-size:12.5px;font-weight:400;color:var(--hint)}
+.ns-p{margin:0;font-size:15px;line-height:1.75;color:var(--title)}
+.fld{display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 12px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--hint)}
+.fld input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.fld input::placeholder{color:var(--hint)}
+.fld .icon-btn{width:34px;height:34px}
+/* ===== Demo 2: a "হাদিস | রাবি" switch at the top of search, names and books as chips ===== */
+.sw{display:flex;margin:12px 14px 0;padding:4px;border-radius:12px;background:var(--surface-2);border:1px solid var(--divider)}
+.sw button{flex:1;height:38px;border-radius:9px;font-size:15px;color:var(--body)}
+.sw button[aria-pressed="true"]{background:var(--card);color:var(--primary);font-weight:700;box-shadow:var(--shadow)}
+.pad{padding:12px 14px 0}
+.note{margin:14px 16px 6px;font-size:13.5px;color:var(--hint)}
+.ctx{margin:14px 16px 0;font-size:14px;color:var(--hint);line-height:1.7}
+.wrapc{display:flex;flex-wrap:wrap;gap:8px;padding:4px 14px}
+.nc{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 6px 0 14px;border-radius:20px;background:var(--card);border:1px solid var(--divider);font-size:14.5px;color:var(--title)}
+.nc i{font-style:normal;font-size:12px;padding:1px 8px;border-radius:12px;background:var(--surface-2);color:var(--hint)}
+.nc:hover{border-color:var(--primary)}
+/* ===== Result: header + book chips + content ===== */
+.ph{display:flex;align-items:center;gap:12px;padding:16px 16px 10px}
+.av{width:52px;height:52px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:22px;font-weight:700;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .av{color:var(--primary)}
+.ph b{display:block;font-size:18px;color:var(--title)}
+.ph small{font-size:13.5px;color:var(--hint)}
+.ip{margin:0 16px 10px;font-size:14.5px;line-height:1.7;color:var(--body)}
+.ip button{color:var(--primary);font-weight:700}
+.bchips{flex:none;display:flex;gap:8px;overflow-x:auto;padding:8px 14px 10px;border-bottom:1px solid var(--divider);scrollbar-width:none}
+.bchips::-webkit-scrollbar{display:none}
+.bchips .chip b{font-weight:700;margin-left:2px}
+.bchips .chip[tabindex="-1"]{cursor:default}
+.sumr{display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--divider);font-size:15px;color:var(--title);width:100%;text-align:left}
+.sumr[tabindex="-1"]{cursor:default}
+.sumr b{color:var(--primary-dark)}
+:root[data-theme="dark"] .sumr b{color:var(--primary)}
+.hl{display:block;width:calc(100% - 24px);text-align:left;margin-top:10px}
+.hl .translation{color:var(--title);font-size:16px;line-height:1.75}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="search" data-status="light"></section>
+      <section class="screen" data-screen="pick" data-status="light"></section>
+      <section class="screen" data-screen="result" data-status="light"></section>
+      <section class="screen" data-screen="book" data-status="light"></section>
+      <section class="screen g" data-screen="hadith"></section>
+      <section class="screen g" data-screen="namesheet"></section>
+      <div class="sheet" id="ns" role="dialog" aria-label="ছোট পরিচিতি"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="rabi_core.js"></script>
+<script>
+/* ======================================================================
+   DEMO 2 — ট্যাব আর চিপ: search gets a "হাদিস | রাবি" switch on top;
+   in রাবি mode the names are chips with counts. On the result the books
+   are a chip row: "সব" lists every book, a book chip shows its hadiths.
+   ====================================================================== */
+(function () {
+  const { bn, icons } = Kit;
+  const { S, cur, book, bookKeys, total, fmt, initial, H } = RabiDemo;
+  const flat = (t, sub, act) => `<header class="appbar flat"><button class="icon-btn" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="পেছনে">${icons.back}</button><h1>${t}${sub ? `<small>${sub}</small>` : ''}</h1></header>`;
+  const sw = (r) => `<div class="sw"><button data-act="tabh" aria-pressed="${!r}">হাদিস</button><button data-act="rabi" aria-pressed="${r}">রাবি</button></div>`;
+
+  function resultPage(sel) {
+    const n = cur();
+    return `${flat(n.name, 'রাবির হাদিস', sel ? 'bback' : 'rback')}
+      <div class="ph"><span class="av">${initial(n)}</span><div><b>${n.name}</b><small>মোট ${fmt(total(n))}টি হাদিস · ${bn(n.books.length)}টি বই</small></div></div>
+      ${n.intro && !sel ? `<p class="ip">${n.intro}${S.more && n.more ? ` ${n.more}` : ''} ${n.more ? `<button data-act="more">${S.more ? 'কম দেখুন' : 'আরো পড়ুন'}</button>` : ''}</p>` : ''}
+      <div class="bchips"><button class="chip" data-act="bback" aria-pressed="${!sel}">সব</button>${n.books.map((b, i) => `<button class="chip" ${b[3] ? `data-act="bk" data-b="${i}"` : 'tabindex="-1"'} aria-pressed="${sel && S.bk === i}">${b[0]} <b>${fmt(b[2])}</b></button>`).join('')}</div>
+      <div class="scroll">${sel
+        ? bookKeys().map((k) => `<button class="card hl" data-act="hd" data-k="${k}"><div class="hadith-head"><span class="book-badge">${H[k].ab}</span><div class="hadith-meta"><b>${H[k].book}</b><span>হাদিস: ${bn(H[k].no)} · ${H[k].kitab}</span></div><span class="grade">সহিহ হাদিস</span></div><p class="translation">${H[k].tr}</p></button>`).join('')
+        : n.books.map((b, i) => `<button class="sumr" ${b[3] ? `data-act="bk" data-b="${i}"` : 'tabindex="-1"'}><span>${b[0]}</span><b>${fmt(b[2])}টি</b></button>`).join('')}</div>`;
+  }
+
+  const D = {
+    search: () => `${flat('সার্চ')}${sw(false)}<div class="scroll"><div class="pad"><div class="fld">${icons.search}<input placeholder="হাদিস সার্চ করুন" aria-label="হাদিস সার্চ করুন"></div></div>
+      <p class="ctx">হাদিসের কথা দিয়ে খুঁজতে এখানে লিখুন। কোনো সাহাবির বর্ণিত হাদিস খুঁজতে ওপরে "রাবি" বাছুন।</p></div>`,
+    pick: () => `${flat('সার্চ')}${sw(true)}<div class="pad"><label class="fld">${icons.search}<input data-q value="${S.q}" placeholder="রাবির নাম লিখুন" aria-label="রাবির নাম লিখুন"><button class="icon-btn" data-act="clr" aria-label="মুছুন" ${S.q ? '' : 'hidden'}>${icons.close}</button></label></div>
+      <div class="scroll" data-res></div>`,
+    results: (arr) => (arr.length
+      ? `<p class="note">${S.q ? 'মিল থাকা রাবি' : 'সব রাবি'}</p><div class="wrapc">${arr.map((n) => `<button class="nc" data-act="n" data-n="${n.id}">${n.name}<i>${fmt(total(n))}</i></button>`).join('')}</div>`
+      : `<div class="empty">${icons.search}<h3>কিছু পাওয়া যায়নি</h3><p>এই নামে কোনো রাবি নেই। অন্য বানানে লিখে দেখুন।</p></div>`),
+    result: () => resultPage(false),
+    book: () => resultPage(true),
+    act: { tabh: (el, { go }) => go('search') },
+  };
+  RabiDemo.start(D, { demo: 2, name: 'ট্যাব আর চিপ' });
+})();
+</script>
+</body>
+</html>

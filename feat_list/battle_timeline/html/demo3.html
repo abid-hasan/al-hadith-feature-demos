@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>যুদ্ধের টাইমলাইন ও হাদিস — ডেমো ৩ · বড় কার্ড</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared page body ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.appbar.np h1{margin-left:12px}
+
+/* ===== List: big colourful cards, joined by a short connector ===== */
+.big{display:flex;width:calc(100% - 24px);margin:0 12px;border-radius:18px;overflow:hidden;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.big .yr{flex:none;width:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 0;background:var(--primary);color:#fff;line-height:1.1}
+.big .yr b{font-size:30px}
+.big .yr small{font-size:12.5px;opacity:.9}
+.big .t{flex:1;min-width:0;padding:14px 14px 12px}
+.big .t b{display:block;font-size:18px;color:var(--title)}
+.big .t .pl{display:inline-flex;align-items:center;gap:4px;margin-top:6px;height:26px;padding:0 10px;border-radius:20px;background:var(--tint);font-size:12.5px;color:var(--primary-dark)}
+:root[data-theme="dark"] .big .t .pl{color:var(--primary)}
+.big .t .pl svg{width:13px;height:13px}
+.big .t em{display:block;margin-top:8px;font-style:normal;font-size:13px;color:var(--body)}
+.big .t em b{display:inline;font-size:13px;color:var(--title)}
+.link{width:2px;height:16px;margin-left:57px;background:var(--primary);opacity:.4}
+
+/* ===== Battle page: hero, then one collapsible section per book ===== */
+.hero{flex:none;display:flex;align-items:center;gap:16px;padding:6px 20px 20px;background:var(--appbar);color:var(--on-appbar)}
+.hero .yb{flex:none;width:72px;height:72px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.16);line-height:1.1}
+.hero .yb b{font-size:24px}
+.hero .yb small{font-size:11.5px}
+.hero h2{margin:0;font-size:22px}
+.hero p{display:flex;align-items:center;gap:5px;margin:4px 0 0;font-size:14px;opacity:.92}
+.hero p svg{width:15px;height:15px}
+.acc{margin:0 12px 12px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+.acc-h{display:flex;align-items:center;gap:10px;width:100%;padding:14px;text-align:left}
+.acc-h .book-badge{width:34px;height:34px;font-size:10px}
+.acc-h b{flex:1;font-size:16px;color:var(--title)}
+.acc-h span{font-size:13px;color:var(--hint)}
+.acc-h svg{color:var(--hint);transition:transform .2s}
+.acc.open .acc-h>svg{transform:rotate(180deg)}
+.acc-b{display:none;border-top:1px solid var(--divider)}
+.acc.open .acc-b{display:block}
+.hrow{display:block;width:100%;padding:12px 14px;border-bottom:1px solid var(--divider);text-align:left}
+.hrow:last-child{border-bottom:0}
+.hrow .t{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--title)}
+.hrow .t .grade{margin-left:auto;font-size:11.5px}
+.hrow p{margin:4px 0 0;font-size:14px;color:var(--body)}
+.hrow p.n{color:var(--primary)}
+.dlin{padding:16px 14px}
+.dlin p{margin:0 0 12px;font-size:14.5px;line-height:1.6;color:var(--body)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="list"></section>
+      <section class="screen" data-screen="battle"></section>
+      <section class="screen" data-screen="nodl"></section>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="battle_data.js"></script>
+<script>
+  const T = window.BT, S = T.S, I = Kit.icons, bn = Kit.bn, $ = Kit.$;
+  const closed = new Set(); // book sections the user folded
+  const yr = (y) => { const [n, ...u] = y.split(' '); return `<b>${n}</b><small>${u.join(' ')}</small>`; };
+
+  /* ---------- List: big cards ---------- */
+  function listView() {
+    const card = (b) => `<button class="big" data-act="battle" data-id="${b.id}"><span class="yr">${yr(b.year)}</span>
+      <span class="t"><b>${b.name}</b><span class="pl">${T.ICON.pin(13)}${b.place}</span><em><b>${bn(T.total(b))}টি</b> হাদিস · ${bn(Object.keys(b.groups).length)}টি কিতাবে</em></span></button>`;
+    return `<header class="appbar np"><h1>যুদ্ধ ও হাদিস</h1></header><div class="body">${T.BATTLES.map(card).join('<div class="link"></div>')}</div>`;
+  }
+
+  /* ---------- Battle page: hero + book sections that fold ---------- */
+  function battleView() {
+    const b = T.byId(S.id);
+    const sec = (g) => `<div class="acc${closed.has(g.book) ? '' : ' open'}"><button class="acc-h" data-act="fold" data-book="${g.book}"><span class="book-badge">${g.abbr}</span>
+        <b>${g.name}</b><span>${bn(g.nos.length)}টি হাদিস</span>${I.down}</button>
+      <div class="acc-b">${g.dl ? g.nos.map((no) => { const m = T.meta(g.book, no); return `<button class="hrow" data-act="hadith" data-book="${g.book}" data-no="${no}">
+        <span class="t">হাদিস ${bn(no)}<span class="grade">${T.GRADE}</span></span><p class="n">${m.nar} থেকে বর্ণিত</p><p>পরিচ্ছেদ: ${m.sec}</p></button>`; }).join('')
+        : `<div class="dlin" id="dl-msg"><p>${T.dlText}</p><button class="btn" data-act="dl">${T.ICON.download(18)}ডাউনলোড ম্যানেজার</button></div>`}</div></div>`;
+    return `<header class="appbar"><button class="icon-btn" data-act="back" aria-label="পেছনে">${I.back}</button><h1></h1></header>
+      <div class="hero"><span class="yb">${yr(b.year)}</span><div><h2>${b.name}</h2><p>${T.ICON.pin(15)}${b.place}</p></div></div>
+      <div class="body">${T.groups(b).map(sec).join('')}</div>`;
+  }
+
+  /* ---------- Navigation ---------- */
+  let internal = false;
+  const go = (id) => { internal = true; Kit.show(id); internal = false; };
+  const openBattle = () => go(T.byId(S.id).groups.muslim && !S.mDl ? 'nodl' : 'battle');
+  Kit.onScreen((id) => {
+    if (!internal && id !== 'list') { S.id = 'uhud'; S.mDl = id === 'battle'; closed.clear(); if (id === 'nodl') closed.add('bukhari'); T.syncBar(); }
+    $(`.screen[data-screen="${id}"]`).innerHTML = id === 'list' ? listView() : battleView();
+  });
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-act]');
+    if (!t || !t.closest('.phone')) return;
+    const a = t.dataset.act;
+    if (a === 'battle') { S.id = t.dataset.id; closed.clear(); openBattle(); }
+    else if (a === 'back') go('list');
+    else if (a === 'fold') { const k = t.dataset.book; closed.has(k) ? closed.delete(k) : closed.add(k); t.parentElement.classList.toggle('open'); }
+    else if (a === 'hadith') T.openHadith(t.dataset.book, +t.dataset.no);
+    else if (a === 'dl') T.dlManager();
+  });
+
+  Kit.init({ demo: 3, name: 'বড় কার্ড', extra: T.extra, screens: T.SCREENS });
+  /* Toolbar: সহীহ মুসলিম downloaded or not */
+  $('#tg-dl').onclick = () => { S.mDl = !S.mDl; T.syncBar(); if (Kit.current === 'list') go('list'); else openBattle(); };
+  T.syncBar();
+</script>
+</body>
+</html>

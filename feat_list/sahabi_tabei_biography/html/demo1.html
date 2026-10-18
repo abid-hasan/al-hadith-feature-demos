@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সাহাবি আর তাবেঈদের জীবনী — ডেমো ১ · অ্যাপের ধরন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): rounded body, hadith cards, tappable narrator ===== */
+.icon-btn svg,.btn svg{flex:none}
+.screen.g{background:var(--appbar)}
+.rb{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+/* the narrator's name becomes a button only when a biography exists */
+.nar{font-weight:700;color:var(--primary);text-decoration:underline dotted;text-underline-offset:4px;text-decoration-thickness:1.5px}
+.fld{display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 12px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--hint)}
+.fld input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.fld input::placeholder{color:var(--hint)}
+.fld .icon-btn{width:34px;height:34px}
+/* "তাঁর বর্ণিত হাদিস" (#৬০-এর পেজ, shared body): total, books with counts, hadith cards */
+.hs-top{margin:14px 14px 10px;padding:14px 16px;border-radius:10px;background:var(--card);box-shadow:var(--shadow)}
+.hs-top b{display:block;font-size:16px;color:var(--title)}
+.hs-top span{font-size:13.5px;color:var(--hint)}
+.hs-b{margin:0 14px 10px;border-radius:10px;background:var(--card);overflow:hidden;box-shadow:var(--shadow)}
+.hs-r{display:flex;align-items:center;gap:10px;width:100%;padding:14px 12px 14px 16px;text-align:left;font-size:15.5px;color:var(--title)}
+.hs-r[tabindex="-1"]{cursor:default}
+.hs-r span{flex:1}
+.hs-r b{font-size:14px;color:var(--primary-dark)}
+:root[data-theme="dark"] .hs-r b{color:var(--primary)}
+.hs-r svg{color:var(--hint);transition:transform .2s}
+.hs-b.on .hs-r svg{transform:rotate(180deg)}
+.hs-c{padding:12px 16px 14px;border-top:1px solid var(--divider)}
+.hs-c .translation{color:var(--title);line-height:1.7}
+/* ===== Demo 1: জীবনী = AboutWritersPage look (fancy app bar, rounded body, ListItemCard) ===== */
+.seg{display:flex;height:48px;margin:14px 14px 10px;padding:3px 4px;border:1.5px solid var(--primary);border-radius:10px;background:var(--card)}
+.seg span{flex:1;display:grid;place-items:center;border-radius:7px;font-size:14.5px;font-weight:700;color:var(--body)}
+.seg span.on{background:var(--primary);color:var(--on-appbar)}
+.srch{padding:0 14px}
+.chip-row{padding:10px 14px 4px}
+.cnt{margin:6px 16px 8px;font-size:13px;color:var(--hint)}
+.pc{display:flex;align-items:center;gap:14px;width:calc(100% - 28px);margin:0 14px 10px;padding:12px 10px 12px 14px;border-radius:10px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.pc .book-badge{width:42px;height:42px;font-size:17px}
+.pc .book-badge.tb{background:var(--primary-dark)}
+.pc div{flex:1;min-width:0}
+.pc b{display:block;font-size:15.5px;color:var(--title)}
+.pc small{display:block;font-size:13px;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc>svg{color:var(--hint);flex:none}
+/* ===== Biography page (InfoPage look, plus intro, sections, source) ===== */
+.bh{display:flex;gap:14px;align-items:center}
+.bh .book-badge{width:52px;height:52px;font-size:21px}
+.bh .book-badge.tb{background:var(--primary-dark)}
+.bh h2{margin:0;font-size:19px;color:var(--title)}
+.tag{display:inline-block;margin-top:2px;padding:0 10px;border-radius:20px;font-size:12px;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .tag{color:var(--primary)}
+.full{margin:12px 0 0;font-size:13.5px;color:var(--hint)}
+.intro{margin:12px 0 0;padding:12px 14px;border-radius:10px;background:var(--surface-2);font-size:15px;color:var(--title);line-height:1.7}
+.intro small{display:block;font-size:12.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .intro small{color:var(--primary)}
+.dst{margin:0 0 6px;font-size:15.5px;font-weight:600;color:var(--primary)}
+.bs h4{margin:12px 0 2px;font-size:15px;color:var(--title)}
+.bs p{margin:0;font-size:15px;line-height:1.75;color:var(--body)}
+.srcl{margin:14px 0 0;padding-top:10px;border-top:1px solid var(--divider);font-size:13px;color:var(--hint)}
+.foot{flex:none;padding:10px 14px 14px;background:var(--scaffold);border-top:1px solid var(--divider)}
+/* ===== Narrator sheet ===== */
+.pv-t{flex:1;min-width:0}
+.pv-t h2{margin:0;font-size:17px;color:var(--title)}
+.pv-t small{font-size:12.5px;color:var(--hint)}
+.pv-in{margin:4px 0 0;font-size:15px;line-height:1.7;color:var(--title)}
+.sheet-foot .btn{flex:1}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos); the engine renders each one ===== -->
+      <section class="screen g" data-screen="list"></section>
+      <section class="screen g" data-screen="search"></section>
+      <section class="screen g" data-screen="bio"></section>
+      <section class="screen g" data-screen="card"></section>
+      <section class="screen g" data-screen="sheet"></section>
+      <section class="screen g" data-screen="hadiths"></section>
+      <!-- ===== Sheet: ছোট পরিচিতি (filled by D.sheet) ===== -->
+      <div class="sheet" id="pv" role="dialog" aria-label="ছোট পরিচিতি"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="bio_core.js"></script>
+<script>
+/* ======================================================================
+   DEMO 1 — অ্যাপের ধরন: tab "সাহাবি ও তাবেঈ" inside জীবনী, search field
+   and filter chips like the search page, names as ListItemCard, the
+   biography like InfoPage, and the app's Material bottom sheet.
+   ====================================================================== */
+(function () {
+  const { bn, icons } = Kit;
+  const { P, S, TYPE, src, initial, hisBody } = BioDemo;
+  const bar = (t, sub, act) => `<header class="appbar"><button class="icon-btn" data-act="${act}" aria-label="পেছনে">${icons.back}</button><h1>${t}${sub ? `<small>${sub}</small>` : ''}</h1></header>`;
+  const badge = (p) => `<span class="book-badge${p.t === 'tabei' ? ' tb' : ''}">${initial(p)}</span>`;
+  const F = [['all', 'সব'], ['sahabi', 'সাহাবি'], ['tabei', 'তাবেঈ']];
+
+  const D = {
+    list: () => `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" tabindex="-1">${icons.back}</button><h1>জীবনী</h1></header>
+      <div class="rb"><div class="scroll">
+        <div class="seg"><span>সীরাত</span><span class="on">সাহাবি ও তাবেঈ</span></div>
+        <div class="srch"><label class="fld">${icons.search}<input data-q value="${S.q}" placeholder="নাম লিখে খুঁজুন" aria-label="নাম লিখে খুঁজুন"><button class="icon-btn" data-act="clr" aria-label="মুছুন" ${S.q ? '' : 'hidden'}>${icons.close}</button></label></div>
+        <div class="chip-row">${F.map(([f, t]) => `<button class="chip" data-act="f" data-f="${f}" aria-pressed="${S.f === f}">${t}</button>`).join('')}</div>
+        <div data-res></div></div></div>`,
+    results: (arr) => (arr.length
+      ? `<p class="cnt">${bn(arr.length)} জন</p>${arr.map((p) => `<button class="pc" data-act="person" data-p="${p.id}">${badge(p)}<div><b>${p.name}</b><small>${p.line}</small></div>${icons.chevron}</button>`).join('')}`
+      : `<div class="empty">${icons.search}<h3>নাম পাওয়া যায়নি</h3><p>অন্য বানানে বা নামের অংশ লিখে দেখুন</p></div>`),
+    bio: (p) => `${bar(p.name, TYPE[p.t], 'bback')}<div class="rb"><div class="scroll" style="padding-top:14px">
+        <section class="card"><div class="bh">${badge(p)}<div><h2>${p.name}</h2><span class="tag">${TYPE[p.t]}</span></div></div>
+          <p class="full">পুরো নাম: ${p.full}</p>
+          <div class="intro"><small>ছোট পরিচিতি</small>${p.intro}</div></section>
+        <section class="card bs"><h3 class="dst">বিস্তারিত জীবনী</h3>${p.bio.map(([h, t]) => `<h4>${h}</h4><p>${t}</p>`).join('')}
+          <p class="srcl">উৎস: ${src(p)}</p></section></div>
+        <div class="foot"><button class="btn block" data-act="his">${icons.book}তাঁর বর্ণিত হাদিস</button></div></div>`,
+    sheet: (p) => `<div class="sheet-head">${badge(p)}<div class="pv-t"><h2>${p.name}</h2><small>${TYPE[p.t]}</small></div><button class="icon-btn" data-close aria-label="বন্ধ করুন">${icons.close}</button></div>
+      <div class="sheet-body"><p class="pv-in">${p.intro}</p></div>
+      <div class="sheet-foot"><button class="btn outline" data-act="more">আরো পড়ুন</button><button class="btn" data-act="his">তাঁর বর্ণিত হাদিস</button></div>`,
+    hadiths: (p) => `${bar('তাঁর বর্ণিত হাদিস', p.name, 'hback')}<div class="rb"><div class="scroll">${hisBody(p)}</div></div>`,
+  };
+  BioDemo.start(D, { demo: 1, name: 'অ্যাপের ধরন' });
+})();
+</script>
+</body>
+</html>

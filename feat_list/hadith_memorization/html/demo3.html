@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>হাদিস মুখস্থ কোর্স — ডেমো ৩ · উল্টানো কার্ড</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): page body, home quick actions, hadith card ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.btn:disabled,.icon-btn:disabled{opacity:.4;cursor:default}
+.foot{flex:none;display:flex;gap:10px;padding:10px 12px 16px;background:var(--card);border-top:1px solid var(--divider)}
+.foot .btn{flex:1}
+/* ===== Home (HadithBookListTab): green band + quick-action card (HomeSmallDashboard) ===== */
+.home .body{position:relative;padding-top:0}
+.hband{position:absolute;left:0;right:0;top:0;height:90px;background:linear-gradient(var(--appbar),var(--primary-dark))}
+:root[data-theme="dark"] .hband{background:var(--appbar)}
+.appbar.home-bar h1{text-align:center}
+.dash{position:relative;background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin:12px;padding:10px 0 6px}
+.qa{display:grid;grid-template-columns:repeat(4,1fr);row-gap:4px}
+.qa>span,.qa>button{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px;font-size:13px;font-weight:700;line-height:1.25;color:var(--body);text-align:center;border-radius:10px}
+.qi{width:36px;height:36px;border-radius:50%;background:var(--tint);color:var(--primary);display:grid;place-items:center}
+.qi svg{width:18px;height:18px}
+.qa .dot{position:absolute;top:8px;left:calc(50% + 10px);width:8px;height:8px;border-radius:50%;background:var(--error)}
+.qa>button.feat .qi{background:var(--primary);color:var(--on-appbar)}
+/* ===== Hadith card pieces (HadithListItem: head, narrator in primary, translation) ===== */
+.hc{padding:12px 14px 14px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:12px 0 6px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+.ref{margin:8px 0 0;font-size:13px;color:var(--hint)}
+/* ===== Hidden words for the self test: base look, each demo restyles ===== */
+.mask{display:inline;padding:0 2px;border-radius:6px;font:inherit;color:inherit;line-height:inherit}
+.mask:not(.open){color:transparent;background:var(--tint);box-shadow:inset 0 0 0 1px var(--primary)}
+/* ===== Answer colours: primary = right, error = wrong (as the hadith quiz does) ===== */
+.ok{--v:var(--primary)}
+.bad{--v:var(--error)}
+/* ===== Audio button: playing state ===== */
+.wave{display:inline-flex;align-items:flex-end;gap:2px;height:14px}
+.wave i{width:3px;border-radius:2px;background:currentColor;animation:wv .9s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.15s}.wave i:nth-child(3){animation-delay:.3s}
+@keyframes wv{0%,100%{height:4px}50%{height:14px}}
+
+/* ===== Demo 3 — উল্টানো কার্ড: courses in a sideways carousel, lessons as a
+   number grid, each hadith a card that flips over for the self test ===== */
+.bar-sub{font-size:12px}
+/* Course carousel */
+.car{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 16px 14px;scrollbar-width:none}
+.car::-webkit-scrollbar{display:none}
+.cv{flex:none;width:82%;scroll-snap-align:center;border-radius:20px;background:var(--card);box-shadow:var(--shadow);overflow:hidden;text-align:left;display:flex;flex-direction:column}
+.cv .top{padding:20px 18px;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .cv .top{color:var(--primary)}
+.cv .top b{display:block;font-size:46px;line-height:1}
+.cv .top span{font-size:14px;font-weight:700}
+.cv .bd{padding:14px 18px 18px;display:flex;flex-direction:column;gap:8px}
+.cv h3{margin:0;font-size:18px;color:var(--title)}
+.cv p{margin:0;font-size:13.5px;color:var(--body)}
+.cv .m{display:flex;justify-content:space-between;font-size:12.5px;color:var(--hint)}
+.cv .btn{margin-top:4px}
+.swipe{margin:0 16px;font-size:12.5px;color:var(--hint);text-align:center}
+/* Course: stats + number grid */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 12px 6px}
+.stats div{padding:12px 8px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);text-align:center}
+.stats b{display:block;font-size:20px;color:var(--title)}
+.stats span{font-size:12px;color:var(--hint)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 12px}
+.gt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;aspect-ratio:1;padding:4px;border-radius:14px;background:var(--card);border:1.5px solid var(--divider);color:var(--title)}
+.gt b{font-size:20px;line-height:1.1}
+.gt small{font-size:10.5px;line-height:1.25;color:var(--hint);text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gt svg{width:14px;height:14px}
+.gt.done{background:var(--primary);border-color:var(--primary);color:var(--on-appbar)}
+.gt.done small{color:var(--on-appbar);opacity:.85}
+.gt.next,.gt.again{border-color:var(--primary);background:var(--tint)}
+.gt.locked{opacity:.5}
+.gt.locked b{font-size:16px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin:10px 16px 0;font-size:12px;color:var(--hint)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;border:1.5px solid var(--divider);background:var(--card)}
+.legend i.d{background:var(--primary);border-color:var(--primary)}
+.legend i.n{background:var(--tint);border-color:var(--primary)}
+.wide{display:flex;align-items:center;gap:12px;width:calc(100% - 24px);margin:10px 12px 0;padding:14px;border-radius:16px;background:var(--card);border:1.5px solid var(--divider);text-align:left}
+.wide .wi{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;background:var(--surface-2);color:var(--hint)}
+.wide.on{border-color:var(--primary)}
+.wide.on .wi{background:var(--primary);color:var(--on-appbar)}
+.wide div{flex:1}
+.wide b{display:block;font-size:15.5px;color:var(--title)}
+.wide span{font-size:12.5px;color:var(--hint)}
+/* Lesson: hadith cards side by side */
+.lsn{margin:2px 16px 10px}
+.lsn small{font-size:13px;color:var(--hint)}
+.lsn h2{margin:0;font-size:20px;color:var(--title)}
+.cards{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 16px 12px;scrollbar-width:none}
+.cards::-webkit-scrollbar{display:none}
+.fc{flex:none;width:100%;scroll-snap-align:center;padding:18px 16px;border-radius:20px;background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column}
+.cards.two .fc{width:88%}
+.fc .no{font-size:12.5px;color:var(--hint)}
+.fc .narrator{color:var(--primary);font-size:14.5px;margin:8px 0 6px}
+.fc .translation{font-size:18px;line-height:1.8;color:var(--title);margin:0}
+.fc .ref{margin-top:12px}
+.fc .acts{display:flex;gap:8px;margin-top:14px}
+.btn.playing{background:var(--primary);color:var(--on-appbar)}
+.flipbtn{margin:0 16px}
+/* Self test: the back of the card */
+.fc.back{background:var(--surface-2);border:2px solid var(--primary);animation:flip .45s ease-out}
+@keyframes flip{from{transform:perspective(900px) rotateY(-90deg);opacity:.4}}
+.fc.back .mask:not(.open){background:var(--primary);box-shadow:none;border-radius:6px}
+.fc.back .mask.open{background:var(--card);border-radius:6px;color:var(--primary-dark)}
+:root[data-theme="dark"] .fc.back .mask.open{color:var(--primary)}
+.decide{flex:none;display:flex;justify-content:space-around;padding:12px 24px 18px;background:var(--card);border-top:1px solid var(--divider)}
+.decide button{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--title)}
+.decide i{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--divider);color:var(--body)}
+.decide i svg{width:26px;height:26px}
+.decide .yes i{background:var(--primary);border-color:var(--primary);color:var(--on-appbar)}
+.decide .all i{width:62px;border-style:dashed}
+/* Quiz: question card, chip answers */
+.qc{margin:6px 16px 0;padding:20px 16px;border-radius:20px;background:var(--card);box-shadow:var(--shadow)}
+.qc small{font-size:12.5px;color:var(--hint)}
+.qc p{margin:6px 0 16px;font-size:17.5px;font-weight:600;line-height:1.65;color:var(--title)}
+.qch{display:flex;flex-wrap:wrap;gap:8px}
+.qch button{height:44px;padding:0 18px;border-radius:22px;border:1.5px solid var(--divider);font-size:15.5px;color:var(--title);background:var(--card)}
+.qch button.ok,.qch button.bad{border-color:var(--v);background:var(--v);color:var(--on-appbar)}
+.qn{margin:12px 16px 0;font-size:14px;color:var(--body)}
+.qn b{color:var(--primary)}
+.qdots{display:flex;justify-content:center;gap:6px;margin:4px 0 12px}
+.qdots i{width:28px;height:6px;border-radius:4px;background:var(--divider)}
+.qdots i.ok,.qdots i.bad{background:var(--v)}
+.qdots i.cur{background:var(--primary)}
+/* Certificate: landscape card with a side ribbon */
+.c3{display:flex;margin:10px 16px 0;border-radius:18px;background:var(--card);box-shadow:var(--shadow);overflow:hidden;transform:rotate(-1.2deg)}
+.c3 .rb{width:58px;flex:none;display:flex;flex-direction:column;align-items:center;padding-top:20px;background:var(--primary);color:var(--on-appbar)}
+.c3 .rb svg{width:30px;height:30px}
+.c3 .tx{flex:1;padding:22px 18px}
+.c3 small{font-size:12.5px;color:var(--hint)}
+.c3 h2{margin:0 0 12px;font-size:21px;color:var(--primary)}
+.c3 .nm{font-size:22px;font-weight:700;color:var(--title)}
+.c3 p{margin:8px 0 14px;font-size:14.5px;line-height:1.7;color:var(--body)}
+.c3 .ft{display:flex;justify-content:space-between;font-size:12.5px;color:var(--hint)}
+
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="home"></section>
+      <section class="screen" data-screen="courses"></section>
+      <section class="screen" data-screen="course"></section>
+      <section class="screen" data-screen="lesson"></section>
+      <section class="screen" data-screen="test"></section>
+      <section class="screen" data-screen="quiz"></section>
+      <section class="screen" data-screen="cert"></section>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, progress state, the flow and
+   screen wiring. Each demo's own look lives in the D object below.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const I = {
+  memo: (w = 18) => svg('<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/><path d="M9 10l2 2 4-4"/>', w),
+  lock: (w = 18) => svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>', w),
+  headset: (w = 18) => svg('<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>', w),
+  eye: (w = 18) => svg('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', w),
+  redo: (w = 18) => svg('<path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/>', w),
+  award: (w = 18) => svg('<circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/>', w),
+  quiz: (w = 18) => svg('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.7M12 17h.01"/>', w),
+  save: (w = 18) => svg('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>', w),
+};
+
+/* ---------- Hadith (safe list only, Bangla only). {…} = hidden in the self test.
+   audio: false means the scholars gave no recording, so no listen button. ---------- */
+const HAD = {
+  b1: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1, nar: 'উমর ইবনুল খাত্তাব (রাঃ) থেকে বর্ণিত:', audio: true,
+    text: 'সকল কাজ {নিয়তের} ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই {পাবে}, যার সে {নিয়ত} করে।' },
+  m223: { book: 'সহীহ মুসলিম', abbr: 'মুসলিম', no: 223, part: true, nar: 'আবু মালিক আল-আশআরি (রাঃ) থেকে বর্ণিত:', audio: true,
+    text: '{পবিত্রতা} ঈমানের {অর্ধেক}।' },
+  b6018: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 6018, part: true, nar: 'আবু হুরায়রা (রাঃ) থেকে বর্ণিত:', audio: false,
+    text: 'যে ব্যক্তি আল্লাহ ও {শেষ দিনের} প্রতি ঈমান রাখে, সে যেন {ভালো কথা} বলে অথবা {চুপ থাকে}।' },
+  b6116: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 6116, nar: 'আবু হুরায়রা (রাঃ) থেকে বর্ণিত:', audio: true,
+    text: 'এক ব্যক্তি নবী (সাঃ)-কে বললেন, আমাকে উপদেশ দিন। তিনি বললেন, {রাগ করো না}। লোকটি কয়েকবার একই কথা বললেন, তিনি প্রতিবারই বললেন, {রাগ করো না}।' },
+  b1894: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1894, part: true, nar: 'আবু হুরায়রা (রাঃ) থেকে বর্ণিত:', audio: false,
+    text: 'রোজা {ঢালস্বরূপ}।' },
+};
+const GRADE = 'সহিহ হাদিস';
+/* ---------- Courses. h = the lesson's hadith; c = count for lessons this demo
+   does not open. Only the first three lessons carry hadith text. ---------- */
+const TOPICS = ['নামাজ', 'জাকাত', 'হজ', 'মা-বাবার হক', 'প্রতিবেশী', 'মেহমানদারি', 'সত্য কথা', 'লজ্জা', 'দয়া', 'হালাল উপার্জন', 'সালাম', 'ভ্রাতৃত্ব', 'ধৈর্য', 'তাওবা', 'দোয়া', 'জিকির', 'মৃত্যুর স্মরণ'];
+const FIRST = [{ t: 'নিয়ত ও পবিত্রতা', h: ['b1', 'm223'] }, { t: 'কথা ও রাগ', h: ['b6018', 'b6116'] }, { t: 'রোজা', h: ['b1894'] }];
+const COURSES = {
+  c40: { name: '৪০ হাদিস', sub: 'প্রতিদিনের আমল ও আচরণ', n: 40, L: [...FIRST, ...TOPICS.map((t, i) => ({ t, c: i === 16 ? 3 : 2 }))] },
+  c10: { name: '১০ হাদিস', sub: 'সহজ শুরু, ছোট ছোট পাঠ', n: 10, L: [...FIRST, { t: 'সালাম', c: 3 }, { t: 'দয়া', c: 2 }] },
+};
+/* ---------- Course quiz (scholars write the real questions) ---------- */
+const QUIZ = [
+  { q: '“সকল কাজ ___ ওপর নির্ভরশীল।” খালি জায়গায় কোনটা বসবে?', o: ['নিয়তের', 'ফলাফলের', 'চেষ্টার'], a: 0 },
+  { q: 'হাদিসে পবিত্রতাকে ঈমানের কত অংশ বলা হয়েছে?', o: ['এক-তৃতীয়াংশ', 'অর্ধেক', 'এক-চতুর্থাংশ'], a: 1 },
+  { q: 'উপদেশ চাওয়া ব্যক্তিকে নবী (সাঃ) বারবার কী বলেছেন?', o: ['বেশি কথা বলো না', 'দেরি করো না', 'রাগ করো না'], a: 2 },
+  { q: 'হাদিসে রোজাকে কিসের সাথে তুলনা করা হয়েছে?', o: ['ঢাল', 'আলো', 'সেতু'], a: 0 },
+];
+const PASS = 3;
+const OPT = ['ক', 'খ', 'গ', 'ঘ'];
+/* Progress mark for question i: ok | bad | cur | '' */
+const qMark = (i) => (i < S.q.i || S.q.end ? (S.q.ans[i] ? 'ok' : 'bad') : i === S.q.i ? (S.q.pick === null ? 'cur' : S.q.ans[i] ? 'ok' : 'bad') : '');
+const CERT = { name: 'আব্দুর রহমান', date: '১৮ অক্টোবর ২০২৬' };
+
+/* ---------- State ---------- */
+const S = {
+  cid: 'c40', li: 0, nav: false, play: null,
+  done: { c40: new Set(), c10: new Set([0]) }, again: { c40: new Set(), c10: new Set() },
+  all: { c40: false, c10: false }, passed: { c40: false, c10: false },
+  rev: new Set(), q: { i: 0, pick: null, score: 0, end: false, ans: [] },
+};
+const C = () => COURSES[S.cid];
+const L = () => C().L[S.li];
+const cnt = (l) => (l.h ? l.h.length : l.c);
+const isDone = (cid, i) => S.all[cid] || S.done[cid].has(i);
+const isOpen = (cid, i) => i < FIRST.length || S.all[cid];
+const memorized = (cid) => (S.all[cid] ? COURSES[cid].n : [...S.done[cid]].reduce((s, i) => s + cnt(COURSES[cid].L[i]), 0));
+const doneLessons = (cid) => (S.all[cid] ? COURSES[cid].L.length : S.done[cid].size);
+const pct = (cid) => Math.round((memorized(cid) / COURSES[cid].n) * 100);
+const nextLi = (cid) => { const i = COURSES[cid].L.findIndex((l, k) => !isDone(cid, k) && isOpen(cid, k)); return i; };
+/* Lesson row status: done | again | next | open | locked */
+const status = (cid, i) => (isDone(cid, i) ? 'done' : !isOpen(cid, i) ? 'locked' : S.again[cid].has(i) ? 'again' : nextLi(cid) === i ? 'next' : 'open');
+const STATUS = { done: 'মুখস্থ হয়েছে', again: 'আবার পড়ুন', next: 'পরের পাঠ', open: 'বাকি', locked: 'আগের পাঠ শেষ হলে' };
+const quizOpen = (cid) => S.all[cid];
+const hRef = (k) => `${HAD[k].book} · হাদিস: ${bn(HAD[k].no)}${HAD[k].part ? ' (অংশ)' : ''}`;
+const plain = (k) => HAD[k].text.replace(/[{}]/g, '');
+/* Text with the hidden words as buttons (key = hadith:index) */
+const masked = (k) => { let n = 0; return HAD[k].text.replace(/\{([^}]+)\}/g, (m, w) => { const key = `${k}:${n++}`; return `<button class="mask${S.rev.has(key) ? ' open' : ''}" data-act="reveal" data-k="${key}" aria-label="${S.rev.has(key) ? w : 'লুকানো অংশ, ট্যাপ করে দেখুন'}">${w}</button>`; }); };
+const maskKeys = () => L().h.flatMap((k) => (HAD[k].text.match(/\{[^}]+\}/g) || []).map((m, i) => `${k}:${i}`));
+const allRevealed = () => maskKeys().every((x) => S.rev.has(x));
+const playBtn = (k, cls = 'btn tonal') => (HAD[k].audio ? `<button class="${cls}${S.play === k ? ' playing' : ''}" data-act="play" data-hk="${k}" aria-label="${S.play === k ? 'থামান' : 'শুনুন'}">${S.play === k ? `${icons.pause}<span class="wave"><i></i><i></i><i></i></span>থামান` : `${icons.play}শুনুন`}</button>` : '');
+
+const SCREENS = [
+  { id: 'home', label: 'হোম' },
+  { id: 'courses', label: 'কোর্সের তালিকা' },
+  { id: 'course', label: 'কোর্সের পেজ' },
+  { id: 'lesson', label: 'পাঠ' },
+  { id: 'test', label: 'নিজে পরীক্ষা' },
+  { id: 'quiz', label: 'কোর্সের কুইজ' },
+  { id: 'cert', label: 'সার্টিফিকেট' },
+];
+const EXTRA = '<button class="kit-chip" type="button" data-prog="new">নতুন কোর্স</button><button class="kit-chip" type="button" data-prog="all">সব পাঠ শেষ</button>';
+
+/* ---------- Home: only the quick-action card, with the new button ---------- */
+const QA = [['সর্বশেষ', icons.clock], ['জাম্প', icons.chevron], ['ওয়াক্ত', icons.sun], ['সাদাকা', icons.plus], ['ফিড', icons.grid], ['কুইজ', icons.check], ['ফ্ল্যাশকার্ড', icons.copy]];
+function homeHTML() {
+  return `<header class="appbar home-bar"><h1>আল হাদিস</h1></header>
+    <div class="body"><div class="hband"></div><div class="dash"><div class="qa">${QA.map(([n, ic]) => `<span><span class="qi">${ic}</span>${n}</span>`).join('')}
+      <button class="feat" data-act="feature"><span class="qi">${I.memo()}</span>হাদিস মুখস্থ<i class="dot"></i></button></div></div></div>`;
+}
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  sec.classList.toggle('home', id === 'home');
+  sec.innerHTML = id === 'home' ? homeHTML() : D[id]();
+  D.after?.(id, sec);
+}
+const rerender = () => { const b = $('.screen.on .body'); const top = b ? b.scrollTop : 0; render(Kit.current); const n = $('.screen.on .body'); if (n) n.scrollTop = top; };
+const go = (id) => { S.nav = true; Kit.show(id); };
+function resetQuiz() { S.q = { i: 0, pick: null, score: 0, end: false, ans: [] }; }
+function setProg(p) {
+  S.cid = 'c40';
+  S.all.c40 = p === 'all'; S.passed.c40 = false;
+  S.done.c40 = new Set(); S.again.c40 = new Set();
+  if (['quiz', 'cert'].includes(Kit.current) && p === 'new') { go('course'); return; }
+  syncExtra(); rerender();
+}
+function syncExtra() { $$('[data-prog]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.prog === 'all' ? S.all.c40 : !S.all.c40 && !S.done.c40.size))); }
+function onScreen(id) {
+  // A toolbar chip can open any screen: put the course in the state that screen needs.
+  if (!S.nav) {
+    if (id === 'lesson' || id === 'test') { S.li = Math.max(0, Math.min(nextLi(S.cid), FIRST.length - 1)); if (!L().h) S.li = 0; }
+    if (id === 'quiz') { S.all[S.cid] = true; S.passed[S.cid] = false; resetQuiz(); }
+    if (id === 'cert') { S.all[S.cid] = true; S.passed[S.cid] = true; }
+  }
+  if (id === 'test' || (id === 'lesson' && !S.nav)) S.rev = new Set();
+  if (id !== 'lesson') S.play = null;
+  S.nav = false;
+  syncExtra();
+  render(id);
+}
+
+/* ---------- Wiring ---------- */
+const BACK = { courses: 'home', course: 'courses', lesson: 'course', test: 'lesson', quiz: 'course', cert: 'course' };
+const ACT = {
+  back: () => go(BACK[Kit.current] || 'home'),
+  feature: () => go('courses'),
+  course: (t) => { S.cid = t.dataset.cid; go('course'); },
+  lesson: (t) => {
+    const i = +t.dataset.li;
+    if (!isOpen(S.cid, i)) { Kit.snack('আগের পাঠগুলো শেষ হলে এই পাঠ খুলবে'); return; }
+    if (!C().L[i].h) { Kit.snack(`পাঠ ${bn(i + 1)}: ${C().L[i].t} · মুখস্থ হয়েছে`); return; }
+    S.li = i; S.rev = new Set(); go('lesson');
+  },
+  resume: () => { const i = nextLi(S.cid); if (i < 0) { ACT.quiz(); return; } S.li = i; S.rev = new Set(); go('lesson'); },
+  play: (t) => { S.play = S.play === t.dataset.hk ? null : t.dataset.hk; rerender(); },
+  test: () => { S.rev = new Set(); go('test'); },
+  reveal: (t) => { S.rev.add(t.dataset.k); t.classList.add('open'); t.setAttribute('aria-label', t.textContent); D.onReveal?.(); },
+  revealAll: () => { maskKeys().forEach((k) => S.rev.add(k)); rerender(); },
+  remembered: () => {
+    S.done[S.cid].add(S.li); S.again[S.cid].delete(S.li);
+    go('course');
+    Kit.snack(`পাঠ ${bn(S.li + 1)} শেষ · ${bn(memorized(S.cid))}টি হাদিস মুখস্থ`);
+  },
+  again: () => { S.again[S.cid].add(S.li); go('course'); Kit.snack('পাঠটা বাকি রইল, পরে আবার পড়ুন'); },
+  quiz: () => { if (!quizOpen(S.cid)) { Kit.snack('সব পাঠ শেষ হলে কুইজ খুলবে'); return; } resetQuiz(); go('quiz'); },
+  pick: (t) => { if (S.q.pick !== null) return; S.q.pick = +t.dataset.o; S.q.ans[S.q.i] = S.q.pick === QUIZ[S.q.i].a; if (S.q.ans[S.q.i]) S.q.score++; rerender(); },
+  qnext: () => {
+    S.q.i++; S.q.pick = null;
+    if (S.q.i >= QUIZ.length) { S.q.end = true; S.q.i = QUIZ.length - 1; if (S.q.score >= PASS) S.passed[S.cid] = true; }
+    rerender();
+  },
+  qretry: () => { resetQuiz(); rerender(); },
+  cert: () => go('cert'),
+  save: () => Kit.snack('সার্টিফিকেট ছবি হিসেবে গ্যালারিতে সেভ হয়েছে'),
+  share: () => Kit.snack('ফোনের শেয়ার মেনু খুলবে'),
+};
+document.addEventListener('click', (e) => {
+  const p = e.target.closest('[data-prog]');
+  if (p) { setProg(p.dataset.prog); return; }
+  const t = e.target.closest('[data-act]');
+  if (t) (D.act?.[t.dataset.act] || ACT[t.dataset.act])?.(t);
+});
+
+/* ======================================================================
+   DEMO 3 — উল্টানো কার্ড
+   ====================================================================== */
+const bar = (title, sub = '') => `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="back">${icons.back}</button><h1>${title}${sub ? `<small>${sub}</small>` : ''}</h1></header>`;
+const prog = (p) => `<div class="progress"><i style="width:${p}%"></i></div>`;
+const D = {
+  /* ---------- Course carousel ---------- */
+  courses: () => `${bar('হাদিস মুখস্থ')}<div class="body"><div class="car">${Object.entries(COURSES).map(([id, c]) => `<div class="cv"><div class="top"><b>${bn(c.n)}</b><span>হাদিস</span></div><div class="bd"><h3>${c.name}</h3><p>${c.sub}</p>
+      <div class="m"><span>${bn(c.L.length)}টি পাঠ</span><span>${bn(memorized(id))}/${bn(c.n)} মুখস্থ</span></div>${prog(pct(id))}
+      <button class="btn${memorized(id) ? '' : ' tonal'}" data-act="course" data-cid="${id}">${memorized(id) ? 'চালিয়ে যান' : 'কোর্স খুলুন'}</button></div></div>`).join('')}</div>
+    <p class="swipe">পাশে সরিয়ে আরও কোর্স দেখুন</p></div>`,
+  /* ---------- Course: stats + lesson number grid ---------- */
+  course: () => {
+    const c = C(), q = quizOpen(S.cid);
+    const tiles = c.L.map((l, i) => { const st = status(S.cid, i); return `<button class="gt ${st}" data-act="lesson" data-li="${i}" aria-label="পাঠ ${bn(i + 1)}: ${l.t}, ${STATUS[st]}">${st === 'locked' ? I.lock() : `<b>${bn(i + 1)}</b>`}<small>${l.t}</small></button>`; }).join('');
+    return `${bar(c.name, c.sub)}<div class="body"><div class="stats"><div><b>${bn(memorized(S.cid))}/${bn(c.n)}</b><span>হাদিস মুখস্থ</span></div><div><b>${bn(doneLessons(S.cid))}</b><span>পাঠ শেষ</span></div><div><b>${bn(c.L.length - doneLessons(S.cid))}</b><span>পাঠ বাকি</span></div></div>
+      <h2 class="section-title">পাঠ</h2><div class="grid">${tiles}</div>
+      <div class="legend"><span><i class="d"></i>মুখস্থ হয়েছে</span><span><i class="n"></i>পরের পাঠ বা আবার পড়ুন</span><span><i></i>বাকি</span></div>
+      <button class="wide${q ? ' on' : ''}" data-act="quiz"><span class="wi">${q ? I.quiz() : I.lock()}</span><div><b>কোর্সের কুইজ</b><span>${q ? `${bn(QUIZ.length)}টি প্রশ্ন · পাস করতে ${bn(PASS)}টি সঠিক` : 'সব পাঠ শেষ হলে খুলবে'}</span></div>${icons.chevron}</button>
+      ${S.passed[S.cid] ? `<button class="wide on" data-act="cert"><span class="wi">${I.award()}</span><div><b>সার্টিফিকেট</b><span>সেভ আর শেয়ার করুন</span></div>${icons.chevron}</button>` : ''}</div>`;
+  },
+  /* ---------- Lesson: front of the cards ---------- */
+  lesson: () => { const l = L(); return `${bar(`পাঠ ${bn(S.li + 1)}`, C().name)}<div class="body"><div class="lsn"><small>${bn(l.h.length)}টি হাদিস${l.h.length > 1 ? ' · পাশে সরিয়ে দেখুন' : ''}</small><h2>${l.t}</h2></div>
+    <div class="cards${l.h.length > 1 ? ' two' : ''}">${l.h.map((k, i) => `<article class="fc"><span class="no">হাদিস ${bn(i + 1)}/${bn(l.h.length)} · ${GRADE}</span><p class="narrator">${HAD[k].nar}</p><p class="translation">${plain(k)}</p><p class="ref">${hRef(k)}</p>${HAD[k].audio ? `<div class="acts">${playBtn(k)}</div>` : ''}</article>`).join('')}</div>
+    <button class="btn block flipbtn" data-act="test" style="width:calc(100% - 32px)">${I.redo()}কার্ড উল্টে নিজে পরীক্ষা দিন</button></div>`; },
+  /* ---------- Self test: back of the cards ---------- */
+  test: () => { const l = L(); return `${bar('নিজে পরীক্ষা', `পাঠ ${bn(S.li + 1)} · ${l.t}`)}<div class="body"><div class="lsn"><small>সবুজ দাগের নিচে কী আছে, মনে করে বলুন। তারপর ট্যাপ করুন।</small></div>
+    <div class="cards${l.h.length > 1 ? ' two' : ''}">${l.h.map((k, i) => `<article class="fc back"><span class="no">হাদিস ${bn(i + 1)}/${bn(l.h.length)}</span><p class="narrator">${HAD[k].nar}</p><p class="translation">${masked(k)}</p><p class="ref">${hRef(k)}</p></article>`).join('')}</div></div>
+    <div class="decide"><button data-act="again"><i>${I.redo(26)}</i>আবার পড়ব</button><button class="all" data-act="revealAll"><i>${I.eye(26)}</i>সব খুলুন</button><button class="yes" data-act="remembered"><i>${icons.check}</i>মনে ছিল</button></div>`; },
+  /* ---------- Quiz ---------- */
+  quiz: () => {
+    const q = S.q, Q = QUIZ[q.i];
+    const d = `<div class="qdots">${QUIZ.map((x, i) => `<i class="${qMark(i)}"></i>`).join('')}</div>`;
+    if (q.end) {
+      const pass = q.score >= PASS;
+      return `${bar('কোর্সের কুইজ', C().name)}<div class="body">${d}<div class="qc" style="text-align:center"><small>ফলাফল</small><p style="font-size:26px;margin:4px 0">${bn(q.score)}/${bn(QUIZ.length)} সঠিক</p>
+        <p style="font-size:15px;font-weight:400">${pass ? 'অভিনন্দন, আপনি পাস করেছেন।' : `পাস করতে ${bn(PASS)}টি সঠিক উত্তর লাগবে।`}</p>
+        ${pass ? `<button class="btn block" data-act="cert">${I.award()}সার্টিফিকেট দেখুন</button>` : `<button class="btn block" data-act="qretry">${I.redo()}আবার চেষ্টা করুন</button>`}</div></div>`;
+    }
+    return `${bar('কোর্সের কুইজ', C().name)}<div class="body">${d}<div class="qc"><small>প্রশ্ন ${bn(q.i + 1)}/${bn(QUIZ.length)}</small><p>${Q.q}</p><div class="qch">${Q.o.map((o, i) => `<button class="${q.pick !== null && i === Q.a ? 'ok' : q.pick === i ? 'bad' : ''}" data-act="pick" data-o="${i}">${o}</button>`).join('')}</div></div>
+      ${q.pick !== null ? `<p class="qn">${q.pick === Q.a ? '<b>সঠিক!</b>' : `সঠিক উত্তর: <b>${Q.o[Q.a]}</b>`}</p>` : ''}</div>
+      <div class="foot"><button class="btn" data-act="qnext"${q.pick === null ? ' disabled' : ''}>${q.i === QUIZ.length - 1 ? 'ফলাফল দেখুন' : 'পরের প্রশ্ন'}</button></div>`;
+  },
+  /* ---------- Certificate ---------- */
+  cert: () => `${bar('সার্টিফিকেট', C().name)}<div class="body"><div class="c3"><div class="rb">${I.award()}</div><div class="tx"><small>হাদিস মুখস্থ কোর্স</small><h2>সার্টিফিকেট</h2><div class="nm">${CERT.name}</div>
+    <p>“${C().name}” কোর্সের ${bn(C().n)}টি হাদিস মুখস্থ করে কুইজে পাস করেছেন।</p><div class="ft"><span>${CERT.date}</span><span>আল হাদিস</span></div></div></div></div>
+    <div class="foot"><button class="btn tonal" data-act="save">${I.save()}সেভ করুন</button><button class="btn" data-act="share">${icons.share}শেয়ার করুন</button></div>`,
+};
+
+Kit.onScreen(onScreen);
+Kit.init({ demo: 3, name: 'উল্টানো কার্ড', extra: EXTRA, screens: SCREENS });
+</script>
+</body>
+</html>
+

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সীরাত — ডেমো ৪ · শান্ত পাঠ</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): menu drawer, rounded body, hadith page ===== */
+.appbar.np h1{margin-left:12px}
+.icon-btn svg,.btn svg{flex:none}
+.screen.g{background:var(--appbar)}
+.rb{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+/* Menu: the drawer, with "জীবনী" next to "লেখক সম্পর্কে" (exact place: team decides) */
+.mn-dim{position:absolute;inset:0;background:var(--scrim)}
+.mn{position:absolute;top:0;bottom:0;left:0;width:82%;background:var(--card);display:flex;flex-direction:column;box-shadow:4px 0 18px rgba(0,0,0,.18)}
+.mn-top{background:var(--appbar);color:var(--on-appbar);padding:22px 20px 18px}
+.mn-top b{display:block;font-size:20px}
+.mn-top span{font-size:13px;opacity:.85}
+.mn-list{padding:10px 8px}
+.mn-row{display:flex;align-items:center;gap:16px;width:100%;min-height:54px;padding:0 14px;border-radius:10px;font-size:16px;color:var(--title);text-align:left;cursor:default}
+.mn-row>svg:first-child{color:var(--primary)}
+.mn-row span{flex:1}
+.mn-row>svg:last-child{width:20px;height:20px;color:var(--hint)}
+.mn-row.on{background:var(--tint);font-weight:700;cursor:pointer}
+/* Hadith details page */
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+/* Reading text: size from the font control (--rfs) */
+.txt p{margin:0 0 14px;font-size:var(--rfs,17px);line-height:1.85;color:var(--title)}
+/* ===== Demo 4: quiet, card-less pages; book-like reading with footnotes ===== */
+.screen.paper{background:var(--card)}
+.paper .appbar.flat{background:var(--card)}
+.lead{margin:22px 20px 4px;font-size:26px;font-weight:700;color:var(--title)}
+.lead-s{margin:0 20px 14px;font-size:14px;color:var(--hint)}
+.sw{display:flex;gap:18px;margin:0 20px 6px;font-size:14px}
+.sw span{color:var(--hint)}
+.sw span.on{color:var(--title);font-weight:700;text-decoration:underline;text-decoration-color:var(--primary);text-decoration-thickness:2px;text-underline-offset:6px}
+.br{border-top:1px solid var(--divider);margin:0 20px}
+.br:last-child{border-bottom:1px solid var(--divider)}
+.br-main{display:flex;align-items:center;gap:12px;width:100%;padding:16px 0;text-align:left}
+.br-main div{flex:1}
+.br-main b{display:block;font-size:17px;color:var(--title)}
+.br-main small{font-size:13px;color:var(--hint)}
+.br-main>svg{color:var(--hint)}
+.br-main .get{font-size:13.5px;font-weight:700;color:var(--primary)}
+/* inline download panel (opens under the row, no sheet) */
+.br-dl{padding:0 0 16px}
+.br-dl p{margin:0 0 10px;font-size:14px;color:var(--body)}
+.br-dl .row{display:flex;gap:8px}
+/* ===== সূচিপত্র: plain numbered list ===== */
+.cl{margin:6px 20px 0}
+.cl button{display:flex;align-items:baseline;gap:16px;width:100%;padding:13px 0;border-bottom:1px solid var(--divider);text-align:left}
+.cl .n{width:28px;flex:none;font-size:22px;font-weight:700;color:var(--primary);line-height:1}
+.cl b{display:block;font-size:16px;color:var(--title);font-weight:600}
+.cl small{font-size:12.5px;color:var(--hint)}
+/* ===== Reader: font row under the bar, footnotes, text links ===== */
+.ab-aa{height:36px;padding:0 10px;border-radius:8px;font-weight:700;font-size:16px;color:var(--primary)}
+.ab-aa[aria-pressed="true"]{background:var(--tint)}
+.frow{flex:none;display:flex;align-items:center;gap:12px;padding:8px 20px;border-bottom:1px solid var(--divider);background:var(--card)}
+.frow span{flex:1;font-size:13.5px;color:var(--hint)}
+.frow input{flex:2;accent-color:var(--primary)}
+.frow b{width:26px;text-align:right;color:var(--title)}
+.pg{padding:22px 22px 10px}
+.pg-k{font-size:12.5px;letter-spacing:.5px;color:var(--hint)}
+.pg h2{margin:2px 0 16px;font-size:23px;color:var(--title)}
+.txt p{text-align:justify}
+.iref.note{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;margin-left:2px;border-radius:9px;vertical-align:super;font-size:11px;font-weight:700;background:var(--primary);color:var(--on-appbar);line-height:1}
+.fn{margin:8px 22px 0;padding-top:12px;border-top:1px solid var(--divider)}
+.fn h3{margin:0 0 6px;font-size:13px;color:var(--hint);font-weight:700}
+.fn button{display:flex;gap:10px;width:100%;padding:6px 0;text-align:left;font-size:14.5px;color:var(--title)}
+.fn button i{font-style:normal;font-weight:700;color:var(--primary)}
+.fn button span{flex:1}
+.fn button u{color:var(--primary);text-decoration:none;font-size:13px}
+.fn p{margin:8px 0 0;font-size:13px;color:var(--hint)}
+.tl2{display:flex;justify-content:space-between;gap:12px;margin:18px 22px 0;padding-top:14px;border-top:1px solid var(--divider)}
+.tl2 button{max-width:48%;font-size:14px;color:var(--primary);text-align:left;line-height:1.4}
+.tl2 button:last-child{text-align:right;margin-left:auto}
+.tl2 button small{display:block;font-size:12px;color:var(--hint)}
+/* ===== Hadith page: one quiet row under the card ===== */
+.qrow{display:flex;align-items:center;gap:10px;width:calc(100% - 24px);margin:0 12px;padding:14px 4px;border-top:1px solid var(--divider);border-bottom:1px solid var(--divider);text-align:left}
+.qrow div{flex:1}
+.qrow b{display:block;font-size:15px;color:var(--primary)}
+.qrow small{font-size:13px;color:var(--hint)}
+.qrow>svg{color:var(--primary)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="menu"></section>
+      <section class="screen paper" data-screen="section" data-status="light"></section>
+      <section class="screen paper" data-screen="download" data-status="light"></section>
+      <section class="screen paper" data-screen="toc" data-status="light"></section>
+      <section class="screen paper" data-screen="read" data-status="light" data-keep-scroll></section>
+      <section class="screen g" data-screen="hadith"></section>
+      <section class="screen g" data-screen="link"></section>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="seerah_core.js"></script>
+<script>
+/* ======================================================================
+   DEMO 4 — শান্ত পাঠ: no cards, plain rows on a paper-white page.
+   Download opens right under the book row, the reader feels like a
+   printed book: footnote numbers in the text, the hadith list at the
+   end, font size as a slider row under the app bar.
+   ====================================================================== */
+(function () {
+  const { bn, icons, $ } = Kit;
+  const { BOOKS, CH, H, S, ref, src, refsOf, para, book } = SeerahDemo;
+  let open = null;   // book whose download panel is open
+  let aa = false;    // font row shown
+  const flat = (t, sub, act, extra = '') => `<header class="appbar flat"><button class="icon-btn" data-act="${act}" aria-label="পেছনে">${icons.back}</button><h1>${t}${sub ? `<small>${sub}</small>` : ''}</h1>${extra}</header>`;
+
+  const bookRow = (b) => `<div class="br"><button class="br-main" data-act="book" data-b="${b.id}"><div><b>${b.name}</b>
+      <small>${bn(CH.length)}টি অধ্যায় · ${S.dl[b.id] ? 'ডাউনলোড করা আছে' : b.size}</small></div>
+      ${S.dl[b.id] ? icons.chevron : '<span class="get">ডাউনলোড</span>'}</button>
+    ${open === b.id ? `<div class="br-dl"><p>পড়তে আগে বইটি ডাউনলোড করুন। এরপর ইন্টারনেট ছাড়াও পড়া যাবে।</p>
+      <div class="row"><button class="btn" data-act="dlgo" data-b="${b.id}">ডাউনলোড করুন</button><button class="btn text" data-act="dlx">বাতিল</button></div></div>` : ''}</div>`;
+  const reSection = () => { const sec = $('.screen.on'); sec.innerHTML = D.section(); };
+
+  const D = {
+    section: () => `${flat('জীবনী', '', 'sback')}<div class="scroll">
+      <h2 class="lead">সীরাত</h2><p class="lead-s">নবীজির (সাঃ) জীবনী, প্রামাণ্য গ্রন্থ থেকে</p>
+      <div class="sw"><span class="on">সীরাত</span><span>সাহাবি ও তাবেঈ</span></div>
+      <div style="margin-top:14px">${BOOKS.map(bookRow).join('')}</div></div>`,
+    openDl: (id) => { open = id; reSection(); },
+    toc: () => `${flat(book().name, 'সূচিপত্র', 'tback')}<div class="scroll"><div class="cl">
+      ${CH.map((c, i) => `<button data-act="ch" data-c="${i}"><span class="n">${bn(i + 1)}</span><span><b>${c.t}</b><small>${c.when}</small></span></button>`).join('')}</div></div>`,
+    read: () => {
+      const c = CH[S.ch], refs = refsOf(S.ch), pv = CH[S.ch - 1], nx = CH[S.ch + 1];
+      return `${flat(c.t, book().name, 'rback', `<button class="ab-aa" data-act="aa" aria-pressed="${aa}" aria-label="ফন্ট সাইজ">অ</button>`)}
+        ${aa ? `<div class="frow"><span>ফন্ট সাইজ</span><input type="range" min="13" max="25" step="2" value="${S.fs}" data-fsr aria-label="ফন্ট সাইজ"><b data-fsv>${bn(S.fs)}</b></div>` : ''}
+        <div class="scroll"><div class="pg"><div class="pg-k">অধ্যায় ${bn(S.ch + 1)}</div><h2>${c.t}</h2>
+          <div class="txt">${c.p.map((p) => `<p>${para(p, 'note')}</p>`).join('')}</div></div>
+          <div class="fn">${refs.length ? `<h3>হাদিস রেফারেন্স</h3>${refs.map((k, i) => `<button data-act="ref" data-k="${k}"><i>${bn(i + 1)}</i><span>${ref(k)}</span><u>খুলুন</u></button>`).join('')}` : ''}
+            <p>সূত্র: ${src()}</p></div>
+          <div class="tl2">${pv ? `<button data-act="prev"><small>পূর্ববর্তী</small>‹ ${pv.t}</button>` : ''}${nx ? `<button data-act="next"><small>পরবর্তী</small>${nx.t} ›</button>` : ''}</div></div>`;
+    },
+    hLink: (h) => `<button class="qrow" data-act="seerah"><div><b>সীরাতে পড়ুন</b><small>${CH[h.ch].t} · ${BOOKS[0].name}</small></div>${icons.chevron}</button>`,
+    act: {
+      dlx: () => { open = null; reSection(); },
+      aa: () => {
+        aa = !aa;
+        const sec = $('.screen[data-screen="read"]'), top = $('.scroll', sec).scrollTop;
+        sec.innerHTML = D.read(); $('.scroll', sec).scrollTop = top;
+      },
+    },
+  };
+  /* slider: same S.fs as the other demos */
+  document.addEventListener('input', (e) => {
+    if (!e.target.matches('[data-fsr]')) return;
+    S.fs = +e.target.value;
+    $('.screen[data-screen="read"]').style.setProperty('--rfs', `${S.fs}px`);
+    $('[data-fsv]').textContent = bn(S.fs);
+  });
+  /* runs before the engine's own listener: close the download panel on every visit */
+  Kit.onScreen(() => { open = null; });
+  SeerahDemo.start(D, { demo: 4, name: 'শান্ত পাঠ' });
+})();
+</script>
+</body>
+</html>

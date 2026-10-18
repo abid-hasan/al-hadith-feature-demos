@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ইভেন্ট ভিত্তিক হাদিস সংকলন — ডেমো ৫ · স্লাইডারের প্রথম পাতা</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="ehc.css">
+<style>
+/* ===== Home: the event is the first page of the daily hadith slider ===== */
+.slider{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:8px 0 0}
+.slider::-webkit-scrollbar{display:none}
+.slider>*{flex:0 0 calc(100% - 24px);margin:0 6px;scroll-snap-align:center}
+.slider>*:first-child{margin-left:12px}
+.slider>*:last-child{margin-right:12px}
+.slider .slide{margin:0}
+.evs{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px 16px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);text-align:left;border:1.5px solid var(--accent)}
+.evs .top{display:flex;align-items:center;gap:8px;width:100%}
+.evs .top small{font-size:13px;font-weight:700;color:var(--title)}
+.evs .top em{margin-left:auto;font-style:normal;font-size:12px;padding:1px 9px;border-radius:12px;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .evs .top em{color:var(--primary)}
+.evs b{font-size:19px;color:var(--title);line-height:1.3}
+.evs span{font-size:13.5px;color:var(--body)}
+.evs .lnk{margin-top:2px;font-size:14px;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:2px}
+.evs .lnk svg{width:16px;height:16px}
+
+/* ===== Collection: intro as a quote block, then a numbered list (chapter-list look) ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.intro{margin:14px 12px 12px;padding:10px 14px;border-left:3px solid var(--primary);border-radius:4px 10px 10px 4px;background:var(--card);font-size:14.5px;line-height:1.6;color:var(--body)}
+.lrow{display:flex;align-items:center;gap:12px;width:calc(100% - 24px);margin:0 12px 10px;padding:12px 4px 12px 12px;background:var(--card);border-radius:10px;box-shadow:var(--shadow)}
+.lrow .book-badge{width:44px;height:44px;font-size:15px;font-weight:600}
+.lrow .tx{flex:1;min-width:0;text-align:left}
+.lrow .tx b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:15px;line-height:1.5;color:var(--title);font-weight:600}
+.lrow .tx span{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:13px;color:var(--body)}
+.lrow .tx .bm{color:var(--primary);display:grid}
+.lrow .icon-btn{color:var(--hint)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screen: home (event = first slider page) ===== -->
+      <section class="screen" data-screen="home">
+        <header class="home-bar"><button class="icon-btn" data-snack="ড্রয়ার — এই ফিচারের অংশ নয়" data-e="menu" aria-label="মেনু"></button><h1>আল হাদিস</h1><button class="icon-btn" data-snack="সার্চ — এই ফিচারের অংশ নয়" data-i="search" aria-label="সার্চ"></button></header>
+        <div class="scroll">
+          <div class="band">
+            <div class="slider" id="slider"></div>
+            <div class="dots" id="sdots"></div>
+          </div>
+          <div id="qa"></div>
+          <div id="books"></div>
+        </div>
+      </section>
+
+      <!-- ===== Screen: the collection (numbered list) ===== -->
+      <section class="screen" data-screen="collection">
+        <header class="appbar"><button class="icon-btn" data-go="home" data-i="back" aria-label="পেছনে"></button><h1 id="c-title"></h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="c-body"></div></div></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="../../_kit/kit.js"></script>
+<script src="ehc_data.js"></script>
+<script src="ehc.js"></script>
+<script>
+  const E = window.EHC, S = E.S, I = Kit.icons, $ = Kit.$, $$ = Kit.$$, bn = Kit.bn;
+  $$('[data-i]').forEach((b) => { b.innerHTML = I[b.dataset.i]; });
+  $$('[data-e]').forEach((b) => { b.innerHTML = E.ic[b.dataset.e](24); });
+  $('#qa').innerHTML = E.qaHtml();
+  $('#books').innerHTML = E.booksHtml();
+  const DAILY = '<div class="slide"><small>দৈনিক হাদিস</small><p>যে আল্লাহ এবং কেয়ামতের দিনে বিশ্বাস রাখে, সে যেন ভাল কথা বলে অথবা চুপ থাকে।</p><span>সহিহ বুখারি · হাদিস: ৬০১৮</span></div>';
+  const NOTICE = '<div class="slide"><small>দৈনিক হাদিস</small><p>রাগ করো না।</p><span>সহিহ বুখারি · হাদিস: ৬১১৬</span></div>';
+
+  /* ---------- Home slider: event page first (only while an event is on) ---------- */
+  function renderHome() {
+    const id = E.eventId(), ev = E.events[id];
+    const pages = (ev ? [`<button class="evs" data-go="collection"><span class="top">${E.eventIcon(id, 24)}<small>${ev.sub}</small><em>${E.count(ev)}</em></span>
+      <b>${ev.name}</b><span>${ev.intro.split('।')[0]}।</span><span class="lnk">সংকলন দেখুন${I.chevron}</span></button>`] : []).concat(DAILY, NOTICE);
+    $('#slider').innerHTML = pages.join('');
+    $('#slider').scrollLeft = 0;
+    dots(0, pages.length);
+  }
+  function dots(at, n) { $('#sdots').innerHTML = Array.from({ length: n }, (_, i) => `<i class="${i === at ? 'on' : ''}"></i>`).join(''); }
+  $('#slider').addEventListener('scroll', () => { const s = $('#slider'), w = s.firstElementChild.offsetWidth + 12; dots(Math.round(s.scrollLeft / w), s.children.length); });
+
+  /* ---------- Collection list ---------- */
+  function row(id, i) {
+    const h = E.hadith[id];
+    return `<div class="lrow"><span class="book-badge">${bn(i + 1)}</span>
+      <button class="tx" data-open-h="${id}"><b>${h.tr}</b><span>${h.book} · হাদিস: ${h.no}${E.grade(h)}${S.bm.has(id) ? `<i class="bm">${E.ic.bookmarkOn(15)}</i>` : ''}</span></button>
+      <button class="icon-btn" data-menu="${id}" aria-label="মেনু">${I.more}</button></div>`;
+  }
+  function renderCollection() {
+    const ev = E.ev();
+    $('#c-title').innerHTML = `${ev.name}<small>${E.count(ev)}</small>`;
+    $('#c-body').innerHTML = `<div class="intro">${ev.intro}</div>${ev.ids.map(row).join('')}`;
+  }
+
+  /* ---------- Events ---------- */
+  document.addEventListener('click', (e) => { const c = e.target.closest('[data-open-h]'); if (c) E.open(c.dataset.openH); });
+  Kit.onScreen((id) => { if (id === 'home') renderHome(); if (id === 'collection') renderCollection(); });
+
+  E.mount({ menu: 'list', onChange: () => { if (Kit.current === 'collection') renderCollection(); },
+    onDate: () => { renderHome(); if (Kit.current === 'collection') renderCollection(); if (Kit.current === 'hadith') Kit.show('collection'); } });
+  Kit.init({ demo: 5, name: 'স্লাইডারের প্রথম পাতা', extra: E.extra,
+    screens: [{ id: 'home', label: 'হোম' }, { id: 'collection', label: 'সংকলন' }, { id: 'hadith', label: 'হাদিসের পেজ' }] });
+</script>
+</body>
+</html>

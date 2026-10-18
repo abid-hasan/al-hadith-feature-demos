@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>এআই হাদিস চ্যাটবট — ডেমো ৫ · প্রশ্নোত্তর খাতা</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared bits ===== */
+.pg{display:flex;flex-direction:column;flex:1;min-height:0}
+[data-hid]{cursor:pointer}
+.body{flex:1;min-height:0;overflow-y:auto}
+.body::-webkit-scrollbar{width:0}
+.appbar.flat .icon-btn svg{width:22px;height:22px}
+
+/* ===== Entry: a chip under the search field ===== */
+.sf{display:flex;align-items:center;gap:10px;height:48px;margin:16px 16px 10px;padding:0 14px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--hint);font-size:15px}
+.sf svg{width:18px;height:18px}
+.or{display:flex;align-items:center;gap:8px;margin:0 16px;font-size:13.5px;color:var(--hint)}
+.or .chip svg{width:16px;height:16px}
+
+/* ===== Chat: no bubbles, a question then its hadith on a thin line ===== */
+.cpill{display:inline-flex;align-items:center;height:28px;padding:0 10px;margin-right:6px;border-radius:20px;background:var(--tint);color:var(--primary-dark);font-size:12.5px;font-weight:700;white-space:nowrap}
+:root[data-theme="dark"] .cpill{color:var(--primary)}
+.qa{padding:16px 16px 6px;border-bottom:1px solid var(--divider)}
+.qa .lb{font-size:12px;font-weight:700;letter-spacing:.2px;color:var(--hint)}
+.qa h3{margin:2px 0 10px;font-size:18px;line-height:1.45;color:var(--title)}
+.tl{position:relative;padding-left:22px}
+.tl::before{content:"";position:absolute;left:6px;top:6px;bottom:14px;width:2px;background:var(--divider)}
+.tl .ln{position:relative;margin:0 0 10px;font-size:14.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .tl .ln{color:var(--primary)}
+.tl .ln::before{content:"";position:absolute;left:-21px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--primary)}
+.tl .ln small{display:block;font-weight:400;font-size:13px;color:var(--hint)}
+.tl .ln.ask{color:var(--title)}
+.hc{position:relative;margin:0 0 10px;padding:12px 14px;box-shadow:none;border:1px solid var(--divider)}
+.hc::before{content:"";position:absolute;left:-21px;top:18px;width:8px;height:8px;border-radius:50%;background:var(--card);border:2px solid var(--primary)}
+.hc .top{display:flex;align-items:center;gap:8px}
+.hc .top b{flex:1;font-size:14.5px;color:var(--title)}
+.hc .translation{margin-top:6px;color:var(--title)}
+.hc .narrator{margin-top:6px;font-size:12.5px}
+
+/* ===== Composer card ===== */
+.cbox{flex:none;margin:0;padding:10px 14px 14px;background:var(--card);border-top:1px solid var(--divider)}
+.cbox .note{margin:0 0 8px;font-size:12px;line-height:1.45;color:var(--hint)}
+.cbox .row{display:flex;align-items:flex-end;gap:10px}
+.cbox textarea{flex:1;min-width:0;min-height:52px;max-height:90px;resize:none;padding:10px 12px;border-radius:12px;border:1px solid var(--divider);background:var(--surface-2);color:var(--title);font-size:15px;line-height:1.5;outline:none}
+.cbox textarea:focus{border-color:var(--primary)}
+.cbox textarea::placeholder{color:var(--hint)}
+.cbox .btn{height:46px}
+.cbox.off{text-align:center}
+.cbox.off b{display:block;font-size:15px;color:var(--title)}
+.cbox.off small{font-size:13px;color:var(--hint)}
+
+/* ===== Hadith page ===== */
+.hp{padding:16px}
+.hp .ref{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.hp .ref b{flex:1;font-size:17px;color:var(--title)}
+.hp .ref small{display:block;font-size:13px;font-weight:400;color:var(--hint)}
+.hp .translation{font-size:17px;line-height:1.8;color:var(--title)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <section class="screen" data-screen="entry" data-status="light"></section>
+      <section class="screen" data-screen="chat" data-status="light"></section>
+      <section class="screen" data-screen="answer" data-status="light"></section>
+      <section class="screen" data-screen="masala" data-status="light"></section>
+      <section class="screen" data-screen="empty" data-status="light"></section>
+      <section class="screen" data-screen="hadith" data-status="light"></section>
+      <section class="screen" data-screen="limit" data-status="light"></section>
+
+      <div id="hold" hidden>
+        <!-- Page: search page, chat chip under the field -->
+        <div class="pg" id="pg-entry">
+          <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="exit" data-i="back"></button><h1>সার্চ</h1></header>
+          <div class="body"><div class="sf" id="sf"></div><div class="or" id="or"></div></div>
+        </div>
+        <!-- Page: the chat as a question-and-answer notebook -->
+        <div class="pg" id="pg-chat">
+          <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="entry" data-i="back"></button><h1>হাদিস চ্যাট</h1><span class="cpill" id="cr"></span></header>
+          <div class="body" data-scroller></div>
+          <div id="foot"></div>
+        </div>
+        <!-- Page: hadith -->
+        <div class="pg" id="pg-hadith">
+          <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="back" data-i="back"></button><h1 id="hp-t"></h1></header>
+          <div class="body hp"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="chatbot.js"></script>
+<script>
+/* ======================================================================
+   DEMO 5 — প্রশ্নোত্তর খাতা: no bubbles. Each question is a heading,
+   its hadith hang below on a thin line, and every question starts a new
+   block (nothing carries over). The rule sits right above the box.
+   Entry: a chip under the search field.
+   ====================================================================== */
+(function () {
+  const { S, H, T, esc, bn, book, left } = BOT;
+  const I = Kit.icons;
+  const $ = (s, r) => (r || document).querySelector(s);
+  const CHAT = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4A8 8 0 1 1 20 12z"/></svg>';
+  $('#sf').innerHTML = `${I.search}<span>হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন</span>`;
+  $('#or').innerHTML = `<span>অথবা</span><button class="chip on" data-act="openchat">${CHAT}হাদিস চ্যাটে প্রশ্ন করুন</button>`;
+
+  const grade = (id) => `<span class="grade">${BOT.GRADES[H[id].grade]}</span>`;
+  const card = (id) => `<article class="card hc" data-act="open" data-hid="${id}" tabindex="0"><div class="top"><b>${book(id).name} ${bn(H[id].num)}</b>${grade(id)}</div>
+      <p class="translation">${esc(H[id].tr)}</p><p class="narrator">${H[id].nar}</p></article>`;
+  // pair each question with the reply after it
+  function blocks() {
+    const out = [];
+    S.msgs.forEach((m) => { if (m.me) out.push({ q: m.me }); else if (out.length) out[out.length - 1].a = m; });
+    return out;
+  }
+  function reply(a) {
+    if (!a) return '';
+    if (a.bot === 'found') return `<p class="ln">${T.found(a.ids.length)}</p>${a.ids.map(card).join('')}`;
+    if (a.bot === 'masala') return `<p class="ln ask">${T.masala}<small>${T.masalaSub}</small></p>`;
+    return `<p class="ln ask">${T.none}<small>${T.noneSub}</small></p>`;
+  }
+
+  BOT.start({ demo: 5, name: 'প্রশ্নোত্তর খাতা', render: {
+    entry() {},
+    chat(el) {
+      $('#cr').textContent = left() ? `${bn(left())}টি ক্রেডিট বাকি` : T.out;
+      $('.body', el).innerHTML = blocks().map((b) => `<section class="qa" data-me><span class="lb">আপনার প্রশ্ন</span><h3>${esc(b.q)}</h3><div class="tl">${reply(b.a)}</div></section>`).join('');
+      $('#foot').innerHTML = left()
+        ? `<div class="cbox"><p class="note">${T.rule} ${T.ruleMore}</p><div class="row"><textarea data-q rows="2" aria-label="প্রশ্ন লিখুন" placeholder="${T.hint}"></textarea><button class="btn" data-act="send">পাঠান</button></div></div>`
+        : `<div class="cbox off"><b>${T.out}</b><small>${T.reset}</small></div>`;
+    },
+    hadith(el) {
+      const id = S.cur;
+      $('#hp-t').textContent = `${book(id).name} ${bn(H[id].num)}`;
+      $('.body', el).innerHTML = `<div class="ref"><span class="book-badge">${book(id).abbr}</span><b>${book(id).name}<small>হাদিস: ${bn(H[id].num)} · অধ্যায়: ${H[id].kitab}</small></b>${grade(id)}</div>
+        <p class="narrator">${H[id].nar}</p><p class="translation">${esc(H[id].tr)}</p>`;
+    },
+  } });
+})();
+</script>
+</body>
+</html>

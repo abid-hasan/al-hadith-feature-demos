@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>পার্সোনাল সাজেশন — ডেমো ৪ · কারণ মাথায়</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Home: quick-action card (as in the app) ===== */
+.pg{display:flex;flex-direction:column;flex:1;min-height:0}
+.qa{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin:14px 12px 0;padding:12px 0 10px}
+.qa-row{display:grid;grid-template-columns:repeat(4,1fr)}
+.qa-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px 8px;border-radius:10px;font-size:14px;font-weight:700;color:var(--body);line-height:1.25;text-align:center}
+.qa-tile:hover{background:var(--surface-2)}
+
+/* ===== NEW: card with a coloured header band that carries the reason ===== */
+.sg4{margin:12px 12px 16px;border-radius:20px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+.band{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--primary);color:var(--on-appbar)}
+.band svg{width:22px;height:22px;flex:none}
+.band b{display:block;font-size:15.5px}
+.band small{display:block;font-size:13px;opacity:.9}
+.sg4-body{padding:14px 16px 16px}
+.sg4-body .translation{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:var(--title);margin-top:10px}
+.sg4-body .btn{width:100%;margin-top:12px}
+.sg4-body .lead{margin:0 0 4px;font-size:15px;color:var(--title);line-height:1.6}
+
+/* ===== RoundedScaffoldBody ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.panel>.scroll{padding-top:14px}
+
+/* ===== NEW: আগ্রহের বিষয় — picked ones on top (tap a chip to remove it), all categories below with add buttons ===== */
+.lbl{margin:0 16px 8px;font-size:13.5px;font-weight:700;color:var(--hint)}
+.mine{display:flex;flex-wrap:wrap;gap:8px;margin:0 12px 18px;padding:12px;min-height:58px;border-radius:12px;background:var(--card);border:1.5px dashed var(--divider)}
+.mine .none{font-size:14px;color:var(--hint);align-self:center;padding-left:4px}
+.mchip{display:inline-flex;align-items:center;gap:4px;height:34px;padding:0 6px 0 12px;border-radius:20px;background:var(--tint);color:var(--primary-dark);font-size:14px}
+:root[data-theme="dark"] .mchip{color:var(--primary)}
+.mchip svg{width:16px;height:16px}
+.alist{background:var(--card);border-radius:var(--r-card);margin:0 12px}
+.arow{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;border-bottom:1px solid var(--divider)}
+.arow:last-child{border-bottom:0}
+.arow span{flex:1;min-width:0;font-size:15px;color:var(--title);line-height:1.4}
+.arow small{display:block;font-size:12.5px;color:var(--hint)}
+.add{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--primary);color:var(--primary);flex:none}
+.add svg{width:18px;height:18px}
+.add[aria-pressed="true"]{background:var(--primary);color:var(--on-appbar)}
+.foot{flex:none;display:flex;gap:10px;padding:10px 16px 16px;background:var(--card);border-top:1px solid var(--divider)}
+.foot .btn{flex:1}
+.foot .btn[disabled]{opacity:.45;pointer-events:none}
+
+/* ===== Settings ===== */
+.sc{background:var(--card);border-radius:8px;margin:0 12px 12px;padding:10px 15px 15px}
+.sc-head{display:flex;align-items:center;gap:12px;min-height:40px}
+.sc-head .ic{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.sc-head .ic svg{width:20px;height:20px}
+.sc-head b{flex:1;font-size:16px;color:var(--title)}
+.sc-head>svg{color:var(--hint);transform:rotate(180deg)}
+.opt{margin-top:20px}
+.opt-row{display:flex;align-items:center;justify-content:space-between}
+.opt-t{font-size:15px;color:var(--title)}
+.dd{display:flex;align-items:center;gap:8px;width:100%;margin-top:12px;height:44px;padding:0 10px 0 12px;border-radius:6px;border:1px solid var(--divider);text-align:left;font-size:15px;color:var(--primary-dark)}
+:root[data-theme="dark"] .dd{color:var(--primary)}
+.dd span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd svg{color:var(--body);flex:none}
+.cnt{min-width:24px;height:24px;padding:0 6px;border-radius:12px;display:grid;place-items:center;background:var(--primary);color:var(--on-appbar);font-size:13px}
+.radio{display:flex;align-items:center;gap:14px;width:100%;padding:12px 4px;font-size:15.5px;color:var(--title);text-align:left}
+.radio i{width:20px;height:20px;border-radius:50%;border:2px solid var(--disabled);flex:none}
+.radio[aria-checked="true"] i{border:6px solid var(--primary)}
+
+/* ===== Hadith page ===== */
+.chap{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:0 12px 10px;padding:12px var(--pad);font-size:15px;font-weight:700;color:var(--title)}
+.chap b{color:var(--primary)}
+.chap span{display:block;font-weight:400;font-size:13.5px;color:var(--body)}
+.full .narrator{color:var(--primary);font-size:15px;margin:12px 0 4px}
+.full .translation{font-size:16px;line-height:1.75;color:var(--title)}
+
+/* ===== Lock screen: expanded (big text) notification ===== */
+.lock{flex:1;display:flex;flex-direction:column;padding:28px 12px 0;background:var(--scaffold)}
+.lock .clock{font-size:58px;font-weight:700;color:var(--title);line-height:1.1;text-align:center}
+.lock .date{font-size:15px;color:var(--hint);text-align:center;margin-bottom:26px}
+.nt{display:block;width:100%;text-align:left;background:var(--card);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
+.nt-top{display:flex;align-items:center;gap:8px;padding:12px 14px 0;font-size:12.5px;color:var(--hint)}
+.nt-top img{width:20px;height:20px;border-radius:5px}
+.nt-top b{color:var(--title)}
+.nt h3{margin:8px 14px 4px;font-size:15.5px;color:var(--title)}
+.nt p{margin:0 14px;font-size:14.5px;color:var(--body);line-height:1.65}
+.nt .bar{display:block;margin-top:12px;padding:10px 14px;background:var(--tint);font-size:13.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .nt .bar{color:var(--primary)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="new" data-keep-scroll></section>
+      <section class="screen" data-screen="topics">
+        <header class="appbar"><button class="icon-btn" id="t-back" data-i="back" aria-label="পেছনে"></button><h1>আগ্রহের বিষয়</h1></header>
+        <div class="rbody"><div class="panel">
+          <div class="scroll" id="t-body"></div>
+          <div class="foot"><button class="btn" id="t-save">সেভ করুন</button></div>
+        </div></div>
+      </section>
+      <section class="screen" data-screen="home" data-keep-scroll></section>
+      <section class="screen" data-screen="hadith">
+        <header class="appbar"><button class="icon-btn" id="h-back" data-i="back" aria-label="পেছনে"></button><h1 id="h-title"></h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="h-body"></div></div></div>
+      </section>
+      <section class="screen" data-screen="settings">
+        <header class="appbar"><button class="icon-btn" data-i="back" aria-label="পেছনে" data-go="home"></button><h1>সেটিংস</h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="s-body"></div></div></div>
+      </section>
+      <section class="screen" data-screen="notif" data-status="light">
+        <div class="lock" id="lock"></div>
+      </section>
+
+      <div id="hold" hidden>
+        <div class="pg" id="pg-home">
+          <header class="appbar"><button class="icon-btn" data-i="menu" aria-label="মেনু" data-go="settings"></button><h1>আল হাদিস</h1><button class="icon-btn" data-i="search" aria-label="সার্চ" data-snack="সার্চ পেজ খুলবে — এই ফিচারের অংশ নয়"></button></header>
+          <div class="scroll" id="home-body"></div>
+        </div>
+      </div>
+
+      <div class="sheet" id="sh-time" role="dialog" aria-label="নোটিফিকেশনের সময় নির্বাচন করুন">
+        <div class="sheet-head"><h2>নোটিফিকেশনের সময় নির্বাচন করুন</h2><button class="icon-btn" data-close data-i="close" aria-label="বন্ধ করুন"></button></div>
+        <div class="sheet-body" id="time-list" style="padding-bottom:18px"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="ps_data.js"></script>
+<script>
+(function () {
+  const { $, $$, icons, bn } = Kit;
+  icons.menu = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+  const ic = (k) => icons[k] || PS.ICON[k];
+  const paint = (root = document) => $$('[data-i]', root).forEach((b) => { b.innerHTML = ic(b.dataset.i); });
+
+  /* ---------- State ---------- */
+  const S = { recent: null, bookmark: null, picked: new Set(), read: new Set(), draft: new Set(), from: 'new', hk: null, back: 'home', daily: true, time: 'সকাল ৮:০০' };
+  const asNew = () => Object.assign(S, { recent: null, bookmark: null, picked: new Set(), read: new Set() });
+  const asReturning = () => Object.assign(S, { recent: 56, bookmark: 41, picked: new Set([56, 45]), read: new Set() });
+  const head = (h) => `<div class="hadith-head"><span class="book-badge" style="background:${h.color}">${h.abbr}</span>
+      <div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${h.no}</span></div><span class="grade">সহিহ হাদিস</span></div>`;
+  function suggestion() { let s = PS.next(S); if (!s) { S.read.clear(); s = PS.next(S); } return s; }
+
+  /* ---------- Home ---------- */
+  const pg = $('#pg-home');
+  function renderHome() {
+    let card;
+    if (!PS.hasSignal(S)) {
+      card = `<section class="sg4"><div class="band">${PS.ICON.spark}<span><b>এটাও পড়তে পারেন</b><small>আপনার পছন্দের বিষয় এখনো জানা নেই</small></span></div>
+        <div class="sg4-body"><p class="lead">কয়েকটা বিষয় বেছে নিলে এখানে আর নোটিফিকেশনে সেই বিষয়ের হাদিস আসবে।</p>
+        <button class="btn" data-topics="new">${PS.ICON.tag}আগ্রহের বিষয় বাছুন</button></div></section>`;
+    } else {
+      const s = suggestion(), h = PS.HADITHS[s.k];
+      card = `<section class="sg4"><div class="band">${PS.ICON.spark}<span><b>এটাও পড়তে পারেন</b><small>${s.why}</small></span></div>
+        <div class="sg4-body">${head(h)}<p class="translation">${h.tr.replace(/\n+/g, ' ')}</p>
+        <button class="btn tonal" data-h="${s.k}">পুরো হাদিস পড়ুন</button></div></section>`;
+    }
+    $('#home-body').innerHTML = PS.qaGrid() + card;
+  }
+
+  /* ---------- আগ্রহের বিষয়: picked box + list with add buttons ---------- */
+  function renderTopics() {
+    const mine = [...S.draft].map((id) => `<button class="mchip" data-sub="${id}" aria-label="${PS.subj(id).t} বাদ দিন">${PS.subj(id).t}${icons.close}</button>`).join('');
+    $('#t-body').innerHTML = `<p class="lbl">আপনার বাছা বিষয়</p>
+      <div class="mine">${mine || '<span class="none">নিচের তালিকা থেকে যোগ করুন</span>'}</div>
+      <p class="lbl">"বিষয়ভিত্তিক হাদিস"-এর সব ক্যাটাগরি</p>
+      <div class="alist">${PS.SUBJECTS.map((s) => `<div class="arow"><span>${s.t}<small>${bn(s.n)}টি হাদিস</small></span>
+        <button class="add" data-sub="${s.id}" aria-pressed="${S.draft.has(s.id)}" aria-label="${S.draft.has(s.id) ? 'বাদ দিন' : 'যোগ করুন'}">${S.draft.has(s.id) ? icons.check : icons.plus}</button></div>`).join('')}</div>`;
+    const same = S.draft.size === S.picked.size && [...S.draft].every((x) => S.picked.has(x));
+    $('#t-save').disabled = same;
+  }
+
+  /* ---------- Hadith page ---------- */
+  function renderHadith() {
+    const h = PS.HADITHS[S.hk];
+    S.read.add(S.hk);
+    if (!S.recent) S.recent = h.subj;
+    $('#h-title').innerHTML = `${h.book}<small>হাদিস: ${h.no}</small>`;
+    $('#h-body').innerHTML = `<div class="chap"><b>অধ্যায়:</b> ${h.ch}<span>${h.sec}</span></div>
+      <article class="card full">${head(h)}<p class="narrator">${h.nar} থেকে বর্ণিত:</p>${h.tr.split(/\n+/).map((t) => `<p class="translation">${t}</p>`).join('')}</article>`;
+  }
+
+  /* ---------- Settings ---------- */
+  function renderSettings() {
+    $('#s-body').innerHTML = `<div class="sc">
+      <div class="sc-head"><span class="ic">${PS.ICON.bell}</span><b>নোটিফিকেশন সেটিংস</b>${icons.down}</div>
+      <div class="opt opt-row"><span class="opt-t">দৈনিক নোটিফিকেশন</span><button class="switch" id="sw-daily" role="switch" aria-checked="${S.daily}" aria-label="দৈনিক নোটিফিকেশন"></button></div>
+      <div class="opt"><span class="opt-t">নোটিফিকেশনের সময়</span><button class="dd" data-open="sh-time"><span>${S.time}</span>${icons.down}</button></div>
+      <div class="opt"><span class="opt-t">আগ্রহের বিষয়</span><button class="dd" data-topics="settings"><span>${S.picked.size ? [...S.picked].map(PS.short).join(', ') : 'বাছা হয়নি'}</span><b class="cnt">${bn(S.picked.size)}</b>${icons.chevron}</button></div>
+    </div>`;
+    $('#time-list').innerHTML = PS.TIMES.map((t) => `<button class="radio" data-time="${t}" aria-checked="${t === S.time}"><i></i>${t}</button>`).join('');
+  }
+
+  /* ---------- Lock screen ---------- */
+  function renderNotif() {
+    const n = PS.notif(S), h = PS.HADITHS[n.k];
+    $('#lock').innerHTML = `<div class="clock">${bn(S.time.replace(/^\S+ /, ''))}</div><div class="date">শনিবার, ১৮ অক্টোবর</div>
+      <button class="nt" data-h="${n.k}"><span class="nt-top"><img src="${PS.ICON.app}" alt=""><b>আল হাদিস</b> · এখন</span>
+        <h3>${PS.short(n.sid)} নিয়ে আজকের হাদিস</h3><p>${PS.nl(h.tr)}</p>
+        <span class="bar">${h.book} · হাদিস ${h.no}</span></button>`;
+  }
+
+  /* ---------- Navigation ---------- */
+  let internal = false;
+  const go = (id) => { internal = true; Kit.show(id); internal = false; };
+  Kit.onScreen((id) => {
+    if (id === 'new' || id === 'home') {
+      if (!internal) (id === 'new' ? asNew : asReturning)();
+      $(`.screen[data-screen="${id}"]`).appendChild(pg); renderHome(); $('#home-body').scrollTop = 0;
+    }
+    if (id === 'topics') { if (!internal) { asNew(); S.from = 'new'; S.draft = new Set(); } renderTopics(); }
+    if (id === 'hadith') { if (!internal) { asReturning(); S.hk = PS.next(S).k; S.back = 'home'; } renderHadith(); }
+    if (id === 'settings') { if (!internal) asReturning(); renderSettings(); }
+    if (id === 'notif') { if (!internal) asReturning(); renderNotif(); }
+  });
+
+  /* ---------- In-phone events ---------- */
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-topics],[data-sub],[data-h],[data-time],#t-save,#t-back,#h-back,#sw-daily');
+    if (!t || !t.closest('.phone')) return;
+    if (t.dataset.topics) { S.from = t.dataset.topics; S.draft = new Set(S.picked); return go('topics'); }
+    if (t.dataset.sub) {
+      const id = +t.dataset.sub; S.draft.has(id) ? S.draft.delete(id) : S.draft.add(id);
+      const y = $('#t-body').scrollTop; renderTopics(); $('#t-body').scrollTop = y; return;
+    }
+    if (t.id === 't-save') { S.picked = new Set(S.draft); go(S.from === 'settings' ? 'settings' : 'home'); return Kit.snack('আগ্রহের বিষয় সেভ হয়েছে'); }
+    if (t.id === 't-back') return go(S.from === 'settings' ? 'settings' : 'new');
+    if (t.dataset.h) { S.hk = t.dataset.h; S.back = Kit.current === 'notif' ? 'home' : Kit.current; return go('hadith'); }
+    if (t.id === 'h-back') return go(S.back === 'new' ? 'home' : S.back);
+    if (t.dataset.time) { S.time = t.dataset.time; Kit.close('sh-time'); renderSettings(); return Kit.snack(`নোটিফিকেশন আসবে ${S.time}`); }
+    if (t.id === 'sw-daily') { S.daily = !S.daily; t.setAttribute('aria-checked', S.daily); return Kit.snack(S.daily ? 'দৈনিক নোটিফিকেশন চালু' : 'দৈনিক নোটিফিকেশন বন্ধ'); }
+  });
+
+  paint();
+  Kit.init({ demo: 4, name: 'কারণ মাথায়', screens: [
+    { id: 'new', label: 'নতুন ইউজার' },
+    { id: 'topics', label: 'আগ্রহের বিষয়' },
+    { id: 'home', label: 'হোমে সাজেশন' },
+    { id: 'hadith', label: 'পুরো হাদিস' },
+    { id: 'settings', label: 'সেটিংস' },
+    { id: 'notif', label: 'নোটিফিকেশন' },
+  ]});
+})();
+</script>
+</body>
+</html>

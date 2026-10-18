@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সহযোগী অ্যাপের সাথে লিংক — ডেমো ৫ · রঙিন ব্যানার</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): scroll body, details page, hadith card ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+/* Details page: HadithFancyAppBar over RoundedScaffoldBody */
+.screen.rs{background:var(--appbar)}
+.rbody{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.rbody .body{padding-top:16px}
+/* Chapter card (HadithSectionListItem) */
+.sc{padding:12px 16px}
+.sc small{display:block;font-size:12.5px;color:var(--hint)}
+.sc b{display:block;font-size:15.5px;color:var(--title)}
+/* Hadith card (HadithListItem): head, narrator in primary, translation */
+.hc{padding:12px 14px 14px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 6px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+.btn.sm{height:34px;padding:0 10px;font-size:14px}
+.btn.sm svg{width:17px;height:17px}
+
+/* ===== Partner app icon (neutral, not a grade colour) ===== */
+.pic{width:var(--s);height:var(--s);flex:none;display:grid;place-items:center;border-radius:calc(var(--s) * .26);background:var(--title);color:var(--card)}
+.pic svg{width:58%;height:58%}
+
+/* ===== Partner app screen (another app: flat bar, its own reading card) ===== */
+.pbar{gap:10px;padding-left:16px}
+.pbar h1{margin-left:0}
+.pc{padding:18px 16px}
+.ptag{font-size:12.5px;font-weight:700;color:var(--hint)}
+.ph{margin:4px 0 8px;font-size:19px;line-height:1.4;color:var(--title)}
+.pb{margin:0 0 14px;font-size:15px;line-height:1.75}
+.pq{margin:0;padding:12px 14px;border-left:3px solid var(--divider);background:var(--surface-2);border-radius:0 8px 8px 0}
+.pq p{margin:0 0 8px;font-size:15px;line-height:1.7;color:var(--title)}
+.plink{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--title);text-decoration:underline;text-underline-offset:3px}
+.plink svg{width:16px;height:16px}
+
+/* ===== Store page (phone's store) ===== */
+.st-head{display:flex;gap:16px;align-items:center;padding:20px 16px 8px}
+.st-head h2{margin:0;font-size:20px;color:var(--title)}
+.st-head p{margin:2px 0 0;font-size:13.5px;color:var(--hint)}
+.st-act{padding:12px 16px 4px}
+.st-about{margin:0 16px;font-size:14.5px;line-height:1.7}
+
+/* ===== Website hadith page (browser) ===== */
+.br{flex:none;display:flex;align-items:center;gap:4px;padding:6px 12px 8px 4px;background:var(--surface-2);border-bottom:1px solid var(--divider);color:var(--title)}
+.br-url{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:20px;background:var(--card);font-size:14px;color:var(--body)}
+.br-url svg{color:var(--hint)}
+.site{display:flex;align-items:center;gap:10px;padding:4px 16px 14px;font-size:17px;font-weight:700;color:var(--title)}
+.site .book-badge{width:30px;height:30px}
+.site .book-badge svg{width:15px;height:15px}
+/* ===== Demo 5: a tinted banner with the paired item and a full button ===== */
+.pbn{margin:0 12px 10px;padding:16px;border-radius:14px;background:var(--tint);border:1px solid var(--divider)}
+.pbn-top{display:flex;align-items:center;gap:12px}
+.pbn-top small{display:block;font-size:12.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .pbn-top small{color:var(--primary)}
+.pbn-top b{display:block;font-size:17px;color:var(--title)}
+.pbn-item{margin:12px 0 14px;padding:10px 12px;border-radius:10px;background:var(--card);font-size:15px;color:var(--title)}
+.pbn-item span{display:block;font-size:12.5px;color:var(--hint)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="partner" data-status="light"></section>
+      <section class="screen rs" data-screen="details"></section>
+      <section class="screen" data-screen="store" data-status="light"></section>
+      <section class="screen" data-screen="web" data-status="light"></section>
+
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, state, the flow and screen
+   wiring. Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const EXT = svg('<path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/>', 18);
+const LOCK = svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>', 15);
+const MOON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3.5a8.5 8.5 0 1 0 5.5 14.4A7 7 0 0 1 15 3.5z" fill="currentColor"/></svg>';
+/* Partner app icon: a neutral tile, the real icon comes with the partner's data */
+const pIcon = (s) => `<span class="pic" style="--s:${s}px">${MOON}</span>`;
+
+/* ---------- The linked hadith (safe list, Bangla only) ---------- */
+const H = { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1, bab: 'রাসূলুল্লাহ (সাঃ)-এর প্রতি ওহী কীভাবে শুরু হয়েছিল',
+  grade: 'সহিহ হাদিস', nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত',
+  text: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' };
+/* ---------- The partner app and the item paired with this hadith.
+   Which apps become partners is a product call; the pair comes as verified data. ---------- */
+const P = { name: 'মুসলিম ডে', tag: 'আজকের শিক্ষা', item: 'নিয়ত ঠিক করার অভ্যাস',
+  body: 'দিনের প্রতিটা কাজ শুরুর আগে একটু থেমে ভাবুন, কাজটা কার জন্য করছেন। ছোট কাজও ভালো নিয়তে করলে তা ইবাদত হয়ে ওঠে।',
+  about: 'দৈনন্দিন আমল, দোয়া আর ইসলামিক শিক্ষার অ্যাপ' };
+const ROW = 'সহযোগী অ্যাপে দেখুন';
+
+/* ---------- State: which apps are on the phone (toolbar toggles) ---------- */
+const S = { app: true, partner: true };
+const SCREENS = [
+  { id: 'partner', label: 'সহযোগী অ্যাপ' },
+  { id: 'details', label: 'হাদিসের বিস্তারিত' },
+  { id: 'store', label: 'স্টোর পেজ' },
+  { id: 'web', label: 'ওয়েবসাইট' },
+];
+const EXTRA = '<button class="kit-chip" type="button" data-x="app">আল হাদিস ইনস্টল করা</button><button class="kit-chip" type="button" data-x="partner">সহযোগী অ্যাপ ইনস্টল করা</button>';
+
+/* ---------- Shared markup ---------- */
+function hadithCard(foot = '') {
+  return `<article class="card hc"><div class="hadith-head"><span class="book-badge">${H.abbr}</span><div class="hadith-meta"><b>${H.book}</b><span>হাদিস: ${bn(H.no)}</span></div><span class="grade">${H.grade}</span></div>
+    <p class="narrator">${H.nar}</p><p class="translation">${H.text}</p>${foot}</article>`;
+}
+/* Partner app: a reading card that quotes the hadith and links to it (#22 link) */
+function partnerHTML() {
+  return `<header class="appbar flat pbar">${pIcon(30)}<h1>${P.name}</h1></header>
+    <div class="body"><article class="card pc"><span class="ptag">${P.tag}</span><h2 class="ph">${P.item}</h2><p class="pb">${P.body}</p>
+      <blockquote class="pq"><p>"${H.text}"</p><button class="plink" data-act="link">${icons.link}${H.book}, হাদিস ${bn(H.no)}</button></blockquote></article></div>`;
+}
+/* Al Hadith: the details page the link opens, with this demo's partner row */
+function detailsHTML() {
+  return `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="home">${icons.back}</button><h1>${H.book}<small>হাদিস: ${bn(H.no)}</small></h1></header>
+    <div class="rbody"><div class="body${D.float ? ' pad' : ''}"><div class="card sc"><small>অধ্যায়</small><b>${H.bab}</b></div>
+      ${hadithCard(D.foot ? D.foot() : '')}${D.row ? D.row() : ''}</div>${D.float ? D.float() : ''}</div>`;
+}
+/* Phone's store page when the partner app is missing */
+function storeHTML() {
+  return `<header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-go="details">${icons.back}</button><h1>স্টোর</h1></header>
+    <div class="body"><div class="st-head">${pIcon(72)}<div><h2>${P.name}</h2><p>${P.about}</p></div></div>
+      <div class="st-act">${S.partner ? '<button class="btn block" data-act="openp">খুলুন</button>' : '<button class="btn block" data-act="install">ইনস্টল</button>'}</div>
+      <h3 class="section-title">এই অ্যাপ সম্পর্কে</h3><p class="st-about">প্রতিদিনের আমল, দোয়া আর ছোট ছোট ইসলামিক শিক্ষা এক জায়গায়।</p></div>`;
+}
+/* Website: the same hadith in the browser when Al Hadith is missing */
+function webHTML() {
+  return `<div class="br"><button class="icon-btn" aria-label="পেছনে" data-go="partner">${icons.back}</button><div class="br-url">${LOCK}<span>আল হাদিস ওয়েবসাইট</span></div></div>
+    <div class="body"><div class="site"><span class="book-badge">${icons.book}</span>আল হাদিস</div>${hadithCard()}</div>`;
+}
+const VIEW = { partner: partnerHTML, details: detailsHTML, store: storeHTML, web: webHTML };
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (sec && VIEW[id]) sec.innerHTML = VIEW[id]();
+  const sh = $('#sheet-partner');
+  if (sh && D.sheet) sh.innerHTML = D.sheet();
+}
+function syncExtra() { $$('[data-x]').forEach((b) => b.setAttribute('aria-pressed', String(S[b.dataset.x]))); }
+function onScreen(id) {
+  // A toolbar chip can open any screen: set the phone state that screen needs.
+  if (id === 'details') S.app = true;
+  if (id === 'web') S.app = false;
+  if (id === 'store') S.partner = false;
+  syncExtra();
+  render(id);
+}
+
+/* ---------- Flow ---------- */
+const ACT = {
+  // 1. Partner app link: Al Hadith opens the hadith, or the website if it is missing
+  link: () => Kit.show(S.app ? 'details' : 'web'),
+  // 5. Back on a hadith opened from a link goes to the app's home
+  home: () => Kit.snack('অ্যাপের হোম খুলবে'),
+  // 3-4. Partner row: open the partner app at that item, or its store page
+  partner: () => Kit.show(S.partner ? 'partner' : 'store'),
+  install: () => { S.partner = true; syncExtra(); render('store'); Kit.snack('ইনস্টল হয়েছে'); },
+  openp: () => Kit.show('partner'),
+};
+document.addEventListener('click', (e) => {
+  const x = e.target.closest('[data-x]');
+  if (x) { S[x.dataset.x] = !S[x.dataset.x]; syncExtra(); render(Kit.current); return; }
+  const t = e.target.closest('[data-act]');
+  if (t) ACT[t.dataset.act]?.(t);
+});
+/* ======================================================================
+   DEMO 5 — রঙিন ব্যানার: a tinted banner under the hadith that names the
+   app and the paired item, with one full-width button.
+   ====================================================================== */
+const D = {
+  row: () => `<section class="pbn"><div class="pbn-top">${pIcon(46)}<div><small>সহযোগী অ্যাপ</small><b>${P.name}</b></div></div>
+    <p class="pbn-item"><span>${P.tag}</span>${P.item}</p><button class="btn block" data-act="partner">${ROW}${EXT}</button></section>`,
+};
+Kit.onScreen(onScreen);
+Kit.init({ demo: 5, name: 'রঙিন ব্যানার', extra: EXTRA, screens: SCREENS });
+D.boot?.();
+</script>
+</body>
+</html>

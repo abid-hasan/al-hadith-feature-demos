@@ -1,0 +1,62 @@
+/* =====================================================================
+   ছবি তুলে হাদিস যাচাই — shared styles for demo1..demo5:
+   the home quick actions (context) and the phone's own system UI
+   (photo picker, camera, permission dialog, gallery + Android share list).
+   These are not app screens, so every demo shows them the same way.
+   ===================================================================== */
+
+/* ---------- Home quick actions (HomeSmallDashboard: 4 per row, radius 20) ---------- */
+.qa{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin:14px 12px;padding:12px 0 10px}
+.qa-row{display:grid;grid-template-columns:repeat(4,1fr)}
+.qa-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px 8px;border-radius:10px;font-size:14px;font-weight:700;color:var(--body)}
+.qa-tile:hover{background:var(--surface-2)}
+.qa-tile.go{outline:2px dashed var(--primary);outline-offset:-4px}
+
+/* ---------- Waiting spinner ---------- */
+.spin{display:inline-block;width:18px;height:18px;flex:none;border-radius:50%;border:2.5px solid var(--divider);border-top-color:var(--primary);animation:psv-sp .8s linear infinite}
+@keyframes psv-sp{to{transform:rotate(360deg)}}
+
+/* ---------- System photo picker ---------- */
+.gp{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding-bottom:16px}
+.gp button{position:relative;aspect-ratio:3/4;overflow:hidden;border-radius:4px;background:var(--surface-2)}
+.gp small{position:absolute;left:0;right:0;bottom:0;padding:10px 6px 4px;font-size:11.5px;color:white;background:linear-gradient(transparent,rgba(0,0,0,.55));text-align:left}
+.gp-when{font-size:13px;color:var(--hint);margin:2px 0 8px}
+
+/* ---------- System camera ---------- */
+.sheet.cam{max-height:100%;height:100%;border-radius:0;background:black;color:white}
+.cam .vf{position:relative;flex:1;min-height:0;overflow:hidden}
+.cam .vf-img{position:absolute;inset:0}
+.cam .frame{position:absolute;inset:40px 26px 90px;border:2px solid rgba(255,255,255,.85);border-radius:12px;box-shadow:0 0 0 999px rgba(0,0,0,.25)}
+.cam .tip{position:absolute;left:0;right:0;bottom:44px;text-align:center;font-size:14px;text-shadow:0 1px 3px black}
+.cam .top{position:absolute;top:8px;left:8px;z-index:2;color:white}
+.cam .bar{flex:none;height:120px;display:grid;place-items:center}
+.shutter{width:70px;height:70px;border-radius:50%;border:4px solid white;background:rgba(255,255,255,.25)}
+.shutter:active{background:white}
+
+/* ---------- System permission dialog ---------- */
+.dialog.perm{left:30px;right:30px;border-radius:24px;text-align:center}
+.perm .ico{width:40px;height:40px;margin:0 auto 10px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.perm h2{font-size:16.5px;line-height:1.45}
+.perm .actions{flex-direction:column;align-items:stretch;gap:6px}
+.perm .actions .btn{height:44px;border-radius:22px}
+
+/* ---------- Gallery app + Android share list (outside the app) ---------- */
+.screen.gal{background:black;color:white}
+.gal .gtop{flex:none;height:52px;display:flex;align-items:center;padding:0 6px}
+.gal .gimg{flex:1;min-height:0;display:grid;place-items:center;padding:0 20px 120px}
+.gal .gimg>div{width:100%;aspect-ratio:300/440;max-height:100%}
+.gal .gbot{flex:none;display:flex;justify-content:space-around;height:60px;align-items:center;opacity:.9}
+.ash{position:absolute;left:0;right:0;bottom:0;z-index:5;background:var(--card);color:var(--title);border-radius:24px 24px 0 0;padding:10px 16px 22px;box-shadow:0 -6px 24px rgba(0,0,0,.3)}
+.ash .grab{width:36px;height:4px;border-radius:4px;background:var(--divider);margin:0 auto 12px}
+.ash .pv{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+.ash .pv>div{width:44px;height:58px;border-radius:6px;overflow:hidden;flex:none}
+.ash .pv b{display:block;font-size:15px}
+.ash .pv span{font-size:13px;color:var(--hint)}
+.apps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.app{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px;border-radius:12px;font-size:12.5px;color:var(--body);line-height:1.3;text-align:center}
+.app i{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--body)}
+.app.me{background:var(--tint);color:var(--title);font-weight:700}
+.app.me i{background:var(--card)}
+
+/* ---------- Not-found illustration (NoSearchResultFound) ---------- */
+.nf-ill{display:block;margin:0 auto}

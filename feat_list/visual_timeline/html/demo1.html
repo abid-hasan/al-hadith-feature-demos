@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ভিজ্যুয়াল টাইমলাইন — ডেমো ১ · অ্যাপের ধরন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== RoundedScaffoldBody (green behind, radius-20 panel) ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.panel>.scroll{padding-top:12px}
+.icon-btn svg{flex:none}
+
+/* ===== Era buttons: the app's segmented look (border primary, filled when on) ===== */
+.seg{flex:none;display:flex;height:46px;margin:14px 14px 4px;padding:3px 4px;border:1.5px solid var(--primary);border-radius:10px;background:var(--card)}
+.seg button{flex:1;border-radius:7px;font-size:14.5px;font-weight:700;color:var(--body)}
+.seg button[aria-pressed="true"]{background:var(--primary);color:var(--on-appbar)}
+
+/* ===== Timeline: one line top to bottom, a dot per event ===== */
+.era-h{display:flex;align-items:baseline;gap:8px;margin:8px 16px 8px 52px;font-size:16px;font-weight:700;color:var(--title)}
+.era-h span{font-size:12.5px;font-weight:400;color:var(--hint)}
+.tl{position:relative;padding:0 12px 0 0}
+.tl::before{content:"";position:absolute;left:27px;top:0;bottom:0;width:2px;background:var(--divider)}
+.ev{position:relative;display:flex;align-items:flex-start;gap:12px;padding-left:16px;margin-bottom:10px}
+.dot{position:relative;z-index:1;flex:none;width:24px;height:24px;margin-top:14px;border-radius:50%;display:grid;place-items:center;background:var(--scaffold)}
+.dot::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 3px var(--tint)}
+.evc{flex:1;min-width:0;display:block;text-align:left;margin:0;padding:12px 14px}
+.evc .yr{font-size:13.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .evc .yr{color:var(--primary)}
+.evc b{display:block;margin-top:2px;font-size:16px;color:var(--title)}
+.evc .row{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13.5px;color:var(--body)}
+.evc .row span{display:inline-flex;align-items:center;gap:3px;flex:1;min-width:0}
+.evc .row svg{width:15px;height:15px;color:var(--hint);flex:none}
+.cnt{flex:none;font-size:12.5px;font-weight:700;padding:1px 9px;border-radius:20px;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .cnt{color:var(--primary)}
+.ev.flash .evc{box-shadow:0 0 0 2px var(--primary)}
+.ev.flash .dot::after{animation:pulse 1.2s ease-out 2}
+@keyframes pulse{0%{box-shadow:0 0 0 3px var(--tint)}60%{box-shadow:0 0 0 12px transparent}100%{box-shadow:0 0 0 3px var(--tint)}}
+
+/* ===== Event's hadith list: hadith cards (HadithListItem head + narrator + section) ===== */
+.ev-sum{margin:0 16px 10px;font-size:14px;color:var(--hint)}
+.ev-sum b{color:var(--title)}
+.hcx{display:block;width:calc(100% - 24px);text-align:left}
+.hcx .narrator{color:var(--primary);font-size:15px;margin:10px 0 2px}
+.hcx .sec-l{margin:4px 0 0;font-size:14px;color:var(--body)}
+.hcx .sec-l b{color:var(--title);font-weight:700}
+
+/* ===== Chapter page + details page (app) with the new time line ===== */
+.sec{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:0 12px 10px;padding:12px var(--pad);font-size:15px;font-weight:700;color:var(--title)}
+.sec b{color:var(--primary)}
+.sec span{display:block;font-weight:400;font-size:13.5px;color:var(--body)}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+.hc[data-act="card"]{cursor:pointer}
+.when{display:flex;align-items:center;gap:8px;width:100%;margin-top:12px;padding-top:10px;border-top:1px solid var(--divider);text-align:left;font-size:14px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .when{color:var(--primary)}
+.when span{flex:1;min-width:0}
+.when svg{width:18px;height:18px;flex:none}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos); filled by render() ===== -->
+      <section class="screen" data-screen="home"></section>
+      <section class="screen" data-screen="timeline"></section>
+      <section class="screen" data-screen="event"></section>
+      <section class="screen" data-screen="chapter"></section>
+      <section class="screen" data-screen="detail"></section>
+      <section class="screen" data-screen="jump"></section>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="timeline_data.js"></script>
+<script>
+  const T = window.TL, S = T.S, I = Kit.icons, bn = Kit.bn, $ = Kit.$, $$ = Kit.$$;
+  const back = () => `<button class="icon-btn" data-act="back" aria-label="পেছনে">${I.back}</button>`;
+  const shell = (title, body, top = '') => `<header class="appbar">${back()}<h1>${title}</h1></header>
+    <div class="rbody"><div class="panel">${top}<div class="scroll">${body}</div></div></div>`;
+  const head = (h) => `<div class="hadith-head"><span class="book-badge">বুখারী</span><div class="hadith-meta"><b>সহীহ বুখারী</b><span>হাদিস: ${bn(h.no)}</span></div><span class="grade">${T.GRADE}</span></div>`;
+  const whenRow = (hk) => `<button class="when" data-act="tl" data-ev="${T.H[hk].ev}">${T.ICON.clock(18)}<span>${T.timeLine(hk)}</span>${I.chevron}</button>`;
+
+  /* ---------- Home ---------- */
+  const homeView = () => `<header class="appbar"><h1 style="margin-left:12px">আল হাদিস</h1></header><div class="scroll">${T.homeHTML()}</div>`;
+
+  /* ---------- Timeline: era buttons on top, then the line with one dot per event ---------- */
+  function timelineView() {
+    const top = `<div class="seg">${T.ERAS.map((e) => `<button data-act="era" data-era="${e.id}" aria-pressed="${e.id === 'makki'}">${e.name}</button>`).join('')}</div>`;
+    const body = T.ERAS.map((era) => `<div class="era-h" data-era-start="${era.id}">${era.name}<span>${era.span}</span></div>
+      <div class="tl">${T.EVENTS.filter((e) => e.era === era.id).map((e) => `<div class="ev" data-ev-row="${e.id}"><span class="dot"></span>
+        <button class="card evc" data-act="ev" data-id="${e.id}"><span class="yr">${e.year}</span><b>${e.name}</b>
+          <span class="row"><span>${T.ICON.pin(15)}${e.place}</span><span class="cnt">${bn(e.hadith.length)}টি হাদিস</span></span></button></div>`).join('')}</div>`).join('');
+    return shell('টাইমলাইন', body + '<div style="height:200px"></div>', top);
+  }
+
+  /* ---------- One event: its hadith cards ---------- */
+  function eventView() {
+    const e = T.evById(S.ev);
+    const body = `<p class="ev-sum"><b>${bn(e.hadith.length)}টি হাদিস</b> · সহীহ বুখারী</p>${e.hadith.map((hk) => { const h = T.H[hk]; return `<button class="card hcx" data-act="hadith" data-h="${hk}">
+      ${head(h)}<p class="narrator">${h.nar} থেকে বর্ণিত</p><p class="sec-l"><b>পরিচ্ছেদ:</b> ${h.sec}</p></button>`; }).join('')}`;
+    return shell(`${e.name}<small>${e.year} · ${e.place}</small>`, body);
+  }
+
+  /* ---------- Chapter page (app): the card now carries the time line ---------- */
+  function chapterView() {
+    const h = T.H.b1;
+    const body = `<div class="sec"><b>অধ্যায়:</b> ${h.sec}<span>${h.ch}</span></div>
+      <article class="card hc" data-act="card" data-h="b1">${head(h)}<p class="narrator">${h.nar} থেকে বর্ণিত:</p>${T.paras(h.text)}${whenRow('b1')}</article>`;
+    return shell(`সহীহ বুখারী<small>${h.ch}</small>`, body);
+  }
+
+  /* ---------- Hadith details page (app) with the time line ---------- */
+  function detailView() {
+    const h = T.H[S.hk];
+    const body = `<article class="card hc">${head(h)}<p class="narrator">${h.nar} থেকে বর্ণিত:</p>${T.paras(h.text)}${whenRow(S.hk)}</article>
+      <div class="sec"><b>অধ্যায়:</b> ${h.ch}<span>${h.sec}</span></div>`;
+    return shell(`সহীহ বুখারী<small>হাদিস: ${bn(h.no)}</small>`, body);
+  }
+
+  /* ---------- Navigation: back goes where the user came from ---------- */
+  const VIEWS = { home: homeView, timeline: timelineView, jump: timelineView, event: eventView, chapter: chapterView, detail: detailView };
+  const DEF_BACK = { timeline: 'home', jump: 'detail', event: 'timeline', chapter: 'home', detail: 'chapter' };
+  const backTo = {};
+  let internal = false, goingBack = false;
+  const go = (id) => { if (!goingBack && Kit.current !== id) backTo[id] = Kit.current; internal = true; Kit.show(id); internal = false; };
+  function afterTimeline(id) {
+    const box = $(`.screen[data-screen="${id}"] .scroll`);
+    T.watchEra(box, (era) => $$(`.screen[data-screen="${id}"] [data-era]`).forEach((b) => b.setAttribute('aria-pressed', b.dataset.era === era)));
+    if (S.focus) {
+      const row = $(`.screen[data-screen="${id}"] [data-ev-row="${S.focus}"]`);
+      requestAnimationFrame(() => { T.scrollTo(box, row, 40, false); row.classList.add('flash'); });
+    } else if (goingBack && S.top) box.scrollTop = S.top; // back from an event: same place in the line
+  }
+  Kit.onScreen((id) => {
+    if (!internal) { delete backTo[id]; if (id === 'event') S.ev = 'wada'; if (id === 'detail') S.hk = 'b1'; if (id === 'jump') S.focus = 'hijrah'; }
+    if (id === 'timeline') S.focus = null;
+    $(`.screen[data-screen="${id}"]`).innerHTML = VIEWS[id]();
+    if (id === 'timeline' || id === 'jump') afterTimeline(id);
+  });
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-act]');
+    if (!t || !t.closest('.phone')) return;
+    const a = t.dataset.act;
+    if (a === 'home-tl') go('timeline');
+    else if (a === 'back') { const id = Kit.current; goingBack = true; go(backTo[id] || DEF_BACK[id]); goingBack = false; }
+    else if (a === 'era') T.scrollTo(t.closest('.panel').querySelector('.scroll'), t.closest('.panel').querySelector(`[data-era-start="${t.dataset.era}"]`));
+    else if (a === 'ev') { S.top = t.closest('.scroll').scrollTop; S.ev = t.dataset.id; go('event'); }
+    else if (a === 'hadith') T.openHadith(t.dataset.h, go);
+    else if (a === 'tl') { e.stopPropagation(); S.focus = t.dataset.ev; go('jump'); }
+    else if (a === 'card') { S.hk = t.dataset.h; go('detail'); }
+  });
+
+  Kit.init({ demo: 1, name: 'অ্যাপের ধরন', screens: T.SCREENS });
+</script>
+</body>
+</html>

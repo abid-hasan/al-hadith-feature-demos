@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>মাল্টি-ল্যাঙ্গুয়েজ অনুবাদ — ডেমো ৪ · টাইলের গ্রিড</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): scroll body, chapter card, hadith card ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.appbar h1{margin-left:4px}
+/* ===== Chapter section card (HadithSectionListItem) ===== */
+.sc{padding:12px 16px}
+.sc small{display:block;font-size:12.5px;color:var(--hint)}
+.sc b{display:block;font-size:15.5px;color:var(--title)}
+/* ===== Hadith card (HadithListItem): top bar, narrator in primary, translation ===== */
+.hc{padding:12px 14px 14px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 6px}
+.hc .translation{font-size:16px;color:var(--title)}
+/* ===== Sheet pieces used by most demos ===== */
+.sh-sub{display:block;font-size:12.5px;font-weight:400;color:var(--hint)}
+.lrow{display:flex;align-items:center;gap:12px;width:100%;min-height:50px;padding:8px 4px;border-bottom:1px solid var(--divider);text-align:left;color:var(--title);font-size:15.5px}
+.lrow:last-child{border-bottom:0}
+.lrow .tick{margin-left:auto;color:var(--primary);width:22px;height:22px}
+.swrow{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;text-align:left}
+.swrow b{display:block;font-size:15.5px;color:var(--title)}
+.swrow small{display:block;font-size:13px;color:var(--hint);font-weight:400}
+.swrow .switch{margin-left:auto}
+/* ===== Demo 4 — টাইলের গ্রিড: bottom sheet with a two-column tile grid; in side mode tiles get ১ / ২ badges; second translation in a nested card with a label bar ===== */
+/* ---------- App bar: square language button with the language code ---------- */
+.lsq{display:grid;place-items:center;min-width:40px;height:34px;padding:0 8px;border-radius:9px;border:1.5px solid rgba(255,255,255,.7);color:var(--on-appbar);font-size:13px;font-weight:700;flex:none;margin-right:4px}
+/* ---------- Sheet: slot switcher (side mode) and a two-column tile grid ---------- */
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:12px;background:var(--surface-2);border:1px solid var(--divider);margin:4px 0 12px}
+.seg button{height:38px;border-radius:9px;font-size:14px;color:var(--body)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--title);font-weight:700;box-shadow:var(--shadow)}
+.seg b{color:var(--primary)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:6px}
+.tile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:12px;border-radius:14px;border:1.5px solid var(--divider);background:var(--card);text-align:left;color:var(--title);font-size:15px;min-height:96px}
+.tile i{font-style:normal;display:grid;place-items:center;min-width:38px;height:38px;padding:0 6px;border-radius:12px;background:var(--surface-2);color:var(--body);font-size:13.5px;font-weight:700}
+.tile[aria-pressed="true"]{border-color:var(--primary);background:var(--tint)}
+.tile[aria-pressed="true"] i{background:var(--primary);color:var(--on-appbar)}
+.tile .bdg{position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:var(--on-appbar);font-size:13px;font-weight:700}
+.tile .bdg.two{background:var(--card);color:var(--primary);border:1.5px solid var(--primary)}
+.swrow{border-bottom:1px solid var(--divider);margin-bottom:12px}
+/* ---------- Second translation: nested card with a tinted label bar ---------- */
+.nc{margin-top:12px;border-radius:10px;border:1px solid var(--divider);overflow:hidden}
+.nc-h{display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;background:var(--tint);color:var(--primary-dark);font-size:13px;font-weight:700}
+:root[data-theme="dark"] .nc-h{color:var(--primary)}
+.nc .translation{margin:0;padding:10px 12px 12px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="reading"></section>
+      <section class="screen" data-screen="language"></section>
+      <section class="screen" data-screen="side"></section>
+      <section class="screen" data-screen="compare"></section>
+      <!-- ===== Language sheet (filled by D.sheet) ===== -->
+      <div class="sheet" id="sheet-lang" role="dialog" aria-label="অনুবাদের ভাষা"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, state, the flow and screen
+   wiring. Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+/* Translate icon: the language button */
+const LANG_IC = (w = 18) => svg('<path d="M4 5h9M8.5 3v2M6 5c.5 3 2.5 5.5 5 7M11 5c-.7 3.4-3 6.4-6.5 8"/><path d="M12.5 21l4-9 4 9M14 17.5h5"/>', w);
+
+/* ---------- The five translation languages. Urdu and Arabic are written in
+   Bangla here: the demos show no Arabic-script text, so their translation
+   text is not part of the demo data (picking them shows a snackbar). ---------- */
+const LANGS = [
+  { id: 'bn', name: 'বাংলা', code: 'বাং' },
+  { id: 'en', name: 'English', code: 'EN' },
+  { id: 'id', name: 'Bahasa Indonesia', code: 'ID' },
+  { id: 'ur', name: 'উর্দু', code: 'উর্দু' },
+  { id: 'ar', name: 'আরবি', code: 'আরবি' },
+];
+const L = (id) => LANGS.find((l) => l.id === id);
+const HAS_TEXT = (id) => id === 'bn' || id === 'en' || id === 'id';
+
+/* ---------- The chapter being read (safe-list hadith only) ---------- */
+const BOOK = { name: 'সহীহ বুখারী', abbr: 'বুখারী', kitab: 'আদব' };
+const HADITH = [
+  { no: 6018,
+    bab: { bn: 'যে আল্লাহ ও শেষ দিনে বিশ্বাস রাখে, সে যেন প্রতিবেশীকে কষ্ট না দেয়', en: 'Whoever believes in Allah and the Last Day must not harm his neighbour', id: 'Barang siapa beriman kepada Allah dan hari akhir, janganlah menyakiti tetangganya' },
+    nar: { bn: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', en: 'Narrated by Abu Hurairah', id: 'Dari Abu Hurairah' },
+    t: { bn: 'যে ব্যক্তি আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।',
+      en: 'Whoever believes in Allah and the Last Day should speak good or keep silent.',
+      id: 'Barang siapa beriman kepada Allah dan hari akhir, hendaklah ia berkata baik atau diam.' } },
+  { no: 6116,
+    bab: { bn: 'রাগ থেকে বেঁচে থাকা', en: 'Beware of anger', id: 'Berhati-hati dari marah' },
+    nar: { bn: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', en: 'Narrated by Abu Hurairah', id: 'Dari Abu Hurairah' },
+    t: { bn: 'এক ব্যক্তি নবী (সাঃ)-কে বলল, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বলল, তিনি প্রতিবারই বললেন, রাগ করো না।',
+      en: 'A man said to the Prophet (peace be upon him), "Advise me." He said, "Do not become angry." The man asked again several times, and each time he said, "Do not become angry."',
+      id: 'Seorang laki-laki berkata kepada Nabi (shallallahu alaihi wa sallam), "Berilah aku nasihat." Beliau bersabda, "Jangan marah." Orang itu mengulanginya beberapa kali, dan beliau tetap bersabda, "Jangan marah."' } },
+];
+
+/* ---------- State. Applied: lang (first translation), side, second.
+   Draft (inside the sheet): dSide, dFirst, dSecond — applied on "ঠিক আছে".
+   Saved across launches in the app; here it lives for the page. ---------- */
+const S = { lang: 'bn', side: false, second: 'en', dSide: false, dFirst: 'bn', dSecond: 'en', internal: false };
+const SCREENS = [
+  { id: 'reading', label: 'হাদিস পড়া' },
+  { id: 'language', label: 'ভাষা বাছাই' },
+  { id: 'side', label: 'পাশাপাশি চালু' },
+  { id: 'compare', label: 'মিলিয়ে পড়া' },
+];
+const EXTRA = '';
+const OPEN = (id) => id === 'language' || id === 'side';
+const other = (id) => (id === 'bn' ? 'en' : 'bn');
+const nowLabel = () => (S.side ? `${L(S.lang).name} + ${L(S.second).name}` : L(S.lang).name);
+
+/* ---------- Shared markup: chapter card, hadith card, reading list ---------- */
+function cardHTML(h) {
+  const l = S.lang;
+  const sec = S.side && S.second !== l && h.t[S.second] ? D.second(L(S.second), h.t[S.second]) : '';
+  return `<div class="card sc"><small>অধ্যায়</small><b>${h.bab[l]}</b></div>
+    <article class="card hc"${sec ? ' data-two' : ''}>
+    <div class="hadith-head"><span class="book-badge">${BOOK.abbr}</span><div class="hadith-meta"><b>${BOOK.name}</b><span>হাদিস: ${bn(h.no)}</span></div><span class="grade">সহিহ হাদিস</span></div>
+    <p class="narrator">${h.nar[l]}</p>${D.first ? D.first(L(l), h.t[l], !!sec) : `<p class="translation">${h.t[l]}</p>`}${sec}</article>`;
+}
+function readingHTML() {
+  return `${D.appbar()}<div class="body">${HADITH.map(cardHTML).join('')}</div>`;
+}
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  sec.innerHTML = OPEN(id) && D.page ? D.page() : readingHTML();
+}
+function fillSheet() {
+  const sh = $('#sheet-lang');
+  if (sh && D.sheet) sh.innerHTML = D.sheet();
+}
+function onScreen(id) {
+  // A toolbar chip opens a screen from a known state; taps inside the phone keep theirs.
+  if (!S.internal) {
+    S.lang = 'bn'; S.second = 'en';
+    S.side = id === 'compare';
+    S.dSide = id === 'side'; S.dFirst = 'bn'; S.dSecond = 'en';
+  }
+  S.internal = false;
+  render(id);
+  if (OPEN(id) && D.sheet) { fillSheet(); Kit.open('sheet-lang'); }
+  D.after?.(id);
+}
+function go(id) { S.internal = true; if (Kit.current === id) onScreen(id); else Kit.show(id); }
+const base = () => (S.side ? 'compare' : 'reading');
+function rerender() { render(Kit.current); if (OPEN(Kit.current)) fillSheet(); D.after?.(Kit.current); }
+
+/* ---------- Actions ---------- */
+const noText = (id) => Kit.snack(`${L(id).name} অনুবাদের লেখা এই ডেমোতে রাখা হয়নি`);
+const ACT = {
+  // Language button: opens the sheet with the applied state as the draft.
+  open: () => {
+    S.dSide = S.side; S.dFirst = S.lang; S.dSecond = S.second;
+    go(S.side ? 'side' : 'language');
+  },
+  // Single mode: picking a language applies at once and closes.
+  lang: (t) => {
+    const id = t.dataset.id;
+    if (!HAS_TEXT(id)) { noText(id); return; }
+    S.lang = id; S.side = false;
+    go('reading');
+  },
+  // "পাশাপাশি পড়ুন": on = choose two languages, off = back to one translation at once.
+  side: () => {
+    if (S.dSide) {
+      S.dSide = false; S.side = false;
+      go('language');
+      return;
+    }
+    S.dSide = true; S.dFirst = S.lang;
+    S.dSecond = S.second !== S.lang ? S.second : other(S.lang);
+    go('side');
+  },
+  first: (t) => pickPair('dFirst', 'dSecond', t.dataset.id),
+  second: (t) => pickPair('dSecond', 'dFirst', t.dataset.id),
+  ok: () => {
+    if (!S.dSide) { go(base()); return; }
+    S.lang = S.dFirst; S.second = S.dSecond; S.side = true;
+    go('compare');
+  },
+  close: () => go(base()),
+  noop: () => {},
+};
+// Picking the language already used on the other side swaps the two.
+function pickPair(key, otherKey, id) {
+  if (!HAS_TEXT(id)) { noText(id); return; }
+  if (S[otherKey] === id) S[otherKey] = S[key];
+  S[key] = id;
+  D.pick ? D.pick(key) : rerender();
+}
+
+/* ---------- Wiring ---------- */
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('scrim')) { if (OPEN(Kit.current)) ACT.close(); return; }
+  const t = e.target.closest('[data-act]');
+  if (t) ACT[t.dataset.act]?.(t);
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && OPEN(Kit.current)) ACT.close(); });
+/* ======================================================================
+   DEMO 4 — টাইলের গ্রিড: bottom sheet with a two-column tile grid; in side mode tiles get ১ / ২ badges; second translation in a nested card with a label bar
+   ====================================================================== */
+/* Tile grid: in side mode a slot switcher picks which side the next tap fills; tiles show ১ / ২ */
+let slot = 'first';
+const tile = (l, act, on, badge = '') => `<button class="tile" data-act="${act}" data-id="${l.id}" aria-pressed="${on}"><i>${l.code}</i>${l.name}${badge}</button>`;
+const D = {
+  appbar: () => `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="noop">${icons.back}</button>
+    <h1>${BOOK.name}<small>${BOOK.kitab}</small></h1>
+    <button class="lsq" data-act="open" aria-label="অনুবাদের ভাষা: ${nowLabel()}">${S.side ? `${L(S.lang).code} | ${L(S.second).code}` : L(S.lang).code}</button></header>`,
+  second: (l, text) => `<div class="nc"><div class="nc-h">${LANG_IC(15)}${l.name}</div><p class="translation">${text}</p></div>`,
+  sheet: () => {
+    let grid;
+    if (S.dSide) {
+      grid = `<div class="seg" role="tablist"><button data-act="slot" data-id="first" aria-pressed="${slot === 'first'}"><b>১</b> প্রথম ভাষা</button><button data-act="slot" data-id="second" aria-pressed="${slot === 'second'}"><b>২</b> দ্বিতীয় ভাষা</button></div>
+        <div class="grid">${LANGS.map((l) => tile(l, slot, l.id === S.dFirst || l.id === S.dSecond,
+          l.id === S.dFirst ? '<span class="bdg">১</span>' : l.id === S.dSecond ? '<span class="bdg two">২</span>' : '')).join('')}</div>`;
+    } else {
+      grid = `<div class="grid">${LANGS.map((l) => tile(l, 'lang', l.id === S.lang)).join('')}</div>`;
+    }
+    return `<div class="sheet-head"><h2>অনুবাদের ভাষা<small class="sh-sub">মেনু আর বাটনের ভাষা একই থাকবে</small></h2><button class="icon-btn" data-act="close" aria-label="বন্ধ করুন">${icons.close}</button></div>
+      <div class="sheet-body"><button class="swrow" data-act="side" role="switch" aria-checked="${S.dSide}"><span><b>পাশাপাশি পড়ুন</b><small>প্রতিটা হাদিসে দুই ভাষার অনুবাদ</small></span><span class="switch" aria-checked="${S.dSide}"></span></button>${grid}</div>
+      ${S.dSide ? '<div class="sheet-foot"><button class="btn text" data-act="close">বাতিল</button><button class="btn" data-act="ok">ঠিক আছে</button></div>' : ''}`;
+  },
+  // After filling the first language, the next tap fills the second.
+  pick: (key) => { if (key === 'dFirst') slot = 'second'; rerender(); },
+};
+ACT.slot = (t) => { slot = t.dataset.id; fillSheet(); };
+const _side = ACT.side, _open = ACT.open;
+ACT.side = (t) => { slot = 'first'; _side(t); };
+ACT.open = (t) => { slot = 'first'; _open(t); };
+Kit.onScreen(() => { if (!S.internal) slot = 'first'; });
+Kit.onScreen(onScreen);
+Kit.init({ demo: 4, name: 'টাইলের গ্রিড', extra: EXTRA, screens: SCREENS });
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>পাশাপাশি তুলনা — ডেমো ২ · রেফারেন্স চিপ</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): scroll body, details page, hadith card ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.appbar.np h1{margin-left:12px}
+/* Opened hadith: HadithFancyAppBar over RoundedScaffoldBody */
+.screen.rs{background:var(--appbar)}
+.rbody{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.rbody .body{padding-top:16px}
+/* Chapter card (HadithSectionListItem) */
+.sc{padding:12px 16px}
+.sc small{display:block;font-size:12.5px;color:var(--hint)}
+.sc b{display:block;font-size:15.5px;color:var(--title)}
+/* Hadith card (HadithListItem): head, narrator in primary, translation */
+.hc{padding:12px 14px 14px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 6px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+/* Footnote (HadithListItemFootNote): divider, smaller text at 70% */
+.fn{margin-top:12px;padding-top:10px;border-top:1px solid var(--divider);font-size:14.5px;line-height:1.75;color:var(--body)}
+.fn-l{display:block;color:var(--hint)}
+.btn.sm{height:34px;padding:0 10px;font-size:14px}
+.btn.sm svg{width:17px;height:17px}
+/* ===== Demo 2: plain footnote, reference chips under it, breadcrumb, left/right columns ===== */
+.rf{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px}
+.rf>span{font-size:13px;color:var(--hint)}
+.rf .chip{height:30px;font-size:13px}
+.rf .chip svg{width:14px;height:14px}
+.rf .chip.on{font-weight:700}
+.rf .chip.off{border-style:dashed;color:var(--hint);background:transparent;cursor:default}
+.rf .chip.off small{font-size:11.5px}
+.cols{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr}
+.col{min-height:0;overflow-y:auto;padding:14px 10px 24px;scrollbar-width:none}
+.col::-webkit-scrollbar{display:none}
+.col+.col{border-left:1px solid var(--divider)}
+.col .book-badge{width:30px;height:30px;font-size:9px}
+.col b{display:block;margin-top:8px;font-size:14px;color:var(--title)}
+.col .num{font-size:12.5px;color:var(--primary-dark)}
+:root[data-theme="dark"] .col .num{color:var(--primary)}
+.col .narrator{margin:10px 0 4px;font-size:13px;color:var(--primary)}
+.col p{margin:0;font-size:14.5px;line-height:1.7;color:var(--title)}
+.col .grade{display:inline-block;margin-top:6px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="reading"></section>
+      <section class="screen rs" data-screen="jumped"></section>
+      <section class="screen rs" data-screen="side"></section>
+
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, state, the flow and screen
+   wiring. Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const SPLIT = svg('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/>', 18);
+const RET = svg('<path d="M9 14l-5-5 5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-2"/>', 16);
+
+/* ---------- The hadith being read and the one its footnote points to
+   (the niyyah hadith, Bangla only). The Muslim number in the app comes
+   from the scholars' verified list; the one here is a stand-in. ---------- */
+const A = { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1, kitab: 'ওহীর সূচনা',
+  bab: 'রাসূলুল্লাহ (সাঃ)-এর প্রতি ওহী কীভাবে শুরু হয়েছিল', nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত',
+  text: 'আমি রাসূলুল্লাহ (সাঃ)-কে বলতে শুনেছি: সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' };
+const B = { book: 'সহীহ মুসলিম', abbr: 'মুসলিম', no: 4815, kitab: 'প্রশাসন ও নেতৃত্ব',
+  bab: 'সকল কাজ নিয়তের ওপর নির্ভরশীল', nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত',
+  text: 'রাসূলুল্লাহ (সাঃ) বলেছেন: সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' };
+/* Footnote as it is today, split into parts. link = verified, book in the app;
+   own = Bukhari's own numbers (no verified list in this demo); off = book not in the app */
+const FN = [
+  { t: '(৫৪, ২৫২৯, ৩৮৯৮, ৫০৭০, ৬৬৮৯, ৬৯৫৩', k: 'own' }, { t: '; ' },
+  { t: 'মুসলিম ২৩/৪৫ হাঃ ১৯০৭', k: 'link', short: 'মুসলিম ১৯০৭' }, { t: ', ' },
+  { t: 'আহমাদ ১৬৮', k: 'off', short: 'আহমাদ ১৬৮' }, { t: ')' },
+];
+const FROM = `${A.book}, হাদিস ${bn(A.no)} থেকে এসেছেন`;
+
+const SCREENS = [
+  { id: 'reading', label: 'ফুটনোট' },
+  { id: 'jumped', label: 'অন্য কিতাবের হাদিস' },
+  { id: 'side', label: 'পাশাপাশি দেখা' },
+];
+const EXTRA = '';
+
+/* ---------- Shared markup ---------- */
+const head = (h, extra = '') => `<div class="hadith-head"><span class="book-badge">${h.abbr}</span><div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${bn(h.no)}</span></div><span class="grade">সহিহ হাদিস</span>${extra}</div>`;
+const cardHTML = (h, foot = '') => `<article class="card hc">${head(h)}<p class="narrator">${h.nar}</p><p class="translation">${h.text}</p>${foot}</article>`;
+/* Footnote text: D.link(part) draws a tappable reference, the rest stays plain */
+const fnText = () => FN.map((p) => (p.k === 'link' && D.link ? D.link(p) : p.t)).join('');
+const footHTML = () => `<div class="fn"><span class="fn-l">ফুটনোট:</span>${fnText()}${D.fnExtra ? D.fnExtra() : ''}</div>`;
+function readingHTML() {
+  return `<header class="appbar np"><h1>${A.book}<small>${A.kitab}</small></h1></header>
+    <div class="body"><div class="card sc"><small>অধ্যায়</small><b>${A.bab}</b></div>${cardHTML(A, footHTML())}</div>`;
+}
+function jumpedHTML() {
+  return `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="back">${icons.back}</button><h1>${B.book}<small>${D.sub ? D.sub() : `হাদিস: ${bn(B.no)}`}</small></h1>${D.barSplit ? `<button class="icon-btn" aria-label="পাশাপাশি দেখুন" data-go="side">${SPLIT}</button>` : ''}</header>
+    <div class="rbody"><div class="body${D.float ? ' pad' : ''}">${D.from ? D.from() : ''}<div class="card sc"><small>অধ্যায়</small><b>${B.bab}</b></div>${cardHTML(B, D.jumpFoot ? D.jumpFoot() : '')}</div>${D.float ? D.float() : ''}</div>`;
+}
+function sideHTML() {
+  return `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="jumped">${icons.back}</button><h1>পাশাপাশি দেখা<small>${A.abbr} ${bn(A.no)} · ${B.abbr} ${bn(B.no)}</small></h1></header>
+    <div class="rbody">${D.side()}</div>`;
+}
+const VIEW = { reading: readingHTML, jumped: jumpedHTML, side: sideHTML };
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (sec && VIEW[id]) sec.innerHTML = VIEW[id]();
+  const sh = $('#sheet-peek');
+  if (sh && D.sheet) sh.innerHTML = D.sheet();
+}
+function onScreen(id) { render(id); }
+
+/* ---------- Flow ---------- */
+const ACT = {
+  // 2. A reference link opens that book's hadith
+  jump: () => Kit.show('jumped'),
+  // 4. Back returns to the hadith the reader came from
+  back: () => Kit.show('reading'),
+};
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-act]');
+  if (t) ACT[t.dataset.act]?.(t);
+});
+/* ======================================================================
+   DEMO 2 — রেফারেন্স চিপ: the footnote text stays as it is; under it a
+   row of chips — a verified reference is a tappable chip, a book not in
+   the app is a dashed one. The app bar subtitle is the "from" line, and
+   split view puts the two side by side in columns.
+   ====================================================================== */
+const col = (h) => `<div class="col"><span class="book-badge">${h.abbr}</span><b>${h.book}</b><span class="num">হাদিস: ${bn(h.no)}</span><br><span class="grade">সহিহ হাদিস</span><p class="narrator">${h.nar}</p><p>${h.text}</p></div>`;
+const D = {
+  fnExtra: () => `<div class="rf"><span>অন্য কিতাবে:</span>${FN.filter((p) => p.short).map((p) => (p.k === 'link'
+    ? `<button class="chip on" data-act="jump">${p.short}${icons.chevron}</button>`
+    : `<span class="chip off">${p.short} <small>· অ্যাপে নেই</small></span>`)).join('')}</div>`,
+  sub: () => `${A.abbr} ${bn(A.no)} থেকে › হাদিস: ${bn(B.no)}`,
+  barSplit: true,
+  side: () => `<div class="cols">${col(A)}${col(B)}</div>`,
+};
+Kit.onScreen(onScreen);
+Kit.init({ demo: 2, name: 'রেফারেন্স চিপ', extra: EXTRA, screens: SCREENS });
+D.boot?.();
+</script>
+</body>
+</html>

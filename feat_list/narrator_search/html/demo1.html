@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>রাবির নাম দিয়ে সার্চ — ডেমো ১ · অ্যাপের ধরন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): rounded body, hadith page, tappable narrator, intro sheet ===== */
+.icon-btn svg,.btn svg{flex:none}
+.screen.g{background:var(--appbar)}
+.rb{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+.nar{font-weight:700;color:var(--primary);text-decoration:underline dotted;text-underline-offset:4px;text-decoration-thickness:1.5px}
+.ns-s{display:block;font-size:12.5px;font-weight:400;color:var(--hint)}
+.ns-p{margin:0;font-size:15px;line-height:1.75;color:var(--title)}
+.fld{display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 12px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--hint)}
+.fld input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.fld input::placeholder{color:var(--hint)}
+.fld .icon-btn{width:34px;height:34px}
+/* ===== Demo 1: NewSearchPage look (option cards, selection tile), ListItemCard rows ===== */
+.st{margin:18px 16px 8px;font-size:15.5px;font-weight:700;color:var(--title)}
+.pad{padding:14px 14px 0}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 14px}
+.opt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:10px;background:var(--card);border:1.5px solid var(--divider);font-size:13.5px;color:var(--body);cursor:default}
+.opt.on{border-color:var(--primary);color:var(--primary-dark);font-weight:700}
+:root[data-theme="dark"] .opt.on{color:var(--primary)}
+.opt i{width:16px;height:16px;border-radius:50%;border:2px solid var(--divider)}
+.opt.on i{border:5px solid var(--primary)}
+.tile{display:flex;align-items:center;gap:12px;width:calc(100% - 28px);margin:0 14px;padding:14px 10px 14px 14px;border-radius:10px;background:var(--card);border:1.5px solid var(--primary);text-align:left}
+.tile .ic{width:40px;height:40px;flex:none;border-radius:10px;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.tile div{flex:1}
+.tile b{display:block;font-size:16px;color:var(--title)}
+.tile small{font-size:13px;color:var(--body)}
+.tile>svg{color:var(--primary)}
+/* ===== Narrator list (ListItemCard) ===== */
+.lbl{margin:14px 16px 8px;font-size:13.5px;color:var(--hint)}
+.pc{display:flex;align-items:center;gap:14px;width:calc(100% - 28px);margin:0 14px 10px;padding:12px 10px 12px 14px;border-radius:10px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.pc .book-badge{width:42px;height:42px;font-size:17px}
+.pc div{flex:1;min-width:0}
+.pc b{display:block;font-size:15.5px;color:var(--title)}
+.pc small{font-size:13px;color:var(--body)}
+.pc>svg{color:var(--hint)}
+/* ===== Result: intro card + books ===== */
+.ic-h{display:flex;align-items:center;gap:12px}
+.ic-h .book-badge{width:46px;height:46px;font-size:19px}
+.ic-h b{display:block;font-size:17px;color:var(--title)}
+.ic-h span{font-size:13.5px;color:var(--primary-dark);font-weight:700}
+:root[data-theme="dark"] .ic-h span{color:var(--primary)}
+.ic-p{margin:10px 0 0;font-size:15px;line-height:1.7;color:var(--body)}
+.ic-p+.btn{margin:2px 0 -6px -10px;height:34px}
+.bkr{display:flex;align-items:center;gap:12px;width:calc(100% - 28px);margin:0 14px 10px;padding:12px 10px 12px 12px;border-radius:10px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.bkr[tabindex="-1"]{cursor:default}
+.bkr .book-badge{font-size:9.5px}
+.bkr span{flex:1;font-size:15.5px;color:var(--title)}
+.bkr b{font-size:14px;color:var(--primary-dark)}
+:root[data-theme="dark"] .bkr b{color:var(--primary)}
+.bkr>svg{color:var(--hint)}
+/* ===== Hadith list in one book (HadithListItem) ===== */
+.bh{margin:14px 16px 10px;font-size:13.5px;color:var(--hint)}
+.hl{display:block;width:calc(100% - 24px);text-align:left}
+.hl .narrator{color:var(--primary);font-size:15px;margin:12px 0 4px}
+.hl .translation{color:var(--title);font-size:16px;line-height:1.75}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos); the engine renders each one ===== -->
+      <section class="screen g" data-screen="search"></section>
+      <section class="screen g" data-screen="pick"></section>
+      <section class="screen g" data-screen="result"></section>
+      <section class="screen g" data-screen="book"></section>
+      <section class="screen g" data-screen="hadith"></section>
+      <section class="screen g" data-screen="namesheet"></section>
+      <!-- ===== Sheet: #৩৯-এর ছোট পরিচিতি on the narrator's name ===== -->
+      <div class="sheet" id="ns" role="dialog" aria-label="ছোট পরিচিতি"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="rabi_core.js"></script>
+<script>
+/* ======================================================================
+   DEMO 1 — অ্যাপের ধরন: one more SearchSelectionTile "রাবি" on the
+   search page, narrators as ListItemCard, the intro card on top of the
+   books, and the hadiths as the normal HadithListItem cards.
+   ====================================================================== */
+(function () {
+  const { bn, icons } = Kit;
+  const { S, cur, book, bookKeys, total, fmt, initial, H } = RabiDemo;
+  const bar = (t, sub, act) => `<header class="appbar"><button class="icon-btn" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="পেছনে">${icons.back}</button><h1>${t}${sub ? `<small>${sub}</small>` : ''}</h1></header>`;
+  const USER = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
+
+  const D = {
+    search: () => `${bar('সার্চ')}<div class="rb"><div class="scroll">
+      <div class="pad"><div class="fld">${icons.search}<input placeholder="হাদিস সার্চ করুন" aria-label="হাদিস সার্চ করুন"></div></div>
+      <h3 class="st">সার্চের পদ্ধতি নির্বাচন করুন</h3>
+      <div class="opts"><span class="opt on"><i></i>স্বাভাবিক</span><span class="opt"><i></i>হুবহু মিল</span><span class="opt"><i></i>AI সার্চ</span></div>
+      <h3 class="st">রাবি দিয়ে খুঁজুন</h3>
+      <button class="tile" data-act="rabi"><span class="ic">${USER}</span><div><b>রাবি</b><small>সাহাবির নাম দিয়ে তাঁর বর্ণিত সব হাদিস</small></div>${icons.chevron}</button></div></div>`,
+    pick: () => `${bar('রাবি', '', 'pback')}<div class="rb"><div class="scroll">
+      <div class="pad"><label class="fld">${icons.search}<input data-q value="${S.q}" placeholder="রাবির নাম লিখুন" aria-label="রাবির নাম লিখুন"><button class="icon-btn" data-act="clr" aria-label="মুছুন" ${S.q ? '' : 'hidden'}>${icons.close}</button></label></div>
+      <div data-res></div></div></div>`,
+    results: (arr) => (arr.length
+      ? `<p class="lbl">রাবির তালিকা · ${bn(arr.length)} জন</p>${arr.map((n) => `<button class="pc" data-act="n" data-n="${n.id}"><span class="book-badge">${initial(n)}</span><div><b>${n.name}</b><small>${fmt(total(n))}টি হাদিস</small></div>${icons.chevron}</button>`).join('')}`
+      : `<div class="empty">${icons.search}<h3>কিছু পাওয়া যায়নি</h3><p>এই নামে কোনো রাবি নেই। অন্য বানানে লিখে দেখুন।</p></div>`),
+    result: () => {
+      const n = cur();
+      return `${bar(n.name, 'রাবির হাদিস', 'rback')}<div class="rb"><div class="scroll" style="padding-top:14px">
+        <section class="card"><div class="ic-h"><span class="book-badge">${initial(n)}</span><div><b>${n.name}</b><span>মোট ${fmt(total(n))}টি হাদিস</span></div></div>
+          ${n.intro ? `<p class="ic-p">${n.intro}${S.more && n.more ? ` ${n.more}` : ''}</p>${n.more ? `<button class="btn text" data-act="more">${S.more ? 'কম দেখুন' : 'আরো পড়ুন'}</button>` : ''}` : ''}</section>
+        <h3 class="st" style="margin-top:8px">বই অনুযায়ী</h3>
+        ${n.books.map((b, i) => `<button class="bkr" ${b[3] ? `data-act="bk" data-b="${i}"` : 'tabindex="-1"'}><span class="book-badge">${b[1]}</span><span>${b[0]}</span><b>${fmt(b[2])}টি</b>${b[3] ? icons.chevron : ''}</button>`).join('')}</div></div>`;
+    },
+    book: () => {
+      const n = cur(), b = book();
+      return `${bar(b[0], n.name, 'bback')}<div class="rb"><div class="scroll"><p class="bh">${n.name} বর্ণিত ${fmt(b[2])}টি হাদিস</p>
+        ${bookKeys().map((k) => `<button class="card hl" data-act="hd" data-k="${k}"><div class="hadith-head"><span class="book-badge">${H[k].ab}</span><div class="hadith-meta"><b>${H[k].book}</b><span>হাদিস: ${bn(H[k].no)}</span></div><span class="grade">সহিহ হাদিস</span></div>
+          <p class="narrator">${n.name} থেকে বর্ণিত:</p><p class="translation">${H[k].tr}</p></button>`).join('')}</div></div>`;
+    },
+  };
+  RabiDemo.start(D, { demo: 1, name: 'অ্যাপের ধরন' });
+})();
+</script>
+</body>
+</html>

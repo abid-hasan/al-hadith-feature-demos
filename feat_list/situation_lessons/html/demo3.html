@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>পরিস্থিতি দিয়ে শেখা — ডেমো ৩ · এক এক কার্ড</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== RoundedScaffoldBody ===== */
+.pg{display:flex;flex-direction:column;flex:1;min-height:0}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.panel>.scroll{padding-top:14px}
+
+/* ===== Search page (#13) ===== */
+.scard{background:var(--card);border-radius:12px;margin:0 16px 12px;padding:14px}
+.stitle{margin:16px 0 8px;font-size:16px;font-weight:700;color:var(--title)}
+.sfield{display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 12px;border-radius:10px;border:.8px solid var(--divider);background:var(--tint)}
+.sfield:focus-within{border-color:var(--primary)}
+.sfield svg{width:18px;height:18px;color:var(--hint);flex:none}
+.sfield input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:14.5px}
+.sfield input::placeholder{color:var(--hint)}
+.sfield .clr{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--hint)}
+.sit-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:2px 14px 4px}
+.sit-row::-webkit-scrollbar{display:none}
+.sit-card{flex:none;width:98px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 6px 10px;border-radius:10px;border:.8px solid var(--divider);background:var(--card);text-align:center}
+.sit-ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark);flex:none}
+:root[data-theme="dark"] .sit-ic{color:var(--primary)}
+.sit-card b{font-size:13px;line-height:1.35;color:var(--title)}
+/* NEW: the last card in the row opens সব পাঠ */
+.sit-card.all{border:1.5px solid var(--primary);background:var(--tint)}
+.sit-card.all .sit-ic{background:var(--primary);color:var(--on-appbar)}
+
+/* ===== NEW: lesson tiles in a two-column grid ===== */
+.sec-h{display:flex;align-items:center;gap:8px;margin:16px 16px 8px}
+.sec-h h3{flex:1;margin:0;font-size:16px;color:var(--title)}
+.sec-h small{font-size:13px;color:var(--hint)}
+.sec-h .sit-ic{width:30px;height:30px}
+.sec-h .sit-ic svg{width:17px;height:17px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px 6px}
+.tile{display:flex;flex-direction:column;justify-content:space-between;gap:10px;min-height:128px;padding:12px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.tile b{font-size:14.5px;line-height:1.5;color:var(--title);font-weight:700}
+.tile span{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--hint)}
+.tile span svg{width:18px;height:18px;color:var(--primary)}
+.nores{display:flex;flex-direction:column;align-items:center;gap:10px;padding:40px 24px;text-align:center}
+.nores .sit-ic{width:64px;height:64px}
+.nores h3{margin:6px 0 0;font-size:18px;color:var(--title)}
+.nores p{margin:0;font-size:14px;color:var(--hint)}
+
+/* ===== Situation page (#13) ===== */
+.shead{display:flex;gap:12px;align-items:flex-start}
+.shead .sit-ic{width:48px;height:48px}
+.shead h2{margin:0;font-size:18px;color:var(--title)}
+.shead .ph{font-size:13px;color:var(--hint)}
+.comfort{margin:10px 0 0;font-size:14.5px;color:var(--body);line-height:1.6}
+.hc{cursor:pointer}
+.hc .translation{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;color:var(--title)}
+.hc .narrator,.full .narrator{color:var(--primary);font-size:15px;margin:10px 0 4px}
+
+/* ===== NEW: lesson page — one card per part, progress bars on top, tap to move on ===== */
+.lp{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold)}
+.bars{display:flex;gap:6px;padding:12px 16px 6px}
+.bars i{flex:1;height:4px;border-radius:4px;background:var(--divider)}
+.bars i.on{background:var(--primary)}
+.lmeta{display:flex;align-items:center;justify-content:space-between;padding:4px 16px 10px;font-size:13px;color:var(--hint)}
+.stage{flex:1;min-height:0;overflow-y:auto;padding:0 12px 12px}
+.big{min-height:100%;display:flex;flex-direction:column;border-radius:20px;background:var(--card);box-shadow:var(--shadow);padding:20px 18px}
+.big .k{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .big .k{color:var(--primary)}
+.big .k svg{width:22px;height:22px}
+.big h2{margin:14px 0 10px;font-size:21px;line-height:1.5;color:var(--title)}
+.big p.ev{margin:0;font-size:16px;line-height:1.75;color:var(--body)}
+.big .hc{margin-top:14px;padding:14px;border-radius:14px;background:var(--surface-2)}
+.big .hc .translation{-webkit-line-clamp:8}
+.big .open{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:14px;font-weight:700;color:var(--primary)}
+.big .open svg{width:16px;height:16px}
+.big ol{margin:16px 0 0;padding:0;list-style:none;counter-reset:n}
+.big li{counter-increment:n;display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--divider);font-size:16px;line-height:1.65;color:var(--title)}
+.big li:last-child{border-bottom:0}
+.big li::before{content:counter(n,bengali);flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:var(--on-appbar);font-size:14px;font-weight:700}
+.vf{display:flex;align-items:center;gap:4px;margin-top:auto;padding-top:14px;font-size:12.5px;color:var(--hint)}
+.vf svg{width:15px;height:15px}
+.lnav{flex:none;display:flex;gap:10px;padding:10px 16px 16px}
+.lnav .btn{flex:1}
+.lnav .btn[disabled]{opacity:.4;pointer-events:none}
+.lnav svg{width:18px;height:18px}
+
+/* ===== Hadith page ===== */
+.chap{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:0 12px 10px;padding:12px var(--pad);font-size:15px;font-weight:700;color:var(--title)}
+.chap b{color:var(--primary)}
+.chap span{display:block;font-weight:400;font-size:13.5px;color:var(--body)}
+.full .translation{font-size:16px;line-height:1.75;color:var(--title)}
+.preview{white-space:pre-line;font-size:13.5px;line-height:1.6;color:var(--title);background:var(--surface-2);border-radius:10px;padding:12px;max-height:340px;overflow:auto}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="search"></section>
+      <section class="screen" data-screen="results"></section>
+      <section class="screen" data-screen="empty"></section>
+      <section class="screen" data-screen="all">
+        <header class="appbar"><button class="icon-btn" data-go="search" data-i="back" aria-label="পেছনে"></button><h1>সব পাঠ</h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="all-body"></div></div></div>
+      </section>
+      <section class="screen" data-screen="sit">
+        <header class="appbar"><button class="icon-btn" data-go="search" data-i="back" aria-label="পেছনে"></button><h1 id="sit-title"></h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="sit-body"></div></div></div>
+      </section>
+      <section class="screen" data-screen="lesson" data-status="light">
+        <header class="appbar flat"><button class="icon-btn" id="l-back" data-i="close" aria-label="বন্ধ করুন"></button><h1 id="l-title"></h1><button class="icon-btn" id="l-share" data-i="share" aria-label="পাঠ শেয়ার"></button></header>
+        <div class="lp">
+          <div class="bars" id="bars"><i></i><i></i><i></i></div>
+          <div class="lmeta"><span id="l-pos"></span><span>কার্ডে ট্যাপ করে সামনে যান</span></div>
+          <div class="stage" id="stage"></div>
+          <div class="lnav"><button class="btn outline" id="l-prev">আগের ধাপ</button><button class="btn" id="l-fwd"></button></div>
+        </div>
+      </section>
+      <section class="screen" data-screen="hadith">
+        <header class="appbar"><button class="icon-btn" id="h-back" data-i="back" aria-label="পেছনে"></button><h1 id="h-title"></h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="h-body"></div></div></div>
+      </section>
+
+      <div id="hold" hidden>
+        <div class="pg" id="pg-search">
+          <header class="appbar"><button class="icon-btn" data-i="back" aria-label="পেছনে" data-snack="হোম পেজে ফিরবে"></button><h1>সার্চ</h1></header>
+          <div class="rbody"><div class="panel"><div class="scroll">
+            <div class="scard">
+              <label class="sfield"><span data-i="search"></span><input id="q" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন" aria-label="সার্চ"><button class="clr" id="q-clr" data-i="close" aria-label="মুছুন" hidden></button></label>
+              <h2 class="stitle">জীবনের পরিস্থিতি</h2>
+              <div class="sit-row" id="sit-row"></div>
+            </div>
+            <div id="res"></div>
+          </div></div></div>
+        </div>
+      </div>
+
+      <div class="sheet" id="sh-share" role="dialog" aria-label="পাঠ শেয়ার">
+        <div class="sheet-head"><h2>পাঠ শেয়ার</h2><button class="icon-btn" data-close data-i="close" aria-label="বন্ধ করুন"></button></div>
+        <div class="sheet-body"><div class="preview" id="share-text"></div></div>
+        <div class="sheet-foot"><button class="btn text" data-close>বাতিল</button><button class="btn" data-close data-snack="ফোনের শেয়ার মেনু খুলবে">শেয়ার</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="sl_data.js"></script>
+<script>
+(function () {
+  const { $, $$, icons, bn } = Kit;
+  const ic = (k) => icons[k] || SL.ICON[k];
+  const paint = (root = document) => $$('[data-i]', root).forEach((b) => { b.innerHTML = ic(b.dataset.i); });
+
+  /* ---------- State ---------- */
+  const S = { q: '', sit: 'honest', lesson: 'l1', step: 0, from: 'sit', hk: 'bukhari:1', hback: 'lesson' };
+  const head = (h) => `<div class="hadith-head"><span class="book-badge" style="background:${h.color}">${h.abbr}</span>
+      <div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${h.no}</span></div><span class="grade">সহিহ হাদিস</span></div>`;
+  const tile = (l) => `<button class="tile" data-lesson="${l.id}"><b>${l.q}</b><span>${SL.sit(l.sit).name}${SL.ICON.next}</span></button>`;
+
+  /* ---------- Search page ---------- */
+  const pg = $('#pg-search');
+  $('#sit-row').innerHTML = SL.SITS.map((s) => `<button class="sit-card" data-sit="${s.id}"><span class="sit-ic">${SL.ICON[s.id]}</span><b>${s.phrase}</b></button>`).join('')
+    + `<button class="sit-card all" data-go="all"><span class="sit-ic">${SL.ICON.lesson}</span><b>সব পাঠ</b></button>`;
+  function renderSearch() {
+    const q = $('#q'); if (q.value !== S.q) q.value = S.q;
+    $('#q-clr').hidden = !S.q;
+    if (!S.q.trim()) { $('#res').innerHTML = ''; return; }
+    const r = SL.search(S.q);
+    $('#res').innerHTML = r.sits.length + r.lessons.length
+      ? `${r.sits.map((s) => `<div class="sec-h"><span class="sit-ic">${SL.ICON[s.id]}</span><h3>${s.name}</h3><button class="btn text" data-sit="${s.id}">পেজ খুলুন</button></div>`).join('')}
+         ${r.lessons.length ? `<div class="sec-h"><h3>পাঠ</h3><small>${bn(r.lessons.length)}টি</small></div><div class="grid">${r.lessons.map(tile).join('')}</div>` : ''}`
+      : `<div class="nores"><span class="sit-ic">${icons.search}</span><h3>কোনো পাঠ পাওয়া যায়নি</h3><p>"${S.q}" দিয়ে কোনো পরিস্থিতি বা পাঠ মেলেনি। অন্য শব্দ দিয়ে খুঁজুন।</p></div>`;
+  }
+
+  /* ---------- সব পাঠ: grid per situation ---------- */
+  function renderAll() {
+    $('#all-body').innerHTML = SL.SITS.map((s) => `<div class="sec-h"><span class="sit-ic">${SL.ICON[s.id]}</span><h3>${s.name}</h3><small>${bn(SL.ofSit(s.id).length)}টি পাঠ</small></div>
+      <div class="grid">${SL.ofSit(s.id).map(tile).join('')}</div>`).join('');
+  }
+
+  /* ---------- Situation page (#13) ---------- */
+  const hadithCard = (k) => { const h = SL.HADITHS[k]; return `<article class="card hc" data-h="${k}" tabindex="0">${head(h)}<p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${SL.nl(h.tr)}</p></article>`; };
+  function renderSit() {
+    const s = SL.sit(S.sit);
+    $('#sit-title').textContent = s.name;
+    $('#sit-body').innerHTML = `<div class="card"><div class="shead"><span class="sit-ic">${SL.ICON[s.id]}</span>
+        <div><h2>${s.name}</h2><span class="ph">${s.phrase}</span></div></div><p class="comfort">${s.comfort}</p></div>
+      <div class="sec-h"><h3>হাদিস</h3></div>${s.hadiths.map(hadithCard).join('')}
+      <div class="sec-h"><h3>পাঠ</h3><small>${bn(SL.ofSit(s.id).length)}টি</small></div><div class="grid">${SL.ofSit(s.id).map(tile).join('')}</div>`;
+  }
+
+  /* ---------- Lesson page: step 0 ঘটনা, 1 হাদিস, 2 শিক্ষা ---------- */
+  function renderLesson() {
+    const l = SL.lesson(S.lesson), [i, n] = SL.posOf(l.id), h = SL.HADITHS[l.h];
+    $('#l-title').textContent = l.q;
+    $('#l-pos').textContent = `${SL.sit(l.sit).name} · পাঠ ${bn(i)}/${bn(n)}`;
+    $$('#bars i').forEach((b, j) => b.classList.toggle('on', j <= S.step));
+    const parts = [
+      `<div class="big" data-fwd><span class="k">${SL.ICON.q}ঘটনা</span><h2>${l.q}</h2><p class="ev">${l.ev}</p></div>`,
+      `<div class="big" data-fwd><span class="k">${SL.ICON.lesson}হাদিস কী বলে</span>
+        <div class="hc" data-h="${l.h}" tabindex="0">${head(h)}<p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${SL.nl(h.tr)}</p><span class="open">পুরো হাদিস ${SL.ICON.next}</span></div></div>`,
+      `<div class="big"><span class="k">${SL.ICON.bulb}শিক্ষণীয় বিষয়</span><ol>${l.learn.map((x) => `<li>${x}</li>`).join('')}</ol>
+        <div class="vf">${SL.ICON.shield}আলেমদের যাচাই করা</div></div>`,
+    ];
+    $('#stage').innerHTML = parts[S.step];
+    $('#stage').scrollTop = 0;
+    $('#l-prev').disabled = S.step === 0;
+    $('#l-fwd').innerHTML = S.step < 2 ? `পরের ধাপ${SL.ICON.next}` : `পরের পাঠ${SL.ICON.next}`;
+  }
+  function forward() {
+    if (S.step < 2) { S.step++; return renderLesson(); }
+    S.lesson = SL.nextOf(S.lesson).id; S.step = 0; renderLesson();
+  }
+
+  /* ---------- Hadith page ---------- */
+  function renderHadith() {
+    const h = SL.HADITHS[S.hk];
+    $('#h-title').innerHTML = `${h.book}<small>হাদিস: ${h.no}</small>`;
+    $('#h-body').innerHTML = `<div class="chap"><b>অধ্যায়:</b> ${h.ch}<span>${h.sec}</span></div>
+      <article class="card full">${head(h)}<p class="narrator">${h.nar} থেকে বর্ণিত:</p>${h.tr.split(/\n+/).map((t) => `<p class="translation">${t}</p>`).join('')}</article>`;
+  }
+
+  /* ---------- Navigation ---------- */
+  const STATES = { search: '', results: 'রাগ', empty: 'যাকাত' };
+  let internal = false;
+  const go = (id) => { internal = true; Kit.show(id); internal = false; };
+  Kit.onScreen((id) => {
+    if (id in STATES) { $(`.screen[data-screen="${id}"]`).appendChild(pg); if (!internal) S.q = STATES[id]; renderSearch(); }
+    if (id === 'all') renderAll();
+    if (id === 'sit') { if (!internal) S.sit = 'honest'; renderSit(); }
+    if (id === 'lesson') { if (!internal) { S.lesson = 'l1'; S.step = 0; S.from = 'sit'; S.sit = 'honest'; } renderLesson(); }
+    if (id === 'hadith') { if (!internal) { S.lesson = 'l1'; S.step = 1; S.from = 'sit'; S.hk = SL.lesson('l1').h; S.hback = 'lesson'; } renderHadith(); }
+  });
+  const wantFor = () => { if (!S.q.trim()) return 'search'; const r = SL.search(S.q); return r.sits.length + r.lessons.length ? 'results' : 'empty'; };
+
+  /* ---------- In-phone events ---------- */
+  document.addEventListener('input', (e) => {
+    if (e.target.id !== 'q') return;
+    S.q = e.target.value;
+    const want = wantFor();
+    if (want !== Kit.current) { go(want); const q = $('#q'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); } else renderSearch();
+  });
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-sit],[data-lesson],[data-h],[data-fwd],#q-clr,#l-back,#l-share,#l-prev,#l-fwd,#h-back');
+    if (!t || !t.closest('.phone')) return;
+    if (t.dataset.sit) { S.sit = t.dataset.sit; return go('sit'); }
+    if (t.dataset.lesson) { S.lesson = t.dataset.lesson; S.step = 0; S.from = Kit.current; return go('lesson'); }
+    if (t.dataset.h) { S.hk = t.dataset.h; S.hback = Kit.current; return go('hadith'); }
+    if (t.dataset.fwd !== undefined || t.id === 'l-fwd') return forward();
+    if (t.id === 'l-prev') { S.step = Math.max(0, S.step - 1); return renderLesson(); }
+    if (t.id === 'q-clr') { e.preventDefault(); S.q = ''; return go('search'); }
+    if (t.id === 'l-back') return go(S.from);
+    if (t.id === 'l-share') { $('#share-text').textContent = SL.lessonText(S.lesson); return Kit.open('sh-share'); }
+    if (t.id === 'h-back') return go(S.hback);
+  });
+
+  paint();
+  Kit.init({ demo: 3, name: 'এক এক কার্ড', screens: [
+    { id: 'search', label: 'সার্চ পেজ' },
+    { id: 'results', label: 'সার্চ রেজাল্ট' },
+    { id: 'empty', label: 'খালি অবস্থা' },
+    { id: 'all', label: 'সব পাঠ' },
+    { id: 'sit', label: 'পরিস্থিতির পেজ' },
+    { id: 'lesson', label: 'পাঠ' },
+    { id: 'hadith', label: 'পুরো হাদিস' },
+  ]});
+})();
+</script>
+</body>
+</html>

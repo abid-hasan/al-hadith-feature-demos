@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সাহাবি আর তাবেঈদের জীবনী — ডেমো ৪ · অভিধানের পাতা</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): rounded body, hadith cards, tappable narrator ===== */
+.icon-btn svg,.btn svg{flex:none}
+.screen.g{background:var(--appbar)}
+.rb{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+/* the narrator's name becomes a button only when a biography exists */
+.nar{font-weight:700;color:var(--primary);text-decoration:underline dotted;text-underline-offset:4px;text-decoration-thickness:1.5px}
+.fld{display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 12px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--hint)}
+.fld input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.fld input::placeholder{color:var(--hint)}
+.fld .icon-btn{width:34px;height:34px}
+/* "তাঁর বর্ণিত হাদিস" (#৬০-এর পেজ, shared body): total, books with counts, hadith cards */
+.hs-top{margin:14px 14px 10px;padding:14px 16px;border-radius:10px;background:var(--card);box-shadow:var(--shadow)}
+.hs-top b{display:block;font-size:16px;color:var(--title)}
+.hs-top span{font-size:13.5px;color:var(--hint)}
+.hs-b{margin:0 14px 10px;border-radius:10px;background:var(--card);overflow:hidden;box-shadow:var(--shadow)}
+.hs-r{display:flex;align-items:center;gap:10px;width:100%;padding:14px 12px 14px 16px;text-align:left;font-size:15.5px;color:var(--title)}
+.hs-r[tabindex="-1"]{cursor:default}
+.hs-r span{flex:1}
+.hs-r b{font-size:14px;color:var(--primary-dark)}
+:root[data-theme="dark"] .hs-r b{color:var(--primary)}
+.hs-r svg{color:var(--hint);transition:transform .2s}
+.hs-b.on .hs-r svg{transform:rotate(180deg)}
+.hs-c{padding:12px 16px 14px;border-top:1px solid var(--divider)}
+.hs-c .translation{color:var(--title);line-height:1.7}
+/* ===== Demo 4: dictionary-like, card-less pages; intro opens inside the hadith card ===== */
+.screen.paper{background:var(--card)}
+.paper .appbar.flat{background:var(--card)}
+.big{margin:14px 20px 0;display:flex;align-items:center;gap:8px;border-bottom:2px solid var(--primary);color:var(--primary)}
+.big input{flex:1;min-width:0;height:48px;border:0;background:none;outline:none;font-size:20px;color:var(--title)}
+.big input::placeholder{color:var(--hint)}
+.big .icon-btn{width:34px;height:34px;color:var(--hint)}
+.tg{display:flex;gap:16px;margin:12px 20px 6px;font-size:14px}
+.tg button{color:var(--hint)}
+.tg button[aria-pressed="true"]{color:var(--title);font-weight:700;text-decoration:underline;text-decoration-color:var(--primary);text-decoration-thickness:2px;text-underline-offset:6px}
+.ctx{margin:4px 20px 0;font-size:12.5px;color:var(--hint)}
+.en{display:block;width:calc(100% - 40px);margin:0 20px;padding:13px 0;border-bottom:1px solid var(--divider);text-align:left}
+.en b{font-size:16.5px;color:var(--title)}
+.en em{margin-left:8px;font-style:normal;font-size:12px;color:var(--primary-dark)}
+:root[data-theme="dark"] .en em{color:var(--primary)}
+.en span{display:block;font-size:14px;color:var(--body)}
+/* ===== Biography as an article ===== */
+.ar{padding:20px 22px 30px}
+.ar .k{font-size:12.5px;font-weight:700;letter-spacing:.4px;color:var(--primary-dark)}
+:root[data-theme="dark"] .ar .k{color:var(--primary)}
+.ar h2{margin:2px 0 4px;font-size:26px;color:var(--title);line-height:1.3}
+.ar .fn{margin:0 0 16px;font-size:14px;color:var(--hint)}
+.ar .lead{margin:0 0 18px;padding-bottom:16px;border-bottom:1px solid var(--divider);font-size:17.5px;line-height:1.75;color:var(--title)}
+.ar h3{margin:16px 0 4px;font-size:13.5px;font-weight:700;color:var(--hint)}
+.ar p{margin:0;font-size:15.5px;line-height:1.8;color:var(--title);text-align:justify}
+.ar .src{margin-top:18px;font-size:12.5px;color:var(--hint)}
+.ar .go{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:18px;padding:14px 0;border-top:1px solid var(--divider);border-bottom:1px solid var(--divider);font-size:16px;font-weight:700;color:var(--primary)}
+/* ===== Intro inside the hadith card (no sheet) ===== */
+.ip{margin:6px 0 4px;padding:12px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--divider);animation:in .2s ease-out}
+@keyframes in{from{opacity:0;transform:translateY(-4px)}}
+.ip-h{display:flex;align-items:center;gap:6px}
+.ip-h b{flex:1;font-size:14.5px;color:var(--title)}
+.ip-h small{font-size:12px;color:var(--hint)}
+.ip-h .icon-btn{width:30px;height:30px;color:var(--hint)}
+.ip-h .icon-btn svg{width:18px;height:18px}
+.ip p{margin:4px 0 8px;font-size:14.5px;line-height:1.7;color:var(--body)}
+.ip .row{display:flex;gap:6px}
+.ip .btn{height:34px;padding:0 12px;font-size:13.5px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen paper" data-screen="list" data-status="light"></section>
+      <section class="screen paper" data-screen="search" data-status="light"></section>
+      <section class="screen paper" data-screen="bio" data-status="light"></section>
+      <section class="screen g" data-screen="card"></section>
+      <section class="screen g" data-screen="sheet"></section>
+      <section class="screen paper" data-screen="hadiths" data-status="light"></section>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="bio_core.js"></script>
+<script>
+/* ======================================================================
+   DEMO 4 — অভিধানের পাতা: a big underlined search like a dictionary,
+   plain text entries, the biography as an article, and the narrator's
+   intro opening right inside the hadith card instead of a sheet.
+   ====================================================================== */
+(function () {
+  const { icons, $ } = Kit;
+  const { S, TYPE, src, hisBody } = BioDemo;
+  const F = [['all', 'সব'], ['sahabi', 'সাহাবি'], ['tabei', 'তাবেঈ']];
+  const flat = (t, sub, act, dead) => `<header class="appbar flat"><button class="icon-btn" ${dead ? 'tabindex="-1"' : `data-act="${act}"`} aria-label="পেছনে">${icons.back}</button><h1>${t}${sub ? `<small>${sub}</small>` : ''}</h1></header>`;
+  let lastCard = null;
+  document.addEventListener('click', (e) => { const n = e.target.closest('.nar'); if (n) lastCard = n.closest('.hc'); }, true);
+
+  const D = {
+    list: () => `${flat('জীবনী', 'সাহাবি ও তাবেঈ', '', true)}<div class="scroll">
+      <label class="big">${icons.search}<input data-q value="${S.q}" placeholder="নাম লিখুন" aria-label="নাম লিখুন"><button class="icon-btn" data-act="clr" aria-label="মুছুন" ${S.q ? '' : 'hidden'}>${icons.close}</button></label>
+      <div class="tg">${F.map(([f, t]) => `<button data-act="f" data-f="${f}" aria-pressed="${S.f === f}">${t}</button>`).join('')}</div>
+      <div data-res></div></div>`,
+    results: (arr) => (arr.length ? arr.map((p) => `<button class="en" data-act="person" data-p="${p.id}"><b>${p.name}</b><em>${TYPE[p.t]}</em><span>${p.line}</span></button>`).join('')
+      : `<div class="empty"><h3>নাম পাওয়া যায়নি</h3><p>অন্য বানানে বা নামের অংশ লিখে দেখুন</p></div>`),
+    bio: (p) => `${flat('', '', 'bback')}<div class="scroll"><article class="ar">
+      <div class="k">${TYPE[p.t]}</div><h2>${p.name}</h2><p class="fn">${p.full}</p>
+      <p class="lead">${p.intro}</p>
+      ${p.bio.map(([h, t]) => `<h3>${h}</h3><p>${t}</p>`).join('')}
+      <p class="src">উৎস: ${src(p)}</p>
+      <button class="go" data-act="his">তাঁর বর্ণিত হাদিস${icons.chevron}</button></article></div>`,
+    /* intro opens inside the card that was tapped (no bottom sheet) */
+    openPv: (p) => {
+      const card = (lastCard && lastCard.isConnected) ? lastCard : $('.screen.on .hc');
+      lastCard = null;
+      const old = $('.ip', card);
+      if (old) { old.remove(); return; }
+      card.querySelector('.narrator').insertAdjacentHTML('afterend', `<div class="ip"><div class="ip-h"><b>${p.name}</b><small>${TYPE[p.t]}</small><button class="icon-btn" data-act="ipx" aria-label="বন্ধ করুন">${icons.close}</button></div>
+        <p>${p.intro}</p><div class="row"><button class="btn tonal" data-act="more">আরো পড়ুন</button><button class="btn text" data-act="his">তাঁর বর্ণিত হাদিস</button></div></div>`);
+    },
+    hadiths: (p) => `${flat('তাঁর বর্ণিত হাদিস', p.name, 'hback')}<div class="scroll">${hisBody(p)}</div>`,
+    act: { ipx: (el) => el.closest('.ip').remove() },
+  };
+  BioDemo.start(D, { demo: 4, name: 'অভিধানের পাতা' });
+})();
+</script>
+</body>
+</html>

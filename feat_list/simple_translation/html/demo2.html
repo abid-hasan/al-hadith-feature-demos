@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সহজ বিকল্প অনুবাদ — ডেমো ২ · সেগমেন্ট কন্ট্রোল</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): details page shell, hadith card, neighbour bar ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:16px 0 20px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.appbar h1{margin-left:4px}
+/* ===== Details page: HadithFancyAppBar over RoundedScaffoldBody ===== */
+.screen.rs{background:var(--appbar)}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+/* ===== Chapter card and hadith card ===== */
+.sc{padding:12px 16px}
+.sc small{display:block;font-size:12.5px;color:var(--hint)}
+.sc b{display:block;font-size:15.5px;color:var(--title)}
+.hc{padding:12px 10px 14px 14px}
+.hc .mo{width:34px;height:34px;color:var(--hint)}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 6px}
+.hc .translation{font-size:16px;color:var(--title);line-height:1.7}
+/* ===== Neighbour bar (HadithNeighbourBar): আগের / পরের ===== */
+.nb{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 14px 16px;border-top:1px solid var(--divider);background:var(--scaffold)}
+.nb button{display:flex;align-items:center;justify-content:center;gap:4px;height:42px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--title);font-size:15px}
+.nb svg{width:18px;height:18px;color:var(--primary)}
+/* ===== Share preview (what copy / share sends) ===== */
+.pv{margin:4px 0 12px;padding:10px 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--divider);font-size:14px;line-height:1.6;color:var(--body);white-space:pre-line}
+.pv-l{display:block;font-size:12.5px;color:var(--hint);margin-bottom:4px}
+/* ===== Publishers page ===== */
+.pub .body{padding-top:12px}
+.sh-sub{display:block;font-size:12.5px;font-weight:400;color:var(--hint)}
+/* ===== Demo 2 — সেগমেন্ট কন্ট্রোল: full-width two-part switch above the translation; the simple text sits on a tinted panel; share sheet with a preview ===== */
+/* ---------- Full-width segmented control ---------- */
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:2px 0 10px;border-radius:12px;background:var(--surface-2);border:1px solid var(--divider)}
+.seg button{height:34px;border-radius:9px;font-size:14px;color:var(--body)}
+.seg button[aria-pressed="true"]{background:var(--primary);color:var(--on-appbar);font-weight:700}
+/* ---------- Simple text on a tinted panel ---------- */
+.tp{padding:10px 12px;border-radius:10px;background:var(--tint)}
+.tp .translation{margin:0}
+/* ---------- Share sheet: preview + two buttons ---------- */
+.acts2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:6px}
+.acts2 svg{width:18px;height:18px}
+/* ---------- Publishers: plain list page, book cards with two labelled rows ---------- */
+.bk{display:flex;align-items:center;gap:12px}
+.bk b{font-size:15.5px;color:var(--title)}
+.bk-r{display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--divider);font-size:14px;line-height:1.6;color:var(--body)}
+.bk-r small{width:78px;flex:none;font-size:13px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .bk-r small{color:var(--primary)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="reading"></section>
+      <section class="screen" data-screen="simple"></section>
+      <section class="screen" data-screen="next"></section>
+      <section class="screen" data-screen="share"></section>
+      <section class="screen" data-screen="publishers"></section>
+      <!-- ===== Card menu sheet (filled by D.share) ===== -->
+      <div class="sheet" id="sheet-more" role="dialog" aria-label="অন্যান্য অপশন"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, state, the flow and screen
+   wiring. Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+
+/* ---------- Hadith read one at a time on the details page (আগের / পরের).
+   orig = the publisher's translation; simple = the plain-language one the
+   content team writes and scholars check (Bangla and English only). ---------- */
+const BOOK = { name: 'সহীহ বুখারী', abbr: 'বুখারী', kitab: 'আদব' };
+const HADITH = [
+  { no: 6018,
+    bab: { bn: 'যে আল্লাহ ও শেষ দিনে বিশ্বাস রাখে, সে যেন প্রতিবেশীকে কষ্ট না দেয়', en: 'Whoever believes in Allah and the Last Day must not harm his neighbour' },
+    nar: { bn: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', en: 'Narrated by Abu Hurairah' },
+    orig: { bn: 'যে ব্যক্তি আল্লাহ ও আখিরাত দিবসের প্রতি ঈমান রাখে, সে যেন উত্তম কথা বলে অথবা নীরব থাকে।',
+      en: 'Whoever believes in Allah and the Last Day should speak good or keep silent.' },
+    simple: { bn: 'যে আল্লাহ আর আখিরাতে বিশ্বাস করে, সে হয় ভালো কথা বলবে, নয়তো চুপ থাকবে।',
+      en: 'If you believe in Allah and the Last Day, say something good or stay quiet.' } },
+  { no: 6116,
+    bab: { bn: 'রাগ থেকে বেঁচে থাকা', en: 'Beware of anger' },
+    nar: { bn: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', en: 'Narrated by Abu Hurairah' },
+    orig: { bn: 'এক ব্যক্তি নবী (সাঃ)-এর নিকট আরজ করল, আমাকে অসিয়ত করুন। তিনি বললেন, তুমি রাগান্বিত হয়ো না। লোকটি কয়েকবার তা পুনরাবৃত্তি করল। তিনি প্রত্যেকবারই বললেন, রাগান্বিত হয়ো না।',
+      en: 'A man said to the Prophet (peace be upon him), "Advise me." He said, "Do not become angry." The man repeated it several times, and each time he said, "Do not become angry."' },
+    simple: { bn: 'একজন লোক নবী (সাঃ)-কে বলল, আমাকে কিছু উপদেশ দিন। তিনি বললেন, রাগ কোরো না। লোকটি বারবার একই অনুরোধ করল, আর তিনি প্রতিবার একই কথা বললেন: রাগ কোরো না।',
+      en: 'A man asked the Prophet (peace be upon him) for advice. He said, "Don\'t get angry." The man asked again and again, and each time the answer was the same: "Don\'t get angry."' } },
+];
+
+/* ---------- State: mode = the choice the reader made (kept for the next
+   hadith), idx = hadith on screen, lang = reading language, noSimple = the
+   toolbar case where the next hadith has no simple translation yet ---------- */
+const S = { mode: 'orig', idx: 0, lang: 'bn', noSimple: false, internal: false };
+const SCREENS = [
+  { id: 'reading', label: 'হাদিস পড়া' },
+  { id: 'simple', label: 'সহজ অনুবাদ' },
+  { id: 'next', label: 'পরের হাদিস' },
+  { id: 'share', label: 'কপি ও শেয়ার' },
+  { id: 'publishers', label: 'প্রকাশনী ও অনুবাদক' },
+];
+const EXTRA = '<button class="kit-chip" type="button" data-lang="bn">বাংলায় পড়া</button><button class="kit-chip" type="button" data-lang="en">ইংরেজিতে পড়া</button>'
+  + '<button class="kit-chip" type="button" data-ns>পরের হাদিসে সহজ অনুবাদ নেই</button>';
+const OPEN = (id) => id === 'share';
+const cur = () => HADITH[S.idx];
+// Buttons show only when this hadith has a simple translation in this language.
+const hasSimple = (h) => !!h.simple[S.lang] && !(S.noSimple && h.no === 6116);
+const showsSimple = (h) => S.mode === 'simple' && hasSimple(h);
+const textOf = (h) => (showsSimple(h) ? h.simple[S.lang] : h.orig[S.lang]);
+const LABEL = { orig: 'মূল অনুবাদ', simple: 'সহজ অনুবাদ' };
+// What copy / share sends: the open translation, with the label when it is the simple one.
+const sendText = (h) => `${showsSimple(h) ? `${LABEL.simple}\n` : ''}${textOf(h)}\n\n${BOOK.name}, হাদিস: ${bn(h.no)}`;
+
+/* ---------- Publishers page ("প্রকাশনী ও অনুবাদক", drawer): now also says who
+   writes the simple translation. No person or publisher names in the demo. ---------- */
+const PUB_BOOKS = [
+  { name: 'সহীহ বুখারী', abbr: 'বুখারী', simple: true },
+  { name: 'সহীহ মুসলিম', abbr: 'মুসলিম', simple: false },
+  { name: 'সুনানে আবু দাউদ', abbr: 'দাউদ', simple: false },
+];
+const PUB_ORIG = 'বইটির প্রকাশনীর অনুবাদ, প্রকাশনীর অনুমতি নিয়ে দেওয়া।';
+const PUB_SIMPLE = 'আল হাদিস অ্যাপের কনটেন্ট টিমের লেখা। মূল অনুবাদ আর আরবির সাথে মিলিয়ে আলেমরা যাচাই করেছেন। যে হাদিসে আছে, সেখানে অনুবাদের ওপরে "সহজ অনুবাদ" বাটন থাকে।';
+const pubBar = (title, sub) => `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="pubBack">${icons.back}</button><h1>${title}${sub ? `<small>${sub}</small>` : ''}</h1></header>`;
+
+/* ---------- Shared markup: details page (HadithFancyAppBar + rounded body),
+   hadith card, neighbour bar ---------- */
+function cardHTML(h) {
+  const sw = hasSimple(h) ? D.switcher(showsSimple(h) ? 'simple' : 'orig') : '';
+  return `<article class="card hc">
+    <div class="hadith-head"><span class="book-badge">${BOOK.abbr}</span><div class="hadith-meta"><b>${BOOK.name}</b><span>হাদিস: ${bn(h.no)}</span></div><span class="grade">সহিহ হাদিস</span>
+      <button class="icon-btn mo" data-act="more" aria-label="অন্যান্য অপশন">${icons.more}</button></div>
+    <p class="narrator">${h.nar[S.lang]}</p>${sw}${D.text(h, showsSimple(h))}</article>`;
+}
+function pageHTML() {
+  const h = cur();
+  return `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="noop">${icons.back}</button><h1>${BOOK.name}<small>হাদিস: ${bn(h.no)}</small></h1></header>
+    <div class="rbody"><div class="body"><div class="card sc"><small>অধ্যায়</small><b>${h.bab[S.lang]}</b></div>${cardHTML(h)}</div>
+    <div class="nb"><button data-act="nav" data-d="-1">${icons.back}আগের</button><button data-act="nav" data-d="1">পরের${icons.chevron}</button></div></div>`;
+}
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  sec.classList.toggle('rs', id !== 'publishers');
+  sec.innerHTML = id === 'publishers' ? D.publishers() : pageHTML();
+}
+function fillShare() { const el = $('#sheet-more'); if (el) el.innerHTML = D.share(cur()); }
+const screenFor = () => (S.idx === 1 ? 'next' : S.mode === 'simple' ? 'simple' : 'reading');
+function onScreen(id) {
+  // A toolbar chip opens a screen from a known state; taps inside the phone keep theirs.
+  if (!S.internal) {
+    S.idx = id === 'next' ? 1 : 0;
+    S.mode = id === 'reading' ? 'orig' : 'simple';
+  }
+  S.internal = false;
+  render(id);
+  if (OPEN(id)) { fillShare(); Kit.open('sheet-more'); }
+  syncExtra();
+  D.after?.(id);
+}
+function go(id) { S.internal = true; if (Kit.current === id) onScreen(id); else Kit.show(id); }
+function syncExtra() {
+  $$('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === S.lang)));
+  $$('[data-ns]').forEach((b) => b.setAttribute('aria-pressed', String(S.noSimple)));
+}
+
+/* ---------- Actions ---------- */
+const ACT = {
+  // "মূল অনুবাদ" / "সহজ অনুবাদ": swaps the text in place; the choice carries to the next hadith.
+  mode: (t) => { S.mode = t.dataset.v; go(screenFor()); },
+  nav: (t) => {
+    const n = S.idx + +t.dataset.d;
+    if (n < 0 || n >= HADITH.length) return;
+    S.idx = n; go(screenFor());
+  },
+  more: () => go('share'),
+  copy: () => Kit.snack(showsSimple(cur()) ? 'সহজ অনুবাদ কপি হয়েছে' : 'অনুবাদ কপি হয়েছে'),
+  share: () => Kit.snack('ফোনের শেয়ার মেনু খুলবে'),
+  close: () => go(screenFor()),
+  pubBack: () => go('reading'),
+  noop: () => {},
+};
+
+/* ---------- Wiring ---------- */
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('scrim')) { if (OPEN(Kit.current)) ACT.close(); return; }
+  const lang = e.target.closest('[data-lang]');
+  const ns = e.target.closest('[data-ns]');
+  if (lang || ns) {
+    if (lang) S.lang = lang.dataset.lang; else S.noSimple = !S.noSimple;
+    syncExtra(); render(Kit.current); if (OPEN(Kit.current)) fillShare(); D.after?.(Kit.current);
+    return;
+  }
+  const t = e.target.closest('[data-act]');
+  if (t) ACT[t.dataset.act]?.(t);
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && OPEN(Kit.current)) ACT.close(); });
+/* ======================================================================
+   DEMO 2 — সেগমেন্ট কন্ট্রোল: full-width two-part switch above the translation; the simple text sits on a tinted panel; share sheet with a preview
+   ====================================================================== */
+/* Segmented control above the translation; simple text on a tinted panel */
+const D = {
+  switcher: (on) => `<div class="seg" role="tablist" aria-label="অনুবাদ">${['orig', 'simple'].map((v) => `<button data-act="mode" data-v="${v}" aria-pressed="${on === v}">${LABEL[v]}</button>`).join('')}</div>`,
+  text: (h, simple) => (simple ? `<div class="tp"><p class="translation">${textOf(h)}</p></div>` : `<p class="translation">${textOf(h)}</p>`),
+  share: (h) => `<div class="sheet-head"><h2>অন্যান্য অপশন<small class="sh-sub">${BOOK.name} · হাদিস: ${bn(h.no)}</small></h2><button class="icon-btn" data-act="close" aria-label="বন্ধ করুন">${icons.close}</button></div>
+    <div class="sheet-body"><div class="pv"><span class="pv-l">যা কপি বা শেয়ার হবে</span>${sendText(h)}</div>
+      <div class="acts2"><button class="btn outline" data-act="copy">${icons.copy}অনুবাদ কপি</button><button class="btn" data-act="share">${icons.share}টেক্সট শেয়ার</button></div></div>`,
+  publishers: () => `${pubBar('প্রকাশনী ও অনুবাদক')}<div class="rbody"><div class="body">${PUB_BOOKS.map((b) => `<article class="card">
+      <div class="bk"><span class="book-badge">${b.abbr}</span><b>${b.name}</b></div>
+      <div class="bk-r"><small>মূল অনুবাদ</small><span>${PUB_ORIG}</span></div>${b.simple ? `<div class="bk-r"><small>সহজ অনুবাদ</small><span>${PUB_SIMPLE}</span></div>` : ''}</article>`).join('')}</div></div>`,
+};
+Kit.onScreen(onScreen);
+Kit.init({ demo: 2, name: 'সেগমেন্ট কন্ট্রোল', extra: EXTRA, screens: SCREENS });
+</script>
+</body>
+</html>

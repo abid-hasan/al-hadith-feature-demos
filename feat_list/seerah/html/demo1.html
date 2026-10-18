@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সীরাত — ডেমো ১ · অ্যাপের ধরন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): menu drawer, rounded body, hadith page ===== */
+.appbar.np h1{margin-left:12px}
+.icon-btn svg,.btn svg{flex:none}
+.screen.g{background:var(--appbar)}
+.rb{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+/* Menu: the drawer, with "জীবনী" next to "লেখক সম্পর্কে" (exact place: team decides) */
+.mn-dim{position:absolute;inset:0;background:var(--scrim)}
+.mn{position:absolute;top:0;bottom:0;left:0;width:82%;background:var(--card);display:flex;flex-direction:column;box-shadow:4px 0 18px rgba(0,0,0,.18)}
+.mn-top{background:var(--appbar);color:var(--on-appbar);padding:22px 20px 18px}
+.mn-top b{display:block;font-size:20px}
+.mn-top span{font-size:13px;opacity:.85}
+.mn-list{padding:10px 8px}
+.mn-row{display:flex;align-items:center;gap:16px;width:100%;min-height:54px;padding:0 14px;border-radius:10px;font-size:16px;color:var(--title);text-align:left;cursor:default}
+.mn-row>svg:first-child{color:var(--primary)}
+.mn-row span{flex:1}
+.mn-row>svg:last-child{width:20px;height:20px;color:var(--hint)}
+.mn-row.on{background:var(--tint);font-weight:700;cursor:pointer}
+/* Hadith details page */
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+/* Reading text: size from the font control (--rfs) */
+.txt p{margin:0 0 14px;font-size:var(--rfs,17px);line-height:1.85;color:var(--title)}
+/* ===== Demo 1: জীবনী page = AboutWritersPage (fancy app bar, rounded body, ListItemCard) ===== */
+.seg{display:flex;height:48px;margin:14px 14px 4px;padding:3px 4px;border:1.5px solid var(--primary);border-radius:10px;background:var(--card)}
+.seg span{flex:1;display:grid;place-items:center;border-radius:7px;font-size:14.5px;font-weight:700;color:var(--body)}
+.seg span.on{background:var(--primary);color:var(--on-appbar)}
+.bl{padding:8px 14px 0}
+.bk{display:flex;align-items:center;gap:14px;width:100%;min-height:76px;padding:12px 10px 12px 14px;margin-bottom:12px;border-radius:10px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.cov{width:44px;height:52px;flex:none;border-radius:6px;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.bk-t{flex:1;min-width:0}
+.bk-t b{display:block;font-size:16px;color:var(--title);line-height:1.35}
+.bk-t small{display:block;font-size:13px;color:var(--body)}
+.st{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;color:var(--primary-dark)}
+:root[data-theme="dark"] .st{color:var(--primary)}
+.st svg{width:14px;height:14px}
+.dlb{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--primary);flex:none}
+.bk>svg{color:var(--hint);flex:none}
+/* ===== সূচিপত্র = GeneralBookSectionCard (number column, title, chevron) ===== */
+.tc{display:flex;align-items:center;gap:12px;width:calc(100% - 28px);margin:0 14px 10px;padding:12px 8px 12px 14px;border-radius:10px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.tc-n{width:30px;flex:none;font-size:15px;font-weight:700;color:var(--primary)}
+.tc-t{flex:1;min-width:0}
+.tc-t b{display:block;font-size:15.5px;color:var(--title);font-weight:600}
+.tc-t small{font-size:12.5px;color:var(--hint)}
+.tc>svg{color:var(--hint);flex:none}
+/* ===== Reader (GeneralBookReaderPage): text card + bottom nav ===== */
+.rd{margin:14px 14px 10px;padding:16px;border-radius:10px;background:var(--card)}
+.rd-k{font-size:13px;color:var(--primary-dark);font-weight:700}
+:root[data-theme="dark"] .rd-k{color:var(--primary)}
+.rd h2{margin:2px 0 12px;font-size:20px;color:var(--title)}
+.iref{display:inline;color:var(--primary);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.rf-h{margin:6px 0 10px;padding-top:14px;border-top:1px solid var(--divider);font-size:15.5px;font-weight:600;color:var(--primary)}
+.rf{display:flex;align-items:center;gap:10px;width:100%;padding:10px 6px 10px 10px;margin-bottom:8px;border-radius:10px;background:var(--surface-2);border:1px solid var(--divider);text-align:left}
+.rf .book-badge{width:34px;height:34px;font-size:9.5px}
+.rf div{flex:1;min-width:0}
+.rf b{display:block;font-size:14.5px;color:var(--title)}
+.rf small{display:block;font-size:13px;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rf>svg{color:var(--hint)}
+.srcl{margin:12px 0 0;font-size:13px;color:var(--hint)}
+.rnav{flex:none;display:flex;height:64px;background:var(--card);border-top:1px solid var(--divider)}
+.rnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12.5px;color:var(--body)}
+.rnav button svg{color:var(--primary)}
+.rnav button:disabled{opacity:.4;cursor:default}
+.fsz{font-size:18px;font-weight:700;color:var(--primary);line-height:24px}
+/* ===== Font size sheet ===== */
+.fs-row{display:flex;align-items:center;justify-content:center;gap:22px;padding:10px 0 4px}
+.fs-row .icon-btn{width:46px;height:46px;border:1.5px solid var(--divider);color:var(--primary);font-size:22px;font-weight:700}
+.fs-row b{min-width:48px;text-align:center;font-size:22px;color:var(--title)}
+.fs-pv{margin:8px 0 6px;text-align:center;color:var(--hint);font-size:13px}
+/* ===== Hadith page: HadithDetailsSectionCard "সীরাত" ===== */
+.dsc{padding:14px}
+.dst{margin:0 0 6px;font-size:15.5px;font-weight:600;color:var(--primary)}
+.dsc p{margin:0 0 12px;font-size:14.5px;color:var(--body)}
+.dsc p b{color:var(--title)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos); the engine renders each one ===== -->
+      <section class="screen" data-screen="menu"></section>
+      <section class="screen g" data-screen="section"></section>
+      <section class="screen g" data-screen="download"></section>
+      <section class="screen g" data-screen="toc"></section>
+      <section class="screen g" data-screen="read" data-keep-scroll></section>
+      <section class="screen g" data-screen="hadith"></section>
+      <section class="screen g" data-screen="link"></section>
+
+      <!-- ===== Dialog: download first (filled by D.dl) ===== -->
+      <div class="dialog" id="dl" role="dialog" aria-label="ডাউনলোড"></div>
+
+      <!-- ===== Sheet: ফন্ট সাইজ ===== -->
+      <div class="sheet" id="fs" role="dialog" aria-label="ফন্ট সাইজ">
+        <div class="sheet-head"><h2>ফন্ট সাইজ</h2><button class="icon-btn" data-close data-ic="close" aria-label="বন্ধ করুন"></button></div>
+        <div class="sheet-body">
+          <div class="fs-row"><button class="icon-btn" data-act="fs" data-d="-1" aria-label="ছোট করুন">−</button><b data-fsv>১৭</b><button class="icon-btn" data-act="fs" data-d="1" aria-label="বড় করুন">+</button></div>
+          <p class="fs-pv">লেখা সাথে সাথে বদলে যাবে</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="seerah_core.js"></script>
+<script>
+/* ======================================================================
+   DEMO 1 — অ্যাপের ধরন: জীবনী = AboutWritersPage with a tab bar,
+   books as ListItemCard, contents as GeneralBookSectionCard, the reader
+   with a bottom nav, and a HadithDetailsSectionCard on the hadith page.
+   ====================================================================== */
+(function () {
+  const { bn, icons } = Kit;
+  const { BOOKS, CH, H, S, ref, src, refsOf, para, book } = SeerahDemo;
+  const BOOK_IC = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 8h6"/></svg>';
+  const DL_IC = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
+  const PREV = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
+  const NEXT = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+
+  const bar = (t, sub, act) => `<header class="appbar"><button class="icon-btn" data-act="${act}" aria-label="পেছনে">${icons.back}</button><h1>${t}${sub ? `<small>${sub}</small>` : ''}</h1></header>`;
+  const bookRow = (b) => `<button class="bk" data-act="book" data-b="${b.id}">
+      <span class="cov">${BOOK_IC}</span>
+      <span class="bk-t"><b>${b.name}</b><small>${bn(CH.length)}টি অধ্যায়</small>
+        ${S.dl[b.id] ? `<span class="st">${icons.check}ডাউনলোড করা আছে</span>` : `<small>${b.size}</small>`}</span>
+      ${S.dl[b.id] ? icons.chevron : `<span class="dlb" aria-label="ডাউনলোড করুন">${DL_IC}</span>`}</button>`;
+
+  const D = {
+    /* ---------- জীবনী section, "সীরাত" tab ---------- */
+    section: () => `${bar('জীবনী', '', 'sback')}<div class="rb"><div class="scroll">
+      <div class="seg"><span class="on">সীরাত</span><span>সাহাবি ও তাবেঈ</span></div>
+      <div class="bl">${BOOKS.map(bookRow).join('')}</div></div></div>`,
+    /* ---------- Download first (AlertDialog) ---------- */
+    dl: (b) => `<h2>${b.name}</h2><p>বইটি পড়তে আগে ডাউনলোড করতে হবে। একবার ডাউনলোড করলে ইন্টারনেট ছাড়াও পড়া যাবে।</p>
+      <p class="muted">আকার: ${b.size}</p>
+      <div class="actions"><button class="btn text" data-close>বাতিল</button><button class="btn" data-act="dlgo" data-b="${b.id}">ডাউনলোড করুন</button></div>`,
+    /* ---------- সূচিপত্র ---------- */
+    toc: () => `${bar(book().name, 'সূচিপত্র', 'tback')}<div class="rb"><div class="scroll" style="padding-top:14px">
+      ${CH.map((c, i) => `<button class="tc" data-act="ch" data-c="${i}"><span class="tc-n">${bn(i + 1)}</span><span class="tc-t"><b>${c.t}</b><small>${c.when}</small></span>${icons.chevron}</button>`).join('')}</div></div>`,
+    /* ---------- Reading page ---------- */
+    read: () => {
+      const c = CH[S.ch], refs = refsOf(S.ch);
+      return `${bar(c.t, book().name, 'rback')}<div class="rb"><div class="scroll">
+        <article class="rd"><div class="rd-k">অধ্যায় ${bn(S.ch + 1)}</div><h2>${c.t}</h2>
+          <div class="txt">${c.p.map((p) => `<p>${para(p)}</p>`).join('')}</div>
+          ${refs.length ? `<h3 class="rf-h">এই অধ্যায়ের হাদিস</h3>${refs.map((k) => `<button class="rf" data-act="ref" data-k="${k}"><span class="book-badge">${H[k].ab}</span><div><b>${ref(k)}</b><small>${H[k].tr}</small></div>${icons.chevron}</button>`).join('')}` : ''}
+          <p class="srcl">সূত্র: ${src()}</p></article></div>
+        <nav class="rnav"><button data-act="prev" ${S.ch === 0 ? 'disabled' : ''}>${PREV}পূর্ববর্তী</button>
+          <button data-open="fs"><span class="fsz">অ</span>ফন্ট সাইজ</button>
+          <button data-act="next" ${S.ch === CH.length - 1 ? 'disabled' : ''}>${NEXT}পরবর্তী</button></nav></div>`;
+    },
+    /* ---------- Hadith page: one more HadithDetailsSectionCard ---------- */
+    hLink: (h) => `<section class="card dsc"><h3 class="dst">সীরাত</h3><p>এই হাদিসের সাথে জোড়া অধ্যায়: <b>${CH[h.ch].t}</b> · ${BOOKS[0].name}</p>
+      <button class="btn tonal" data-act="seerah">${BOOK_IC}সীরাতে পড়ুন</button></section>`,
+  };
+  SeerahDemo.start(D, { demo: 1, name: 'অ্যাপের ধরন' });
+})();
+</script>
+</body>
+</html>

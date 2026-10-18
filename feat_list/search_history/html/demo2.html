@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সার্চ হিস্ট্রি — ডেমো ২ · কাটা চিহ্ন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): page body, search field, results page ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+/* ===== RoundedScaffoldBody: green app bar behind a rounded page ===== */
+.screen.rs{background:var(--appbar)}
+.rs .body{background:var(--scaffold);border-radius:20px 20px 0 0}
+.page{padding:14px 16px 24px}
+/* ===== _SearchSectionCard (radius 12, padding 14) ===== */
+.sc{background:var(--card);border-radius:12px;padding:14px;margin-bottom:16px}
+.stt{margin:0;font-size:16px;font-weight:600;color:var(--title);flex:1}
+/* ===== NewSearchField ===== */
+.sf{display:flex;align-items:center;height:48px;border-radius:10px;border:1px solid var(--divider);background:var(--surface-2);color:var(--hint)}
+.sf:focus-within{border-color:var(--primary)}
+.sf .i{width:40px;display:grid;place-items:center}
+.sf .i svg{width:18px;height:18px}
+.sf input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.sf input::placeholder{color:var(--hint)}
+.sf .icon-btn{color:var(--primary)}
+.sf .icon-btn svg{width:20px;height:20px}
+/* ===== Results page: overview card (SearchResultOverViewCard) + hadith cards ===== */
+.ov{background:var(--card);border-radius:10px;padding:10px 14px;margin:14px 14px 7px}
+.ov p{margin:0}
+.ov .ql{font-size:16px;font-weight:600;color:var(--title)}
+.ov .q-t{color:var(--primary)}
+.ov .ct{font-size:13px;color:var(--body)}
+.ov .used{margin-top:4px;font-size:12.5px;color:var(--hint)}
+.bks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bks span{font-size:12.5px;padding:1px 10px;border-radius:20px;background:var(--surface-2);color:var(--body);border:1px solid var(--divider)}
+.hc{margin:7px 14px;padding:12px 14px 14px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:12px 0 6px}
+.hc .translation{font-size:16px;color:var(--title)}
+mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-radius:4px;padding:0 2px}
+:root[data-theme="dark"] mark.hl{color:var(--primary)}
+.dialog p{margin:0;font-size:14.5px;color:var(--body)}
+
+/* ===== Demo 2 — কাটা চিহ্ন: every chip carries its own ✕; tapping it turns
+   the chip into a red "মুছে ফেলুন" pill for one more tap. The title row has
+   an icon and a trash button for "সব মুছুন" ===== */
+.hh{display:flex;align-items:center;gap:8px;margin-top:16px}
+.hh>svg{color:var(--primary);flex:none}
+.hh .stt{font-size:15.5px}
+.tb{display:inline-flex;align-items:center;gap:4px;height:30px;padding:0 10px;border-radius:15px;font-size:13px;color:var(--body);border:1px solid var(--divider)}
+.tb svg{width:15px;height:15px}
+.tb.del{color:var(--error)}
+.flow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.flow.clamp{max-height:36px;overflow:hidden}
+.cx{display:inline-flex;align-items:center;height:36px;border-radius:18px;background:var(--tint);color:var(--primary-dark);font-size:14px;overflow:hidden;max-width:100%}
+:root[data-theme="dark"] .cx{color:var(--primary)}
+.cx .q{display:inline-flex;align-items:center;gap:6px;height:100%;padding:0 4px 0 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx .q svg{width:14px;height:14px;flex:none}
+.cx .x{width:30px;height:100%;display:grid;place-items:center;color:inherit;opacity:.7}
+.cx .x:hover{opacity:1}
+.cx.armed{background:var(--error);color:var(--on-appbar);animation:arm .2s ease-out}
+.cx.armed .q{padding-right:12px}
+@keyframes arm{from{transform:scale(.92)}}
+.foot-more{display:flex;justify-content:center;margin-top:10px}
+.foot-more .btn{height:32px;font-size:13.5px}
+.foot-more svg{width:18px;height:18px;transition:transform .3s}
+.foot-more [aria-expanded="true"] svg{transform:rotate(180deg)}
+
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="search"></section>
+      <section class="screen" data-screen="results"></section>
+      <section class="screen" data-screen="expanded"></section>
+      <section class="screen" data-screen="deleteOne"></section>
+      <section class="screen" data-screen="deleteAll"></section>
+      <!-- ===== Confirm before clearing everything (same in all 5 demos) ===== -->
+      <div class="dialog" id="dlg-all" role="alertdialog" aria-label="আপনি কি নিশ্চিত?">
+        <h2>আপনি কি নিশ্চিত?</h2><p>পুরো সার্চ হিস্ট্রি এই ফোন থেকে মুছে যাবে।</p>
+        <div class="actions"><button class="btn text" data-act="cancel">বাতিল করুন</button><button class="btn danger" data-act="clearAll">মুছে ফেলুন</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): history data, the search flow, delete one,
+   delete all. Each demo's own look lives in the D object below.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const svg = (d, w = 18) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const I = { x: (w = 14) => svg('<path d="M7 7l10 10M17 7L7 17"/>', w), hist: (w = 18) => svg('<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v4h4"/><path d="M12 8v4l3 2"/>', w), fill: (w = 16) => svg('<path d="M7 17 17 7M9 7h8v8"/>', w) };
+
+/* ---------- History on this phone: newest first, at most 10, no repeats.
+   "তাহাজ্জুদ" was searched yesterday, so it is first. ---------- */
+const START = ['তাহাজ্জুদ', 'রাগ করো না', 'নিয়ত', 'রোজা', 'পবিত্রতা', 'ভালো কথা বলা', 'জুমার দিনের আমল', 'মা-বাবার সেবা', 'দান-সদকা', 'ইস্তিগফার'];
+const MAX = 10;
+/* ---------- Results (hadith text only from the safe list, Bangla only) ---------- */
+const HAD = {
+  b1: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1, nar: 'উমর ইবনুল খাত্তাব (রাঃ) থেকে বর্ণিত:', text: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' },
+  m223: { book: 'সহীহ মুসলিম', abbr: 'মুসলিম', no: 223, nar: 'আবু মালিক আল-আশআরি (রাঃ) থেকে বর্ণিত:', text: 'পবিত্রতা ঈমানের অর্ধেক।' },
+  b6018: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 6018, nar: 'আবু হুরায়রা (রাঃ) থেকে বর্ণিত:', text: 'যে ব্যক্তি আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।' },
+  b6116: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 6116, nar: 'আবু হুরায়রা (রাঃ) থেকে বর্ণিত:', text: 'এক ব্যক্তি নবী (সাঃ)-কে বললেন, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বললেন, তিনি প্রতিবারই বললেন, রাগ করো না।' },
+  b1894: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1894, nar: 'আবু হুরায়রা (রাঃ) থেকে বর্ণিত:', text: 'রোজা ঢালস্বরূপ।' },
+};
+const HITS = { 'রাগ করো না': ['b6116'], 'নিয়ত': ['b1'], 'রোজা': ['b1894'], 'পবিত্রতা': ['m223'], 'ভালো কথা বলা': ['b6018'] };
+const COUNT = { 'তাহাজ্জুদ': 46, 'রাগ করো না': 9, 'নিয়ত': 38, 'রোজা': 214, 'পবিত্রতা': 57, 'ভালো কথা বলা': 17, 'জুমার দিনের আমল': 31, 'মা-বাবার সেবা': 26, 'দান-সদকা': 121, 'ইস্তিগফার': 43 };
+const SETTINGS = 'পদ্ধতি: স্বাভাবিক · বই: সব সিলেক্টেড · গ্রেড: সব সিলেক্টেড';
+
+/* ---------- State ---------- */
+const S = { hist: [...START], expanded: false, last: 'তাহাজ্জুদ', target: 'রাগ করো না', base: 'search', nav: false, edit: false, sel: new Set() };
+const SCREENS = [
+  { id: 'search', label: 'সার্চ পেজ' },
+  { id: 'results', label: 'সার্চ রেজাল্ট' },
+  { id: 'expanded', label: 'সব দেখা' },
+  { id: 'deleteOne', label: 'একটা মোছা' },
+  { id: 'deleteAll', label: 'সব মোছা' },
+];
+const EXTRA = '<button class="kit-chip" type="button" data-reset>হিস্ট্রি আগের মতো</button>';
+
+/* ---------- Shared markup ---------- */
+const field = () => `<form class="sf" data-form><span class="i">${icons.search}</span><input type="search" placeholder="হাদিস খুঁজুন" aria-label="হাদিস খুঁজুন" enterkeyhint="search"><button class="icon-btn" type="submit" aria-label="সার্চ করুন">${icons.search}</button></form>`;
+const searchBar = () => `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-snack="হোমে ফিরবে">${icons.back}</button><h1>সার্চ</h1></header>`;
+const total = (q) => COUNT[q] || 6 + ([...q].length * 7) % 40;
+function split(n) { const a = Math.round(n * 0.4), b = Math.round(n * 0.3), c = Math.round(n * 0.18); return [['সহীহ বুখারী', a], ['সহীহ মুসলিম', b], ['সুনানে আবু দাউদ', c], ['জামে তিরমিজি', n - a - b - c]].filter(([, x]) => x > 0); }
+function resultsHTML() {
+  const q = S.last, n = total(q), hits = HITS[q] || [];
+  const hl = (t) => t.split(q).join(`<mark class="hl">${esc(q)}</mark>`);
+  return `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="back">${icons.back}</button><h1>সার্চ রেজাল্ট</h1></header>
+    <div class="body"><div class="ov"><p class="ql">আপনি ( <b class="q-t">${esc(q)}</b> ) লিখে সার্চ করেছেন</p><p class="ct">মোট ${bn(n)}টি হাদিস পাওয়া গেছে</p><p class="used">${SETTINGS}</p>
+      <div class="bks">${split(n).map(([b, x]) => `<span>${b} ${bn(x)}</span>`).join('')}</div></div>
+      ${hits.map((k) => `<article class="card hc"><div class="hadith-head"><span class="book-badge">${HAD[k].abbr}</span><div class="hadith-meta"><b>${HAD[k].book}</b><span>হাদিস: ${bn(HAD[k].no)}</span></div><span class="grade">সহিহ হাদিস</span></div><p class="narrator">${HAD[k].nar}</p><p class="translation">${hl(HAD[k].text)}</p></article>`).join('')}</div>`;
+}
+
+/* ---------- Flow ---------- */
+function run(q) {
+  q = q.trim();
+  if (!q) { Kit.snack('সার্চ করার জন্য কিছু লিখুন'); return; }
+  S.hist = [q, ...S.hist.filter((x) => x !== q)].slice(0, MAX);
+  S.last = q; S.edit = false; S.sel = new Set();
+  go('results');
+}
+function del(q) {
+  S.hist = S.hist.filter((x) => x !== q);
+  S.sel.delete(q);
+  if (!S.hist.length) S.edit = false;
+  Kit.snack(`“${q}” হিস্ট্রি থেকে মুছে ফেলা হয়েছে`);
+}
+function clearAll() { S.hist = []; S.expanded = false; S.edit = false; S.sel = new Set(); Kit.snack('সার্চ হিস্ট্রি মুছে ফেলা হয়েছে'); }
+const ensure = () => { if (!S.hist.length) S.hist = [...START]; if (!S.hist.includes(S.target)) S.target = S.hist[Math.min(1, S.hist.length - 1)]; };
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  sec.classList.add('rs');
+  sec.innerHTML = id === 'results' ? resultsHTML() : D.page(id);
+  D.after?.(id, sec);
+}
+const rerender = () => { const b = $('.screen.on .body'); const top = b ? b.scrollTop : 0; render(Kit.current); const n = $('.screen.on .body'); if (n) n.scrollTop = top; };
+const go = (id) => { S.nav = true; Kit.show(id); };
+function onScreen(id) {
+  // A toolbar chip can open any screen: put the history in the state it shows.
+  if (!S.nav) {
+    if (id !== 'results') ensure();
+    if (id === 'search') { S.expanded = false; S.edit = false; S.sel = new Set(); }
+    if (id === 'expanded') S.expanded = true;
+    if (id === 'deleteOne' || id === 'deleteAll') { S.base = D.baseFor?.(id) || 'search'; S.target = S.hist[Math.min(1, S.hist.length - 1)]; }
+    if (id === 'results') S.last = S.hist[0] || 'তাহাজ্জুদ';
+  }
+  S.nav = false;
+  render(id);
+  if (id === 'deleteAll') Kit.open('dlg-all');
+  if (id === 'deleteOne') D.openOne?.();
+}
+/* Leave an overlay screen back to the page under it */
+const backToBase = () => go(S.base === 'expanded' ? 'expanded' : 'search');
+
+/* ---------- Wiring ---------- */
+const ACT = {
+  run: (t) => run(t.dataset.q),
+  back: () => go(S.expanded ? 'expanded' : 'search'),
+  more: () => { S.expanded = !S.expanded; go(S.expanded ? 'expanded' : 'search'); },
+  askAll: () => { S.base = Kit.current === 'expanded' ? 'expanded' : 'search'; go('deleteAll'); },
+  clearAll: () => { clearAll(); S.base = 'search'; backToBase(); },
+  cancel: () => backToBase(),
+  askOne: (t) => { S.target = t.dataset.q; S.base = Kit.current === 'expanded' ? 'expanded' : 'search'; go('deleteOne'); },
+  delOne: (t) => { del(t.dataset.q || S.target); if (Kit.current === 'deleteOne') backToBase(); else rerender(); },
+};
+document.addEventListener('click', (e) => {
+  if (Hold.fired) { Hold.fired = false; e.preventDefault(); e.stopImmediatePropagation(); return; }
+  if (e.target.matches('[data-reset]')) { S.hist = [...START]; S.edit = false; S.sel = new Set(); S.expanded = Kit.current === 'expanded'; rerender(); Kit.snack('হিস্ট্রি আগের অবস্থায় ফিরেছে'); return; }
+  if (e.target.classList.contains('scrim') && (Kit.current === 'deleteOne' || Kit.current === 'deleteAll')) { backToBase(); return; }
+  const t = e.target.closest('[data-act]');
+  if (t) { e.preventDefault(); (D.act?.[t.dataset.act] || ACT[t.dataset.act])?.(t); }
+});
+document.addEventListener('submit', (e) => { const f = e.target.closest('[data-form]'); if (!f) return; e.preventDefault(); run($('input', f).value); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && (Kit.current === 'deleteOne' || Kit.current === 'deleteAll')) backToBase(); });
+/* ---------- Long press (and right click) on [data-hold] ---------- */
+const Hold = { fired: false, timer: 0, x: 0, y: 0 };
+const holdFire = (t) => { Hold.fired = true; holdEnd(); (D.act?.hold || ACT.askOne)(t); };
+function holdEnd() {
+  clearTimeout(Hold.timer); Hold.timer = 0;
+  $$('.pressing').forEach((x) => x.classList.remove('pressing'));
+}
+document.addEventListener('pointerdown', (e) => {
+  const t = e.target.closest('[data-hold]');
+  if (!t) return;
+  Hold.fired = false; Hold.x = e.clientX; Hold.y = e.clientY;
+  t.classList.add('pressing');
+  Hold.timer = setTimeout(() => holdFire(t), 550);
+});
+document.addEventListener('pointermove', (e) => { if (Hold.timer && Math.abs(e.clientX - Hold.x) + Math.abs(e.clientY - Hold.y) > 10) holdEnd(); });
+// The click that follows a long press is swallowed; forget it if none comes.
+['pointerup', 'pointercancel'].forEach((ev) => document.addEventListener(ev, () => { if (Hold.timer) holdEnd(); if (Hold.fired) setTimeout(() => { Hold.fired = false; }, 300); }));
+document.addEventListener('contextmenu', (e) => { const t = e.target.closest('[data-hold]'); if (!t) return; e.preventDefault(); clearTimeout(Hold.timer); holdFire(t); });
+
+/* ======================================================================
+   DEMO 2 — কাটা চিহ্ন
+   ====================================================================== */
+const chip = (q) => (Kit.current === 'deleteOne' && S.target === q
+  ? `<span class="cx armed"><button class="q" data-act="delOne" data-q="${esc(q)}">${icons.trash}মুছে ফেলুন</button></span>`
+  : `<span class="cx"><button class="q" data-act="run" data-q="${esc(q)}">${icons.search}${esc(q)}</button><button class="x" data-act="askOne" data-q="${esc(q)}" aria-label="${esc(q)} মুছুন">${I.x()}</button></span>`);
+const D = {
+  /* ---------- Search page: chips with ✕ ---------- */
+  page: () => `${searchBar()}<div class="body"><div class="page"><div class="sc">${field()}
+    ${S.hist.length ? `<div class="hh">${I.hist()}<h3 class="stt">সার্চ হিস্ট্রি</h3><button class="tb del" data-act="askAll">${icons.trash}সব মুছুন</button></div>
+      <div class="flow${S.expanded ? '' : ' clamp'}">${S.hist.map(chip).join('')}</div>
+      <div class="foot-more" data-more><button class="btn text" data-act="more" aria-expanded="${S.expanded}">${S.expanded ? 'কম দেখুন' : `সব দেখুন (${bn(S.hist.length)})`}${icons.down}</button></div>` : ''}</div></div></div>`,
+  after: (id, sec) => { const f = $('.flow', sec), m = $('[data-more]', sec); if (f && m && !S.expanded) m.hidden = f.scrollHeight <= f.clientHeight + 2; },
+  baseFor: () => 'search',
+};
+/* Tapping anywhere else on the page puts the red pill back to a chip */
+document.addEventListener('click', (e) => { if (Kit.current === 'deleteOne' && e.target.closest('.screen.on') && !e.target.closest('[data-act]')) backToBase(); });
+
+Kit.onScreen(onScreen);
+Kit.init({ demo: 2, name: 'কাটা চিহ্ন', extra: EXTRA, screens: SCREENS });
+</script>
+</body>
+</html>
+

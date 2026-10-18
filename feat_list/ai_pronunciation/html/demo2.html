@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>এআই উচ্চারণ সহায়ক — ডেমো ২ · নিচের প্লেয়ার বার</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (all 5 demos): page shell, hadith card, Arabic words, "sound" animation ===== */
+.wrap{flex:1;min-height:0;display:flex;flex-direction:column}
+.wrap.green{background:var(--appbar)}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.scroll{padding-top:14px}
+.icon-btn svg,.btn svg{flex:none}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 6px}
+.hc .translation{font-size:16px;color:var(--title)}
+.sc{padding:12px 16px}
+.sc small{display:block;font-size:12.5px;color:var(--hint)}
+.sc b{display:block;font-size:15.5px;color:var(--title)}
+/* Arabic paragraph: one span per word so the playing word can be marked */
+.arp{font-family:var(--font-ar);direction:rtl;text-align:right;font-size:26px;line-height:2.1;color:var(--title);margin:12px 0 4px}
+.arp .w{border-radius:8px;padding:0 3px;transition:background .15s,color .15s}
+.ar{font-family:var(--font-ar);direction:rtl}
+/* Equalizer bars: stand-in for sound while something "plays" */
+.eq{display:inline-flex;align-items:flex-end;gap:2px;height:14px}
+.eq i{width:3px;height:100%;border-radius:2px;background:currentColor;animation:eq .9s ease-in-out infinite;transform-origin:bottom}
+.eq i:nth-child(2){animation-delay:-.3s}.eq i:nth-child(3){animation-delay:-.6s}.eq i:nth-child(4){animation-delay:-.15s}
+@keyframes eq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+.slow-on .eq i{animation-duration:1.5s}
+/* Word-by-word grid (app's _WordByWordWrap) */
+.wgrid{display:flex;flex-wrap:wrap;direction:rtl;gap:20px 12px;margin:14px 0 6px}
+.wb{display:flex;flex-direction:column;align-items:center;gap:2px;max-width:160px;padding:4px 6px;border-radius:8px;text-align:center}
+.wb .ar{font-size:24px;line-height:1.6;color:var(--title)}
+.wb small{font-size:12px;font-style:italic;color:var(--body)}
+.wb span{font-size:13px;color:var(--title);direction:ltr}
+.wb.say{background:var(--tint)}
+.wb.say .ar{color:var(--primary)}
+/* Word sheet: property rows */
+.prop{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--divider);font-size:15px;color:var(--title)}
+.prop span{color:var(--hint);font-size:14px}
+.prop .ar{font-size:20px}
+/* ===== Demo 2 — নিচের প্লেয়ার বার: segmented tabs, a speaker button by the Arabic, a player bar docked at the bottom ===== */
+.appbar.np h1{margin-left:12px}
+.seg{display:flex;margin:14px 0 4px;border:1.5px solid var(--primary);border-radius:10px;overflow:hidden}
+.seg button{flex:1;height:36px;font-size:14.5px;color:var(--primary);font-weight:700}
+.seg button.on{background:var(--primary);color:var(--on-appbar)}
+.arh{display:flex;align-items:center;gap:8px;margin-top:12px}
+.arh span{font-size:13px;color:var(--hint)}
+.arh .btn{margin-left:auto;height:34px;padding:0 12px;font-size:13.5px}
+.arp{margin-top:4px}
+.arp .w.hl{color:var(--primary);box-shadow:inset 0 -3px 0 var(--primary);border-radius:0}
+/* Docked player bar: part of the screen, slides up while playing */
+.pbar{flex:none;background:var(--card);border-top:1px solid var(--divider);padding:10px 14px 12px;box-shadow:0 -6px 18px rgba(0,0,0,.08);animation:pb .25s cubic-bezier(.2,.8,.2,1)}
+@keyframes pb{from{transform:translateY(100%)}to{transform:none}}
+.pb-top{display:flex;align-items:center;gap:12px}
+.pb-play{width:46px;height:46px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:var(--on-appbar)}
+.pb-mid{flex:1;min-width:0}
+.pb-mid b{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--title)}
+.pb-mid b .eq{color:var(--primary)}
+.pb-line{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;color:var(--hint)}
+.pb-line .progress{flex:1}
+.pb-line .progress i{transition:width .3s linear}
+.pb-rate{display:flex;margin-top:10px;padding:3px;border-radius:10px;background:var(--surface-2)}
+.pb-rate button{flex:1;height:32px;border-radius:8px;font-size:13.5px;color:var(--body)}
+.pb-rate button.on{background:var(--card);color:var(--primary);font-weight:700;box-shadow:var(--shadow)}
+/* Word sheet: big Arabic, round listen button with rings */
+.wd{display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 0 6px}
+.wd .ar{font-size:42px;line-height:1.5;color:var(--title)}
+.wd p{margin:4px 0 0;font-size:17px;color:var(--title)}
+.wd small{font-size:14px;color:var(--hint)}
+.ring{position:relative;width:64px;height:64px;margin:14px 0 4px;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:var(--on-appbar)}
+.ring.on::before,.ring.on::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--primary);animation:rg 1.4s ease-out infinite}
+.ring.on::after{animation-delay:.7s}
+@keyframes rg{from{transform:scale(1);opacity:.8}to{transform:scale(1.7);opacity:0}}
+.chips2{display:flex;justify-content:center;gap:8px;margin:10px 0 4px}
+.chips2 span{font-size:13px;padding:3px 10px;border-radius:14px;background:var(--surface-2);color:var(--body)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos); the engine fills each one ===== -->
+      <section class="screen" data-screen="hadith"></section>
+      <section class="screen" data-screen="playing"></section>
+      <section class="screen" data-screen="slow"></section>
+      <section class="screen" data-screen="words"></section>
+      <section class="screen" data-screen="word"></section>
+      <!-- ===== Word detail sheet (filled by D.sheet) ===== -->
+      <div class="sheet" id="sheet-word" role="dialog" aria-label="শব্দের বিস্তারিত"></div>
+
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): the hadith, its word timings, a pretend
+   audio clock, and the flow wiring. No real audio: the "sound" is a timer
+   that moves the highlight word by word. Each demo's look lives in D.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ic = (k, w = 20) => icons[k].replace('width="24" height="24"', `width="${w}" height="${w}"`);
+const SPEAKER = (w = 20) => svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>', w);
+const PLAY = (w = 20) => ic('play', w);
+const STOP = (w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/></svg>`;
+const EQ = '<span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>';
+
+/* ---------- The hadith (Bukhari 1). Audio and per-word timings come as checked data ---------- */
+const H = { book: 'সহিহ বুখারি', abbr: 'বুখারী', no: 1, kitab: 'ওহির সূচনা', bab: 'রাসূলুল্লাহ (সাঃ)-এর কাছে ওহি যেভাবে শুরু হয়েছিল',
+  grade: 'সহিহ হাদিস', nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত',
+  tr: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' };
+/* ms = how long the word lasts in the recording at normal speed */
+const W = [
+  { ar: 'إِنَّمَا', tr: 'ইন্নামা', m: 'নিশ্চয়ই কেবল', root: '', ms: 700 },
+  { ar: 'الأَعْمَالُ', tr: "আল-আ'মালু", m: 'কাজসমূহ', root: 'ع م ل', ms: 900 },
+  { ar: 'بِالنِّيَّاتِ', tr: 'বিন-নিয়্যাত', m: 'নিয়তের ওপর', root: 'ن و ي', ms: 1000 },
+  { ar: 'وَإِنَّمَا', tr: 'ওয়া ইন্নামা', m: 'আর নিশ্চয়ই কেবল', root: '', ms: 800 },
+  { ar: 'لِكُلِّ', tr: 'লিকুল্লি', m: 'প্রত্যেকের জন্য', root: 'ك ل ل', ms: 600 },
+  { ar: 'امْرِئٍ', tr: 'ইমরিইন', m: 'ব্যক্তির', root: 'م ر ء', ms: 700 },
+  { ar: 'مَا', tr: 'মা', m: 'যা', root: '', ms: 400 },
+  { ar: 'نَوَى', tr: 'নাওয়া', m: 'সে নিয়ত করেছে', root: 'ن و ي', ms: 800 },
+];
+const RATE = { normal: { label: 'স্বাভাবিক', k: 1 }, slow: { label: 'ধীরে', k: 1.7 } };
+const FIRST_WORD = 2; // بِالنِّيَّاتِ: the word tapped in the user flow
+const FAIL_WORD = 7;  // نَوَى: its first play fails, to show the message with "আবার চেষ্টা করুন"
+
+/* ---------- State ---------- */
+const S = { tab: 'ar', playing: false, idx: -1, rate: 'normal', word: FIRST_WORD, saying: null, failed: false };
+const SCREENS = [
+  { id: 'hadith', label: 'হাদিসের পেজ' },
+  { id: 'playing', label: 'পুরো হাদিস শোনা' },
+  { id: 'slow', label: 'ধীরে শোনা' },
+  { id: 'words', label: 'শব্দে শব্দে' },
+  { id: 'word', label: 'শব্দের বিস্তারিত' },
+];
+const k = () => RATE[S.rate].k;
+const total = () => W.reduce((a, w) => a + w.ms, 0) * k();
+const elapsed = () => (S.idx < 0 ? 0 : W.slice(0, S.idx).reduce((a, w) => a + w.ms, 0) * k());
+const clock = (ms) => { const s = Math.round(ms / 1000); return `${bn(Math.floor(s / 60))}:${bn(String(s % 60).padStart(2, '0'))}`; };
+const pct = () => (S.idx < 0 ? 0 : Math.round(((elapsed() + W[S.idx].ms * k()) / total()) * 100));
+
+/* ---------- Shared markup helpers ---------- */
+const hadithHead = () => `<div class="hadith-head"><span class="book-badge">${H.abbr}</span><div class="hadith-meta"><b>${H.book}</b><span>হাদিস: ${bn(H.no)}</span></div><span class="grade">${H.grade}</span></div>`;
+const arabicPara = () => `<p class="arp" lang="ar">${W.map((w, i) => `<span class="w${S.idx === i ? ' hl' : ''}${S.playing && i < S.idx ? ' done' : ''}" data-w="${i}">${w.ar}</span>`).join(' ')}</p>`;
+const wordGrid = () => `<div class="wgrid">${W.map((w, i) => `<button class="wb${S.saying === i ? ' say' : ''}" data-act="word" data-i="${i}" aria-label="${w.tr}: শুনুন আর বিস্তারিত দেখুন"><span class="ar" lang="ar">${w.ar}</span><small>${w.tr}</small><span>${w.m}</span></button>`).join('')}</div>`;
+const playLabel = () => (S.playing ? 'থামান' : 'পুরো হাদিস শুনুন');
+const rateLabel = () => RATE[S.rate].label;
+
+/* ---------- Pretend audio: full hadith ---------- */
+let tm = null, wt = null;
+function paint() {
+  $$('.screen.on [data-w]').forEach((el) => { const i = +el.dataset.w; el.classList.toggle('hl', i === S.idx); el.classList.toggle('done', S.playing && i < S.idx); });
+  $$('.screen.on [data-pct]').forEach((el) => { el.style.width = `${pct()}%`; });
+  $$('.screen.on [data-time]').forEach((el) => { el.textContent = `${clock(S.idx < 0 ? 0 : elapsed() + W[S.idx].ms * k())} / ${clock(total())}`; });
+  D.tick?.();
+  follow();
+}
+/* Long text: keep the playing word inside the visible part of the page */
+function follow() {
+  const w = $('.screen.on .w.hl'); const sc = w?.closest('.scroll');
+  if (!sc) return;
+  const z = $('.phone').getBoundingClientRect().height / $('.phone').offsetHeight || 1;
+  const wr = w.getBoundingClientRect(), sr = sc.getBoundingClientRect();
+  if (wr.bottom > sr.bottom - 90 * z || wr.top < sr.top) sc.scrollTop += (wr.top - sr.top) / z - 120;
+}
+function step() {
+  S.idx += 1;
+  if (S.idx >= W.length) { finish(); return; }
+  paint();
+  tm = setTimeout(step, W[S.idx].ms * k());
+}
+function start(from = 0) { clearTimeout(tm); stopWord(); S.playing = true; S.idx = from - 1; step(); }
+function resume() { clearTimeout(tm); tm = setTimeout(step, W[Math.max(0, S.idx)].ms * k()); }
+function stopFull() { clearTimeout(tm); S.playing = false; S.idx = -1; }
+function finish() { stopFull(); if (Kit.current === 'playing' || Kit.current === 'slow') go('hadith'); }
+
+/* ---------- Pretend audio: one word ---------- */
+function stopWord() { clearTimeout(wt); S.saying = null; paintWord(); }
+function paintWord() {
+  $$('.screen.on [data-i]').forEach((el) => el.classList.toggle('say', +el.dataset.i === S.saying));
+  const b = $('#sheet-word [data-act="wplay"]');
+  if (b) { const on = S.saying === S.word; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.innerHTML = D.wbtn(on); }
+}
+function sayWord(i) {
+  stopFull(); clearTimeout(wt);
+  if (i === FAIL_WORD && !S.failed) {
+    S.failed = true; S.saying = null; paintWord();
+    Kit.snack('অডিও চালানো যায়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।', { label: 'আবার চেষ্টা করুন', onClick: () => sayWord(i) });
+    return;
+  }
+  S.saying = i; paintWord();
+  wt = setTimeout(() => { S.saying = null; paintWord(); }, W[i].ms * k() + 500);
+}
+
+/* ---------- Render ---------- */
+let internal = false;
+function go(id) { internal = true; Kit.show(id); internal = false; }
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  sec.innerHTML = D.page();
+  sec.classList.toggle('slow-on', S.rate === 'slow');
+}
+function fillSheet() { $('#sheet-word').innerHTML = D.sheet(W[S.word], S.word); paintWord(); }
+function onScreen(id) {
+  if (!internal) {
+    clearTimeout(tm); clearTimeout(wt); S.saying = null; S.playing = false; S.idx = -1;
+    S.tab = id === 'words' || id === 'word' ? 'wbw' : 'ar';
+    S.rate = id === 'slow' ? 'slow' : 'normal';
+    if (id === 'word') S.word = FIRST_WORD;
+  }
+  render(id);
+  if (!internal && id === 'playing') start(0);
+  if (!internal && id === 'slow') start(3); // as if switched to slow in the middle
+  if (S.playing) paint();
+  if (id === 'word') { fillSheet(); Kit.open('sheet-word'); if (!internal) sayWord(S.word); }
+  D.after?.(id);
+}
+function afterInit() { D.init?.(); }
+
+/* ---------- Wiring ---------- */
+const ACT = {
+  play: () => {
+    if (S.playing) { stopFull(); go(S.tab === 'wbw' ? 'words' : 'hadith'); return; }
+    S.tab = 'ar'; S.playing = true; S.idx = -1;
+    go(S.rate === 'slow' ? 'slow' : 'playing');
+    start(0);
+  },
+  rate: (t) => {
+    const want = t.dataset.r || (S.rate === 'normal' ? 'slow' : 'normal');
+    if (want === S.rate) { D.closeMenu?.(); return; }
+    S.rate = want;
+    if (S.playing) { clearTimeout(tm); go(want === 'slow' ? 'slow' : 'playing'); paint(); resume(); } // same place, new speed
+    else render(Kit.current);
+    Kit.snack(`গতি: ${rateLabel()}`);
+  },
+  menu: () => D.toggleMenu?.(),
+  tab: (t) => { if (t.dataset.t === S.tab) return; stopFull(); stopWord(); S.tab = t.dataset.t; go(S.tab === 'wbw' ? 'words' : 'hadith'); },
+  word: (t) => { S.word = +t.dataset.i; go('word'); sayWord(S.word); },
+  wplay: () => (S.saying === S.word ? stopWord() : sayWord(S.word)),
+  step: (t) => { const n = S.word + +t.dataset.d; if (n < 0 || n >= W.length) return; S.word = n; stopWord(); fillSheet(); },
+  wclose: () => { stopWord(); go('words'); },
+};
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('scrim') && Kit.current === 'word') { stopWord(); go('words'); return; }
+  const t = e.target.closest('[data-act]');
+  if (t && t.closest('.phone')) ACT[t.dataset.act]?.(t);
+  else if (!e.target.closest('.menu')) D.closeMenu?.();
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && Kit.current === 'word') { stopWord(); go('words'); } });
+/* ======================================================================
+   DEMO 2 — নিচের প্লেয়ার বার: a small "শুনুন" button sits by the Arabic.
+   While the hadith plays, a player bar docks at the bottom (stop, progress,
+   time, and a two-way speed switch); the playing word is underlined.
+   The word sheet centres the word with a big listen button that ripples.
+   ====================================================================== */
+const D = {
+  page: () => `<header class="appbar np"><h1>${H.book}<small>হাদিস: ${bn(H.no)}</small></h1></header>
+    <div class="scroll"><div class="card sc"><small>অধ্যায়</small><b>${H.bab}</b></div>
+      <article class="card hc">${hadithHead()}
+        <div class="seg" role="tablist"><button class="${S.tab === 'ar' ? 'on' : ''}" data-act="tab" data-t="ar" role="tab">আরবি</button><button class="${S.tab === 'wbw' ? 'on' : ''}" data-act="tab" data-t="wbw" role="tab">শব্দে শব্দে</button></div>
+        ${S.tab === 'ar' ? `<div class="arh"><span>আরবি লেখা</span><button class="btn outline" data-act="play" aria-pressed="${S.playing}">${S.playing ? `${STOP(16)}থামান` : `${SPEAKER(18)}শুনুন`}</button></div>${arabicPara()}` : wordGrid()}
+        <p class="narrator">${H.nar}</p><p class="translation">${H.tr}</p></article></div>
+    ${S.playing ? `<div class="pbar" role="region" aria-label="অডিও প্লেয়ার"><div class="pb-top"><button class="pb-play" data-act="play" aria-label="থামান">${STOP(20)}</button>
+      <div class="pb-mid"><b>${EQ}পুরো হাদিস বাজছে</b><div class="pb-line"><div class="progress"><i data-pct style="width:0"></i></div><span data-time></span></div></div></div>
+      <div class="pb-rate" role="radiogroup" aria-label="গতি">${Object.keys(RATE).map((r) => `<button class="${S.rate === r ? 'on' : ''}" data-act="rate" data-r="${r}" role="radio" aria-checked="${S.rate === r}">${RATE[r].label}</button>`).join('')}</div></div>` : ''}`,
+  wbtn: (on) => (on ? EQ : SPEAKER(26)),
+  sheet: (w, i) => `<div class="sheet-head"><h2>শব্দের বিস্তারিত</h2><button class="icon-btn" data-act="wclose" aria-label="বন্ধ করুন">${icons.close}</button></div>
+    <div class="sheet-body"><div class="wd"><span class="ar" lang="ar">${w.ar}</span><small>${w.tr}</small><p>${w.m}</p>
+      <button class="ring" data-act="wplay" aria-label="শব্দটা শুনুন"></button><small>শুনতে চাপুন</small></div>
+      ${w.root ? `<div class="chips2"><span>মূল হরফ: <span class="ar" lang="ar">${w.root}</span></span></div>` : ''}</div>
+    <div class="sheet-foot"><button class="btn text" data-act="step" data-d="-1"${i === 0 ? ' disabled style="opacity:.4"' : ''}>আগের শব্দ</button><button class="btn" data-act="wclose">বন্ধ করুন</button><button class="btn text" data-act="step" data-d="1"${i === W.length - 1 ? ' disabled style="opacity:.4"' : ''}>পরের শব্দ</button></div>`,
+};
+Kit.onScreen(onScreen);
+Kit.init({ demo: 2, name: 'নিচের প্লেয়ার বার', extra: typeof EXTRA === 'string' ? EXTRA : '', screens: SCREENS });
+afterInit();
+</script>
+</body>
+</html>

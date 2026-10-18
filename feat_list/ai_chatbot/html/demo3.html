@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>এআই হাদিস চ্যাটবট — ডেমো ৩ · সোয়াইপ উত্তর</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared bits ===== */
+.pg{display:flex;flex-direction:column;flex:1;min-height:0}
+[data-hid]{cursor:pointer}
+.body{flex:1;min-height:0;overflow-y:auto}
+.body::-webkit-scrollbar{width:0}
+.appbar .icon-btn svg{width:22px;height:22px}
+
+/* ===== Entry: banner card on the search page ===== */
+.sf{display:flex;align-items:center;gap:10px;height:48px;margin:14px 14px 12px;padding:0 14px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--hint);font-size:15px}
+.sf svg{width:18px;height:18px}
+.ban{display:flex;align-items:center;gap:14px;width:calc(100% - 28px);margin:0 14px;padding:16px;border-radius:16px;background:var(--appbar);color:var(--on-appbar);text-align:left}
+.ban .ic{width:48px;height:48px;border-radius:14px;flex:none;display:grid;place-items:center;background:rgba(255,255,255,.16)}
+.ban .ic svg{width:26px;height:26px}
+.ban b{display:block;font-size:16px}
+.ban small{display:block;font-size:13px;opacity:.88}
+.ban>svg{margin-left:auto;flex:none}
+
+/* ===== Chat: rule strip pinned under the app bar ===== */
+.strip{flex:none;display:flex;gap:8px;align-items:flex-start;padding:8px 14px;background:var(--tint);font-size:12.5px;line-height:1.5;color:var(--title);border-bottom:1px solid var(--divider)}
+.strip svg{width:17px;height:17px;flex:none;color:var(--primary);margin-top:1px}
+.me{display:flex;justify-content:flex-end;margin:16px 14px 4px}
+.me p{max-width:78%;margin:0;padding:10px 14px;border-radius:14px;background:var(--primary);color:var(--on-appbar);font-size:15px}
+.bl{display:flex;align-items:center;gap:8px;margin:12px 14px 8px;font-size:14.5px;font-weight:700;color:var(--title)}
+.bl i{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.bl i svg{width:16px;height:16px}
+.sub{margin:-4px 14px 6px 50px;font-size:13px;color:var(--hint)}
+.deck{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 14px 4px 50px;scrollbar-width:none}
+.deck::-webkit-scrollbar{display:none}
+.sw{flex:0 0 78%;scroll-snap-align:start;display:flex;flex-direction:column;gap:8px;min-height:190px;padding:14px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.sw .hadith-head{gap:8px}
+.sw .book-badge{width:32px;height:32px;font-size:9.5px}
+.sw .hadith-meta b{font-size:14px}
+.sw .grade{font-size:11px}
+.sw .x{flex:1;margin:0;font-size:15px;line-height:1.65;color:var(--title);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.sw .go{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:var(--primary)}
+.sw .go svg{width:16px;height:16px}
+.cnt{margin:4px 14px 0 50px;font-size:12px;color:var(--hint)}
+.pad{height:14px}
+
+/* ===== Composer ===== */
+.comp{flex:none;display:flex;align-items:flex-end;gap:8px;padding:10px 12px 12px;background:var(--card);border-top:1px solid var(--divider)}
+.comp input{flex:1;min-width:0;height:44px;padding:0 14px;border-radius:12px;background:var(--surface-2);border:1px solid var(--divider);color:var(--title);font-size:15px;outline:none}
+.comp input::placeholder{color:var(--hint)}
+.comp .btn{height:44px;padding:0 14px}
+.comp .btn svg{width:18px;height:18px}
+.out{flex:none;padding:14px 16px;background:var(--card);border-top:1px solid var(--divider)}
+.out b{display:block;font-size:15px;color:var(--title)}
+.out small{font-size:13px;color:var(--hint)}
+
+/* ===== Hadith page ===== */
+.hp .card{margin:14px 12px}
+.hp .kb{margin:12px 0 0;font-size:13px;color:var(--hint)}
+.hp .translation{font-size:16px;line-height:1.75;color:var(--title)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <section class="screen" data-screen="entry"></section>
+      <section class="screen" data-screen="chat"></section>
+      <section class="screen" data-screen="answer"></section>
+      <section class="screen" data-screen="masala"></section>
+      <section class="screen" data-screen="empty"></section>
+      <section class="screen" data-screen="hadith"></section>
+      <section class="screen" data-screen="limit"></section>
+
+      <div id="hold" hidden>
+        <!-- Page: search page with a chat banner -->
+        <div class="pg" id="pg-entry">
+          <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="exit" data-i="back"></button><h1>সার্চ</h1></header>
+          <div class="body"><div class="sf" id="sf"></div><button class="ban" data-act="openchat" id="ban"></button></div>
+        </div>
+        <!-- Page: the chat -->
+        <div class="pg" id="pg-chat">
+          <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="entry" data-i="back"></button><h1>হাদিস চ্যাট<small id="cr"></small></h1></header>
+          <div class="strip" id="strip"></div>
+          <div class="body" data-scroller></div>
+          <div id="foot"></div>
+        </div>
+        <!-- Page: hadith -->
+        <div class="pg" id="pg-hadith">
+          <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="back" data-i="back"></button><h1 id="hp-t"></h1></header>
+          <div class="body hp"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="chatbot.js"></script>
+<script>
+/* ======================================================================
+   DEMO 3 — সোয়াইপ উত্তর: the rule is a strip pinned under the app bar.
+   Each reply is the fixed line, then the hadith as cards to swipe
+   sideways. Entry: a banner on the search page.
+   ====================================================================== */
+(function () {
+  const { S, H, T, esc, bn, book, credits } = BOT;
+  const I = Kit.icons;
+  const $ = (s, r) => (r || document).querySelector(s);
+  const CHAT = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4A8 8 0 1 1 20 12z"/></svg>';
+  $('#sf').innerHTML = `${I.search}<span>হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন</span>`;
+  $('#ban').innerHTML = `<span class="ic">${CHAT}</span><span><b>হাদিস চ্যাট</b><small>প্রশ্ন বা মনের কথা লিখে হাদিস খুঁজুন</small></span>${I.chevron}`;
+  $('#strip').innerHTML = `${I.info}<span>${T.rule} ${T.ruleMore}</span>`;
+
+  const grade = (id) => `<span class="grade">${BOT.GRADES[H[id].grade]}</span>`;
+  const sw = (id) => `<article class="sw" data-act="open" data-hid="${id}" tabindex="0"><div class="hadith-head"><span class="book-badge">${book(id).abbr}</span>
+      <div class="hadith-meta"><b>${book(id).name}</b><span>হাদিস: ${bn(H[id].num)}</span></div>${grade(id)}</div>
+      <p class="x">${esc(H[id].tr)}</p><span class="go">পুরো হাদিস${I.chevron}</span></article>`;
+  const bl = (t) => `<div class="bl"><i>${I.book}</i>${t}</div>`;
+  function msg(m) {
+    if (m.me) return `<div class="me" data-me><p>${esc(m.me)}</p></div>`;
+    if (m.bot === 'found') return `${bl(T.found(m.ids.length))}<div class="deck">${m.ids.map(sw).join('')}</div>${m.ids.length > 1 ? '<p class="cnt">পাশে সরিয়ে বাকিগুলো দেখুন</p>' : ''}`;
+    if (m.bot === 'masala') return `${bl(T.masala)}<p class="sub">${T.masalaSub}</p>`;
+    return `${bl(T.none)}<p class="sub">${T.noneSub}</p>`;
+  }
+
+  BOT.start({ demo: 3, name: 'সোয়াইপ উত্তর', render: {
+    entry() {},
+    chat(el) {
+      $('#cr').textContent = credits();
+      $('.body', el).innerHTML = `${S.msgs.map(msg).join('')}<div class="pad"></div>`;
+      $('#foot').innerHTML = BOT.left()
+        ? `<div class="comp"><input data-q type="text" enterkeyhint="send" autocomplete="off" aria-label="প্রশ্ন লিখুন" placeholder="${T.hint}"><button class="btn" data-act="send">পাঠান</button></div>`
+        : `<div class="out"><b>${T.out}</b><small>${T.reset}</small></div>`;
+    },
+    hadith(el) {
+      const id = S.cur;
+      $('#hp-t').innerHTML = `${book(id).name}<small>হাদিস: ${bn(H[id].num)}</small>`;
+      $('.body', el).innerHTML = `<article class="card"><div class="hadith-head"><span class="book-badge">${book(id).abbr}</span>
+        <div class="hadith-meta"><b>${book(id).name}</b><span>হাদিস: ${bn(H[id].num)}</span></div>${grade(id)}</div>
+        <p class="narrator">${H[id].nar}</p><p class="translation">${esc(H[id].tr)}</p><p class="kb">অধ্যায়: ${H[id].kitab}</p></article>`;
+    },
+  } });
+})();
+</script>
+</body>
+</html>

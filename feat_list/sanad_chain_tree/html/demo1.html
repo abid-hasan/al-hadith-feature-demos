@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সনদ চেইন ট্রি — ডেমো ১ · অ্যাপের ধরন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): scroll body, hadith card, details page ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+/* ===== Details page: HadithFancyAppBar over RoundedScaffoldBody ===== */
+.screen.rs{background:var(--appbar)}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.rbody .body{padding-top:16px}
+/* ===== Hadith card (HadithListItem): top bar, narrator in primary, translation ===== */
+.hc{padding:12px 14px 14px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 6px}
+.hc .translation{font-size:16px;color:var(--title)}
+/* ===== HadithDetailsSectionCard: title in primary, w600 ===== */
+.dsc{padding:14px}
+.dst{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:15.5px;font-weight:600;color:var(--primary)}
+.dst .meta{margin-left:auto;font-size:12.5px;font-weight:400;color:var(--hint)}
+.ex{margin:0;font-size:15px;line-height:1.75;color:var(--body)}
+/* ===== Tree page: the stage pans, the canvas scales ===== */
+.stage{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;cursor:grab;background:var(--scaffold)}
+.stage.drag{cursor:grabbing}
+.canvas{position:absolute;left:0;top:0;transform-origin:0 0}
+.links{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.links path{fill:none;stroke:var(--primary);stroke-width:1.6;opacity:.6}
+.tn{position:absolute;transform:translate(-50%,-50%);text-align:center}
+/* ===== Narrator sheet: shared pieces ===== */
+.sheet-head h2 small{display:block;font-size:12.5px;font-weight:400;color:var(--hint)}
+.rel{margin:0;font-size:14px;line-height:1.7;color:var(--body)}
+
+/* ===== Demo 1 — অ্যাপের ধরন: one more HadithDetailsSectionCard "সনদ" after
+   "ব্যাখ্যা"; the tree page is a normal AppBar page with small round zoom
+   buttons; the narrator opens in the app's Material bottom sheet ===== */
+/* Section: a vertical line of names, dot per narrator */
+.sl{list-style:none;margin:0;padding:0}
+.sl>li{position:relative;padding:0 0 12px 24px}
+.sl>li::before{content:"";position:absolute;left:3px;top:7px;width:8px;height:8px;border-radius:50%;background:var(--card);border:2px solid var(--primary)}
+.sl>li::after{content:"";position:absolute;left:8px;top:21px;bottom:-1px;width:2px;background:var(--divider)}
+.sl>li:last-child{padding-bottom:0}
+.sl>li:last-child::after{display:none}
+.rn{display:block;text-align:left;border-radius:8px}
+.rn b{display:block;font-size:15px;font-weight:600;line-height:1.35;color:var(--title)}
+.rn span{font-size:12.5px;color:var(--hint)}
+.sp{display:block;margin:0 0 8px;font-size:13px;color:var(--primary-dark)}
+:root[data-theme="dark"] .sp{color:var(--primary)}
+.brs{display:grid;gap:8px}
+.br{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--surface-2);border:1px solid var(--divider)}
+.br .rn{flex:1;min-width:0}
+.br .rn b{font-size:14px}
+.br>svg{color:var(--hint);flex:none}
+.more{margin-top:12px}
+/* Tree page: node cards, elbow lines, zoom buttons bottom right */
+.tp-note{flex:none;display:flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;color:var(--hint);border-bottom:1px solid var(--divider);background:var(--card)}
+.tp-note b{color:var(--title);font-weight:600}
+.nd{display:flex;flex-direction:column;justify-content:center;width:112px;min-height:50px;padding:6px 8px;border-radius:10px;background:var(--card);box-shadow:var(--shadow);border:1px solid var(--divider)}
+.nd b{font-size:13px;font-weight:600;line-height:1.3;color:var(--title)}
+.nd small{font-size:11.5px;color:var(--hint)}
+.tn[data-id="umar"] .nd,.tn[data-id="bukhari"] .nd{border-color:var(--primary);background:var(--tint)}
+.zc{position:absolute;right:14px;bottom:18px;display:flex;flex-direction:column;gap:8px}
+.zc button{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--card);color:var(--title);box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.zc span{align-self:center;font-size:12px;color:var(--hint)}
+/* Sheet: label/value rows, teachers list, opinion */
+.fx{margin:0 0 6px}
+.fx div{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--divider)}
+.fx dt{width:104px;flex:none;font-size:13.5px;color:var(--hint)}
+.fx dd{margin:0;font-size:14.5px;color:var(--title)}
+.sh-t{margin:14px 0 6px;font-size:14.5px;font-weight:600;color:var(--primary)}
+.tch{margin:0;padding-left:18px;font-size:14.5px;color:var(--body)}
+.tch li{margin-bottom:2px}
+
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen rs" data-screen="details"></section>
+      <section class="screen" data-screen="tree"></section>
+      <section class="screen" data-screen="narrator"></section>
+      <!-- ===== Sheet: the narrator's profile (filled by D.sheet) ===== -->
+      <div class="sheet" id="sheet-nar" role="dialog" aria-label="রাবির পরিচিতি"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, state, tree layout, pan and
+   zoom, and the flow. Each demo's own look lives in the D object below.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const I = {
+  tree: (w = 18) => svg('<circle cx="12" cy="4.5" r="2"/><circle cx="5.5" cy="19.5" r="2"/><circle cx="18.5" cy="19.5" r="2"/><path d="M12 6.5V12M12 12H5.5v5.5M12 12h6.5v5.5"/>', w),
+  minus: (w = 20) => svg('<path d="M5 12h14"/>', w),
+  plus: (w = 20) => svg('<path d="M12 5v14M5 12h14"/>', w),
+  fit: (w = 20) => svg('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>', w),
+  arrow: (w = 14) => svg('<path d="M5 12h14M13 6l6 6-6 6"/>', w),
+  down: (w = 14) => svg('<path d="M12 5v14M6 13l6 6 6-6"/>', w),
+};
+
+/* ---------- The hadith (safe list: Bukhari 1, Bangla only) ---------- */
+const H = { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1, grade: 'সহিহ হাদিস',
+  nar: 'উমর ইবনুল খাত্তাব (রাঃ) থেকে বর্ণিত:', text: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' };
+const EXPL = 'কাজের প্রতিদান নির্ভর করে মনের উদ্দেশ্যের ওপর। বাইরে থেকে একই রকম দুটো কাজ নিয়তের কারণে আলাদা মূল্য পায়।';
+
+/* ---------- Narrators of this hadith (scholars will supply the real data).
+   The chain is the well-known one of Bukhari 1; the two other routes are
+   Bukhari's own routes to the same hadith through Yahya ibn Sa'id.
+   n = full name, s = short name for the tree, lv = stage, t = teachers.
+   No reliability verdict is attached to any real name. ---------- */
+const R = {
+  umar: { n: 'উমর ইবনুল খাত্তাব (রাঃ)', s: 'উমর (রাঃ)', lv: 'সাহাবি', full: 'উমর ইবনুল খাত্তাব ইবনু নুফাইল আল-কুরাশি (রাঃ)', died: '২৩ হিজরি', place: 'মদিনা', t: ['রাসুলুল্লাহ (সাঃ)'] },
+  alqama: { n: 'আলকামা ইবনু ওয়াক্কাস', s: 'আলকামা', lv: 'তাবেঈ', full: 'আলকামা ইবনু ওয়াক্কাস আল-লাইসি', died: 'খলিফা আব্দুল মালিকের সময়ে', place: 'মদিনা', t: ['উমর ইবনুল খাত্তাব (রাঃ)', 'আয়েশা (রাঃ)'] },
+  taymi: { n: 'মুহাম্মাদ ইবনু ইবরাহিম আত-তাইমি', s: 'মুহাম্মাদ আত-তাইমি', lv: 'তাবেঈ', full: 'মুহাম্মাদ ইবনু ইবরাহিম ইবনিল হারিস আত-তাইমি', died: '১২০ হিজরি', place: 'মদিনা', t: ['আলকামা ইবনু ওয়াক্কাস'] },
+  yahya: { n: 'ইয়াহইয়া ইবনু সাঈদ আল-আনসারি', s: 'ইয়াহইয়া আল-আনসারি', lv: 'তাবেঈ', full: 'ইয়াহইয়া ইবনু সাঈদ ইবনি কাইস আল-আনসারি', died: '১৪৩ হিজরি', place: 'মদিনা', t: ['আনাস ইবনু মালিক (রাঃ)', 'সাঈদ ইবনুল মুসাইয়্যিব', 'মুহাম্মাদ ইবনু ইবরাহিম আত-তাইমি'] },
+  uyayna: { n: 'সুফিয়ান ইবনু উয়াইনা', s: 'সুফিয়ান ইবনু উয়াইনা', lv: 'তাবে-তাবেঈ', full: 'সুফিয়ান ইবনু উয়াইনা আল-হিলালি', died: '১৯৮ হিজরি', place: 'মক্কা', t: ['ইয়াহইয়া ইবনু সাঈদ আল-আনসারি', 'আমর ইবনু দিনার', 'ইবনু শিহাব আয-যুহরি'] },
+  malik: { n: 'মালিক ইবনু আনাস', s: 'মালিক ইবনু আনাস', lv: 'তাবে-তাবেঈ', full: 'মালিক ইবনু আনাস আল-আসবাহি', died: '১৭৯ হিজরি', place: 'মদিনা', t: ['নাফি', 'ইবনু শিহাব আয-যুহরি', 'ইয়াহইয়া ইবনু সাঈদ আল-আনসারি'] },
+  thaqafi: { n: 'আব্দুল ওয়াহহাব আস-সাকাফি', s: 'আব্দুল ওয়াহহাব', lv: 'তাবে-তাবেঈ', full: 'আব্দুল ওয়াহহাব ইবনু আব্দিল মাজিদ আস-সাকাফি', died: '১৯৪ হিজরি', place: 'বসরা', t: ['ইয়াহইয়া ইবনু সাঈদ আল-আনসারি'] },
+  humaydi: { n: 'আব্দুল্লাহ ইবনুয যুবাইর আল-হুমাইদি', s: 'আল-হুমাইদি', lv: 'তাবে-তাবেঈদের ছাত্র', full: 'আব্দুল্লাহ ইবনুয যুবাইর আল-হুমাইদি', died: '২১৯ হিজরি', place: 'মক্কা', t: ['সুফিয়ান ইবনু উয়াইনা'] },
+  qanabi: { n: 'আব্দুল্লাহ ইবনু মাসলামা আল-কানাবি', s: 'আল-কানাবি', lv: 'তাবে-তাবেঈদের ছাত্র', full: 'আব্দুল্লাহ ইবনু মাসলামা আল-কানাবি', died: '২২১ হিজরি', place: 'বসরা', t: ['মালিক ইবনু আনাস'] },
+  qutayba: { n: 'কুতাইবা ইবনু সাঈদ', s: 'কুতাইবা ইবনু সাঈদ', lv: 'তাবে-তাবেঈদের ছাত্র', full: 'কুতাইবা ইবনু সাঈদ আস-সাকাফি', died: '২৪০ হিজরি', place: 'বাগলান, খোরাসান', t: ['আব্দুল ওয়াহহাব আস-সাকাফি', 'মালিক ইবনু আনাস'] },
+  bukhari: { n: 'ইমাম বুখারি', s: 'ইমাম বুখারি', lv: 'বইয়ের ইমাম', full: 'মুহাম্মাদ ইবনু ইসমাঈল আল-বুখারি', died: '২৫৬ হিজরি', place: 'বুখারা', t: ['আল-হুমাইদি', 'আল-কানাবি', 'কুতাইবা ইবনু সাঈদ'] },
+};
+/* Rows from the Sahabi down to the book's imam; who heard from whom */
+const ROWS = [['umar'], ['alqama'], ['taymi'], ['yahya'], ['uyayna', 'malik', 'thaqafi'], ['humaydi', 'qanabi', 'qutayba'], ['bukhari']];
+const EDGES = [['umar', 'alqama'], ['alqama', 'taymi'], ['taymi', 'yahya'], ['yahya', 'uyayna'], ['yahya', 'malik'], ['yahya', 'thaqafi'],
+  ['uyayna', 'humaydi'], ['malik', 'qanabi'], ['thaqafi', 'qutayba'], ['humaydi', 'bukhari'], ['qanabi', 'bukhari'], ['qutayba', 'bukhari']];
+const TRUNK = ['umar', 'alqama', 'taymi', 'yahya'];
+const BR = [['uyayna', 'humaydi'], ['malik', 'qanabi'], ['thaqafi', 'qutayba']];
+const ALL = ROWS.flat();
+const STAGES = [{ lv: 'সাহাবি', rows: [0] }, { lv: 'তাবেঈ', rows: [1, 2, 3] }, { lv: 'তাবে-তাবেঈ', rows: [4] }, { lv: 'তাবে-তাবেঈদের ছাত্র', rows: [5] }, { lv: 'বইয়ের ইমাম', rows: [6] }];
+const COUNT = `${bn(BR.length)}টি সূত্র · ${bn(ALL.length)} জন রাবি`;
+const SPLIT = `এখান থেকে ${bn(BR.length)}টি সূত্রে ভাগ হয়েছে`;
+const heardFrom = (id) => EDGES.filter(([, b]) => b === id).map(([a]) => R[a].n);
+const toldTo = (id) => EDGES.filter(([a]) => a === id).map(([, b]) => R[b].n);
+const FACTS = (id) => [['পুরো নাম', R[id].full], ['মৃত্যু', R[id].died], ['কোথায় ছিলেন', R[id].place]];
+const REL_T = 'নির্ভরযোগ্যতা নিয়ে মুহাদ্দিসদের মতামত';
+const REL = 'মতামতের সারাংশ আলেমদের যাচাইয়ের অপেক্ষায়। অ্যাপ নিজে কোনো মতামত দেখায় না।';
+
+/* ---------- State ---------- */
+const S = { has: true, from: 'details', nid: 'yahya', tapped: false, prev: null, fitNext: true };
+const V = { x: 0, y: 0, k: 1 };
+const T = { W: 0, H: 0 };
+const SCREENS = [
+  { id: 'details', label: 'বিস্তারিত পেজ' },
+  { id: 'tree', label: 'পুরো সনদ' },
+  { id: 'narrator', label: 'রাবির পরিচিতি' },
+];
+const EXTRA = '<button class="kit-chip" type="button" data-has="1">সনদ আছে</button><button class="kit-chip" type="button" data-has="0">সনদ নেই</button>';
+
+/* ---------- Shared markup: hadith card, details page ---------- */
+function cardHTML() {
+  return `<article class="card hc"><div class="hadith-head"><span class="book-badge">${H.abbr}</span><div class="hadith-meta"><b>${H.book}</b><span>হাদিস: ${bn(H.no)}</span></div><span class="grade">${H.grade}</span></div>
+    <p class="narrator">${H.nar}</p><p class="translation">${H.text}</p></article>`;
+}
+function detailsHTML() {
+  const sec = S.has ? D.section() : '';
+  return `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-snack="হাদিসের তালিকায় ফিরবে">${icons.back}</button><h1>${H.book}<small>হাদিস: ${bn(H.no)}</small></h1></header>
+    <div class="rbody"><div class="body">${cardHTML()}${D.before ? sec : ''}
+      <section class="card dsc"><h3 class="dst">ব্যাখ্যা</h3><p class="ex">${EXPL}</p></section>${D.before ? '' : sec}</div></div>`;
+}
+
+/* ---------- Tree layout: 3 columns across, one row per stage step.
+   L = { dir: 'v' (top to bottom) | 'h' (left to right), cw: cross cell,
+   ch: main cell, pad, gut: extra space before the cross axis } ---------- */
+function layout(L) {
+  const P = {};
+  ROWS.forEach((row, r) => row.forEach((id, c) => {
+    const a = (L.gut || 0) + L.pad + ((3 - row.length) / 2 + c + 0.5) * L.cw;
+    const b = L.pad + (r + 0.5) * L.ch;
+    P[id] = L.dir === 'h' ? { x: b, y: a } : { x: a, y: b };
+  }));
+  const cross = (L.gut || 0) + 2 * L.pad + 3 * L.cw;
+  const main = 2 * L.pad + ROWS.length * L.ch;
+  return { P, W: L.dir === 'h' ? main : cross, H: L.dir === 'h' ? cross : main };
+}
+function treeCanvas() {
+  const L = D.tree;
+  const { P, W, H: h } = layout(L);
+  T.W = W; T.H = h;
+  const links = EDGES.map(([a, b]) => `<path d="${D.link(P[a], P[b], L)}"/>`).join('');
+  const nodes = ALL.map((id) => `<button class="tn" data-act="nar" data-id="${id}" style="left:${P[id].x}px;top:${P[id].y}px" aria-label="${R[id].n}, ${R[id].lv}">${D.node(id)}</button>`).join('');
+  return `<div class="stage" data-stage><div class="canvas" style="width:${W}px;height:${h}px">${D.bands ? D.bands(L, W, h) : ''}<svg class="links" width="${W}" height="${h}" viewBox="0 0 ${W} ${h}">${links}</svg>${nodes}</div>${D.zoom ? D.zoom() : ''}</div>`;
+}
+
+/* ---------- Pan and zoom (drag to move, pinch or wheel or buttons to zoom) ---------- */
+const clampK = (k) => Math.min(2.2, Math.max(0.4, k));
+const stageEl = () => $('.screen.on [data-stage]');
+function applyV() {
+  const c = $('.screen.on .canvas');
+  if (c) c.style.transform = `translate(${V.x}px,${V.y}px) scale(${V.k})`;
+  $$('[data-zl]').forEach((e) => { if (e.tagName === 'INPUT') e.value = Math.round(V.k * 100); else e.textContent = `${bn(Math.round(V.k * 100))}%`; });
+}
+function fitV(all) {
+  const st = stageEl();
+  if (!st) return;
+  const w = st.clientWidth, h = st.clientHeight, m = 24;
+  const cross = D.tree.dir === 'h' ? (h - m) / T.H : (w - m) / T.W;
+  V.k = clampK(all ? Math.min((w - m) / T.W, (h - m) / T.H) : Math.min(1, cross));
+  V.x = D.tree.dir === 'h' && !all ? 12 : (w - T.W * V.k) / 2;
+  V.y = D.tree.dir === 'h' || all ? (h - T.H * V.k) / 2 : 12;
+  applyV();
+}
+function zoomTo(k, px, py) {
+  const st = stageEl();
+  if (!st) return;
+  if (px === undefined) { px = st.clientWidth / 2; py = st.clientHeight / 2; }
+  const k2 = clampK(k);
+  V.x = px - ((px - V.x) * k2) / V.k;
+  V.y = py - ((py - V.y) * k2) / V.k;
+  V.k = k2;
+  applyV();
+}
+const pts = new Map();
+let moved = false, pinch = null;
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+document.addEventListener('pointerdown', (e) => {
+  const st = e.target.closest('[data-stage]');
+  if (!st || e.target.closest('.zc')) return;
+  if (pts.size === 0) moved = false;
+  pts.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY });
+  st.classList.add('drag');
+  if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: dist(a, b), k: V.k }; }
+});
+document.addEventListener('pointermove', (e) => {
+  const p = pts.get(e.pointerId);
+  if (!p) return;
+  if (pinch && pts.size === 2) {
+    p.x = e.clientX; p.y = e.clientY;
+    const [a, b] = [...pts.values()];
+    const r = stageEl().getBoundingClientRect();
+    zoomTo(pinch.k * (dist(a, b) / pinch.d), (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top);
+    moved = true;
+    return;
+  }
+  V.x += e.clientX - p.x; V.y += e.clientY - p.y;
+  p.x = e.clientX; p.y = e.clientY;
+  if (Math.abs(p.x - p.sx) + Math.abs(p.y - p.sy) > 6) moved = true;
+  applyV();
+});
+const endPt = (e) => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; if (!pts.size) $$('.drag').forEach((s) => s.classList.remove('drag')); };
+document.addEventListener('pointerup', endPt);
+document.addEventListener('pointercancel', endPt);
+document.addEventListener('wheel', (e) => {
+  const st = e.target.closest('[data-stage]');
+  if (!st) return;
+  e.preventDefault();
+  const r = st.getBoundingClientRect();
+  zoomTo(V.k * (e.deltaY < 0 ? 1.1 : 1 / 1.1), e.clientX - r.left, e.clientY - r.top);
+}, { passive: false });
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  const base = id === 'narrator' ? S.from : id;
+  sec.classList.toggle('rs', base === 'details');
+  sec.innerHTML = base === 'tree' ? D.treePage(treeCanvas()) : detailsHTML();
+  $('.statusbar')?.classList.toggle('light', base === 'tree' && !!D.flatTree);
+  if (base === 'tree') { if (S.fitNext) { fitV(false); S.fitNext = false; } else applyV(); }
+  D.after?.(sec, base);
+}
+function syncExtra() { $$('[data-has]').forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.has === '1') === S.has))); }
+function onScreen(id) {
+  if (id !== 'details') S.has = true;
+  if (id === 'tree' && !(S.prev === 'narrator' && S.from === 'tree')) S.fitNext = true;
+  if (id === 'narrator' && !S.tapped) { S.from = S.prev === 'tree' ? 'tree' : 'details'; S.nid = 'yahya'; }
+  S.tapped = false;
+  syncExtra();
+  render(id);
+  if (id === 'narrator') { const sh = $('#sheet-nar'); sh.innerHTML = D.sheet(S.nid); Kit.open('sheet-nar'); }
+  S.prev = id;
+}
+function setHas(v) {
+  S.has = v;
+  if (!v && Kit.current !== 'details') { Kit.show('details'); return; }
+  syncExtra();
+  render(Kit.current);
+}
+
+/* ---------- Wiring ---------- */
+const ACT = {
+  tree: () => Kit.show('tree'),
+  back: () => Kit.show('details'),
+  nar: (t) => {
+    S.nid = t.dataset.id;
+    if (Kit.current === 'narrator') { $('#sheet-nar').innerHTML = D.sheet(S.nid); return; }
+    S.from = Kit.current; S.tapped = true;
+    Kit.show('narrator');
+  },
+  close: () => Kit.show(S.from),
+  zin: () => zoomTo(V.k * 1.25),
+  zout: () => zoomTo(V.k / 1.25),
+  fit: () => fitV(true),
+};
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('scrim')) { if (Kit.current === 'narrator') ACT.close(); return; }
+  const h = e.target.closest('[data-has]');
+  if (h) { setHas(h.dataset.has === '1'); return; }
+  const t = e.target.closest('[data-act]');
+  if (!t) return;
+  if (moved && t.closest('[data-stage]') && !t.closest('.zc')) { moved = false; return; }
+  (D.act?.[t.dataset.act] || ACT[t.dataset.act])?.(t);
+});
+document.addEventListener('input', (e) => { if (e.target.matches('input[data-zl]')) zoomTo(e.target.value / 100); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && Kit.current === 'narrator') ACT.close(); });
+window.addEventListener('resize', () => { if (Kit.current === 'tree') fitV(false); });
+
+/* ======================================================================
+   DEMO 1 — অ্যাপের ধরন
+   ====================================================================== */
+const rn = (id) => `<button class="rn" data-act="nar" data-id="${id}"><b>${R[id].n}</b><span>${R[id].lv}</span></button>`;
+const D = {
+  /* ---------- "সনদ" section card: trunk, the split, three routes, the imam ---------- */
+  section: () => `<section class="card dsc"><h3 class="dst">সনদ<span class="meta">${COUNT}</span></h3>
+    <ol class="sl">${TRUNK.map((id) => `<li>${rn(id)}</li>`).join('')}
+      <li><span class="sp">${SPLIT}</span><div class="brs">${BR.map(([a, b]) => `<div class="br">${rn(a)}${I.arrow()}${rn(b)}</div>`).join('')}</div></li>
+      <li>${rn('bukhari')}</li></ol>
+    <button class="btn tonal block more" data-act="tree">${I.tree()}পুরো সনদ দেখুন</button></section>`,
+  /* ---------- Tree page ---------- */
+  tree: { dir: 'v', cw: 124, ch: 92, pad: 14 },
+  node: (id) => `<span class="nd"><b>${R[id].s}</b><small>${R[id].lv}</small></span>`,
+  link: (a, b) => { const y1 = a.y + 25, y2 = b.y - 25, m = (y1 + y2) / 2; return `M${a.x} ${y1}V${m}H${b.x}V${y2}`; },
+  zoom: () => `<div class="zc"><button data-act="zin" aria-label="বড় করুন">${I.plus()}</button><button data-act="zout" aria-label="ছোট করুন">${I.minus()}</button><button data-act="fit" aria-label="পুরো ট্রি দেখুন">${I.fit()}</button><span data-zl>১০০%</span></div>`,
+  treePage: (canvas) => `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="back">${icons.back}</button><h1>পুরো সনদ<small>${H.book} · হাদিস: ${bn(H.no)}</small></h1></header>
+    <div class="tp-note"><b>${COUNT}</b>· নামে ট্যাপ করে পরিচিতি দেখুন</div>${canvas}`,
+  /* ---------- Narrator bottom sheet ---------- */
+  sheet: (id) => {
+    const up = heardFrom(id), down = toldTo(id);
+    const rows = [...FACTS(id), ...(up.length ? [['এই সনদে শুনেছেন', up.join(', ')]] : []), ...(down.length ? [['এই সনদে শুনিয়েছেন', down.join(', ')]] : [])];
+    return `<div class="sheet-head"><h2>${R[id].n}<small>${R[id].lv}</small></h2><button class="icon-btn" data-act="close" aria-label="বন্ধ করুন">${icons.close}</button></div>
+    <div class="sheet-body"><dl class="fx">${rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
+      <h3 class="sh-t">কাদের কাছে শিখেছেন</h3><ul class="tch">${R[id].t.map((t) => `<li>${t}</li>`).join('')}</ul>
+      <h3 class="sh-t">${REL_T}</h3><p class="rel">${REL}</p></div>
+    <div class="sheet-foot"><button class="btn" data-act="close">বন্ধ করুন</button></div>`;
+  },
+};
+
+Kit.onScreen(onScreen);
+Kit.init({ demo: 1, name: 'অ্যাপের ধরন', extra: EXTRA, screens: SCREENS });
+</script>
+</body>
+</html>

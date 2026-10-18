@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>আরবি উচ্চারণ — ডেমো ৩ · পাশাপাশি সারি</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): scroll body, hadith card, switches ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.appbar h1{margin-left:4px}
+/* ===== Hadith card (HadithListItem): top bar, Arabic, narrator in primary, translation ===== */
+.hc{padding:12px 14px 14px}
+.hc .arabic{margin:14px 0 4px;font-size:23px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:12px 0 6px}
+.hc .translation{font-size:16px;color:var(--title)}
+/* ===== Word-by-word tab row (আরবি | শব্দে শব্দে) and the experimental label ===== */
+.wtabs{display:flex;align-items:center;gap:8px;margin-top:14px}
+.wt{display:inline-flex;padding:3px;border-radius:12px;background:var(--tint)}
+.wt button{height:30px;padding:0 14px;border-radius:9px;font-size:13.5px;color:var(--body)}
+.wt button[aria-pressed="true"]{background:var(--card);color:var(--title);font-weight:700;box-shadow:var(--shadow)}
+.exp{margin-left:auto;display:inline-flex;align-items:center;gap:4px;height:30px;padding:0 10px;border-radius:9px;background:var(--tint);color:var(--primary-dark);font-size:13px;font-weight:700}
+:root[data-theme="dark"] .exp{color:var(--primary)}
+.ar-w{font-family:var(--font-ar);direction:rtl;color:var(--title);line-height:1.7}
+/* ===== Settings switch row (SettingsToggleOption) ===== */
+.tg{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;text-align:left}
+.tg span{flex:1;min-width:0}
+.tg b{display:block;font-size:15.5px;font-weight:400;color:var(--title)}
+.tg small{display:block;font-size:12.5px;color:var(--hint)}
+.tg .switch{margin-left:auto}
+/* ===== Demo 3 — পাশাপাশি সারি: settings as a drop-down card; pronunciation with a primary rule beside it; words as a right-to-left list of rows ===== */
+/* ---------- Settings drop-down card under the app bar's right corner ---------- */
+.sheet.drop{top:52px;left:auto;right:10px;bottom:auto;width:300px;max-height:75%;border-radius:16px;transform:translateY(-8px) scale(.98);transform-origin:top right;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;box-shadow:0 10px 30px rgba(0,0,0,.22)}
+.sheet.drop.on{opacity:1;transform:none;pointer-events:auto}
+.drop h3{margin:14px 16px 0;font-size:13px;color:var(--hint)}
+.drop .sheet-body{padding:0 16px 8px}
+.drop .tg{border-bottom:1px solid var(--divider)}
+.drop .tg:last-child{border-bottom:0}
+/* ---------- Chip tabs ---------- */
+.ct{display:flex;align-items:center;gap:8px;margin-top:12px}
+.ct .exp{height:28px}
+/* ---------- Full-hadith pronunciation: primary side rule ---------- */
+.prl{margin:6px 0 0;padding:2px 0 2px 12px;border-left:3px solid var(--primary);font-size:15.5px;line-height:1.7;color:var(--title)}
+/* ---------- Words as a list of rows: Arabic on the right ---------- */
+.wl{margin:12px 0 2px;border:1px solid var(--divider);border-radius:10px;overflow:hidden}
+.wl button{display:flex;align-items:center;gap:12px;width:100%;padding:8px 12px;border-bottom:1px solid var(--divider);text-align:left}
+.wl button:last-child{border-bottom:0}
+.wl .ar-w{order:2;margin-left:auto;font-size:22px}
+.wl span{display:flex;flex-direction:column}
+.wl i{font-size:13px;font-style:normal;color:var(--primary-dark)}
+:root[data-theme="dark"] .wl i{color:var(--primary)}
+.wl b{font-size:14.5px;font-weight:400;color:var(--title)}
+/* ---------- Word sheet: Arabic in the header, two cards side by side ---------- */
+.wh{display:flex;align-items:center;gap:4px;padding:14px 8px 4px var(--pad)}
+.wh .ar-w{flex:1;font-size:32px;font-weight:700;text-align:right;padding-right:8px}
+.wh small{display:block;font-size:13px;color:var(--hint)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:12px}
+.two div{padding:12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--divider)}
+.two small{display:block;font-size:12.5px;color:var(--hint)}
+.two b{font-size:15.5px;color:var(--title)}
+.wh small{direction:ltr;font-family:var(--font);font-weight:400}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="reading"></section>
+      <section class="screen" data-screen="settings"></section>
+      <section class="screen" data-screen="pron"></section>
+      <section class="screen" data-screen="words"></section>
+      <section class="screen" data-screen="word"></section>
+      <!-- ===== Settings drop-down and word sheet ===== -->
+      <div class="sheet drop" id="sheet-set" role="dialog" aria-label="কন্টেন্ট সেটিংস"></div>
+      <div class="sheet" id="sheet-word" role="dialog" aria-label="শব্দের বিস্তারিত"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, state, the flow and screen
+   wiring. Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+/* Quick-tools (sliders) icon: the reading page's settings button */
+const TOOLS = (w = 22) => svg('<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>', w);
+const WARN = (w = 14) => svg('<path d="M12 4 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/>', w);
+
+/* ---------- The chapter being read (safe-list hadith only). This feature is
+   about the Arabic, so the matn is shown in Arabic. pron = the full-hadith
+   pronunciation (scholar-checked data, Bangla and Roman letters); null = this
+   hadith has none yet. words = the existing word-by-word data. ---------- */
+const BOOK = { name: 'সহীহ বুখারী', abbr: 'বুখারী' };
+const W = (ar, bnTr, enTr, bnM, enM) => ({ ar, tr: { bn: bnTr, en: enTr }, m: { bn: bnM, en: enM } });
+const HADITH = [
+  { no: 1, nar: { bn: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত', en: 'Narrated by Umar ibn al-Khattab' },
+    ar: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى',
+    pron: { bn: 'ইন্নামাল আ\'মালু বিন-নিয়্যাত, ওয়া ইন্নামা লিকুল্লিমরিয়িম মা নাওয়া।', en: 'Innamal a\'malu bin-niyyat, wa innama li-kullimri\'im ma nawa.' },
+    t: { bn: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।', en: 'Actions are only by intentions, and every person will have only what they intended.' },
+    words: [W('إِنَّمَا', 'ইন্নামা', 'innama', 'নিশ্চয়ই কেবল', 'only'), W('الأَعْمَالُ', 'আল-আ\'মালু', 'al-a\'malu', 'কাজসমূহ', 'actions'),
+      W('بِالنِّيَّاتِ', 'বিন-নিয়্যাত', 'bin-niyyat', 'নিয়তের ওপর', 'by intentions'), W('وَإِنَّمَا', 'ওয়া ইন্নামা', 'wa innama', 'আর কেবল', 'and only'),
+      W('لِكُلِّ', 'লিকুল্লি', 'li-kulli', 'প্রত্যেকের জন্য', 'for every'), W('امْرِئٍ', 'ইমরিয়িন', 'imri\'in', 'ব্যক্তি', 'person'),
+      W('مَا', 'মা', 'ma', 'যা', 'what'), W('نَوَى', 'নাওয়া', 'nawa', 'সে নিয়ত করেছে', 'he intended')] },
+  { no: 6018, nar: { bn: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', en: 'Narrated by Abu Hurairah' },
+    ar: 'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ',
+    pron: null,
+    t: { bn: 'যে ব্যক্তি আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।', en: 'Whoever believes in Allah and the Last Day should speak good or keep silent.' },
+    words: [W('مَنْ', 'মান', 'man', 'যে', 'whoever'), W('كَانَ', 'কানা', 'kana', 'হয়', 'is'), W('يُؤْمِنُ', 'ইউ\'মিনু', 'yu\'minu', 'ঈমান রাখে', 'believes'),
+      W('بِاللَّهِ', 'বিল্লাহি', 'billahi', 'আল্লাহর প্রতি', 'in Allah'), W('وَالْيَوْمِ', 'ওয়াল ইয়াওমি', 'wal-yawmi', 'ও দিনের', 'and the Day'),
+      W('الآخِرِ', 'আল-আখিরি', 'al-akhiri', 'শেষ', 'Last'), W('فَلْيَقُلْ', 'ফালইয়াকুল', 'falyaqul', 'সে যেন বলে', 'let him say'),
+      W('خَيْرًا', 'খাইরান', 'khayran', 'ভালো কথা', 'good'), W('أَوْ', 'আও', 'aw', 'অথবা', 'or'), W('لِيَصْمُتْ', 'লিয়াসমুত', 'liyasmut', 'চুপ থাকে', 'keep silent')] },
+  { no: 1894, nar: { bn: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', en: 'Narrated by Abu Hurairah' },
+    ar: 'الصِّيَامُ جُنَّةٌ',
+    pron: { bn: 'আস-সিয়ামু জুন্নাহ।', en: 'As-siyamu junnah.' },
+    t: { bn: 'রোজা ঢালস্বরূপ।', en: 'Fasting is a shield.' },
+    words: [W('الصِّيَامُ', 'আস-সিয়ামু', 'as-siyamu', 'রোজা', 'fasting'), W('جُنَّةٌ', 'জুন্নাহ', 'junnah', 'ঢাল', 'a shield')] },
+];
+
+/* ---------- State: the content settings, reading language, each card's tab,
+   and the word open in "শব্দের বিস্তারিত" ---------- */
+const S = { arabic: true, pron: false, wbw: true, wpron: true, lang: 'bn', tab: {}, h: 0, w: 1, internal: false };
+const SCREENS = [
+  { id: 'reading', label: 'হাদিস পড়া' },
+  { id: 'settings', label: 'সেটিংস' },
+  { id: 'pron', label: 'উচ্চারণ চালু' },
+  { id: 'words', label: 'শব্দে শব্দে' },
+  { id: 'word', label: 'শব্দের বিস্তারিত' },
+];
+const EXTRA = '<button class="kit-chip" type="button" data-lang="bn">বাংলায় পড়া</button><button class="kit-chip" type="button" data-lang="en">ইংরেজিতে পড়া</button>';
+const OPEN = (id) => id === 'settings' || id === 'word';
+const SHEET = { settings: 'sheet-set', word: 'sheet-word' };
+
+/* ---------- Content settings rows ("আরবির উচ্চারণ দেখান" sits under "আরবি দেখান") ---------- */
+function toggles() {
+  return [
+    { k: 'arabic', t: 'আরবি দেখান' },
+    S.arabic && { k: 'pron', t: 'আরবির উচ্চারণ দেখান', sub: 'পুরো হাদিসের উচ্চারণ, আরবির নিচে' },
+    S.arabic && { k: 'wbw', t: 'শব্দে শব্দে অর্থ' },
+    S.arabic && S.wbw && { k: 'wpron', t: 'শব্দের উচ্চারণ দেখান', sub: 'শব্দে শব্দে ট্যাবে প্রতিটা শব্দের নিচে' },
+  ].filter(Boolean);
+}
+
+// One switch row (SettingsToggleOption); demos without subtitles pass bare = true.
+const tgRow = (o, bare) => `<button class="tg" data-act="toggle" data-k="${o.k}" role="switch" aria-checked="${S[o.k]}"><span><b>${o.t}</b>${o.sub && !bare ? `<small>${o.sub}</small>` : ''}</span><span class="switch" aria-checked="${S[o.k]}"></span></button>`;
+// Word attributes used by every demo's word tile.
+const wAttr = (i, j, w) => `data-act="word" data-i="${i}" data-w="${j}" aria-label="${w.m[S.lang]}, শব্দের বিস্তারিত"`;
+
+/* ---------- Shared markup: hadith card with the Arabic block ---------- */
+function arabicBlock(h, i) {
+  if (!S.arabic) return '';
+  const tab = S.wbw ? S.tab[i] || 'ar' : 'ar';
+  const tabs = S.wbw ? D.tabs(i, tab) : '';
+  if (tab === 'wbw') return tabs + D.words(h, i);
+  return `${tabs}<p class="arabic">${h.ar}</p>${S.pron && h.pron ? D.pron(h.pron[S.lang]) : ''}`;
+}
+function cardHTML(h, i) {
+  return `<article class="card hc">
+    <div class="hadith-head"><span class="book-badge">${BOOK.abbr}</span><div class="hadith-meta"><b>${BOOK.name}</b><span>হাদিস: ${bn(h.no)}</span></div><span class="grade">সহিহ হাদিস</span></div>
+    ${arabicBlock(h, i)}<p class="narrator">${h.nar[S.lang]}</p><p class="translation">${h.t[S.lang]}</p></article>`;
+}
+function readingHTML() {
+  return `${D.appbar()}<div class="body">${HADITH.map(cardHTML).join('')}</div>`;
+}
+const curWord = () => HADITH[S.h].words[S.w];
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (sec) sec.innerHTML = readingHTML();
+}
+function fill(id) {
+  const el = $(`#${SHEET[id]}`);
+  if (el) el.innerHTML = id === 'settings' ? D.settings() : D.wordSheet(curWord(), S.h);
+}
+function onScreen(id) {
+  // A toolbar chip opens a screen from a known state; taps inside the phone keep theirs.
+  if (!S.internal) {
+    Object.assign(S, { arabic: true, wbw: true, wpron: true, pron: !['reading', 'settings'].includes(id), h: 0, w: 1 });
+    S.tab = id === 'words' || id === 'word' ? { 0: 'wbw' } : {};
+  }
+  S.internal = false;
+  render(id);
+  if (OPEN(id)) { fill(id); Kit.open(SHEET[id]); }
+  syncExtra();
+  D.after?.(id);
+}
+function go(id) { S.internal = true; if (Kit.current === id) onScreen(id); else Kit.show(id); }
+// The screen that matches the state underneath an open panel.
+const base = () => (S.arabic && S.wbw && Object.values(S.tab).includes('wbw') ? 'words' : S.pron ? 'pron' : 'reading');
+function syncExtra() { $$('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === S.lang))); }
+
+/* ---------- Actions ---------- */
+const ACT = {
+  settings: () => go('settings'),
+  // A switch: the page behind updates at once, the panel stays open.
+  toggle: (t) => {
+    S[t.dataset.k] = !S[t.dataset.k];
+    render('settings');
+    fill('settings');
+    D.after?.('settings');
+  },
+  tab: (t) => { S.tab[+t.dataset.i] = t.dataset.v; go(base()); },
+  word: (t) => { S.h = +t.dataset.i; S.w = +t.dataset.w; go('word'); },
+  wnav: (t) => {
+    const n = S.w + +t.dataset.d;
+    if (n < 0 || n >= HADITH[S.h].words.length) return;
+    S.w = n; fill('word');
+  },
+  close: () => go(base()),
+  noop: () => {},
+};
+
+/* ---------- Wiring ---------- */
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('scrim')) { if (OPEN(Kit.current)) ACT.close(); return; }
+  const lang = e.target.closest('[data-lang]');
+  if (lang) { S.lang = lang.dataset.lang; syncExtra(); render(Kit.current); if (OPEN(Kit.current)) fill(Kit.current); return; }
+  const t = e.target.closest('[data-act]');
+  if (t) ACT[t.dataset.act]?.(t);
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && OPEN(Kit.current)) ACT.close(); });
+/* ======================================================================
+   DEMO 3 — পাশাপাশি সারি: settings as a drop-down card; pronunciation with a primary rule beside it; words as a right-to-left list of rows
+   ====================================================================== */
+/* Drop-down settings card; words as a list of rows; prev/next in the word sheet's header */
+const D = {
+  appbar: () => `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="noop">${icons.back}</button>
+    <h1>${BOOK.name}</h1><button class="icon-btn" data-act="settings" aria-label="পড়ার সেটিংস">${TOOLS()}</button></header>`,
+  tabs: (i, tab) => `<div class="ct" role="tablist"><button class="chip" data-act="tab" data-i="${i}" data-v="ar" aria-pressed="${tab === 'ar'}">আরবি</button><button class="chip" data-act="tab" data-i="${i}" data-v="wbw" aria-pressed="${tab === 'wbw'}">শব্দে শব্দে</button>
+    ${tab === 'wbw' ? `<span class="exp">${WARN()}পরীক্ষামূলক</span>` : ''}</div>`,
+  pron: (text) => `<p class="prl">${text}</p>`,
+  words: (h, i) => `<div class="wl">${h.words.map((w, j) => `<button ${wAttr(i, j, w)}><span class="ar-w">${w.ar}</span><span>${S.wpron ? `<i>${w.tr[S.lang]}</i>` : ''}<b>${w.m[S.lang]}</b></span></button>`).join('')}</div>`,
+  settings: () => `<h3>কন্টেন্ট সেটিংস</h3><div class="sheet-body">${toggles().map((o) => tgRow(o)).join('')}</div>`,
+  wordSheet: (w, i) => `<div class="wh"><button class="icon-btn" data-act="wnav" data-d="-1" aria-label="পূর্ববর্তী">${icons.back}</button><button class="icon-btn" data-act="wnav" data-d="1" aria-label="পরবর্তী">${icons.chevron}</button>
+      <div class="ar-w">${w.ar}<small>শব্দের বিস্তারিত · ${bn(S.w + 1)}/${bn(HADITH[i].words.length)}</small></div><button class="icon-btn" data-act="close" aria-label="বন্ধ করুন">${icons.close}</button></div>
+    <div class="sheet-body"><div class="two"><div><small>উচ্চারণ</small><b>${w.tr[S.lang]}</b></div><div><small>অর্থ</small><b>${w.m[S.lang]}</b></div></div></div>`,
+};
+Kit.onScreen(onScreen);
+Kit.init({ demo: 3, name: 'পাশাপাশি সারি', extra: EXTRA, screens: SCREENS });
+</script>
+</body>
+</html>

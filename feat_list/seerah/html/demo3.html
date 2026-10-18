@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সীরাত — ডেমো ৩ · জীবনের টাইমলাইন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): menu drawer, rounded body, hadith page ===== */
+.appbar.np h1{margin-left:12px}
+.icon-btn svg,.btn svg{flex:none}
+.screen.g{background:var(--appbar)}
+.rb{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+/* Menu: the drawer, with "জীবনী" next to "লেখক সম্পর্কে" (exact place: team decides) */
+.mn-dim{position:absolute;inset:0;background:var(--scrim)}
+.mn{position:absolute;top:0;bottom:0;left:0;width:82%;background:var(--card);display:flex;flex-direction:column;box-shadow:4px 0 18px rgba(0,0,0,.18)}
+.mn-top{background:var(--appbar);color:var(--on-appbar);padding:22px 20px 18px}
+.mn-top b{display:block;font-size:20px}
+.mn-top span{font-size:13px;opacity:.85}
+.mn-list{padding:10px 8px}
+.mn-row{display:flex;align-items:center;gap:16px;width:100%;min-height:54px;padding:0 14px;border-radius:10px;font-size:16px;color:var(--title);text-align:left;cursor:default}
+.mn-row>svg:first-child{color:var(--primary)}
+.mn-row span{flex:1}
+.mn-row>svg:last-child{width:20px;height:20px;color:var(--hint)}
+.mn-row.on{background:var(--tint);font-weight:700;cursor:pointer}
+/* Hadith details page */
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+/* Reading text: size from the font control (--rfs) */
+.txt p{margin:0 0 14px;font-size:var(--rfs,17px);line-height:1.85;color:var(--title)}
+/* ===== Demo 3: contents as a life timeline, reader with a floating pill ===== */
+.intro{margin:16px 16px 6px;font-size:14px;color:var(--body)}
+.wb{display:flex;align-items:stretch;width:calc(100% - 28px);margin:10px 14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);overflow:hidden;text-align:left}
+.wb-band{width:8px;flex:none;background:var(--primary)}
+.wb[data-b="hisham"] .wb-band{background:var(--appbar)}
+.wb-in{flex:1;padding:14px 12px 12px 14px}
+.wb-in b{display:block;font-size:16.5px;color:var(--title)}
+.wb-in small{font-size:13px;color:var(--hint)}
+/* mini timeline graphic on the book card: one dot per chapter */
+.dots{display:flex;align-items:center;margin:10px 0 2px}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--primary);flex:none}
+.dots u{flex:1;height:2px;background:var(--divider)}
+.wb-st{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:12.5px;color:var(--primary-dark)}
+:root[data-theme="dark"] .wb-st{color:var(--primary)}
+.wb-st svg{width:15px;height:15px;display:inline-block;vertical-align:-2px}
+.wb-st .btn{height:32px;padding:0 12px;font-size:13.5px}
+/* download dialog */
+.dlg-sz{display:flex;justify-content:space-between;margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--surface-2);font-size:13.5px;color:var(--body)}
+.dlg-sz b{color:var(--title)}
+/* ===== Timeline ===== */
+.tl{position:relative;padding:8px 14px 20px 0}
+.tl::before{content:"";position:absolute;left:107px;top:18px;bottom:30px;width:2px;background:var(--divider)}
+.tl-era{position:relative;margin:14px 0 6px 92px;display:inline-block;padding:3px 12px;border-radius:20px;background:var(--tint);color:var(--primary-dark);font-size:12.5px;font-weight:700}
+:root[data-theme="dark"] .tl-era{color:var(--primary)}
+.tl-r{position:relative;display:flex;align-items:flex-start;width:100%;padding:8px 0;text-align:left}
+.tl-w{width:92px;flex:none;padding:3px 12px 0 8px;text-align:right;font-size:12px;color:var(--hint);line-height:1.35}
+.tl-d{width:14px;height:14px;margin:5px 9px 0 8px;flex:none;border-radius:50%;background:var(--card);border:3px solid var(--primary);z-index:1}
+.tl-c{flex:1;min-width:0;padding:8px 12px;border-radius:10px;background:var(--card);box-shadow:var(--shadow)}
+.tl-c b{display:block;font-size:15px;color:var(--title);font-weight:600}
+.tl-c small{font-size:12px;color:var(--primary-dark)}
+:root[data-theme="dark"] .tl-c small{color:var(--primary)}
+/* ===== Reader: position strip + floating pill ===== */
+.pos{flex:none;display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--divider);font-size:12.5px;color:var(--hint)}
+.pos .progress{flex:1}
+.rx{padding:18px 18px 110px}
+.rx h2{margin:0 0 4px;font-size:21px;color:var(--title)}
+.rx .when{display:inline-block;margin-bottom:14px;font-size:13px;color:var(--primary-dark);font-weight:700}
+:root[data-theme="dark"] .rx .when{color:var(--primary)}
+.iref{display:inline;padding:1px 4px;border-radius:4px;background:var(--tint);color:var(--primary-dark);font-weight:700;border-bottom:2px solid var(--primary)}
+:root[data-theme="dark"] .iref{color:var(--primary)}
+.endr{margin:6px 0 0;padding:12px 14px;border-left:3px solid var(--primary);border-radius:0 10px 10px 0;background:var(--card)}
+.endr h3{margin:0 0 6px;font-size:13.5px;color:var(--hint)}
+.endr button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 0;text-align:left;font-size:15px;color:var(--title);font-weight:600}
+.endr button svg{margin-left:auto;color:var(--hint);width:18px;height:18px}
+.endr p{margin:8px 0 0;font-size:12.5px;color:var(--hint)}
+.pill-nav{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;height:52px;padding:0 6px;border-radius:26px;background:var(--title);color:var(--card);box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:5}
+.pill-nav button{height:40px;padding:0 12px;border-radius:20px;display:flex;align-items:center;gap:4px;font-size:14px;color:inherit}
+.pill-nav button:disabled{opacity:.35;cursor:default}
+.pill-nav .aa{font-weight:700;font-size:16px;border-left:1px solid rgba(127,127,127,.4);border-right:1px solid rgba(127,127,127,.4);border-radius:0}
+.pill-nav svg{width:18px;height:18px}
+/* font popover */
+.fpop{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);display:flex;align-items:center;gap:14px;padding:8px 10px;border-radius:14px;background:var(--card);box-shadow:0 6px 20px rgba(0,0,0,.2);z-index:6}
+.fpop span{font-size:13px;color:var(--hint)}
+.fpop b{min-width:28px;text-align:center;color:var(--title)}
+.fpop .icon-btn{width:36px;height:36px;border:1px solid var(--divider);color:var(--primary);font-weight:700;font-size:18px}
+/* ===== Hadith page: card with a timeline dot ===== */
+.sl{display:flex;gap:12px;align-items:center;padding:14px}
+.sl .tl-d{margin:0}
+.sl div{flex:1}
+.sl small{display:block;font-size:12.5px;color:var(--hint)}
+.sl b{display:block;font-size:15px;color:var(--title)}
+.sl .btn{height:36px;padding:0 12px;font-size:14px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="menu"></section>
+      <section class="screen" data-screen="section"></section>
+      <section class="screen" data-screen="download"></section>
+      <section class="screen" data-screen="toc"></section>
+      <section class="screen" data-screen="read" data-keep-scroll></section>
+      <section class="screen g" data-screen="hadith"></section>
+      <section class="screen g" data-screen="link"></section>
+      <div class="dialog" id="dl" role="dialog" aria-label="ডাউনলোড"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="seerah_core.js"></script>
+<script>
+/* ======================================================================
+   DEMO 3 — জীবনের টাইমলাইন: the contents read as the Prophet's (সাঃ)
+   life on a vertical timeline (মক্কি → মাদানি), the reader shows where
+   you are on it and keeps prev / font / next in one floating pill.
+   ====================================================================== */
+(function () {
+  const { bn, icons, $ } = Kit;
+  const { BOOKS, CH, H, S, ref, src, refsOf, para, book } = SeerahDemo;
+  const bar = (t, sub, act) => `<header class="appbar"><button class="icon-btn" data-act="${act}" aria-label="পেছনে">${icons.back}</button><h1>${t}${sub ? `<small>${sub}</small>` : ''}</h1></header>`;
+  const PREV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
+  const NEXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+  let fpop = false;
+
+  const D = {
+    section: () => `${bar('জীবনী', 'সীরাত', 'sback')}<div class="scroll">
+      <p class="intro">নবীজির (সাঃ) জীবনী, প্রামাণ্য সীরাত গ্রন্থ থেকে। প্রতিটা ঘটনা থেকে সংশ্লিষ্ট হাদিসে যাওয়া যাবে।</p>
+      ${BOOKS.map((b) => `<button class="wb" data-act="book" data-b="${b.id}"><span class="wb-band"></span><span class="wb-in">
+        <b>${b.name}</b><small>${bn(CH.length)}টি অধ্যায় · জন্ম থেকে ইন্তেকাল</small>
+        <span class="dots">${CH.map((_, i) => `${i ? '<u></u>' : ''}<i></i>`).join('')}</span>
+        <span class="wb-st">${S.dl[b.id] ? `<span>${icons.check} ডাউনলোড করা আছে</span><span>পড়ুন ›</span>` : `<span class="muted">${b.size}</span><span class="btn tonal">ডাউনলোড করুন</span>`}</span>
+      </span></button>`).join('')}</div>`,
+    dl: (b) => `<h2>ডাউনলোড করবেন?</h2><p>${b.name} পড়তে আগে ডাউনলোড করতে হবে। এরপর ইন্টারনেট ছাড়াও পড়া যাবে।</p>
+      <div class="dlg-sz"><span>আকার</span><b>${b.size}</b></div>
+      <div class="actions"><button class="btn text" data-close>পরে</button><button class="btn" data-act="dlgo" data-b="${b.id}">ডাউনলোড করুন</button></div>`,
+    toc: () => {
+      let era = '';
+      return `${bar(book().name, 'সূচিপত্র', 'tback')}<div class="scroll"><div class="tl">
+        ${CH.map((c, i) => `${c.era !== era ? `<span class="tl-era">${(era = c.era)}</span>` : ''}
+          <button class="tl-r" data-act="ch" data-c="${i}"><span class="tl-w">${c.when}</span><span class="tl-d"></span>
+            <span class="tl-c"><b>${c.t}</b>${(c.refs || []).length ? `<small>${bn(c.refs.length)}টি হাদিস যুক্ত</small>` : ''}</span></button>`).join('')}</div></div>`;
+    },
+    read: () => {
+      const c = CH[S.ch], refs = refsOf(S.ch);
+      return `${bar(c.t, book().name, 'rback')}
+        <div class="pos"><span>${bn(S.ch + 1)}/${bn(CH.length)}</span><div class="progress"><i style="width:${((S.ch + 1) / CH.length) * 100}%"></i></div><span>${c.era}</span></div>
+        <div class="scroll"><div class="rx"><h2>${c.t}</h2><span class="when">${c.when}</span>
+          <div class="txt">${c.p.map((p) => `<p>${para(p)}</p>`).join('')}</div>
+          <div class="endr">${refs.length ? `<h3>সংশ্লিষ্ট হাদিস</h3>${refs.map((k) => `<button data-act="ref" data-k="${k}">${ref(k)}${icons.chevron}</button>`).join('')}` : ''}
+            <p>সূত্র: ${src()}</p></div></div></div>
+        ${fpop ? `<div class="fpop"><span>ফন্ট সাইজ</span><button class="icon-btn" data-act="fs" data-d="-1" aria-label="ছোট">−</button><b data-fsv>${bn(S.fs)}</b><button class="icon-btn" data-act="fs" data-d="1" aria-label="বড়">+</button></div>` : ''}
+        <nav class="pill-nav"><button data-act="prev" ${S.ch === 0 ? 'disabled' : ''}>${PREV}পূর্ববর্তী</button>
+          <button class="aa" data-act="aa" aria-label="ফন্ট সাইজ">অ</button>
+          <button data-act="next" ${S.ch === CH.length - 1 ? 'disabled' : ''}>পরবর্তী${NEXT}</button></nav>`;
+    },
+    hLink: (h) => `<section class="card sl"><span class="tl-d"></span><div><small>সীরাতে · ${CH[h.ch].when}</small><b>${CH[h.ch].t}</b></div>
+      <button class="btn tonal" data-act="seerah">সীরাতে পড়ুন</button></section>`,
+    act: {
+      aa: () => {
+        fpop = !fpop;
+        const sec = $('.screen[data-screen="read"]'), sc = $('.scroll', sec), top = sc.scrollTop;
+        sec.innerHTML = D.read(); $('.scroll', sec).scrollTop = top;
+      },
+    },
+  };
+  SeerahDemo.start(D, { demo: 3, name: 'জীবনের টাইমলাইন' });
+})();
+</script>
+</body>
+</html>

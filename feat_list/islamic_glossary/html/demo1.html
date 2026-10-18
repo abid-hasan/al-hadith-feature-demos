@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ইসলামিক পরিভাষা গ্লোসারি — ডেমো ১ · অ্যাপের ধরন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (all 5 demos): page pieces, hadith card, dotted term, empty state ===== */
+.wrap{flex:1;min-height:0;display:flex;flex-direction:column}
+.wrap.green{background:var(--appbar)}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.appbar.np h1{margin-left:12px}
+.icon-btn svg,.btn svg{flex:none}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 6px}
+.hc .translation{font-size:16.5px;line-height:1.85;color:var(--title)}
+.sc{padding:12px 16px}
+.sc small{display:block;font-size:12.5px;color:var(--hint)}
+.sc b{display:block;font-size:15.5px;color:var(--title)}
+/* Dotted term: a word whose explanation is in the glossary data */
+.gt{display:inline;font:inherit;color:inherit;line-height:inherit;border-bottom:2px dotted var(--primary);border-radius:0;padding:0 1px;cursor:pointer}
+.gt.on{background:var(--tint);border-bottom-style:solid}
+.ar{font-family:var(--font-ar);direction:rtl;color:var(--title)}
+.field .clr{color:var(--hint);width:28px;height:28px;display:grid;place-items:center;border-radius:50%}
+.field .clr svg{width:18px;height:18px}
+.field input::-webkit-search-cancel-button{display:none}
+/* Empty state (NoSearchResultFound) */
+.nores{display:flex;flex-direction:column;align-items:center;gap:26px;padding:60px 24px;text-align:center}
+.nores h3{margin:0;font-size:19px;font-weight:700;color:var(--title)}
+/* ===== Demo 1 — অ্যাপের ধরন: HadithFancyAppBar + RoundedScaffoldBody, Material bottom sheet, TahkikListTab look ===== */
+.scroll{padding-top:14px}
+.grip{width:40px;height:4px;border-radius:4px;background:var(--divider);margin:8px auto 0}
+.tm-head{display:flex;align-items:flex-start;gap:10px}
+.tm-head h2{flex:1;margin:0;font-size:20px;color:var(--title);line-height:1.35}
+.tm-head .ar{font-size:26px;line-height:1.3}
+.alt{font-size:13.5px;font-weight:400;color:var(--hint)}
+.kind{display:inline-block;margin-top:6px;font-size:12.5px;color:var(--primary-dark);background:var(--tint);border-radius:6px;padding:0 8px}
+:root[data-theme="dark"] .kind{color:var(--primary)}
+.tm-text{margin:12px 0 4px;font-size:15.5px;line-height:1.75;color:var(--body)}
+.sheet-body{padding-top:6px}
+/* Glossary page: search box, category chips, letter groups (pinned header + one card) */
+.top{flex:none;padding:14px 14px 6px}
+.chip-row{padding:6px 14px 8px}
+.grp{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:8px;padding:10px 18px 8px;background:var(--scaffold);font-size:15px;font-weight:700;color:var(--title)}
+.grp span{font-size:13px;font-weight:500;color:var(--hint)}
+.gcard{margin:0 14px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+.row{display:flex;gap:12px;width:100%;padding:12px 14px;text-align:left;border-top:1px solid var(--divider)}
+.row:first-child{border-top:0}
+.row .dot{width:9px;height:9px;flex:none;margin-top:9px;border-radius:50%;background:var(--disabled)}
+.row .rb{flex:1;min-width:0}
+.row b{display:block;font-size:16px;color:var(--title)}
+.row p{margin:2px 0 0;font-size:14px;line-height:1.6;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row.on p{white-space:normal}
+.row .ar{font-size:20px;line-height:1.4;flex:none}
+.row .chev{flex:none;color:var(--hint);transition:transform .2s;margin-top:4px}
+.row.on .chev{transform:rotate(180deg);color:var(--primary)}
+.row.on{background:var(--surface-2)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos); the engine fills each one ===== -->
+      <section class="screen" data-screen="reading"></section>
+      <section class="screen" data-screen="term"></section>
+      <section class="screen" data-screen="glossary"></section>
+      <section class="screen" data-screen="opened"></section>
+      <section class="screen" data-screen="search"></section>
+      <section class="screen" data-screen="empty"></section>
+      <!-- ===== Term bottom sheet (filled by D.sheet) ===== -->
+      <div class="sheet" id="sheet-term" role="dialog" aria-label="পরিভাষার ব্যাখ্যা"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): glossary data, state, search, the flow
+   and screen wiring. Each demo's own look lives in the D object below.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ic = (k, w = 20) => icons[k].replace('width="24" height="24"', `width="${w}" height="${w}"`);
+/* Open dictionary: the glossary icon */
+const DICT = (w = 20) => svg('<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6M9 11h4"/>', w);
+
+/* ---------- Glossary data: scholars write and check the real list; it ships with the app ---------- */
+const CATS = [
+  { id: 'all', name: 'সব' },
+  { id: 'measure', name: 'মাপ ও ওজন' },
+  { id: 'distance', name: 'দূরত্ব' },
+  { id: 'money', name: 'মুদ্রা' },
+  { id: 'food', name: 'খাবার ও পানীয়' },
+  { id: 'worship', name: 'ইবাদত' },
+];
+const TERMS = [
+  { id: 'mudd', name: 'মুদ', ar: 'مُدّ', cat: 'measure', text: 'শস্য মাপার একটা পাত্র। মাঝারি গড়নের মানুষ দুই হাত একসাথে করে এক অঞ্জলি ভরলে যতটুকু হয়, মোটামুটি ততটুকু। অজুর পানির পরিমাণ বোঝাতেও হাদিসে এসেছে।' },
+  { id: 'sa', name: "সা'", ar: 'صَاع', cat: 'measure', text: "শস্য মাপার বড় পাত্র, চার মুদে এক সা'। সদকাতুল ফিতর আদায়ের মাপ হিসেবে হাদিসে এসেছে।" },
+  { id: 'wasq', name: 'ওয়াসাক', ar: 'وَسْق', cat: 'measure', text: "ষাট সা'-এর সমান মাপ। ফসলের জাকাত কখন দিতে হয়, তা বোঝাতে এই মাপ এসেছে।" },
+  { id: 'uqiya', name: 'উকিয়া', ar: 'أُوقِيَّة', cat: 'measure', text: 'রুপার ওজনের মাপ, চল্লিশ দিরহামের সমান।' },
+  { id: 'dhira', name: "যিরা'", ar: 'ذِرَاع', cat: 'distance', text: 'দৈর্ঘ্যের মাপ: কনুই থেকে মধ্যমা আঙুলের মাথা পর্যন্ত। বাংলায় একে এক হাত বলে।' },
+  { id: 'mil', name: 'মাইল', ar: 'مِيل', cat: 'distance', text: 'আরবদের দূরত্বের মাপ। সফরের দূরত্ব বোঝাতে হাদিসে এসেছে। তখনকার মাইল আজকের মাইলের সাথে হুবহু মেলে না।' },
+  { id: 'farsakh', name: 'ফারসাখ', ar: 'فَرْسَخ', cat: 'distance', text: 'তিন মাইলের সমান দূরত্ব।' },
+  { id: 'dinar', name: 'দিনার', ar: 'دِينَار', cat: 'money', text: 'সোনার মুদ্রা। জাকাত আর লেনদেনের হিসাবে হাদিসে এসেছে।' },
+  { id: 'dirham', name: 'দিরহাম', ar: 'دِرْهَم', cat: 'money', text: 'রুপার মুদ্রা। দান, মোহর আর লেনদেনের হিসাবে হাদিসে বহুবার এসেছে।' },
+  { id: 'nabidh', name: 'নাবীয', ar: 'نَبِيذ', cat: 'food', text: 'খেজুর বা কিসমিস পানিতে ভিজিয়ে বানানো মিষ্টি পানীয়। নেশা ধরার আগ পর্যন্ত তা পান করা বৈধ।' },
+  { id: 'tharid', name: 'সারীদ', ar: 'ثَرِيد', cat: 'food', text: 'ঝোলে রুটি টুকরো করে ভিজিয়ে বানানো খাবার। আরবদের কাছে এটা প্রিয় খাবার ছিল।' },
+  { id: 'sawiq', name: 'সাওয়ীক', ar: 'سَوِيق', cat: 'food', text: 'ভাজা যব বা গমের ছাতু। পানি বা দুধে মিশিয়ে খাওয়া হতো, সফরে সাথে রাখা হতো।' },
+  { id: 'niyyah', name: 'নিয়ত', ar: 'نِيَّة', cat: 'worship', text: 'কোনো কাজ কেন করা হচ্ছে, মনের সেই সংকল্প। ইবাদত কবুল হতে নিয়ত আল্লাহর সন্তুষ্টির জন্য হওয়া জরুরি।' },
+  { id: 'taharah', name: 'পবিত্রতা', alt: 'তাহারাত', ar: 'طَهَارَة', cat: 'worship', text: 'শরীর, কাপড় আর জায়গা নাপাকি থেকে মুক্ত রাখা। অজু, গোসল আর তায়াম্মুম এর অংশ। নামাজসহ অনেক ইবাদতের আগে এটা শর্ত।' },
+  { id: 'iman', name: 'ঈমান', ar: 'إِيمَان', cat: 'worship', text: 'আল্লাহ, ফেরেশতা, কিতাব, রাসূল, আখিরাত আর তাকদিরে অন্তরে বিশ্বাস, মুখে স্বীকার আর কাজে তার প্রকাশ।' },
+  { id: 'sawm', name: 'রোজা', alt: 'সাওম', ar: 'صَوْم', cat: 'worship', text: 'সুবহে সাদিক থেকে সূর্যাস্ত পর্যন্ত নিয়তসহ খাবার, পানীয় আর স্ত্রী-সহবাস থেকে বিরত থাকা।' },
+];
+const byId = (id) => TERMS.find((t) => t.id === id);
+const catName = (id) => CATS.find((c) => c.id === id).name;
+const catCount = (id) => (id === 'all' ? TERMS.length : TERMS.filter((t) => t.cat === id).length);
+
+/* ---------- The hadith being read (safe list, Bangla only). Marked words come from the data ---------- */
+const H = { book: 'সহিহ মুসলিম', abbr: 'মুসলিম', no: 223, kitab: 'পবিত্রতা', bab: 'অজুর ফজিলত',
+  grade: 'সহিহ হাদিস', nar: 'আবু মালিক আশআরি (রা.) থেকে বর্ণিত',
+  parts: [['taharah', 'পবিত্রতা'], ' ', ['iman', 'ঈমানের'], ' অর্ধেক।'] };
+const FIRST = 'taharah'; // the word tapped in the user flow
+
+/* ---------- State ---------- */
+const S = { term: FIRST, q: '', cat: 'all', open: null, from: 'reading' };
+const SCREENS = [
+  { id: 'reading', label: 'হাদিস পড়া' },
+  { id: 'term', label: 'পরিভাষার ব্যাখ্যা' },
+  { id: 'glossary', label: 'গ্লোসারি' },
+  { id: 'opened', label: 'পরিভাষা খোলা' },
+  { id: 'search', label: 'সার্চ' },
+  { id: 'empty', label: 'খালি' },
+];
+const GLOSS = ['glossary', 'opened', 'search', 'empty'];
+/* What each toolbar chip shows when opened directly */
+const PRESET = { glossary: { q: '', open: null }, opened: { q: '', open: FIRST }, search: { q: "সা'", open: null }, empty: { q: 'যাকাত', open: null } };
+
+/* ---------- Search: start of the Bangla name, other name or Arabic form (marks and apostrophes ignored) ---------- */
+const norm = (s) => String(s).toLowerCase().normalize('NFC')
+  .replace(/[ً-ٰٟـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه')
+  .replace(/['’‘`]/g, '').replace(/\s+/g, ' ').trim();
+const alpha = (a, b) => a.name.localeCompare(b.name, 'bn');
+function results() {
+  const q = norm(S.q);
+  let r = TERMS.filter((t) => S.cat === 'all' || t.cat === S.cat).sort(alpha);
+  if (!q) return r;
+  const rank = (t) => ([t.name, t.alt || '', t.ar].flatMap((k) => norm(k).split(' ')).some((w) => w.startsWith(q)) ? 0 : 9); // a word starts with what was typed
+  return r.filter((t) => rank(t) < 9); // stays in alphabet order, so letter groups hold
+}
+/* Alphabet groups: first letter of the Bangla name */
+function groups(list) {
+  const g = [];
+  list.forEach((t) => { const l = t.name[0]; const last = g[g.length - 1]; if (last && last.l === l) last.items.push(t); else g.push({ l, items: [t] }); });
+  return g;
+}
+const LETTERS = () => groups([...TERMS].sort(alpha)).map((g) => g.l);
+
+/* ---------- Shared markup ---------- */
+const termBtn = (id, text) => `<button class="gt${S.term === id && Kit.current === 'term' ? ' on' : ''}" data-act="term" data-id="${id}" aria-label="${text}: পরিভাষার ব্যাখ্যা">${text}</button>`;
+const hadithText = () => H.parts.map((p) => (Array.isArray(p) ? termBtn(p[0], p[1]) : p)).join('');
+const hadithHead = () => `<div class="hadith-head"><span class="book-badge">${H.abbr}</span><div class="hadith-meta"><b>${H.book}</b><span>হাদিস: ${bn(H.no)}</span></div><span class="grade">${H.grade}</span></div>`;
+const nameLine = (t) => `${t.name}${t.alt ? ` <small class="alt">(${t.alt})</small>` : ''}`;
+const searchField = (ph = 'সার্চ করুন') => `<label class="field sf"><span>${ic('search', 20)}</span><input id="q" type="search" autocomplete="off" placeholder="${ph}" aria-label="পরিভাষা সার্চ: বাংলা নাম বা আরবি রূপ" value="${S.q.replace(/"/g, '&quot;')}"><button class="clr" data-act="clear" aria-label="মুছুন"${S.q ? '' : ' hidden'}>${ic('close', 18)}</button></label>`;
+const emptyHTML = () => `<div class="nores"><svg width="112" height="70" viewBox="0 0 112 70" fill="none" aria-hidden="true"><rect x="12" y="2" width="78" height="52" rx="4" stroke="var(--primary)" stroke-width="2.5"/><path d="M12 13h78" stroke="var(--primary)" stroke-width="2.5"/><circle cx="19" cy="7.5" r="1.6" fill="var(--primary)"/><circle cx="25" cy="7.5" r="1.6" fill="var(--primary)"/><circle cx="84" cy="48" r="13" fill="var(--card)" stroke="var(--primary-dark)" stroke-width="3"/><path d="m93 57 9 9" stroke="var(--primary-dark)" stroke-width="4" stroke-linecap="round"/><path d="m79 43 10 10m0-10-10 10" stroke="var(--primary-dark)" stroke-width="3" stroke-linecap="round"/></svg><h3>কোন সার্চ রেজাল্ট পাওয়া যায়নি</h3></div>`;
+const listHTML = () => { const r = results(); return r.length ? D.list(r) : emptyHTML(); };
+
+/* ---------- Render ---------- */
+let internal = false;
+function go(id) { internal = true; Kit.show(id); internal = false; }
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  sec.innerHTML = GLOSS.includes(id) ? D.glossary() : D.reading(id === 'term');
+}
+function syncCats() { $$('[data-act="cat"]').forEach((b) => { const on = b.dataset.id === S.cat; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
+function refreshList() {
+  const box = $(`.screen[data-screen="${Kit.current}"] #gl-list`);
+  if (box) box.innerHTML = listHTML();
+  syncCats();
+  D.afterList?.();
+}
+/* Scroll a row into view inside its own scroll box (never the page) */
+const zoomOf = () => { const p = $('.phone'); return p.getBoundingClientRect().height / p.offsetHeight || 1; };
+function reveal(el, gap = 70) {
+  const sc = el?.closest('.scroll');
+  if (!sc) return;
+  sc.scrollTop += (el.getBoundingClientRect().top - sc.getBoundingClientRect().top) / zoomOf() - gap;
+}
+function onScreen(id) {
+  if (!internal) {
+    if (id === 'term') S.term = FIRST;
+    if (PRESET[id]) { Object.assign(S, PRESET[id]); S.cat = 'all'; }
+  }
+  render(id);
+  syncCats();
+  const sheet = $('#sheet-term');
+  if (id === 'term' && D.sheet && sheet) { sheet.innerHTML = D.sheet(byId(S.term)); Kit.open(sheet.id); }
+  D.after?.(id);
+  if (S.open && GLOSS.includes(id)) setTimeout(() => reveal($(`.screen.on [data-row="${S.open}"]`)), 0);
+}
+function afterInit() { D.init?.(); }
+function focusSearch() {
+  const q = $('.screen.on #q');
+  if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+}
+
+/* ---------- Wiring ---------- */
+const ACT = {
+  term: (t) => { const id = t.dataset.id; if (Kit.current === 'term' && S.term === id && !D.sheet) { go('reading'); return; } S.term = id; go('term'); },
+  close: () => go('reading'),
+  goto: () => { S.open = S.term; S.q = ''; S.cat = 'all'; go('opened'); },
+  back: () => go('reading'),
+  row: (t) => { const id = t.dataset.id; S.open = S.open === id ? null : id; refreshList(); if (S.open) reveal($(`.screen.on [data-row="${id}"]`), 90); },
+  cat: (t) => { const sh = t.closest('.sheet'); if (sh) Kit.close(sh); S.cat = t.dataset.id; S.open = null; const want = !S.q.trim() ? 'glossary' : results().length ? 'search' : 'empty'; if (want !== Kit.current) go(want); else refreshList(); const sc = $('.screen.on .scroll'); if (sc) sc.scrollTop = 0; },
+  clear: () => { S.q = ''; go(S.open ? 'opened' : 'glossary'); },
+  jump: (t) => { const row = $(`.screen.on [data-letter="${t.dataset.l}"]`); if (row) reveal(row, 0); },
+};
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('scrim') && Kit.current === 'term') { go('reading'); return; }
+  const t = e.target.closest('[data-act]');
+  if (t && t.closest('.phone')) { e.preventDefault(); ACT[t.dataset.act]?.(t); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && Kit.current === 'term') go('reading'); });
+document.addEventListener('input', (e) => {
+  if (e.target.id !== 'q') return;
+  S.q = e.target.value;
+  if (S.q) S.open = null;
+  const want = !S.q.trim() ? (S.open ? 'opened' : 'glossary') : results().length ? 'search' : 'empty';
+  if (want !== Kit.current) { go(want); focusSearch(); return; }
+  $('.screen.on .clr').hidden = !S.q;
+  refreshList();
+});
+/* ======================================================================
+   DEMO 1 — অ্যাপের ধরন: dotted words in HadithListItem's translation, the
+   app's Material bottom sheet, and a glossary page built like the Tahkik
+   list (search box, groups with a pinned heading, rows that expand).
+   ====================================================================== */
+const D = {
+  reading: () => `<div class="wrap green"><header class="appbar np"><h1>${H.book}<small>${H.kitab}</small></h1></header>
+    <div class="rbody"><div class="scroll">
+      <div class="card sc"><small>অধ্যায়</small><b>${H.bab}</b></div>
+      <article class="card hc">${hadithHead()}<p class="narrator">${H.nar}</p><p class="translation">${hadithText()}</p></article>
+    </div></div></div>`,
+  sheet: (t) => `<div class="grip"></div>
+    <div class="sheet-head"><div class="tm-head"><h2>${nameLine(t)}<br><span class="kind">${catName(t.cat)}</span></h2><span class="ar" lang="ar">${t.ar}</span></div></div>
+    <div class="sheet-body"><p class="tm-text">${t.text}</p></div>
+    <div class="sheet-foot"><button class="btn text" data-act="close">বন্ধ করুন</button><button class="btn" data-act="goto">${DICT(18)}গ্লোসারিতে দেখুন</button></div>`,
+  glossary: () => `<div class="wrap green"><header class="appbar"><button class="icon-btn" data-act="back" aria-label="পেছনে">${icons.back}</button><h1>পরিভাষা</h1></header>
+    <div class="rbody"><div class="top">${searchField()}</div>
+      <div class="chip-row">${CATS.map((c) => `<button class="chip" data-act="cat" data-id="${c.id}">${c.name}</button>`).join('')}</div>
+      <div class="scroll" id="gl-list">${listHTML()}</div></div></div>`,
+  list: (r) => groups(r).map((g) => `<div class="grp" data-letter="${g.l}">${g.l}<span>${bn(g.items.length)}</span></div>
+    <div class="gcard">${g.items.map((t) => `<button class="row${S.open === t.id ? ' on' : ''}" data-act="row" data-id="${t.id}" data-row="${t.id}" aria-expanded="${S.open === t.id}">
+      <span class="dot"></span><span class="rb"><b>${nameLine(t)}</b><p>${t.text}</p>${S.open === t.id ? `<span class="kind">${catName(t.cat)}</span>` : ''}</span>
+      <span class="ar" lang="ar">${t.ar}</span><span class="chev">${ic('down', 18)}</span></button>`).join('')}</div>`).join('') + '<div style="height:16px"></div>',
+};
+Kit.onScreen(onScreen);
+Kit.init({ demo: 1, name: 'অ্যাপের ধরন', extra: typeof EXTRA === 'string' ? EXTRA : '', screens: SCREENS });
+afterInit();
+</script>
+</body>
+</html>

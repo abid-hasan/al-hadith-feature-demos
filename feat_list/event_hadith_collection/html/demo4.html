@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ইভেন্ট ভিত্তিক হাদিস সংকলন — ডেমো ৪ · ভাসমান পিল</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="ehc.css">
+<style>
+/* ===== Home: a small pill on the green band, right under the app bar ===== */
+.pill{display:flex;align-items:center;gap:8px;margin:2px auto 8px;height:40px;padding:0 8px 0 6px;border-radius:22px;background:var(--card);box-shadow:0 4px 14px rgba(0,0,0,.16);font-size:14.5px;color:var(--title)}
+.pill i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--tint)}
+.pill b{font-weight:700}
+.pill em{font-style:normal;min-width:24px;height:22px;padding:0 7px;border-radius:12px;background:var(--primary);color:white;font-size:12.5px;display:grid;place-items:center}
+.pill svg.ch{width:16px;height:16px;color:var(--hint)}
+.pill-wrap{display:flex}
+
+/* ===== Collection: a tall sheet over home ===== */
+.home-under{position:absolute;inset:0;display:flex;flex-direction:column;pointer-events:none}
+.dim{position:absolute;inset:0;z-index:5;background:var(--scrim)}
+.panel{position:absolute;left:0;right:0;bottom:0;top:64px;z-index:6;display:flex;flex-direction:column;background:var(--scaffold);border-radius:24px 24px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.25)}
+.grab{width:40px;height:4px;border-radius:4px;background:var(--divider);margin:10px auto 2px}
+.ph{display:flex;align-items:flex-start;gap:10px;padding:8px 8px 4px 16px}
+.ph>span{flex:none;margin-top:2px}
+.ph div{flex:1;min-width:0}
+.ph b{display:block;font-size:18px;color:var(--title);line-height:1.35}
+.ph small{font-size:13px;color:var(--hint)}
+.intro{margin:6px 16px 12px;font-size:14.5px;line-height:1.6;color:var(--body)}
+/* compact cards with a menu that opens in place */
+.row{margin:0 12px 10px;background:var(--card);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.rtop{display:flex;align-items:center;gap:8px;padding:10px 4px 0 14px;font-size:13.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .rtop{color:var(--primary)}
+.rtop .bm{color:var(--primary);display:grid}
+.rtop .grade{margin-left:auto}
+.rtop .icon-btn{width:36px;height:36px;color:var(--hint)}
+.rtop .icon-btn[aria-expanded="true"]{color:var(--primary);background:var(--tint)}
+.rtx{display:block;width:100%;text-align:left;padding:4px 14px 12px;font-size:15px;line-height:1.65;color:var(--title)}
+.rtx span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.inl{display:flex;gap:6px;padding:0 10px 12px;overflow-x:auto;scrollbar-width:none}
+.inl .chip svg{width:16px;height:16px;color:var(--primary)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screen: home (the pill floats on the green band) ===== -->
+      <section class="screen" data-screen="home"></section>
+
+      <!-- ===== Screen: the collection, as a tall sheet over home ===== -->
+      <section class="screen" data-screen="collection">
+        <div class="dim" data-go="home"></div>
+        <div class="panel"><div class="grab"></div><div class="ph" id="ph"></div><div class="scroll" id="c-body"></div></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<!-- ===== Home page (moved under the sheet on the collection screen) ===== -->
+<template id="home-tpl">
+  <div class="home-under" id="home">
+    <header class="home-bar"><button class="icon-btn" data-snack="ড্রয়ার — এই ফিচারের অংশ নয়" data-e="menu" aria-label="মেনু"></button><h1>আল হাদিস</h1><button class="icon-btn" data-snack="সার্চ — এই ফিচারের অংশ নয়" data-i="search" aria-label="সার্চ"></button></header>
+    <div class="scroll">
+      <div class="band">
+        <div class="pill-wrap" id="ev-slot"></div>
+        <div class="slide"><small>দৈনিক হাদিস</small><p>যে আল্লাহ এবং কেয়ামতের দিনে বিশ্বাস রাখে, সে যেন ভাল কথা বলে অথবা চুপ থাকে।</p><span>সহিহ বুখারি · হাদিস: ৬০১৮</span></div>
+        <div class="dots"><i class="on"></i><i></i><i></i></div>
+      </div>
+      <div id="qa"></div>
+      <div id="books"></div>
+    </div>
+  </div>
+</template>
+
+<script src="../../_kit/kit.js"></script>
+<script src="ehc_data.js"></script>
+<script src="ehc.js"></script>
+<script>
+  const E = window.EHC, S = E.S, I = Kit.icons, $ = Kit.$, $$ = Kit.$$;
+  const home = $('#home-tpl').content.firstElementChild.cloneNode(true);
+  $$('[data-i]', home).forEach((b) => { b.innerHTML = I[b.dataset.i]; });
+  $$('[data-e]', home).forEach((b) => { b.innerHTML = E.ic[b.dataset.e](24); });
+  $('#qa', home).innerHTML = E.qaHtml();
+  $('#books', home).innerHTML = E.booksHtml();
+  let open = null; // the card whose menu is open
+
+  /* ---------- Home pill (only while an event is on) ---------- */
+  function renderHome() {
+    const id = E.eventId(), ev = E.events[id];
+    $('#ev-slot', home).innerHTML = ev ? `<button class="pill" data-go="collection"><i>${E.eventIcon(id, 20)}</i><b>${ev.name}</b><em>${Kit.bn(ev.ids.length)}</em>${I.chevron.replace('<svg', '<svg class="ch"')}</button>` : '';
+    home.style.pointerEvents = Kit.current === 'home' ? 'auto' : 'none';
+  }
+
+  /* ---------- Collection sheet ---------- */
+  function row(id) {
+    const h = E.hadith[id], on = open === id;
+    return `<div class="row"><div class="rtop">${S.bm.has(id) ? `<span class="bm">${E.ic.bookmarkOn(16)}</span>` : ''}${h.book} · হাদিস: ${h.no}${E.grade(h)}
+      <button class="icon-btn" data-inl="${id}" aria-expanded="${on}" aria-label="মেনু">${I.more}</button></div>
+      <button class="rtx" data-open-h="${id}"><span>${h.tr}</span></button>
+      ${on ? `<div class="inl">
+        <button class="chip${S.bm.has(id) ? ' on' : ''}" data-act="bookmark" data-id="${id}">${E.bmIcon(id, 16)}${S.bm.has(id) ? 'বুকমার্ক সরান' : 'বুকমার্ক'}</button>
+        <button class="chip${S.notes[id] ? ' on' : ''}" data-act="note" data-id="${id}">${E.ic.note(16)}নোট</button>
+        <button class="chip" data-act="copy" data-id="${id}">${E.ic.copy(16)}কপি</button>
+        <button class="chip" data-act="share" data-id="${id}">${E.ic.share(16)}শেয়ার</button></div>` : ''}</div>`;
+  }
+  function renderCollection() {
+    const id = E.shownId(), ev = E.ev();
+    $('#ph').innerHTML = `<span>${E.eventIcon(id, 30)}</span><div><b>${ev.name}</b><small>${E.count(ev)} · ${ev.sub}</small></div><button class="icon-btn" data-go="home" aria-label="বন্ধ করুন">${I.close}</button>`;
+    $('#c-body').innerHTML = `<p class="intro">${ev.intro}</p>${ev.ids.map(row).join('')}`;
+  }
+
+  /* ---------- Events ---------- */
+  document.addEventListener('click', (e) => {
+    const m = e.target.closest('[data-inl]');
+    if (m) { open = open === m.dataset.inl ? null : m.dataset.inl; renderCollection(); return; }
+    const c = e.target.closest('[data-open-h]'); if (c) E.open(c.dataset.openH);
+  });
+  Kit.onScreen((id) => {
+    if (id === 'home' || id === 'collection') { $(`.screen[data-screen="${id}"]`).prepend(home); renderHome(); }
+    if (id === 'collection') renderCollection();
+  });
+
+  E.mount({ menu: 'list', onChange: () => { if (Kit.current === 'collection') renderCollection(); },
+    onDate: () => { renderHome(); if (Kit.current === 'collection') { if (E.eventId()) renderCollection(); else Kit.show('home'); } if (Kit.current === 'hadith') Kit.show('home'); } });
+  Kit.init({ demo: 4, name: 'ভাসমান পিল', extra: E.extra,
+    screens: [{ id: 'home', label: 'হোম' }, { id: 'collection', label: 'সংকলন' }, { id: 'hadith', label: 'হাদিসের পেজ' }] });
+</script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>এআই চ্যাট (রেফারেন্সসহ) — ডেমো ১ · অ্যাপের ধরন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared bits (same idea in all 5 demos) ===== */
+.pg{display:flex;flex-direction:column;flex:1;min-height:0}
+.q-t{color:var(--primary)}
+[data-hid]{cursor:pointer}
+.opt{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 4px;text-align:left;border-bottom:1px solid var(--divider)}
+.opt:last-child{border-bottom:0}
+.opt b{display:block;color:var(--title);font-size:15px}
+.opt small{display:block;color:var(--hint);font-size:13px}
+.opt .gn{margin-left:auto}
+.rd,.cb{width:20px;height:20px;flex:none;border:2px solid var(--hint);border-radius:50%}
+.cb{border-radius:5px}
+.opt[aria-pressed="true"] .rd{border:6px solid var(--primary)}
+.opt[aria-pressed="true"] .cb{border-color:var(--primary);background:var(--primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/14px no-repeat}
+.gl-note{margin:0 0 4px}
+
+/* ===== RoundedScaffoldBody: green app bar behind a rounded page ===== */
+.screen{background:var(--appbar)}
+.body{flex:1;min-height:0;overflow-y:auto;background:var(--scaffold);border-radius:20px 20px 0 0}
+.body::-webkit-scrollbar{width:0}
+.foot{flex:none;padding:8px 16px 12px;background:var(--scaffold)}
+.appbar .icon-btn svg{width:22px;height:22px}
+
+/* ===== NewSearchPage: _SearchSectionCard + NewSearchField ===== */
+.page{padding:14px 16px}
+.sc{background:var(--card);border-radius:12px;padding:14px;margin-bottom:16px}
+.sf{display:flex;align-items:center;height:48px;border-radius:10px;border:1px solid var(--divider);background:color-mix(in srgb,var(--primary) 4%,transparent);color:var(--hint)}
+.sf:focus-within{border-color:var(--primary)}
+.sf .i{width:40px;display:grid;place-items:center}
+.sf .i svg{width:18px;height:18px}
+.sf input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.sf input::placeholder{color:var(--hint)}
+.sf .icon-btn svg{width:18px;height:18px}
+.st{margin:0 0 10px;font-size:15px;font-weight:700;color:var(--title)}
+/* SearchOptionCard row: radio + label, AI badge */
+.mrow{display:flex;gap:6px}
+.mo{flex:1;display:flex;align-items:center;gap:6px;min-height:48px;padding:6px 4px;border-radius:8px;background:var(--card);font-size:14px;font-weight:500;color:var(--body);text-align:left}
+.mo .rd{width:20px;height:20px}
+.mo[aria-pressed="true"]{font-weight:700;color:var(--title)}
+.mo[aria-pressed="true"] .rd{border:6px solid var(--primary)}
+.aib{font-size:11px;font-weight:700;padding:0 4px;border-radius:4px;background:color-mix(in srgb,var(--accent) 28%,transparent);color:var(--title);line-height:1.5}
+/* credit / sign-in line under the AI option */
+.hint{display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--tint);font-size:13.5px;color:var(--primary-dark);text-align:left}
+:root[data-theme="dark"] .hint{color:var(--primary)}
+.hint svg{width:18px;height:18px;flex:none}
+.hint span{flex:1}
+
+/* ===== SearchPage: overview card + HadithListItem with chapter line ===== */
+.ov{background:var(--card);border-radius:10px;padding:10px 14px;margin:14px 14px 7px}
+.ov p{margin:0}
+.ov .ql{font-size:16px;font-weight:600;color:var(--title)}
+.ov .ct{font-size:13px;color:var(--body)}
+.hc{margin:7px 14px}
+.chl{display:flex;align-items:center;gap:6px;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--divider);font-size:13px;color:var(--hint)}
+.chl svg{width:15px;height:15px;flex:none;color:var(--primary)}
+.chl b{font-weight:600;color:var(--body)}
+.hc .narrator{margin:12px 0 0}
+.morebox{padding:6px 14px 18px}
+
+/* ===== Hadith page ===== */
+.hp .card{margin:14px 12px}
+.hp .translation{font-size:16px;line-height:1.75;color:var(--title)}
+
+/* ===== NoSearchResultFound ===== */
+.nores{display:flex;flex-direction:column;align-items:center;text-align:center;padding:70px 28px 24px}
+.nores h3{margin:24px 0 0;font-size:20px;font-weight:600;color:var(--title)}
+.nores p{margin:10px 0 0;font-size:14.5px;color:var(--body)}
+
+/* ===== Profile: AiSearchUsageCard ===== */
+.pf-t{margin:18px 16px 10px;font-size:18px;font-weight:700;color:var(--title)}
+.uc{background:var(--card);border-radius:12px;margin:0 16px;padding:16px}
+.uc-row{display:flex;align-items:center;gap:10px}
+.uc-row svg{color:var(--primary);flex:none}
+.uc-row b{flex:1;font-size:14px;color:var(--title)}
+.uc-row strong{font-size:16px;color:var(--primary)}
+.uc .progress{height:8px;margin:14px 0 10px;background:color-mix(in srgb,var(--primary) 18%,transparent)}
+.uc p{margin:0;font-size:14px;color:var(--hint)}
+.uc p+p{margin-top:4px;font-size:13px}
+
+/* ===== Sign-in sheet ===== */
+.si{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:4px 8px 6px}
+.si .lk{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.si h3{margin:0;font-size:17px;color:var(--title)}
+.si p{margin:0;font-size:14px;color:var(--body)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screens (same ids in all 5 demos); pages move into the active one ===== -->
+      <section class="screen" data-screen="search"></section>
+      <section class="screen" data-screen="signin"></section>
+      <section class="screen" data-screen="results"></section>
+      <section class="screen" data-screen="hadith"></section>
+      <section class="screen" data-screen="empty"></section>
+      <section class="screen" data-screen="credit"></section>
+      <section class="screen" data-screen="nocredit"></section>
+
+      <div id="hold" hidden>
+        <!-- Page: NewSearchPage with the AI option -->
+        <div class="pg" id="pg-search">
+          <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="exit" data-i="back"></button><h1>সার্চ</h1></header>
+          <div class="body"></div>
+          <div class="foot"><button class="btn block" data-act="run">হাদিস সার্চ করুন</button></div>
+        </div>
+        <!-- Page: SearchPage (results) -->
+        <div class="pg" id="pg-results">
+          <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="search" data-i="back"></button><h1>সার্চ রেজাল্ট<small data-count></small></h1>
+            <button class="icon-btn" aria-label="সাজান" data-open="sh-sort" data-i="sort"></button><button class="icon-btn" aria-label="গ্রেড ফিল্টার" data-open="sh-filter" data-i="filter"></button></header>
+          <div class="body"></div>
+        </div>
+        <!-- Page: hadith opened from a card -->
+        <div class="pg" id="pg-hadith">
+          <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="back" data-i="back"></button><h1 id="hp-t"></h1></header>
+          <div class="body hp"></div>
+        </div>
+        <!-- Page: nothing found -->
+        <div class="pg" id="pg-empty">
+          <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="search" data-i="back"></button><h1>সার্চ রেজাল্ট</h1></header>
+          <div class="body"></div>
+        </div>
+        <!-- Page: profile, AI search usage only -->
+        <div class="pg" id="pg-credit">
+          <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="search" data-i="back"></button><h1>প্রোফাইল</h1></header>
+          <div class="body"></div>
+        </div>
+      </div>
+
+      <!-- ===== Sheets ===== -->
+      <div class="sheet" id="sh-signin" role="dialog" aria-label="সাইন ইন">
+        <div class="sheet-head"><h2>সাইন ইন প্রয়োজন</h2><button class="icon-btn" data-close aria-label="বন্ধ করুন" data-i="close"></button></div>
+        <div class="sheet-body"><div class="si"><span class="lk" id="si-ic"></span><h3>AI সার্চ ব্যবহার করতে সাইন ইন করুন</h3><p>সাইন ইন করলে আপনার বুকমার্ক, নোট ও পিন ব্যাকআপ থাকবে এবং AI সার্চ আনলক হবে।</p></div></div>
+        <div class="sheet-foot"><button class="btn text" data-close>বাতিল</button><button class="btn" data-act="signin">Google দিয়ে সাইন ইন করুন</button></div>
+      </div>
+      <div class="sheet" id="sh-sort" role="dialog" aria-label="সাজান">
+        <div class="sheet-head"><h2>সাজান</h2><button class="icon-btn" data-close aria-label="বন্ধ করুন" data-i="close"></button></div>
+        <div class="sheet-body" data-sort-list></div>
+      </div>
+      <div class="sheet" id="sh-filter" role="dialog" aria-label="গ্রেড ফিল্টার">
+        <div class="sheet-head"><h2>গ্রেড ফিল্টার</h2><button class="btn text" data-act="grade-clear">ক্লিয়ার</button><button class="icon-btn" data-close aria-label="বন্ধ করুন" data-i="close"></button></div>
+        <div class="sheet-body" data-grade-list></div>
+        <div class="sheet-foot"><button class="btn block" data-close>ঠিক আছে</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="ai_search.js"></script>
+<script>
+/* ======================================================================
+   DEMO 1 — অ্যাপের ধরন: NewSearchPage + SearchPage as they are today.
+   New: AI সার্চ turned back on, the first 3 closest matches with
+   "আরও ফলাফল দেখুন", and the chapter line on every card.
+   ====================================================================== */
+(function () {
+  const { S, H, T, esc, bn, left, book, visible, hasMore, LIMIT } = AIS;
+  const I = Kit.icons;
+  const SPARK = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M10 3l1.8 5.2L17 10l-5.2 1.8L10 17l-1.8-5.2L3 10l5.2-1.8zM18 14l.9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9z"/></svg>';
+  const LOCK = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  const ART = '<svg width="84" height="84" viewBox="0 0 84 84" fill="none" aria-hidden="true"><rect x="14" y="8" width="44" height="58" rx="6" style="fill:var(--tint);stroke:var(--primary)" stroke-width="2.5"/><path d="M24 24h24M24 34h24M24 44h12" style="stroke:var(--primary)" stroke-width="2.5" stroke-linecap="round" opacity=".55"/><circle cx="54" cy="54" r="13" style="fill:var(--card);stroke:var(--primary-dark)" stroke-width="3"/><path d="m63.5 63.5 9 9" style="stroke:var(--primary-dark)" stroke-width="4" stroke-linecap="round"/></svg>';
+  document.getElementById('si-ic').innerHTML = LOCK;
+
+  const grade = (id) => `<span class="grade">${AIS.GRADES[H[id].grade]}</span>`;
+  const head = (id) => `<div class="hadith-head"><span class="book-badge">${book(id).abbr}</span>
+      <div class="hadith-meta"><b>${book(id).name}</b><span>হাদিস: ${bn(H[id].num)}</span></div>${grade(id)}</div>`;
+  const chapter = (id) => `<p class="chl">${I.book}<span>অধ্যায়: <b>${H[id].kitab}</b> · ${H[id].bab}</span></p>`;
+  const card = (id) => `<article class="card hc" data-act="open" data-hid="${id}" tabindex="0">${chapter(id)}${head(id)}
+      <p class="narrator">${H[id].nar}</p><p class="translation">${esc(H[id].tr)}</p></article>`;
+  const opt = (m, label, badge) => `<button class="mo" data-act="method" data-m="${m}" aria-pressed="${S.method === m}"><span class="rd"></span>${badge ? '<span class="aib">AI</span>' : ''}${label}</button>`;
+  function hint() {
+    if (S.method !== 'ai') return '';
+    if (!S.signed) return `<button class="hint" data-open="sh-signin">${LOCK}<span>${T.signin}</span>${I.chevron}</button>`;
+    return `<button class="hint" data-act="credit">${SPARK}<span>${left() ? T.left(left()) : T.out}</span>${I.chevron}</button>`;
+  }
+
+  AIS.start({ demo: 1, name: 'অ্যাপের ধরন', render: {
+    search(el) {
+      $('.body', el).innerHTML = `<div class="page">
+        <div class="sc"><label class="sf"><span class="i">${I.search}</span>
+          <input data-q type="search" enterkeyhint="search" autocomplete="off" aria-label="হাদিস সার্চ ইনপুট" placeholder="${S.method === 'ai' ? T.hintAsk : T.hintWord}">
+          <button class="icon-btn" type="button" data-act="clear" aria-label="ক্লিয়ার">${I.close}</button></label></div>
+        <div class="sc"><p class="st">${T.method}</p>
+          <div class="mrow">${opt('normal', T.normal)}${opt('exact', T.exact)}${opt('ai', T.ai, true)}</div>${hint()}</div></div>`;
+    },
+    results(el) {
+      $('.body', el).innerHTML = `<div class="ov"><p class="ql">${T.you(S.res.q)}</p><p class="ct" data-count></p></div>
+        ${visible().map(card).join('')}
+        ${hasMore() ? `<div class="morebox"><button class="btn tonal block" data-act="more">${T.more}</button></div>` : '<div style="height:16px"></div>'}`;
+    },
+    hadith(el) {
+      const id = S.cur;
+      $('#hp-t').innerHTML = `${book(id).name}<small>হাদিস: ${bn(H[id].num)}</small>`;
+      $('.body', el).innerHTML = `<article class="card">${chapter(id)}${head(id)}<p class="narrator">${H[id].nar}</p><p class="translation">${esc(H[id].tr)}</p></article>`;
+    },
+    empty(el) {
+      $('.body', el).innerHTML = `<div class="nores">${ART}<h3>${T.none}</h3><p>প্রশ্নটা অন্যভাবে লিখে আবার সার্চ করুন।</p>
+        <button class="btn outline" style="margin-top:18px" data-act="edit">প্রশ্ন বদলান</button></div>`;
+    },
+    credit(el) {
+      $('.body', el).innerHTML = `<p class="pf-t">${T.ai}</p><div class="uc">
+        <div class="uc-row">${SPARK}<b>${T.today}</b><strong>${bn(S.used)} / ${bn(LIMIT)}</strong></div>
+        <div class="progress"><i style="width:${(S.used / LIMIT) * 100}%"></i></div>
+        <p>${left() ? T.left(left()) : T.out}</p><p>${T.reset}</p></div>`;
+    },
+  } });
+  function $(s, r) { return (r || document).querySelector(s); }
+})();
+</script>
+</body>
+</html>

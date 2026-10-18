@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ভিজ্যুয়াল টাইমলাইন — ডেমো ৩ · রঙিন যুগ</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared page body ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg{flex:none}
+
+/* ===== Era tabs: two coloured cards on top ===== */
+.etabs{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 12px 10px;background:var(--scaffold);border-bottom:1px solid var(--divider)}
+.etabs button{display:flex;flex-direction:column;align-items:flex-start;padding:10px 12px;border-radius:14px;border:2px solid transparent;background:var(--card);text-align:left}
+.etabs b{font-size:15.5px;color:var(--title)}
+.etabs small{font-size:12px;color:var(--hint)}
+.etabs .mk[aria-pressed="true"]{border-color:var(--accent)}
+.etabs .md[aria-pressed="true"]{border-color:var(--primary)}
+.etabs i{width:22px;height:5px;border-radius:4px;margin-bottom:6px}
+.etabs .mk i{background:var(--accent)}
+.etabs .md i{background:var(--primary)}
+
+/* ===== Era bands: year column, line, event; tap opens the event's hadith inline ===== */
+.band{padding:12px 0 6px}
+.band.makki{--c:var(--accent)}
+.band.madani{--c:var(--primary)}
+.band-h{display:flex;align-items:center;gap:8px;margin:0 16px 8px;font-size:13px;font-weight:700;color:var(--hint)}
+.band-h::after{content:"";flex:1;height:1px;background:var(--divider)}
+.e3{display:grid;grid-template-columns:76px 20px 1fr;column-gap:8px;padding:0 12px 0 0}
+.e3 .y{padding:12px 0 0 12px;text-align:right;font-size:15px;font-weight:700;line-height:1.25;color:var(--title)}
+.e3 .ln{position:relative}
+.e3 .ln::before{content:"";position:absolute;left:9px;top:0;bottom:0;width:2px;background:var(--c);opacity:.35}
+.e3 .ln::after{content:"";position:absolute;left:3px;top:16px;width:14px;height:14px;border-radius:50%;background:var(--c);box-shadow:0 0 0 4px var(--scaffold)}
+.e3 .c{padding:6px 0 12px}
+.ebtn{display:block;width:100%;padding:10px 12px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);text-align:left;border-left:4px solid var(--c)}
+.ebtn b{display:block;font-size:16px;color:var(--title)}
+.ebtn span{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:13px;color:var(--body)}
+.ebtn span svg{width:14px;height:14px;color:var(--hint)}
+.ebtn em{margin-left:auto;font-style:normal;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .ebtn em{color:var(--primary)}
+.e3.open .ebtn{border-radius:14px 14px 0 0;box-shadow:none;background:var(--tint)}
+.e3.flash .ebtn{box-shadow:0 0 0 2px var(--c)}
+.drawer{background:var(--card);border-radius:0 0 14px 14px;box-shadow:var(--shadow);border-left:4px solid var(--c);padding:2px 12px 4px}
+.hrow{display:block;width:100%;padding:10px 0;border-top:1px solid var(--divider);text-align:left}
+.hrow .t{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;color:var(--title)}
+.hrow .t .grade{margin-left:auto;font-size:11.5px}
+.hrow p{margin:3px 0 0;font-size:13.5px;color:var(--body)}
+
+/* ===== Chapter + details (app pages): time banner across the card top ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.panel .body{padding-top:14px}
+.sec{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:0 12px 10px;padding:12px var(--pad);font-size:15px;font-weight:700;color:var(--title)}
+.sec b{color:var(--primary)}
+.sec span{display:block;font-weight:400;font-size:13.5px;color:var(--body)}
+.hc{padding-top:0;overflow:hidden}
+.hc .narrator{color:var(--primary);font-size:15px;margin:12px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+.hc[data-act="card"]{cursor:pointer}
+.banner{display:flex;align-items:center;gap:8px;width:calc(100% + 32px);margin:0 -16px 12px;padding:9px 16px;background:var(--tint);text-align:left;font-size:13.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .banner{color:var(--primary)}
+.banner span{flex:1;min-width:0}
+.banner svg{width:17px;height:17px;flex:none}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="home"></section>
+      <section class="screen" data-screen="timeline"></section>
+      <section class="screen" data-screen="event"></section>
+      <section class="screen" data-screen="chapter"></section>
+      <section class="screen" data-screen="detail"></section>
+      <section class="screen" data-screen="jump"></section>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="timeline_data.js"></script>
+<script>
+  const T = window.TL, S = T.S, I = Kit.icons, bn = Kit.bn, $ = Kit.$, $$ = Kit.$$;
+  const back = () => `<button class="icon-btn" data-act="back" aria-label="পেছনে">${I.back}</button>`;
+  const head = (h) => `<div class="hadith-head"><span class="book-badge">বুখারী</span><div class="hadith-meta"><b>সহীহ বুখারী</b><span>হাদিস: ${bn(h.no)}</span></div><span class="grade">${T.GRADE}</span></div>`;
+  const banner = (hk) => `<button class="banner" data-act="tl" data-ev="${T.H[hk].ev}">${T.ICON.clock(17)}<span>${T.timeLine(hk)}</span>${I.chevron}</button>`;
+  const app = (title, body) => `<header class="appbar">${back()}<h1>${title}</h1></header><div class="rbody"><div class="panel"><div class="body">${body}</div></div></div>`;
+
+  /* ---------- Home ---------- */
+  const homeView = () => `<header class="appbar"><h1 style="margin-left:12px">আল হাদিস</h1></header><div class="body">${T.homeHTML()}</div>`;
+
+  /* ---------- Timeline: coloured era bands; the open event shows its hadith below it ---------- */
+  function timelineView(openId) {
+    const drawer = (e) => `<div class="drawer">${e.hadith.map((hk) => { const h = T.H[hk]; return `<button class="hrow" data-act="hadith" data-h="${hk}">
+      <span class="t">সহীহ বুখারী · হাদিস ${bn(h.no)}<span class="grade">${T.GRADE}</span></span><p>${h.nar} থেকে বর্ণিত · পরিচ্ছেদ: ${h.sec}</p></button>`; }).join('')}</div>`;
+    const bands = T.ERAS.map((era) => `<div class="band ${era.id}" data-era-start="${era.id}"><div class="band-h">${era.name} · ${era.span}</div>
+      ${T.EVENTS.filter((e) => e.era === era.id).map((e) => `<div class="e3${e.id === openId ? ' open' : ''}" data-ev-row="${e.id}"><span class="y">${e.year}</span><span class="ln"></span>
+        <div class="c"><button class="ebtn" data-act="ev" data-id="${e.id}" aria-expanded="${e.id === openId}"><b>${e.name}</b>
+          <span>${T.ICON.pin(14)}${e.place}<em>${bn(e.hadith.length)}টি হাদিস</em></span></button>${e.id === openId ? drawer(e) : ''}</div></div>`).join('')}</div>`).join('');
+    return `<header class="appbar">${back()}<h1>টাইমলাইন</h1></header>
+      <div class="etabs">${T.ERAS.map((e) => `<button class="${e.id === 'makki' ? 'mk' : 'md'}" data-act="era" data-era="${e.id}" aria-pressed="${e.id === 'makki'}"><i></i><b>${e.name}</b><small>${e.span}</small></button>`).join('')}</div>
+      <div class="body">${bands}<div style="height:260px"></div></div>`;
+  }
+
+  /* ---------- Chapter page (app) and details page: time banner on the card ---------- */
+  function chapterView() {
+    const h = T.H.b1;
+    return app(`সহীহ বুখারী<small>${h.ch}</small>`, `<div class="sec"><b>অধ্যায়:</b> ${h.sec}<span>${h.ch}</span></div>
+      <article class="card hc" data-act="card" data-h="b1">${banner('b1')}${head(h)}<p class="narrator">${h.nar} থেকে বর্ণিত:</p>${T.paras(h.text)}</article>`);
+  }
+  function detailView() {
+    const h = T.H[S.hk];
+    return app(`সহীহ বুখারী<small>হাদিস: ${bn(h.no)}</small>`, `<article class="card hc">${banner(S.hk)}${head(h)}<p class="narrator">${h.nar} থেকে বর্ণিত:</p>${T.paras(h.text)}</article>
+      <div class="sec"><b>অধ্যায়:</b> ${h.ch}<span>${h.sec}</span></div>`);
+  }
+
+  /* ---------- Navigation: "event" = the timeline with that event open ---------- */
+  const VIEWS = { home: homeView, timeline: () => timelineView(), jump: () => timelineView(), event: () => timelineView(S.ev), chapter: chapterView, detail: detailView };
+  const DEF_BACK = { timeline: 'home', jump: 'detail', event: 'timeline', chapter: 'home', detail: 'chapter' };
+  const backTo = {};
+  let internal = false, goingBack = false, keepTop = null;
+  const go = (id) => { if (!goingBack && Kit.current !== id) backTo[id] = Kit.current; internal = true; Kit.show(id); internal = false; };
+  function afterTimeline(id) {
+    const sc = $(`.screen[data-screen="${id}"]`), box = $('.body', sc);
+    T.watchEra(box, (era) => $$('[data-era]', sc).forEach((b) => b.setAttribute('aria-pressed', b.dataset.era === era)));
+    const target = id === 'jump' ? S.focus : id === 'event' ? S.ev : null;
+    if (keepTop !== null) { box.scrollTop = keepTop; keepTop = null; }
+    else if (target) { const row = $(`[data-ev-row="${target}"]`, sc); requestAnimationFrame(() => { T.scrollTo(box, row, 10, false); if (id === 'jump') row.classList.add('flash'); }); }
+  }
+  Kit.onScreen((id) => {
+    if (!internal) { delete backTo[id]; if (id === 'event') S.ev = 'wada'; if (id === 'detail') S.hk = 'b1'; if (id === 'jump') S.focus = 'hijrah'; }
+    $(`.screen[data-screen="${id}"]`).innerHTML = VIEWS[id]();
+    if (id === 'timeline' || id === 'jump' || id === 'event') afterTimeline(id);
+  });
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-act]');
+    if (!t || !t.closest('.phone')) return;
+    const a = t.dataset.act;
+    if (a === 'home-tl') go('timeline');
+    else if (a === 'back') { const id = Kit.current; goingBack = true; go(backTo[id] || DEF_BACK[id]); goingBack = false; }
+    else if (a === 'era') { const sc = t.closest('.screen'); T.scrollTo($('.body', sc), $(`[data-era-start="${t.dataset.era}"]`, sc), 0); }
+    else if (a === 'ev') {
+      // tap the open event again = close it, the list stays where it is
+      if (Kit.current === 'event' && S.ev === t.dataset.id) { keepTop = t.closest('.body').scrollTop; goingBack = true; go('timeline'); goingBack = false; }
+      else { S.ev = t.dataset.id; go('event'); }
+    }
+    else if (a === 'hadith') T.openHadith(t.dataset.h, go);
+    else if (a === 'tl') { S.focus = t.dataset.ev; go('jump'); }
+    else if (a === 'card') { S.hk = t.dataset.h; go('detail'); }
+  });
+
+  Kit.init({ demo: 3, name: 'রঙিন যুগ', screens: T.SCREENS });
+</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ইভেন্ট ভিত্তিক হাদিস সংকলন — ডেমো ১ · অ্যাপের ধরন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="ehc.css">
+<style>
+/* ===== Home: event card (new) — a white card like HomeSmallDashboard, under the slider ===== */
+.ev{display:flex;align-items:center;gap:12px;width:calc(100% - 24px);margin:12px 12px 0;padding:12px 10px 12px 12px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.ev i{width:48px;height:48px;flex:none;border-radius:12px;display:grid;place-items:center;background:var(--tint)}
+.ev span{flex:1;min-width:0}
+.ev b{display:block;font-size:16.5px;color:var(--title);line-height:1.35}
+.ev small{font-size:13.5px;color:var(--body)}
+.ev>svg{flex:none;color:var(--hint);width:20px;height:20px}
+
+/* ===== Collection page: RoundedScaffoldBody, intro section, search-result cards ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.intro{margin:14px 12px 10px;padding:12px var(--pad);border-radius:var(--r-card);background:var(--card);box-shadow:var(--shadow);font-size:14.5px;line-height:1.6;color:var(--body)}
+.intro b{display:block;margin-bottom:2px;font-size:15px;color:var(--primary)}
+.hc{cursor:pointer}
+.hc .hadith-head{gap:6px}
+.hc .ic{width:36px;height:36px;color:var(--hint)}
+.hc .ic.on{color:var(--primary)}
+.hc .ic svg{width:20px;height:20px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:10px 0 2px}
+.hc .chap{margin:8px 0 0;font-size:13px;color:var(--hint)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screen: home (event card under the daily hadith slider) ===== -->
+      <section class="screen" data-screen="home">
+        <header class="home-bar"><button class="icon-btn" data-snack="ড্রয়ার — এই ফিচারের অংশ নয়" data-e="menu" aria-label="মেনু"></button><h1>আল হাদিস</h1><button class="icon-btn" data-snack="সার্চ — এই ফিচারের অংশ নয়" data-i="search" aria-label="সার্চ"></button></header>
+        <div class="scroll">
+          <div class="band">
+            <div class="slide"><small>দৈনিক হাদিস</small><p>যে আল্লাহ এবং কেয়ামতের দিনে বিশ্বাস রাখে, সে যেন ভাল কথা বলে অথবা চুপ থাকে।</p><span>সহিহ বুখারি · হাদিস: ৬০১৮</span></div>
+            <div class="dots"><i class="on"></i><i></i><i></i></div>
+          </div>
+          <div id="ev-slot"></div>
+          <div id="qa"></div>
+          <div id="books"></div>
+        </div>
+      </section>
+
+      <!-- ===== Screen: the collection ===== -->
+      <section class="screen" data-screen="collection">
+        <header class="appbar"><button class="icon-btn" data-go="home" data-i="back" aria-label="পেছনে"></button><h1 id="c-title"></h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="c-body"></div></div></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="../../_kit/kit.js"></script>
+<script src="ehc_data.js"></script>
+<script src="ehc.js"></script>
+<script>
+  const E = window.EHC, S = E.S, I = Kit.icons, $ = Kit.$, $$ = Kit.$$;
+  $$('[data-i]').forEach((b) => { b.innerHTML = I[b.dataset.i]; });
+  $$('[data-e]').forEach((b) => { b.innerHTML = E.ic[b.dataset.e](24); });
+  $('#qa').innerHTML = E.qaHtml();
+  $('#books').innerHTML = E.booksHtml();
+
+  /* ---------- Home: the card shows only while an event is on ---------- */
+  function renderHome() {
+    const id = E.eventId(), ev = E.events[id];
+    $('#ev-slot').innerHTML = ev ? `<button class="ev" data-go="collection"><i>${E.eventIcon(id, 30)}</i>
+      <span><b>${ev.name}</b><small>${E.count(ev)} · ${ev.sub}</small></span>${I.chevron}</button>` : '';
+  }
+
+  /* ---------- Collection: intro, then search-result style cards ---------- */
+  function card(id) {
+    const h = E.hadith[id];
+    return `<article class="card hc" data-open-h="${id}"><div class="hadith-head"><span class="book-badge">${h.abbr}</span>
+      <div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${h.no}</span></div>${E.grade(h)}
+      <button class="icon-btn ic${S.bm.has(id) ? ' on' : ''}" data-act="bookmark" data-id="${id}" aria-label="বুকমার্ক">${E.bmIcon(id, 20)}</button>
+      <button class="icon-btn ic" data-menu="${id}" aria-label="আরও">${I.more}</button></div>
+      <p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${h.tr}</p><p class="chap">অধ্যায়: ${h.ch}</p></article>`;
+  }
+  function renderCollection() {
+    const ev = E.ev();
+    $('#c-title').innerHTML = `${ev.name}<small>${E.count(ev)}</small>`;
+    $('#c-body').innerHTML = `<div class="intro"><b>${ev.short}</b>${ev.intro}</div>${ev.ids.map(card).join('')}`;
+  }
+
+  /* ---------- Events ---------- */
+  document.addEventListener('click', (e) => {
+    const c = e.target.closest('[data-open-h]');
+    if (c && !e.target.closest('button')) E.open(c.dataset.openH);
+  });
+  Kit.onScreen((id) => { if (id === 'home') renderHome(); if (id === 'collection') renderCollection(); });
+
+  E.mount({ menu: 'list', onChange: () => { if (Kit.current === 'collection') renderCollection(); },
+    onDate: () => { renderHome(); if (Kit.current === 'collection') renderCollection(); if (Kit.current === 'hadith') Kit.show('collection'); } });
+  Kit.init({ demo: 1, name: 'অ্যাপের ধরন', extra: E.extra,
+    screens: [{ id: 'home', label: 'হোম' }, { id: 'collection', label: 'সংকলন' }, { id: 'hadith', label: 'হাদিসের পেজ' }] });
+</script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ইভেন্ট ভিত্তিক হাদিস সংকলন — ডেমো ২ · রঙিন ব্যানার</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="ehc.css">
+<style>
+/* ===== Home: a wide coloured banner on the green band, above the slider ===== */
+.banner{position:relative;display:block;width:calc(100% - 24px);margin:6px 12px 0;padding:16px 16px 14px;border-radius:18px;overflow:hidden;text-align:left;color:white;
+  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.banner .art{position:absolute;right:-6px;top:-4px;opacity:.95}
+.banner .stars{position:absolute;inset:0;background:radial-gradient(circle at 70% 30%,rgba(255,255,255,.18) 0 2px,transparent 3px),radial-gradient(circle at 58% 70%,rgba(255,255,255,.14) 0 1.5px,transparent 2.5px),radial-gradient(circle at 88% 78%,rgba(255,255,255,.16) 0 1.5px,transparent 2.5px)}
+.banner small{position:relative;font-size:12.5px;opacity:.9}
+.banner b{position:relative;display:block;margin:2px 0 10px;font-size:21px;line-height:1.3;max-width:70%}
+.banner .row{position:relative;display:flex;align-items:center;gap:8px}
+.banner .pill{height:28px;padding:0 12px;border-radius:20px;background:rgba(255,255,255,.2);font-size:13px;display:inline-flex;align-items:center}
+.banner .go{margin-left:auto;height:34px;padding:0 14px;border-radius:20px;background:white;color:var(--primary-dark);font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+.banner .go svg{width:16px;height:16px}
+
+/* ===== Collection: coloured hero with the intro, then cards with an action row ===== */
+.hero{flex:none;position:relative;padding:4px 8px 18px;color:white;background:linear-gradient(160deg,var(--primary) 0%,var(--primary-dark) 100%);overflow:hidden}
+.hero .top{display:flex;align-items:center}
+.hero .art{position:absolute;right:-10px;top:30px;opacity:.9}
+.hero h1{margin:6px 10px 0;font-size:23px;line-height:1.3;max-width:72%}
+.hero .meta{margin:4px 10px 0;font-size:13.5px;opacity:.9}
+.hero p{position:relative;margin:10px 10px 0;font-size:14.5px;line-height:1.6;max-width:92%}
+.list{padding-top:12px}
+.hc .hadith-head{gap:8px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:10px 0 2px}
+.hc .tap{cursor:pointer}
+.hc .chap{margin:8px 0 0;font-size:13px;color:var(--hint)}
+.acts{display:flex;margin:10px -16px -14px;border-top:1px solid var(--divider)}
+.acts button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;font-size:12.5px;color:var(--body)}
+.acts button svg{width:20px;height:20px;color:var(--primary)}
+.acts button.on{color:var(--primary);font-weight:700}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screen: home (banner on top of the green band) ===== -->
+      <section class="screen" data-screen="home">
+        <header class="home-bar"><button class="icon-btn" data-snack="ড্রয়ার — এই ফিচারের অংশ নয়" data-e="menu" aria-label="মেনু"></button><h1>আল হাদিস</h1><button class="icon-btn" data-snack="সার্চ — এই ফিচারের অংশ নয়" data-i="search" aria-label="সার্চ"></button></header>
+        <div class="scroll">
+          <div class="band">
+            <div id="ev-slot"></div>
+            <div class="slide"><small>দৈনিক হাদিস</small><p>যে আল্লাহ এবং কেয়ামতের দিনে বিশ্বাস রাখে, সে যেন ভাল কথা বলে অথবা চুপ থাকে।</p><span>সহিহ বুখারি · হাদিস: ৬০১৮</span></div>
+          </div>
+          <div id="qa"></div>
+          <div id="books"></div>
+        </div>
+      </section>
+
+      <!-- ===== Screen: the collection (hero + cards) ===== -->
+      <section class="screen" data-screen="collection">
+        <div class="hero" id="hero"></div>
+        <div class="scroll list" id="c-body"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="../../_kit/kit.js"></script>
+<script src="ehc_data.js"></script>
+<script src="ehc.js"></script>
+<script>
+  const E = window.EHC, S = E.S, I = Kit.icons, $ = Kit.$, $$ = Kit.$$;
+  $$('[data-i]').forEach((b) => { b.innerHTML = I[b.dataset.i]; });
+  $$('[data-e]').forEach((b) => { b.innerHTML = E.ic[b.dataset.e](24); });
+  $('#qa').innerHTML = E.qaHtml();
+  $('#books').innerHTML = E.booksHtml();
+
+  /* ---------- Home banner (only while an event is on) ---------- */
+  function renderHome() {
+    const id = E.eventId(), ev = E.events[id];
+    $('#ev-slot').innerHTML = ev ? `<button class="banner" data-go="collection"><span class="stars"></span><span class="art">${E.eventIcon(id, 92)}</span>
+      <small>${ev.sub}</small><b>${ev.name}</b>
+      <span class="row"><span class="pill">${E.count(ev)}</span><span class="go">পড়ুন${I.chevron}</span></span></button>` : '';
+  }
+
+  /* ---------- Collection ---------- */
+  function card(id) {
+    const h = E.hadith[id], bm = S.bm.has(id), nt = !!S.notes[id];
+    return `<article class="card hc"><div class="tap" role="button" tabindex="0" data-open-h="${id}"><div class="hadith-head"><span class="book-badge">${h.abbr}</span>
+      <div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${h.no}</span></div>${E.grade(h)}</div>
+      <p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${h.tr}</p><p class="chap">অধ্যায়: ${h.ch}</p></div>
+      <div class="acts">
+        <button class="${bm ? 'on' : ''}" data-act="bookmark" data-id="${id}">${E.bmIcon(id, 20)}${bm ? 'বুকমার্ক করা' : 'বুকমার্ক'}</button>
+        <button class="${nt ? 'on' : ''}" data-act="note" data-id="${id}">${E.ic.note(20)}${nt ? 'নোট আছে' : 'নোট'}</button>
+        <button data-act="copy" data-id="${id}">${E.ic.copy(20)}কপি</button>
+        <button data-act="share" data-id="${id}">${E.ic.share(20)}শেয়ার</button></div></article>`;
+  }
+  function renderCollection() {
+    const id = E.shownId(), ev = E.ev();
+    $('#hero').innerHTML = `<div class="top"><button class="icon-btn" data-go="home" aria-label="পেছনে">${I.back}</button></div>
+      <span class="art">${E.eventIcon(id, 110)}</span><h1>${ev.name}</h1><div class="meta">${ev.sub} · ${E.count(ev)}</div><p>${ev.intro}</p>`;
+    $('#c-body').innerHTML = ev.ids.map(card).join('');
+  }
+
+  /* ---------- Events ---------- */
+  document.addEventListener('click', (e) => { const c = e.target.closest('[data-open-h]'); if (c) E.open(c.dataset.openH); });
+  Kit.onScreen((id) => { if (id === 'home') renderHome(); if (id === 'collection') renderCollection(); });
+
+  E.mount({ menu: 'list', onChange: () => { if (Kit.current === 'collection') renderCollection(); },
+    onDate: () => { renderHome(); if (Kit.current === 'collection') renderCollection(); if (Kit.current === 'hadith') Kit.show('collection'); } });
+  Kit.init({ demo: 2, name: 'রঙিন ব্যানার', extra: E.extra,
+    screens: [{ id: 'home', label: 'হোম' }, { id: 'collection', label: 'সংকলন' }, { id: 'hadith', label: 'হাদিসের পেজ' }] });
+</script>
+</body>
+</html>

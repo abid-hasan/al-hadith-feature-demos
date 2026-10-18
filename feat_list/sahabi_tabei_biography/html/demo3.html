@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সাহাবি আর তাবেঈদের জীবনী — ডেমো ৩ · প্রোফাইল গ্রিড</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): rounded body, hadith cards, tappable narrator ===== */
+.icon-btn svg,.btn svg{flex:none}
+.screen.g{background:var(--appbar)}
+.rb{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+/* the narrator's name becomes a button only when a biography exists */
+.nar{font-weight:700;color:var(--primary);text-decoration:underline dotted;text-underline-offset:4px;text-decoration-thickness:1.5px}
+.fld{display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 12px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--hint)}
+.fld input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.fld input::placeholder{color:var(--hint)}
+.fld .icon-btn{width:34px;height:34px}
+/* "তাঁর বর্ণিত হাদিস" (#৬০-এর পেজ, shared body): total, books with counts, hadith cards */
+.hs-top{margin:14px 14px 10px;padding:14px 16px;border-radius:10px;background:var(--card);box-shadow:var(--shadow)}
+.hs-top b{display:block;font-size:16px;color:var(--title)}
+.hs-top span{font-size:13.5px;color:var(--hint)}
+.hs-b{margin:0 14px 10px;border-radius:10px;background:var(--card);overflow:hidden;box-shadow:var(--shadow)}
+.hs-r{display:flex;align-items:center;gap:10px;width:100%;padding:14px 12px 14px 16px;text-align:left;font-size:15.5px;color:var(--title)}
+.hs-r[tabindex="-1"]{cursor:default}
+.hs-r span{flex:1}
+.hs-r b{font-size:14px;color:var(--primary-dark)}
+:root[data-theme="dark"] .hs-r b{color:var(--primary)}
+.hs-r svg{color:var(--hint);transition:transform .2s}
+.hs-b.on .hs-r svg{transform:rotate(180deg)}
+.hs-c{padding:12px 16px 14px;border-top:1px solid var(--divider)}
+.hs-c .translation{color:var(--title);line-height:1.7}
+/* ===== Demo 3: green header with search inside, names as a grid of profile tiles ===== */
+.hd{flex:none;background:var(--appbar);color:var(--on-appbar);padding-bottom:12px}
+.hd .appbar{background:transparent}
+.hd .fld{margin:2px 14px 0;border:0}
+.ht{display:flex;gap:6px;padding:10px 14px 0}
+.ht button{height:30px;padding:0 14px;border-radius:20px;font-size:13.5px;color:var(--on-appbar);border:1px solid rgba(255,255,255,.45)}
+.ht button[aria-pressed="true"]{background:var(--card);color:var(--primary-dark);border-color:var(--card);font-weight:700}
+:root[data-theme="dark"] .ht button[aria-pressed="true"]{color:var(--primary)}
+.top-tabs{display:flex;gap:8px;padding:0 14px 8px;font-size:13px;opacity:.9}
+.top-tabs span{opacity:.7}
+.top-tabs span.on{opacity:1;font-weight:700;border-bottom:2px solid var(--on-appbar)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 10px 12px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);text-align:center}
+.ci{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:700;background:var(--primary);color:var(--on-appbar)}
+.ci.tb{background:var(--card);color:var(--primary-dark);border:2px solid var(--primary-dark)}
+:root[data-theme="dark"] .ci.tb{color:var(--primary);border-color:var(--primary)}
+.tile b{margin-top:4px;font-size:14.5px;line-height:1.35;color:var(--title)}
+.tile small{font-size:12px;color:var(--hint);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.grid .empty{grid-column:1/-1}
+/* ===== Biography: hero header, tabs inside the page, pinned bottom button ===== */
+.hero{flex:none;display:flex;flex-direction:column;align-items:center;padding:0 16px 14px;background:var(--appbar);color:var(--on-appbar);text-align:center}
+.hero .appbar{align-self:stretch;background:transparent;padding:0}
+.hero .ci{width:72px;height:72px;font-size:30px;background:var(--card);color:var(--primary-dark)}
+:root[data-theme="dark"] .hero .ci{color:var(--primary)}
+.hero h2{margin:8px 0 0;font-size:20px}
+.hero small{font-size:13px;opacity:.88}
+.bt{flex:none;display:flex;background:var(--card);border-bottom:1px solid var(--divider)}
+.bt button{flex:1;height:46px;font-size:14.5px;color:var(--hint);border-bottom:2.5px solid transparent}
+.bt button[aria-selected="true"]{color:var(--primary);font-weight:700;border-color:var(--primary)}
+.pane{padding:16px}
+.pane p{margin:0 0 12px;font-size:15.5px;line-height:1.8;color:var(--title)}
+.pane h4{margin:4px 0 4px;font-size:15px;color:var(--primary-dark)}
+:root[data-theme="dark"] .pane h4{color:var(--primary)}
+.pane .full{color:var(--hint);font-size:14px}
+.sbox{padding:14px;border-radius:12px;background:var(--card);border:1px dashed var(--divider);font-size:14.5px;color:var(--body)}
+.pin{flex:none;display:flex;align-items:center;gap:12px;padding:10px 14px 14px;background:var(--card);border-top:1px solid var(--divider)}
+.pin div{flex:1}
+.pin b{display:block;font-size:17px;color:var(--title)}
+.pin small{font-size:12.5px;color:var(--hint)}
+/* ===== Narrator sheet with a coloured band ===== */
+.band{display:flex;align-items:center;gap:12px;padding:16px;border-radius:var(--r-sheet) var(--r-sheet) 0 0;background:var(--appbar);color:var(--on-appbar)}
+.band .ci{width:48px;height:48px;font-size:20px;background:var(--card);color:var(--primary-dark)}
+:root[data-theme="dark"] .band .ci{color:var(--primary)}
+.band div{flex:1}
+.band b{display:block;font-size:17px}
+.band small{font-size:12.5px;opacity:.88}
+.band .icon-btn{color:var(--on-appbar)}
+.sb{padding:14px 16px 6px;font-size:15px;line-height:1.75;color:var(--title)}
+.sheet-foot .btn{flex:1}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="list"></section>
+      <section class="screen" data-screen="search"></section>
+      <section class="screen" data-screen="bio"></section>
+      <section class="screen g" data-screen="card"></section>
+      <section class="screen g" data-screen="sheet"></section>
+      <section class="screen g" data-screen="hadiths"></section>
+      <div class="sheet" id="pv" role="dialog" aria-label="ছোট পরিচিতি"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="bio_core.js"></script>
+<script>
+/* ======================================================================
+   DEMO 3 — প্রোফাইল গ্রিড: search sits in the green header, names show
+   as profile tiles, the biography has its own tabs (পরিচিতি / জীবনী /
+   উৎস) and a pinned "তাঁর বর্ণিত হাদিস" bar with the total count.
+   ====================================================================== */
+(function () {
+  const { bn, icons, $, $$ } = Kit;
+  const { S, TYPE, src, initial, hisBody, total, fmt } = BioDemo;
+  const F = [['all', 'সব'], ['sahabi', 'সাহাবি'], ['tabei', 'তাবেঈ']];
+  const ci = (p) => `<span class="ci${p.t === 'tabei' ? ' tb' : ''}">${initial(p)}</span>`;
+  let tab = 0;
+  const TABS = ['পরিচিতি', 'জীবনী', 'উৎস'];
+  const pane = (p) => [
+    `<p>${p.intro}</p><p class="full">পুরো নাম: ${p.full}</p>`,
+    p.bio.map(([h, t]) => `<h4>${h}</h4><p>${t}</p>`).join(''),
+    `<div class="sbox">এই জীবনী নেওয়া হয়েছে:<br><b>${src(p)}</b></div>`][tab];
+
+  const D = {
+    list: () => `<div class="hd"><header class="appbar"><button class="icon-btn" aria-label="পেছনে" tabindex="-1">${icons.back}</button><h1>জীবনী</h1></header>
+        <div class="top-tabs"><span>সীরাত</span><span class="on">সাহাবি ও তাবেঈ</span></div>
+        <label class="fld">${icons.search}<input data-q value="${S.q}" placeholder="নাম লিখে খুঁজুন" aria-label="নাম লিখে খুঁজুন"><button class="icon-btn" data-act="clr" aria-label="মুছুন" ${S.q ? '' : 'hidden'}>${icons.close}</button></label>
+        <div class="ht">${F.map(([f, t]) => `<button data-act="f" data-f="${f}" aria-pressed="${S.f === f}">${t}</button>`).join('')}</div></div>
+      <div class="scroll"><div class="grid" data-res></div></div>`,
+    results: (arr) => (arr.length ? arr.map((p) => `<button class="tile" data-act="person" data-p="${p.id}">${ci(p)}<b>${p.name}</b><small>${p.line}</small></button>`).join('')
+      : `<div class="empty">${icons.search}<h3>নাম পাওয়া যায়নি</h3><p>অন্য বানানে বা নামের অংশ লিখে দেখুন</p></div>`),
+    bio: (p) => `<div class="hero"><header class="appbar"><button class="icon-btn" data-act="bback" aria-label="পেছনে">${icons.back}</button><h1></h1></header>
+        ${ci(p)}<h2>${p.name}</h2><small>${TYPE[p.t]}</small></div>
+      <div class="bt" role="tablist">${TABS.map((t, i) => `<button role="tab" data-act="tab" data-t="${i}" aria-selected="${i === tab}">${t}</button>`).join('')}</div>
+      <div class="scroll"><div class="pane">${pane(p)}</div></div>
+      <div class="pin"><div><b>${fmt(total(p))}টি</b><small>হাদিস, ${bn(p.books.length)}টি বইয়ে</small></div><button class="btn" data-act="his">তাঁর বর্ণিত হাদিস</button></div>`,
+    sheet: (p) => `<div class="band">${ci(p)}<div><b>${p.name}</b><small>${TYPE[p.t]}</small></div><button class="icon-btn" data-close aria-label="বন্ধ করুন">${icons.close}</button></div>
+      <p class="sb">${p.intro}</p>
+      <div class="sheet-foot"><button class="btn outline" data-act="more">আরো পড়ুন</button><button class="btn" data-act="his">তাঁর বর্ণিত হাদিস</button></div>`,
+    hadiths: (p) => `<header class="appbar"><button class="icon-btn" data-act="hback" aria-label="পেছনে">${icons.back}</button><h1>তাঁর বর্ণিত হাদিস<small>${p.name}</small></h1></header><div class="rb"><div class="scroll">${hisBody(p)}</div></div>`,
+    act: {
+      tab: (el) => {
+        tab = +el.dataset.t;
+        $$('.screen.on [data-act="tab"]').forEach((b) => b.setAttribute('aria-selected', String(+b.dataset.t === tab)));
+        $('.screen.on .pane').innerHTML = pane(BioDemo.person(S.pid));
+      },
+    },
+  };
+  Kit.onScreen((id) => { if (id === 'bio') tab = 0; });
+  BioDemo.start(D, { demo: 3, name: 'প্রোফাইল গ্রিড' });
+})();
+</script>
+</body>
+</html>

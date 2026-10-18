@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ইভেন্ট ভিত্তিক হাদিস সংকলন — ডেমো ৩ · এক এক করে</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="ehc.css">
+<style>
+/* ===== Home: event section with a sideways strip of hadith previews ===== */
+.sec{margin:4px 0 12px}
+.sec-h{display:flex;align-items:center;gap:10px;padding:0 6px 8px 16px}
+.sec-h>span:first-child{flex:none;display:grid;place-items:center}
+.sec-h div{flex:1;min-width:0}
+.sec-h b{display:block;font-size:16.5px;color:var(--title);line-height:1.3}
+.sec-h small{font-size:13px;color:var(--hint)}
+.sec-h .btn.text{height:34px;font-size:14px}
+.strip{display:flex;gap:10px;overflow-x:auto;padding:2px 12px 6px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.pv{flex:0 0 72%;scroll-snap-align:start;display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.pv .top{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--primary-dark);font-weight:700}
+:root[data-theme="dark"] .pv .top{color:var(--primary)}
+.pv .top .grade{margin-left:auto}
+.pv .p{margin:0;font-size:14.5px;line-height:1.6;color:var(--title);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ===== Collection: one hadith at a time (pager) ===== */
+.intro{flex:none;display:flex;gap:10px;align-items:flex-start;margin:12px 12px 4px;padding:10px 12px;border-radius:12px;background:var(--tint);font-size:14px;line-height:1.55;color:var(--title)}
+.intro>span{flex:none;margin-top:2px}
+.pager{flex:1;min-height:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.pager::-webkit-scrollbar{display:none}
+.pg{flex:0 0 100%;scroll-snap-align:center;padding:8px 12px 4px;display:flex}
+.big{flex:1;display:flex;flex-direction:column;background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px}
+.big .hadith-head{gap:6px}
+.big .ic{width:36px;height:36px;color:var(--hint)}
+.big .ic.on{color:var(--primary)}
+.big .ic svg{width:20px;height:20px}
+.big .body{flex:1;min-height:0;overflow-y:auto}
+.big .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.big .translation{font-size:16.5px;line-height:1.75;color:var(--title)}
+.big .chap{font-size:13px;color:var(--hint);margin:10px 0 0}
+.big .btn{margin-top:12px}
+.nav{flex:none;display:flex;align-items:center;gap:10px;padding:8px 16px 14px}
+.nav .icon-btn{background:var(--card);box-shadow:var(--shadow);color:var(--primary)}
+.nav .icon-btn:disabled{opacity:.35}
+.nav .mid{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13.5px;color:var(--hint)}
+.nav .dots{margin:0}
+.flip{transform:scaleX(-1)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screen: home (event strip under the quick actions) ===== -->
+      <section class="screen" data-screen="home">
+        <header class="home-bar"><button class="icon-btn" data-snack="ড্রয়ার — এই ফিচারের অংশ নয়" data-e="menu" aria-label="মেনু"></button><h1>আল হাদিস</h1><button class="icon-btn" data-snack="সার্চ — এই ফিচারের অংশ নয়" data-i="search" aria-label="সার্চ"></button></header>
+        <div class="scroll">
+          <div class="band">
+            <div class="slide"><small>দৈনিক হাদিস</small><p>যে আল্লাহ এবং কেয়ামতের দিনে বিশ্বাস রাখে, সে যেন ভাল কথা বলে অথবা চুপ থাকে।</p><span>সহিহ বুখারি · হাদিস: ৬০১৮</span></div>
+            <div class="dots"><i class="on"></i><i></i><i></i></div>
+          </div>
+          <div id="qa"></div>
+          <div id="ev-slot"></div>
+          <div id="books"></div>
+        </div>
+      </section>
+
+      <!-- ===== Screen: the collection, one hadith per page ===== -->
+      <section class="screen" data-screen="collection">
+        <header class="appbar"><button class="icon-btn" data-go="home" data-i="back" aria-label="পেছনে"></button><h1 id="c-title"></h1></header>
+        <div class="intro" id="intro"></div>
+        <div class="pager" id="pager"></div>
+        <div class="nav"><button class="icon-btn" id="prev" aria-label="আগের হাদিস"></button><div class="mid"><span id="pos"></span><div class="dots" id="dots"></div></div><button class="icon-btn" id="next" aria-label="পরের হাদিস"></button></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="../../_kit/kit.js"></script>
+<script src="ehc_data.js"></script>
+<script src="ehc.js"></script>
+<script>
+  const E = window.EHC, S = E.S, I = Kit.icons, $ = Kit.$, $$ = Kit.$$, bn = Kit.bn;
+  $$('[data-i]').forEach((b) => { b.innerHTML = I[b.dataset.i]; });
+  $$('[data-e]').forEach((b) => { b.innerHTML = E.ic[b.dataset.e](24); });
+  $('#qa').innerHTML = E.qaHtml();
+  $('#books').innerHTML = E.booksHtml();
+  $('#prev').innerHTML = `<span class="flip">${I.chevron}</span>`; $('#next').innerHTML = I.chevron;
+  let at = 0;
+
+  /* ---------- Home: event section (only while an event is on) ---------- */
+  function renderHome() {
+    const id = E.eventId(), ev = E.events[id];
+    $('#ev-slot').innerHTML = ev ? `<div class="sec"><div class="sec-h"><span>${E.eventIcon(id, 32)}</span><div><b>${ev.name}</b><small>${E.count(ev)} · ${ev.sub}</small></div>
+      <button class="btn text" data-start="0">সব দেখুন</button></div>
+      <div class="strip">${ev.ids.map((hid, i) => { const h = E.hadith[hid];
+        return `<button class="pv" data-start="${i}"><span class="top">${h.book} · ${h.no}${E.grade(h)}</span><span class="p">${h.tr}</span></button>`; }).join('')}</div></div>` : '';
+  }
+
+  /* ---------- Collection pager ---------- */
+  function page(id) {
+    const h = E.hadith[id];
+    return `<div class="pg"><article class="big"><div class="hadith-head"><span class="book-badge">${h.abbr}</span>
+      <div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${h.no}</span></div>${E.grade(h)}
+      <button class="icon-btn ic${S.bm.has(id) ? ' on' : ''}" data-act="bookmark" data-id="${id}" aria-label="বুকমার্ক">${E.bmIcon(id, 20)}</button>
+      <button class="icon-btn ic" data-menu="${id}" aria-label="আরও">${I.more}</button></div>
+      <div class="body"><p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${h.tr}</p><p class="chap">অধ্যায়: ${h.ch}</p></div>
+      <button class="btn tonal" data-open-h="${id}">হাদিসের পেজে পড়ুন</button></article></div>`;
+  }
+  function renderCollection() {
+    const id = E.shownId(), ev = E.ev();
+    $('#c-title').innerHTML = `${ev.name}<small>${E.count(ev)}</small>`;
+    $('#intro').innerHTML = `<span>${E.eventIcon(id, 22)}</span>${ev.intro}`;
+    $('#pager').innerHTML = ev.ids.map(page).join('');
+    at = Math.min(at, ev.ids.length - 1);
+    sync();
+    requestAnimationFrame(() => goTo(at, false));
+  }
+  function sync() {
+    const n = E.ev().ids.length;
+    $('#pos').textContent = `${bn(at + 1)} / ${bn(n)}`;
+    $('#dots').innerHTML = E.ev().ids.map((_, i) => `<i class="${i === at ? 'on' : ''}"></i>`).join('');
+    $('#prev').disabled = at === 0; $('#next').disabled = at === n - 1;
+  }
+  function goTo(i, smooth = true) {
+    at = i; sync();
+    const p = $('#pager'); p.scrollTo({ left: i * p.clientWidth, behavior: smooth ? 'smooth' : 'auto' });
+  }
+  $('#pager').addEventListener('scroll', () => { const p = $('#pager'), i = Math.round(p.scrollLeft / Math.max(1, p.clientWidth)); if (i !== at) { at = i; sync(); } });
+  $('#prev').onclick = () => goTo(at - 1);
+  $('#next').onclick = () => goTo(at + 1);
+
+  /* ---------- Events ---------- */
+  document.addEventListener('click', (e) => {
+    const s = e.target.closest('[data-start]');
+    if (s) { at = +s.dataset.start; Kit.show('collection'); return; }
+    const c = e.target.closest('[data-open-h]'); if (c) E.open(c.dataset.openH);
+  });
+  Kit.onScreen((id) => { if (id === 'home') renderHome(); if (id === 'collection') renderCollection(); });
+
+  E.mount({ menu: 'grid', onChange: () => { if (Kit.current === 'collection') renderCollection(); },
+    onDate: () => { renderHome(); at = 0; if (Kit.current === 'collection') renderCollection(); if (Kit.current === 'hadith') Kit.show('collection'); } });
+  Kit.init({ demo: 3, name: 'এক এক করে', extra: E.extra,
+    screens: [{ id: 'home', label: 'হোম' }, { id: 'collection', label: 'সংকলন' }, { id: 'hadith', label: 'হাদিসের পেজ' }] });
+</script>
+</body>
+</html>

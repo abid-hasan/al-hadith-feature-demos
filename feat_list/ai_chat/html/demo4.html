@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>এআই চ্যাট (রেফারেন্সসহ) — ডেমো ৪ · মিনিমাল তালিকা</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared bits ===== */
+.pg{display:flex;flex-direction:column;flex:1;min-height:0}
+[data-hid]{cursor:pointer}
+.body{flex:1;min-height:0;overflow-y:auto;background:var(--card)}
+.body::-webkit-scrollbar{width:0}
+.screen{background:var(--card)}
+.appbar.flat{background:var(--card)}
+.appbar.flat .icon-btn svg{width:22px;height:22px}
+
+/* ===== Demo 4: one white surface, text tabs, thin dividers ===== */
+.sbox{display:flex;align-items:center;gap:8px;margin:18px 16px 0;border-bottom:2px solid var(--divider);color:var(--hint)}
+.sbox:focus-within{border-color:var(--primary)}
+.sbox svg{width:20px;height:20px;flex:none}
+.sbox input{flex:1;min-width:0;height:50px;border:0;outline:none;background:none;color:var(--title);font-size:17px}
+.sbox input::placeholder{color:var(--hint)}
+.lbl{margin:22px 16px 0;font-size:13px;color:var(--hint)}
+.tabs{display:flex;gap:22px;margin:4px 16px 0;border-bottom:1px solid var(--divider)}
+.tabs button{position:relative;height:42px;font-size:15px;color:var(--body);display:flex;align-items:center;gap:5px}
+.tabs button[aria-pressed="true"]{color:var(--primary);font-weight:700}
+.tabs button[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--primary);border-radius:2px}
+.tabs svg{width:15px;height:15px}
+.cr{display:block;margin:12px 16px 0;font-size:13.5px;color:var(--primary);text-align:left}
+.foot{flex:none;padding:10px 16px 14px;background:var(--card)}
+
+/* ===== Results: inline sort and grade filter, then plain rows ===== */
+.ctl{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--divider)}
+.sg{display:flex;border:1px solid var(--divider);border-radius:20px;overflow:hidden}
+.sg button{height:30px;padding:0 12px;font-size:13px;color:var(--body)}
+.sg button[aria-pressed="true"]{background:var(--tint);color:var(--primary-dark);font-weight:700}
+:root[data-theme="dark"] .sg button[aria-pressed="true"]{color:var(--primary)}
+.ctl .chip{height:30px;margin-left:auto}
+.row{display:block;width:100%;padding:14px 16px;border-bottom:1px solid var(--divider);text-align:left}
+.row .top{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;color:var(--title)}
+.row .top span{flex:1}
+.gt{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:400;color:var(--body)}
+.gt i{width:8px;height:8px;border-radius:50%;background:var(--grade-sahih)}
+.row .ch{margin:2px 0 4px;font-size:12.5px;color:var(--hint)}
+.row .tx{margin:0;font-size:14.5px;color:var(--body);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.more{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;height:52px;color:var(--primary);font-weight:700;font-size:14.5px}
+.more svg{width:18px;height:18px}
+
+/* ===== Hadith page: reading first, meta after ===== */
+.rd{padding:22px 20px}
+.rd .narrator{margin:0 0 8px;font-size:14px}
+.rd .tx{margin:0;font-size:18px;line-height:1.8;color:var(--title)}
+.meta{margin:22px 0 0;border-top:1px solid var(--divider)}
+.meta div{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--divider);font-size:14px}
+.meta span{color:var(--hint)}
+.meta b{color:var(--title);font-weight:600;text-align:right}
+
+/* ===== Empty ===== */
+.nores{padding:40px 20px}
+.nores h3{margin:0;font-size:18px;color:var(--title)}
+.nores p{margin:6px 0 14px;color:var(--hint);font-size:14px}
+
+/* ===== Profile: two rows ===== */
+.kv{display:flex;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--divider);font-size:15px;color:var(--body)}
+.kv b{color:var(--title)}
+.kv.on b{color:var(--primary)}
+.fn{margin:10px 16px;font-size:13px;color:var(--hint)}
+
+/* ===== Sign-in dialog ===== */
+.dialog p{margin:0;color:var(--body);font-size:14.5px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <section class="screen" data-screen="search" data-status="light"></section>
+      <section class="screen" data-screen="signin" data-status="light"></section>
+      <section class="screen" data-screen="results" data-status="light"></section>
+      <section class="screen" data-screen="hadith" data-status="light"></section>
+      <section class="screen" data-screen="empty" data-status="light"></section>
+      <section class="screen" data-screen="credit" data-status="light"></section>
+      <section class="screen" data-screen="nocredit" data-status="light"></section>
+
+      <div id="hold" hidden>
+        <!-- Page: search, text tabs for the method -->
+        <div class="pg" id="pg-search">
+          <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="exit" data-i="back"></button><h1>সার্চ</h1></header>
+          <div class="body"></div>
+          <div class="foot"><button class="btn block" data-act="run">হাদিস সার্চ করুন</button></div>
+        </div>
+        <!-- Page: results as plain rows -->
+        <div class="pg" id="pg-results">
+          <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="search" data-i="back"></button><h1 id="rq"></h1>
+            <button class="icon-btn" aria-label="প্রশ্ন বদলান" data-act="edit" data-i="edit"></button></header>
+          <div class="body"></div>
+        </div>
+        <!-- Page: hadith -->
+        <div class="pg" id="pg-hadith">
+          <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="back" data-i="back"></button><h1 id="hp-t"></h1></header>
+          <div class="body"></div>
+        </div>
+        <!-- Page: nothing found -->
+        <div class="pg" id="pg-empty">
+          <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="search" data-i="back"></button><h1>সার্চ রেজাল্ট</h1></header>
+          <div class="body"></div>
+        </div>
+        <!-- Page: profile -->
+        <div class="pg" id="pg-credit">
+          <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="search" data-i="back"></button><h1>প্রোফাইল</h1></header>
+          <div class="body"></div>
+        </div>
+      </div>
+
+      <div class="dialog" id="sh-signin" role="dialog" aria-label="সাইন ইন">
+        <h2>AI সার্চ ব্যবহার করতে সাইন ইন করুন</h2>
+        <p>সাইন ইন করলে আপনার বুকমার্ক, নোট ও পিন ব্যাকআপ থাকবে এবং AI সার্চ আনলক হবে।</p>
+        <div class="actions"><button class="btn text" data-close>বাতিল</button><button class="btn" data-act="signin">Google দিয়ে সাইন ইন করুন</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="ai_search.js"></script>
+<script>
+/* ======================================================================
+   DEMO 4 — মিনিমাল তালিকা: no cards and no sheets. Method as text tabs,
+   sort and grade filter sit inline above the list, every hadith is one
+   plain row (reference, chapter, two lines of text).
+   ====================================================================== */
+(function () {
+  const { S, H, T, esc, bn, left, book, visible, hasMore, all, LIMIT } = AIS;
+  const I = Kit.icons;
+  const $ = (s, r) => (r || document).querySelector(s);
+  const SPARK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 3l1.8 5.2L17 10l-5.2 1.8L10 17l-1.8-5.2L3 10l5.2-1.8zM18 14l.9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9z"/></svg>';
+
+  const gt = (id) => `<span class="gt"><i></i>${AIS.GRADES[H[id].grade]}</span>`;
+  const row = (id) => `<button class="row" data-act="open" data-hid="${id}"><span class="top"><span>${book(id).name} · ${bn(H[id].num)}</span>${gt(id)}</span>
+      <span class="ch" style="display:block">${H[id].kitab} · ${H[id].bab}</span><span class="tx">${esc(H[id].tr)}</span></button>`;
+  const tab = (m, label, ic) => `<button data-act="method" data-m="${m}" aria-pressed="${S.method === m}">${ic || ''}${label}</button>`;
+
+  AIS.start({ demo: 4, name: 'মিনিমাল তালিকা', render: {
+    search(el) {
+      const ai = S.method === 'ai';
+      $('.body', el).innerHTML = `<label class="sbox">${I.search}<input data-q type="search" enterkeyhint="search" aria-label="হাদিস সার্চ ইনপুট" placeholder="${ai ? T.hintAsk : T.hintWord}"></label>
+        <p class="lbl">${T.method}</p><div class="tabs">${tab('normal', T.normal)}${tab('exact', T.exact)}${tab('ai', T.ai, SPARK)}</div>
+        ${ai ? (S.signed ? `<button class="cr" data-act="credit">${left() ? T.left(left()) : T.out}</button>` : `<button class="cr" data-open="sh-signin">${T.signin}</button>`) : ''}`;
+    },
+    results(el) {
+      $('#rq').innerHTML = `${esc(S.res.q)}<small data-count></small>`;
+      $('.body', el).innerHTML = `<div class="ctl"><div class="sg" role="group" aria-label="${T.sort}">
+          <button data-act="sort" data-v="best" aria-pressed="${S.sort === 'best'}">${T.best}</button><button data-act="sort" data-v="book" aria-pressed="${S.sort === 'book'}">${T.bookO}</button></div>
+          <button class="chip${S.grades.has('sahih') ? ' on' : ''}" data-act="grade" data-g="sahih" aria-label="${T.filter}">${S.grades.has('sahih') ? I.check.replace('width="24" height="24"', 'width="15" height="15"') : ''}সহিহ হাদিস</button></div>
+        ${visible().map(row).join('')}
+        ${hasMore() ? `<button class="more" data-act="more">${T.more} (${bn(all().length - S.shown)})${I.down}</button>` : ''}`;
+    },
+    hadith(el) {
+      const id = S.cur;
+      $('#hp-t').textContent = `${book(id).name} ${bn(H[id].num)}`;
+      $('.body', el).innerHTML = `<div class="rd"><p class="narrator">${H[id].nar}</p><p class="tx">${esc(H[id].tr)}</p>
+        <div class="meta"><div><span>বই</span><b>${book(id).name}</b></div><div><span>হাদিস নম্বর</span><b>${bn(H[id].num)}</b></div>
+        <div><span>অধ্যায়</span><b>${H[id].kitab} · ${H[id].bab}</b></div><div><span>গ্রেড</span><b>${gt(id)}</b></div></div></div>`;
+    },
+    empty(el) {
+      $('.body', el).innerHTML = `<div class="nores"><h3>${T.none}</h3><p>"${esc(S.res.q)}" লিখে কিছু মেলেনি। প্রশ্নটা অন্যভাবে লিখে আবার সার্চ করুন।</p>
+        <button class="btn outline" data-act="edit">প্রশ্ন বদলান</button></div>`;
+    },
+    credit(el) {
+      $('.body', el).innerHTML = `<p class="section-title">${T.ai}</p>
+        <div class="kv"><span>${T.today}</span><b>${bn(S.used)} / ${bn(LIMIT)}</b></div>
+        <div class="kv on"><span>বাকি</span><b>${left() ? T.left(left()) : T.out}</b></div><p class="fn">${T.reset}</p>`;
+    },
+  } });
+})();
+</script>
+</body>
+</html>

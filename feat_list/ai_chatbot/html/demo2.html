@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>এআই হাদিস চ্যাটবট — ডেমো ২ · মেসেঞ্জার</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared bits ===== */
+.pg{display:flex;flex-direction:column;flex:1;min-height:0;position:relative}
+[data-hid]{cursor:pointer}
+.body{flex:1;min-height:0;overflow-y:auto}
+.body::-webkit-scrollbar{width:0}
+.appbar.flat .icon-btn svg{width:22px;height:22px}
+
+/* ===== Entry: search page with a floating chat button ===== */
+.sf{display:flex;align-items:center;gap:10px;height:48px;margin:14px 16px;padding:0 14px;border-radius:24px;background:var(--card);box-shadow:var(--shadow);color:var(--hint);font-size:15px}
+.sf svg{width:18px;height:18px}
+.fab{position:absolute;right:16px;bottom:22px;display:flex;align-items:center;gap:8px;height:52px;padding:0 20px 0 16px;border-radius:18px;background:var(--primary);color:var(--on-appbar);font-size:15px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.fab svg{width:22px;height:22px}
+
+/* ===== Chat: messenger look ===== */
+.av{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--primary);color:var(--on-appbar)}
+.av svg{width:20px;height:20px}
+.appbar.flat h1{font-size:17px}
+.sys{display:block;width:fit-content;max-width:86%;margin:14px auto 6px;padding:8px 14px;border-radius:14px;background:var(--surface-2);border:1px solid var(--divider);text-align:center;font-size:12.5px;line-height:1.5;color:var(--body)}
+.me{display:flex;justify-content:flex-end;margin:12px 12px 2px}
+.me p{max-width:76%;margin:0;padding:9px 14px;border-radius:20px 20px 6px 20px;background:var(--tint);color:var(--title);font-size:15px}
+.bot{display:flex;gap:8px;align-items:flex-end;margin:10px 12px 2px}
+.bot .av{width:28px;height:28px}
+.bot .av svg{width:15px;height:15px}
+.stack{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.bub{width:fit-content;max-width:90%;padding:9px 14px;border-radius:20px 20px 20px 6px;background:var(--card);border:1px solid var(--divider);font-size:15px;color:var(--title)}
+.bub small{display:block;font-size:13px;color:var(--hint)}
+.bub.ask{background:var(--tint);border-color:var(--primary)}
+.rc{display:block;width:100%;padding:10px 12px;border-radius:16px 16px 16px 6px;background:var(--card);border:1px solid var(--divider);text-align:left}
+.rc .t{display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .rc .t{color:var(--primary)}
+.rc .t span{flex:1}
+.rc .t svg{width:16px;height:16px;color:var(--hint)}
+.rc .x{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px;font-size:14.5px;line-height:1.6;color:var(--title)}
+.rc .grade{font-size:11px}
+.pad{height:12px}
+
+/* ===== Composer ===== */
+.comp{flex:none;display:flex;align-items:center;gap:6px;margin:6px 10px 12px;padding:4px 4px 4px 16px;border-radius:26px;background:var(--card);border:1px solid var(--divider)}
+.comp input{flex:1;min-width:0;height:44px;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.comp input::placeholder{color:var(--hint)}
+.comp .icon-btn{background:var(--primary);color:var(--on-appbar)}
+.comp .icon-btn svg{width:20px;height:20px}
+.comp.off{justify-content:center;padding:12px 16px;flex-direction:column;gap:0;text-align:center;border-radius:18px}
+.comp.off b{font-size:14.5px;color:var(--title)}
+.comp.off small{font-size:12.5px;color:var(--hint)}
+
+/* ===== Hadith page ===== */
+.hp .card{margin:14px 12px;border-radius:16px}
+.hp .kb{display:inline-block;margin:0 0 10px;padding:2px 10px;border-radius:20px;background:var(--surface-2);font-size:12.5px;color:var(--body)}
+.hp .translation{font-size:16px;line-height:1.75;color:var(--title)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <section class="screen" data-screen="entry" data-status="light"></section>
+      <section class="screen" data-screen="chat" data-status="light"></section>
+      <section class="screen" data-screen="answer" data-status="light"></section>
+      <section class="screen" data-screen="masala" data-status="light"></section>
+      <section class="screen" data-screen="empty" data-status="light"></section>
+      <section class="screen" data-screen="hadith" data-status="light"></section>
+      <section class="screen" data-screen="limit" data-status="light"></section>
+
+      <div id="hold" hidden>
+        <!-- Page: search page with a floating chat button -->
+        <div class="pg" id="pg-entry">
+          <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="exit" data-i="back"></button><h1>সার্চ</h1></header>
+          <div class="body"><div class="sf" id="sf"></div></div>
+          <button class="fab" data-act="openchat" id="fab"></button>
+        </div>
+        <!-- Page: the chat -->
+        <div class="pg" id="pg-chat">
+          <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="entry" data-i="back"></button><span class="av" id="av"></span><h1>হাদিস চ্যাট<small id="cr"></small></h1></header>
+          <div class="body" data-scroller></div>
+          <div id="foot"></div>
+        </div>
+        <!-- Page: hadith -->
+        <div class="pg" id="pg-hadith">
+          <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="back" data-i="back"></button><h1 id="hp-t"></h1></header>
+          <div class="body hp"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="chatbot.js"></script>
+<script>
+/* ======================================================================
+   DEMO 2 — মেসেঞ্জার: a messaging app look. The rule sits as a system
+   note at the top of the thread; each hadith is a small bubble with the
+   reference, grade and three lines of text. Entry: a floating button.
+   ====================================================================== */
+(function () {
+  const { S, H, T, esc, bn, book, credits } = BOT;
+  const I = Kit.icons;
+  const $ = (s, r) => (r || document).querySelector(s);
+  const CHAT = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4A8 8 0 1 1 20 12z"/></svg>';
+  const SEND = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  $('#fab').innerHTML = `${CHAT}হাদিস চ্যাট`;
+  $('#av').innerHTML = I.book;
+  $('#sf').innerHTML = `${I.search}<span>হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন</span>`;
+
+  const grade = (id) => `<span class="grade">${BOT.GRADES[H[id].grade]}</span>`;
+  const rc = (id) => `<button class="rc" data-act="open" data-hid="${id}"><span class="t"><span>${book(id).name} · ${bn(H[id].num)}</span>${grade(id)}${I.chevron}</span><span class="x">${esc(H[id].tr)}</span></button>`;
+  const av = `<span class="av">${I.book}</span>`;
+  function msg(m) {
+    if (m.me) return `<div class="me" data-me><p>${esc(m.me)}</p></div>`;
+    let inner;
+    if (m.bot === 'found') inner = `<div class="bub">${T.found(m.ids.length)}</div>${m.ids.map(rc).join('')}`;
+    else if (m.bot === 'masala') inner = `<div class="bub ask">${T.masala}<small>${T.masalaSub}</small></div>`;
+    else inner = `<div class="bub">${T.none}<small>${T.noneSub}</small></div>`;
+    return `<div class="bot">${av}<div class="stack">${inner}</div></div>`;
+  }
+
+  BOT.start({ demo: 2, name: 'মেসেঞ্জার', render: {
+    entry() {},
+    chat(el) {
+      $('#cr').textContent = credits();
+      $('.body', el).innerHTML = `<span class="sys">${T.rule} ${T.ruleMore}</span>${S.msgs.map(msg).join('')}<div class="pad"></div>`;
+      $('#foot').innerHTML = BOT.left()
+        ? `<div class="comp"><input data-q type="text" enterkeyhint="send" autocomplete="off" aria-label="প্রশ্ন লিখুন" placeholder="${T.hint}"><button class="icon-btn" data-act="send" aria-label="পাঠান">${SEND}</button></div>`
+        : `<div class="comp off"><b>${T.out}</b><small>${T.reset}</small></div>`;
+    },
+    hadith(el) {
+      const id = S.cur;
+      $('#hp-t').innerHTML = `${book(id).name}<small>হাদিস: ${bn(H[id].num)}</small>`;
+      $('.body', el).innerHTML = `<article class="card"><span class="kb">অধ্যায়: ${H[id].kitab}</span><div class="hadith-head"><span class="book-badge">${book(id).abbr}</span>
+        <div class="hadith-meta"><b>${book(id).name}</b><span>হাদিস: ${bn(H[id].num)}</span></div>${grade(id)}</div>
+        <p class="narrator">${H[id].nar}</p><p class="translation">${esc(H[id].tr)}</p></article>`;
+    },
+  } });
+})();
+</script>
+</body>
+</html>

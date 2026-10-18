@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>শেখা শব্দের কুইজ — ডেমো 4 · রঙিন খেলা</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): page body, rounded panel, hadith card ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:14px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.screen.rs{background:var(--appbar)}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden;position:relative}
+.hc{padding:12px 14px 14px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:16px 0 6px}
+.hc .translation{font-size:16px;color:var(--title)}
+.ar{font-family:var(--font-ar);direction:rtl}
+.acc{color:var(--primary-dark)}
+:root[data-theme="dark"] .acc{color:var(--primary)}
+.np h1{margin-left:12px}
+/* ===== "শব্দে শব্দে" tab, as it is today (context for the quiz button) ===== */
+.track{display:inline-flex;padding:3px;border-radius:20px;background:var(--tint);margin:12px 0 16px}
+.track span{padding:5px 18px;border-radius:17px;font-size:14px;color:var(--body)}
+.track span.on{background:var(--primary-dark);color:var(--on-appbar);font-weight:700}
+:root[data-theme="dark"] .track span.on{background:var(--primary)}
+.wrap{display:flex;flex-wrap:wrap;direction:rtl;gap:16px 12px;margin:0 0 4px}
+.wb{display:flex;flex-direction:column;align-items:center;text-align:center}
+.wb .ar{font-size:22px;line-height:1.7;color:var(--title)}
+.wb small{font-size:13px;color:var(--title);direction:ltr}
+.wb.hl .ar{color:var(--primary);border-bottom:2px solid var(--primary)}
+/* ===== Answer colours: primary = right, error = wrong (as the hadith quiz does) ===== */
+.ok{--v:var(--primary)}
+.bad{--v:var(--error)}
+.btn:disabled{opacity:.45;cursor:default}
+
+/* ===== Demo 4: coloured banner under the hadith card ===== */
+.ban{display:block;margin:0 12px;width:calc(100% - 24px);padding:14px 16px;border-radius:16px;background:var(--appbar);color:var(--on-appbar);text-align:left}
+.ban b{display:block;font-size:16px}
+.ban span{font-size:13px;opacity:.85}
+.ban .ws{display:flex;gap:6px;direction:rtl;margin:10px 0 0;flex-wrap:wrap}
+.ban .ws i{font-style:normal;font-family:var(--font-ar);font-size:17px;padding:0 10px;border-radius:10px;background:rgba(255,255,255,.16)}
+.ban .go{display:inline-flex;align-items:center;gap:4px;margin-top:12px;padding:6px 14px;border-radius:16px;background:var(--on-appbar);color:var(--primary-dark);font-weight:700;font-size:14px}
+/* ===== Demo 4: quiz page — big colour tile ===== */
+.tile{margin:0 12px 12px;padding:18px 16px;border-radius:20px;background:var(--accent);color:var(--title)}
+:root[data-theme="dark"] .tile{color:var(--scaffold)}
+.tile b{display:block;font-size:20px}
+.tile p{margin:4px 0 12px;font-size:14px}
+.tile .big{font-size:42px;font-weight:700;line-height:1}
+.tile .btn{background:var(--title);color:var(--card)}
+/* ===== Demo 4: play — coloured top with the word, numbered dots, radio list ===== */
+.top{flex:none;padding:6px 16px 22px;background:var(--appbar);color:var(--on-appbar);text-align:center}
+.dots{display:flex;justify-content:center;gap:6px;margin-bottom:10px}
+.dots i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11px;background:rgba(255,255,255,.18)}
+.dots i.cur{background:var(--on-appbar);color:var(--appbar)}
+.dots i.ok,.dots i.bad{background:var(--v);color:var(--on-appbar)}
+.top small{font-size:13.5px;opacity:.85}
+.top .ar{display:block;font-size:50px;line-height:1.5}
+.top .sk{position:absolute;right:12px;top:6px;font-size:13.5px;font-weight:700;color:var(--on-appbar);opacity:.9;padding:6px}
+.sheet2{flex:1;min-height:0;overflow-y:auto;margin-top:-12px;border-radius:18px 18px 0 0;background:var(--scaffold);padding:16px 14px}
+.radio{display:flex;align-items:center;gap:12px;width:100%;padding:14px;margin-bottom:8px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-size:15.5px;color:var(--title);text-align:left}
+.radio i{width:20px;height:20px;flex:none;border-radius:50%;border:2px solid var(--divider)}
+.radio[aria-pressed="true"] i{border:6px solid var(--primary)}
+.radio.ok,.radio.bad{box-shadow:0 0 0 2px var(--v)}
+.radio.ok i,.radio.bad i{border:6px solid var(--v)}
+.note{display:flex;gap:12px;align-items:flex-start;margin-top:6px;padding:12px 14px;border-radius:14px;background:var(--v);color:var(--on-appbar)}
+.note b{display:block;font-size:16px}
+.note p{margin:4px 0 0;font-size:14px}
+.note .ar{font-size:18px}
+.note button{margin-top:6px;font-size:14px;font-weight:700;color:var(--on-appbar);text-decoration:underline;text-underline-offset:3px}
+.foot{flex:none;padding:10px 14px 16px;background:var(--scaffold)}
+.foot .btn{width:100%;height:52px;border-radius:14px}
+/* ===== Demo 4: result — coloured hero with ring ===== */
+.rh{padding:10px 16px 28px;text-align:center;background:var(--appbar);color:var(--on-appbar)}
+.rh h2{margin:0;font-size:20px}
+.rh .muted{color:var(--on-appbar);opacity:.8}
+.ring{width:140px;height:140px;margin:16px auto 6px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--accent) calc(var(--p)*1%),rgba(255,255,255,.2) 0)}
+.ring b{width:114px;height:114px;border-radius:50%;display:grid;place-items:center;background:var(--appbar);font-size:32px}
+.chips{display:flex;gap:10px;margin:-16px 16px 0;position:relative}
+.chips div{flex:1;padding:12px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);text-align:center}
+.chips b{display:block;font-size:19px;color:var(--title)}
+.chips span{font-size:12.5px;color:var(--hint)}
+.racts{padding:18px 16px;display:flex;flex-direction:column;gap:10px}
+.racts .btn{height:50px;border-radius:14px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen rs" data-screen="hadith"></section>
+      <section class="screen" data-screen="quizhome"></section>
+      <section class="screen" data-screen="play"></section>
+      <section class="screen" data-screen="answer"></section>
+      <section class="screen" data-screen="result"></section>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, the round, screen wiring.
+   Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const IC = {
+  quiz: (w = 20) => svg('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/>', w),
+  ok: (w = 18) => svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>', w),
+  bad: (w = 18) => svg('<path d="M6 6l12 12M18 6L6 18"/>', w),
+  skip: (w = 16) => svg('<path d="M5 5l8 7-8 7zM16 5v14"/>', w),
+  clock: (w = 16) => svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', w),
+  replay: (w = 18) => svg('<path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5"/><path d="M4 4v4.5h4.5"/>', w),
+  book: (w = 16) => svg('<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>', w),
+  next: (w = 18) => svg('<path d="M9 5l7 7-7 7"/>', w),
+  words: (w = 22) => svg('<path d="M4 6h10M4 12h7M4 18h10"/><path d="M17 9l3 3-3 3"/>', w),
+};
+
+/* ---------- Hadiths (safe list only). Arabic = the words the breakdown has. ---------- */
+const HAD = {
+  b1: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1, nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত', text: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' },
+  b6116: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 6116, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', text: 'এক ব্যক্তি নবী (সাঃ)-কে বললেন, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বললেন, তিনি প্রতিবারই বললেন, রাগ করো না।' },
+  m223: { book: 'সহীহ মুসলিম', abbr: 'মুসলিম', no: 223, nar: 'আবু মালিক আল-আশআরি (রা.) থেকে বর্ণিত', text: 'পবিত্রতা ঈমানের অর্ধেক।' },
+  b1894: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1894, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', text: 'রোজা ঢালস্বরূপ।' },
+};
+/* ---------- Word-by-word words (#26 data). rj = মূল শব্দ, rm = মূলের সাধারণ অর্থ.
+   Wrong options are other words' real meanings; the app never makes new ones. ---------- */
+const WORDS = [
+  { ar: 'إِنَّمَا', bn: 'নিশ্চয়ই কেবল', h: 'b1' },
+  { ar: 'الأَعْمَالُ', bn: 'কাজসমূহ', rj: 'عمل', rm: 'কাজ করা', h: 'b1' },
+  { ar: 'بِالنِّيَّاتِ', bn: 'নিয়তের ওপর', rj: 'نوي', rm: 'মনে সংকল্প করা', h: 'b1' },
+  { ar: 'وَإِنَّمَا', bn: 'আর নিশ্চয়ই', h: 'b1', dup: 1 },
+  { ar: 'لِكُلِّ', bn: 'প্রত্যেকের জন্য', rj: 'كلل', h: 'b1' },
+  { ar: 'امْرِئٍ', bn: 'ব্যক্তি', rj: 'مرء', rm: 'মানুষ, পুরুষ', h: 'b1' },
+  { ar: 'مَا', bn: 'যা', h: 'b1' },
+  { ar: 'نَوَى', bn: 'সে নিয়ত করেছে', rj: 'نوي', rm: 'মনে সংকল্প করা', h: 'b1' },
+  { ar: 'لَا', bn: 'না', h: 'b6116' },
+  { ar: 'تَغْضَبْ', bn: 'রাগ করো', rj: 'غضب', rm: 'রাগ করা, ক্ষুব্ধ হওয়া', h: 'b6116' },
+  { ar: 'الطُّهُورُ', bn: 'পবিত্রতা', rj: 'طهر', rm: 'পবিত্র হওয়া', h: 'm223' },
+  { ar: 'شَطْرُ', bn: 'অর্ধেক', rj: 'شطر', rm: 'দুই ভাগ করা', h: 'm223' },
+  { ar: 'الإِيمَانِ', bn: 'ঈমানের', rj: 'أمن', rm: 'নিরাপদ হওয়া, বিশ্বাস করা', h: 'm223' },
+  { ar: 'الصِّيَامُ', bn: 'রোজা', rj: 'صوم', rm: 'বিরত থাকা', h: 'b1894' },
+  { ar: 'جُنَّةٌ', bn: 'ঢাল', rj: 'جنن', rm: 'ঢেকে রাখা, আড়াল করা', h: 'b1894' },
+];
+/* Same word only once ("dup"); words with no meaning are left out */
+const QW = WORDS.filter((w) => w.bn && !w.dup);
+const SEEN = QW.length;
+const of = (h) => WORDS.filter((w) => w.h === h);
+const canQuiz = (h) => QW.filter((w) => w.h === h).length >= 4;
+const LBL = ['ক', 'খ', 'গ', 'ঘ'];
+
+/* ---------- Stable shuffle so the demo looks the same every time ---------- */
+let seed = 7;
+const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+const shuffle = (a) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+
+/* ---------- The round ---------- */
+const S = { src: 'hadith', practice: false, qs: [], k: 0, pick: null, checked: false, res: [], t0: 0, secs: 0, hadith: 'b1', back: null };
+function makeQ(w) {
+  const wrong = shuffle(QW.filter((x) => x.bn !== w.bn)).slice(0, 3).map((x) => x.bn);
+  const opts = shuffle([w.bn, ...wrong]);
+  return { w, opts, ans: opts.indexOf(w.bn) };
+}
+function start(src, list) {
+  seed = src === 'seen' ? 11 : 7;
+  S.src = src; S.practice = !!list;
+  const pool = list || (src === 'hadith' ? QW.filter((w) => w.h === 'b1') : shuffle(QW).slice(0, 10));
+  S.qs = pool.map(makeQ); S.k = 0; S.pick = null; S.checked = false; S.res = []; S.t0 = Date.now(); S.secs = 0;
+}
+const q = () => S.qs[S.k];
+const last = () => S.k === S.qs.length - 1;
+const score = () => S.res.filter(Boolean).length;
+const wrongWords = () => S.qs.filter((x, i) => S.res[i] === false).map((x) => x.w);
+const pct = () => Math.round((score() / S.qs.length) * 100);
+const mmss = (s) => `${bn(String(Math.floor(s / 60)).padStart(2, '0'))}:${bn(String(s % 60).padStart(2, '0'))}`;
+const progressTxt = () => `প্রশ্ন ${bn(S.k + 1)} / ${bn(S.qs.length)}`;
+const srcTxt = () => (S.practice ? 'ভুলগুলোর প্র্যাকটিস' : S.src === 'hadith' ? 'সহীহ বুখারী ১-এর শব্দ' : 'আগে দেখা শব্দ');
+const verdict = () => { const p = pct(); return p === 100 ? 'মাশাআল্লাহ! পুরো নম্বর' : p >= 70 ? 'চমৎকার!' : p >= 40 ? 'ভালো চেষ্টা' : 'ইনশাআল্লাহ, পরেরবার আরও ভালো হবে'; };
+const refTxt = (w) => `${HAD[w.h].book} ${bn(HAD[w.h].no)}`;
+const isRight = () => S.pick === q().ans;
+
+const SCREENS = [
+  { id: 'hadith', label: 'হাদিসের পেজ' },
+  { id: 'quizhome', label: 'কুইজের পেজ' },
+  { id: 'play', label: 'প্রশ্ন' },
+  { id: 'answer', label: 'উত্তরের পর' },
+  { id: 'result', label: 'ফলাফল' },
+];
+
+/* ---------- Hadith page: the word-by-word tab with the quiz button under it ---------- */
+function hadithHTML() {
+  const h = HAD[S.hadith];
+  const ws = of(S.hadith);
+  const back = S.back ? `<button class="icon-btn" data-act="back" aria-label="পেছনে">${icons.back}</button>` : '';
+  return `<header class="appbar${back ? '' : ' np'}">${back}<h1>${h.book}<small>হাদিস: ${bn(h.no)}</small></h1></header>
+    <div class="rbody"><div class="body"><article class="card hc">
+      <div class="hadith-head"><span class="book-badge">${h.abbr}</span><div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${bn(h.no)}</span></div><span class="grade">সহিহ হাদিস</span></div>
+      <div class="track"><span>আরবি</span><span class="on">শব্দে শব্দে</span></div>
+      <div class="wrap">${ws.map((w) => `<div class="wb${S.back && S.focus === w.ar ? ' hl' : ''}"><span class="ar">${w.ar}</span><small>${w.bn}</small></div>`).join('')}</div>
+      ${D.inCard && canQuiz(S.hadith) ? D.quizBtn() : ''}
+      <p class="narrator">${h.nar}</p><p class="translation">${h.text}</p></article>
+      ${!D.inCard && canQuiz(S.hadith) ? D.quizBtn() : ''}</div>${D.float && canQuiz(S.hadith) ? D.float() : ''}</div>`;
+}
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  sec.innerHTML = id === 'hadith' ? hadithHTML() : id === 'quizhome' ? D.home() : id === 'result' ? D.result() : D.play();
+}
+function onScreen(id) {
+  // A toolbar chip can open any screen: make sure the round is in a matching state.
+  if (id === 'hadith' && Kit.current === 'hadith' && !S.keepBack) { S.back = null; S.hadith = 'b1'; }
+  S.keepBack = false;
+  if ((id === 'play' || id === 'answer') && !S.qs.length) start('hadith');
+  if (id === 'play' && S.checked) { S.checked = false; S.pick = null; }
+  if (id === 'answer' && !S.checked) { if (S.pick === null) S.pick = q().ans; S.checked = true; S.res[S.k] = isRight(); }
+  if (id === 'result' && S.res.length < S.qs.length) {
+    if (!S.qs.length) start('hadith');
+    S.qs.forEach((x, i) => { if (S.res[i] === undefined) S.res[i] = i % 3 !== 2; });
+    S.k = S.qs.length - 1; S.checked = true; S.secs = S.secs || 102;
+  }
+  render(id);
+  D.after?.(id);
+}
+
+/* ---------- Wiring ---------- */
+const ACT = {
+  fromHadith: () => { start('hadith'); Kit.show('play'); },
+  fromSeen: () => { start('seen'); Kit.show('play'); },
+  pick: (t) => { if (S.checked) return; S.pick = +t.dataset.o; render(Kit.current); D.after?.(Kit.current); },
+  check: () => { if (S.pick === null) return; Kit.show('answer'); },
+  next: () => {
+    if (last()) { S.secs = Math.max(1, Math.round((Date.now() - S.t0) / 1000)); Kit.show('result'); return; }
+    S.k += 1; S.pick = null; S.checked = false; Kit.show('play');
+  },
+  skip: () => { S.res[S.k] = false; Kit.snack('প্রশ্নটি এড়িয়ে গেছেন'); S.checked = true; ACT.next(); },
+  ref: () => { S.hadith = q().w.h; S.focus = q().w.ar; S.back = 'answer'; S.keepBack = true; Kit.show('hadith'); },
+  back: () => { S.back = null; S.hadith = 'b1'; Kit.show('answer'); },
+  quit: () => Kit.show(S.src === 'hadith' ? 'hadith' : 'quizhome'),
+  practice: () => { const ws = wrongWords(); if (!ws.length) return; start(S.src, ws); Kit.show('play'); },
+  again: () => { start(S.practice ? 'hadith' : S.src); Kit.show('play'); },
+  share: () => Kit.snack('ফোনের শেয়ার মেনু খুলবে'),
+};
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-act]');
+  if (t) ACT[t.dataset.act]?.(t);
+});
+
+/* ======================================================================
+   DEMO 4 — রঙিন খেলা: a green banner with the hadith's words starts it;
+   the quiz page gets a bright tile; the word sits in a coloured top with
+   numbered dots; options are radio rows; the verdict is a solid colour note.
+   ====================================================================== */
+const rCls = (i) => (!S.checked ? '' : i === q().ans ? ' ok' : i === S.pick ? ' bad' : '');
+const D = {
+  inCard: false,
+  quizBtn: () => `<button class="ban" data-act="fromHadith"><b>এই হাদিসের শব্দ দিয়ে কুইজ</b><span>এইমাত্র পড়া শব্দগুলোর অর্থ মনে আছে তো?</span>
+      <div class="ws">${QW.filter((w) => w.h === S.hadith).slice(0, 4).map((w) => `<i>${w.ar}</i>`).join('')}</div><span class="go">শুরু করুন ${IC.next(14)}</span></button>`,
+  home: () => `<header class="appbar np"><h1>হাদিস কুইজ</h1></header>
+    <div class="body"><section class="tile"><span class="big">${bn(SEEN)}</span><b>শব্দের কুইজ</b><p>শব্দে শব্দে অর্থে আগে দেখা ${bn(SEEN)}টি শব্দ থেকে ১০টি প্রশ্ন</p><button class="btn" data-act="fromSeen">কুইজ শুরু করুন</button></section></div>`,
+  play: () => {
+    const x = q();
+    return `<header class="appbar"><button class="icon-btn" data-act="quit" aria-label="পেছনে">${icons.back}</button><h1>শব্দের কুইজ<small>${srcTxt()} · ${progressTxt()}</small></h1></header>
+    <div class="top" style="position:relative">${S.checked ? '' : '<button class="sk" data-act="skip">স্কিপ</button>'}
+      <div class="dots">${S.qs.map((_, i) => `<i class="${S.res[i] === true ? 'ok' : S.res[i] === false ? 'bad' : i === S.k ? 'cur' : ''}">${bn(i + 1)}</i>`).join('')}</div>
+      <small>এই শব্দের অর্থ কী?</small><span class="ar">${x.w.ar}</span></div>
+    <div class="sheet2">${x.opts.map((o, i) => `<button class="radio${rCls(i)}" data-act="pick" data-o="${i}" aria-pressed="${S.pick === i}"><i></i>${o}</button>`).join('')}
+      ${S.checked ? `<div class="note ${isRight() ? 'ok' : 'bad'}">${isRight() ? IC.ok(22) : IC.bad(22)}<div><b>${isRight() ? 'সঠিক উত্তর' : 'ভুল উত্তর'}</b>
+        <p>${x.w.rj ? `মূল শব্দ <span class="ar">${x.w.rj}</span>${x.w.rm ? ` · ${x.w.rm}` : ''}` : `অর্থ: ${x.w.bn}`}</p><button data-act="ref">হাদিসের সূত্র: ${refTxt(x.w)}</button></div></div>` : ''}</div>
+    <div class="foot">${S.checked ? `<button class="btn" data-act="next">${last() ? 'কুইজ শেষ করুন' : 'পরের প্রশ্ন'}</button>` : `<button class="btn" data-act="check" ${S.pick === null ? 'disabled' : ''}>উত্তর যাচাই করুন</button>`}</div>`;
+  },
+  result: () => `<header class="appbar"><button class="icon-btn" data-act="quit" aria-label="পেছনে">${icons.back}</button><h1>শব্দের কুইজ</h1></header>
+    <div class="body" style="padding-top:0"><div class="rh"><h2>কুইজ সম্পন্ন হয়েছে</h2><div class="muted">${verdict()}</div><div class="ring" style="--p:${pct()}"><b>${bn(score())}/${bn(S.qs.length)}</b></div></div>
+      <div class="chips"><div><b>${bn(pct())}%</b><span>স্কোর</span></div><div><b>${mmss(S.secs)}</b><span>সময় লেগেছে</span></div></div>
+      <div class="racts">${wrongWords().length ? `<button class="btn" data-act="practice">${IC.replay()}ভুলগুলো প্র্যাকটিস করুন</button>` : ''}<button class="btn tonal" data-act="again">আবার শুরু করুন</button></div></div>`,
+};
+
+Kit.onScreen(onScreen);
+Kit.init({ demo: 4, name: 'রঙিন খেলা', screens: SCREENS });
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>যুদ্ধের টাইমলাইন ও হাদিস — ডেমো ২ · রেল আর ট্যাব</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared page body ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.appbar.np h1{margin-left:12px}
+
+/* ===== List: a rail with the year on the left of each stop ===== */
+.rail{position:relative;padding:6px 12px 0 0}
+.rail::before{content:"";position:absolute;left:83px;top:16px;bottom:20px;width:2px;background:var(--primary);opacity:.35}
+.stop{display:grid;grid-template-columns:70px 30px 1fr;align-items:center;margin-bottom:12px}
+.stop .y{text-align:right;font-size:14px;font-weight:700;line-height:1.2;color:var(--primary-dark)}
+:root[data-theme="dark"] .stop .y{color:var(--primary)}
+.stop .d{justify-self:center;position:relative;z-index:1;width:14px;height:14px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 4px var(--scaffold)}
+.bcard{display:block;padding:12px 14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.bcard b{display:block;font-size:16px;color:var(--title)}
+.bcard span{display:flex;align-items:center;gap:4px;margin-top:2px;font-size:13px;color:var(--body)}
+.bcard span svg{width:14px;height:14px;color:var(--hint)}
+.bcard em{display:block;margin-top:6px;font-style:normal;font-size:12.5px;font-weight:700;color:var(--primary)}
+
+/* ===== Battle page: flat header, book tabs, hadith cards ===== */
+.bh{flex:none;padding:6px 20px 12px;background:var(--scaffold)}
+.bh .r{display:flex;gap:14px;font-size:14px;color:var(--body)}
+.bh .r span{display:inline-flex;align-items:center;gap:5px}
+.bh .r svg{width:16px;height:16px;color:var(--primary)}
+.tabs{flex:none;padding:0 4px 8px;border-bottom:1px solid var(--divider);background:var(--scaffold)}
+.chip i{font-style:normal;font-size:12px;opacity:.8}
+.gl{margin:14px 16px 8px;font-size:13.5px;font-weight:700;color:var(--hint)}
+.hc3{display:block;width:calc(100% - 24px);text-align:left}
+.hc3 .narrator{color:var(--primary);font-size:15px;margin:10px 0 2px}
+.hc3 .s{margin:4px 0 0;font-size:14px;color:var(--body)}
+.dlcard{text-align:center;padding:22px 18px}
+.dlcard .ic{width:52px;height:52px;margin:0 auto 10px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.dlcard p{margin:0 0 14px;font-size:14.5px;line-height:1.6;color:var(--body)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="list"></section>
+      <section class="screen" data-screen="battle" data-status="light"></section>
+      <section class="screen" data-screen="nodl" data-status="light"></section>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="battle_data.js"></script>
+<script>
+  const T = window.BT, S = T.S, I = Kit.icons, bn = Kit.bn, $ = Kit.$;
+  let tab = 'all'; // book tab on the battle page
+
+  /* ---------- List: rail with years ---------- */
+  function listView() {
+    const stop = (b) => `<div class="stop"><span class="y">${b.year}</span><span class="d"></span>
+      <button class="bcard" data-act="battle" data-id="${b.id}"><b>${b.name}</b><span>${T.ICON.pin(14)}${b.place}</span><em>${bn(T.total(b))}টি হাদিস</em></button></div>`;
+    return `<header class="appbar np"><h1>যুদ্ধ ও হাদিস</h1></header><div class="body"><div class="rail">${T.BATTLES.map(stop).join('')}</div></div>`;
+  }
+
+  /* ---------- Battle page: tabs (সব / each book); "সব" keeps the book groups ---------- */
+  function battleView() {
+    const b = T.byId(S.id), gs = T.groups(b);
+    const tabs = `<div class="tabs chip-row"><button class="chip" data-act="tab" data-tab="all" aria-pressed="${tab === 'all'}">সব <i>${bn(T.total(b))}</i></button>${gs.map((g) =>
+      `<button class="chip" data-act="tab" data-tab="${g.book}" aria-pressed="${tab === g.book}">${g.name} <i>${bn(g.nos.length)}</i></button>`).join('')}</div>`;
+    const card = (g, no) => { const m = T.meta(g.book, no); return `<button class="card hc3" data-act="hadith" data-book="${g.book}" data-no="${no}">
+      <div class="hadith-head"><span class="book-badge">${g.abbr}</span><div class="hadith-meta"><b>${g.name}</b><span>হাদিস: ${bn(no)}</span></div><span class="grade">${T.GRADE}</span></div>
+      <p class="narrator">${m.nar} থেকে বর্ণিত</p><p class="s">পরিচ্ছেদ: ${m.sec}</p></button>`; };
+    const dl = `<div class="card dlcard" id="dl-msg"><div class="ic">${T.ICON.download(26)}</div><p>${T.dlText}</p><button class="btn" data-act="dl">ডাউনলোড ম্যানেজার</button></div>`;
+    const body = gs.filter((g) => tab === 'all' || tab === g.book).map((g) =>
+      `${tab === 'all' ? `<p class="gl">${g.name}</p>` : ''}${g.dl ? g.nos.map((no) => card(g, no)).join('') : dl}`).join('');
+    return `<header class="appbar flat"><button class="icon-btn" data-act="back" aria-label="পেছনে">${I.back}</button><h1>${b.name}</h1></header>
+      <div class="bh"><div class="r"><span>${T.ICON.cal(16)}${b.year}</span><span>${T.ICON.pin(16)}${b.place}</span></div></div>${tabs}<div class="body">${body}</div>`;
+  }
+
+  /* ---------- Navigation ---------- */
+  let internal = false;
+  const go = (id) => { internal = true; Kit.show(id); internal = false; };
+  const openBattle = () => go(T.byId(S.id).groups.muslim && !S.mDl ? 'nodl' : 'battle');
+  Kit.onScreen((id) => {
+    if (!internal && id !== 'list') { S.id = 'uhud'; S.mDl = id === 'battle'; tab = id === 'nodl' ? 'muslim' : 'all'; T.syncBar(); }
+    $(`.screen[data-screen="${id}"]`).innerHTML = id === 'list' ? listView() : battleView();
+  });
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-act]');
+    if (!t || !t.closest('.phone')) return;
+    const a = t.dataset.act;
+    if (a === 'battle') { S.id = t.dataset.id; tab = 'all'; openBattle(); }
+    else if (a === 'back') go('list');
+    else if (a === 'tab') { tab = t.dataset.tab; go(Kit.current); }
+    else if (a === 'hadith') T.openHadith(t.dataset.book, +t.dataset.no);
+    else if (a === 'dl') T.dlManager();
+  });
+
+  Kit.init({ demo: 2, name: 'রেল আর ট্যাব', extra: T.extra, screens: T.SCREENS });
+  /* Toolbar: সহীহ মুসলিম downloaded or not */
+  $('#tg-dl').onclick = () => { S.mDl = !S.mDl; T.syncBar(); if (Kit.current === 'list') go('list'); else openBattle(); };
+  T.syncBar();
+</script>
+</body>
+</html>

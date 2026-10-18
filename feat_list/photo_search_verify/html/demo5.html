@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ছবি তুলে হাদিস যাচাই — ডেমো ৫ · কথোপকথন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="psv_sys.css">
+<style>
+/* ===== Thread ===== */
+.thread{display:flex;flex-direction:column;gap:10px;padding:14px 12px 16px}
+.msg{max-width:84%;padding:10px 13px;border-radius:16px;font-size:15px;line-height:1.6}
+.bot{align-self:flex-start;background:var(--card);color:var(--title);border-bottom-left-radius:4px;box-shadow:var(--shadow)}
+.you{align-self:flex-end;background:var(--tint);color:var(--title);border-bottom-right-radius:4px}
+.you.txt span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.you.pic{padding:4px;background:var(--tint)}
+.you.pic div{width:150px;aspect-ratio:300/440;border-radius:12px;overflow:hidden}
+.who{display:flex;align-items:center;gap:6px;margin-bottom:2px;font-size:12.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .who{color:var(--primary)}
+.who svg{width:16px;height:16px}
+.busy{display:flex;align-items:center;gap:10px;color:var(--hint)}
+.res{max-width:94%;padding:10px}
+.res .ov{display:flex;gap:8px;align-items:flex-start;padding:2px 4px 10px}
+.res .ov svg{flex:none;color:var(--primary);margin-top:2px}
+.res .ov b{display:block;font-size:15.5px}
+.res .ov span{font-size:13px;color:var(--hint)}
+.hc{border:1px solid var(--divider);border-radius:12px;padding:12px}
+.grade.sahih{background:var(--grade-sahih)}
+.hc .narrator{color:var(--primary);font-size:14px;margin:8px 0 2px}
+.hc .translation{font-size:14.5px}
+.res .sh{display:flex;width:100%;height:42px;margin-top:10px}
+.res h3{margin:0 0 6px;font-size:16.5px}
+.res p{margin:0;font-size:14px;color:var(--body);text-align:justify}
+.res .btn.text{margin-top:6px;padding:0 4px}
+
+/* ===== Composer ===== */
+.comp{flex:none;background:var(--card);border-top:1px solid var(--divider);padding:8px 10px 12px}
+.acts{display:flex;gap:8px;margin-bottom:8px}
+.acts .chip{height:34px}
+.acts .chip svg{color:var(--primary)}
+.row{display:flex;align-items:flex-end;gap:8px}
+.in{flex:1;min-width:0;height:46px;max-height:190px;resize:none;border-radius:22px;border:1px solid var(--divider);background:var(--scaffold);padding:11px 16px;font-size:15px;line-height:1.5;color:var(--title);outline:none;transition:height .2s}
+.in.big{height:190px;border-radius:16px}
+.in:focus{border-color:var(--primary)}
+.in::placeholder{color:var(--hint)}
+.send{height:46px;border-radius:23px;padding:0 16px;flex:none}
+.send:disabled{opacity:.5}
+
+/* ===== Picker: attachment sheet with round icons ===== */
+.att{display:flex;justify-content:center;gap:34px;padding:8px 0 16px}
+.att button{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:14.5px;color:var(--title)}
+.att i{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;color:white;background:var(--primary)}
+.att button+button i{background:var(--appbar)}
+:root[data-theme="dark"] .att button+button i{background:var(--primary-dark)}
+.cancel{display:block;width:100%;height:46px;border-top:1px solid var(--divider);font-size:15px;color:var(--body)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screen: home ===== -->
+      <section class="screen" data-screen="home">
+        <header class="appbar"><h1 style="margin-left:12px">আল হাদিস</h1></header>
+        <div class="scroll"><div class="qa" id="qa"></div></div>
+      </section>
+
+      <!-- ===== Conversation states: the same page (#pg) moves between these ===== -->
+      <section class="screen" data-screen="verify"></section>
+      <section class="screen" data-screen="edit"></section>
+      <section class="screen" data-screen="result"></section>
+
+      <!-- ===== Picker: attachment sheet ===== -->
+      <div class="sheet" id="sheet-pick" role="dialog" aria-label="ছবি থেকে">
+        <div class="sheet-head"><h2>ছবি থেকে লেখা নিন</h2></div>
+        <div class="sheet-body" style="padding:0">
+          <div class="att">
+            <button id="p-cam"><i data-x="camera"></i>ছবি তুলুন</button>
+            <button id="p-gal"><i data-x="image"></i>গ্যালারি থেকে নিন</button>
+          </div>
+          <button class="cancel" data-close>বাতিল করুন</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ===== The conversation page ===== -->
+<template id="pg-tpl">
+  <div id="pg" style="display:flex;flex-direction:column;flex:1;min-height:0">
+    <header class="appbar"><button class="icon-btn" data-go="home" data-i="back" aria-label="পেছনে"></button><h1>হাদিস যাচাই</h1></header>
+    <div class="scroll" id="sc"><div class="thread" id="thread"></div></div>
+    <div class="comp">
+      <div class="acts"><button class="chip" data-open="sheet-pick"><span data-x="camera"></span>ছবি থেকে</button><button class="chip" id="b-paste"><span data-x="paste"></span>পেস্ট করুন</button></div>
+      <div class="row"><textarea class="in" id="txt" aria-label="যে লেখাটি যাচাই করতে চান" placeholder="ফেসবুক, হোয়াটসঅ্যাপ বা অন্য কোথাও পাওয়া হাদিসটি এখানে পেস্ট করুন…"></textarea><button class="btn send" id="b-verify">যাচাই করুন</button></div>
+    </div>
+  </div>
+</template>
+
+<script src="../../_kit/kit.js"></script>
+<script src="psv_data.js"></script>
+<script src="psv_sys.js"></script>
+<script>
+  const P = window.PSV, I = Kit.icons, $ = Kit.$, $$ = Kit.$$, bn = Kit.bn;
+  const paint = (root = document) => {
+    $$('[data-i]', root).forEach((b) => { b.innerHTML = I[b.dataset.i]; });
+    $$('[data-x]', root).forEach((b) => { b.innerHTML = P.ic[b.dataset.x](b.tagName === 'I' ? 26 : 18); });
+  };
+
+  /* ---------- Messages ---------- */
+  const WHO = `<div class="who">${P.home.verify.replace('width="30" height="30"', 'width="16" height="16"')}হাদিস যাচাই</div>`;
+  const M = {
+    intro: () => `<div class="msg bot">${WHO}যে লেখাটি যাচাই করতে চান, সেটি এখানে দিন। বই, পোস্টার বা ফেসবুক স্ক্রিনশটের ছবিও দিতে পারেন।</div>`,
+    pic: (id) => `<div class="msg you pic"><div>${P.img[id]()}</div></div>`,
+    reading: () => `<div class="msg bot"><div class="busy"><span class="spin"></span>ছবি থেকে লেখা পড়া হচ্ছে…</div></div>`,
+    readDone: () => `<div class="msg bot">${WHO}পড়া লেখাটা নিচের ঘরে বসিয়েছি। ভুল বানান বা বাড়তি অংশ থাকলে ঠিক করে নিন, তারপর যাচাই করুন।</div>`,
+    text: (t) => `<div class="msg you txt"><span>${t}</span></div>`,
+    found: (ids) => `<div class="msg bot res">${WHO}<div class="ov">${P.ic.found(20)}<div><b>${P.t.found}</b><span>${bn(ids.length)}টি মিল · ${P.t.gradeSrc}</span></div></div>` + ids.map((id) => {
+      const h = P.hadith[id];
+      return `<div class="hc"><div class="hadith-head"><span class="book-badge">${h.abbr}</span><div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${h.no}</span></div><span class="grade sahih">${h.grade}</span></div>
+        <p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${h.tr}</p></div>
+        <button class="btn tonal sh" data-snack="গ্রেডসহ হাদিস কার্ডের ছবি শেয়ার মেনুতে যাবে">${P.ic.share(18)}${P.t.share}</button>`;
+    }).join('') + '</div>',
+    none: () => `<div class="msg bot res">${WHO}<h3>${P.t.noMatch}</h3><p>${P.t.noMatchMsg}</p><button class="btn text" data-retry>${P.t.edit}</button></div>`,
+  };
+
+  /* ---------- State ---------- */
+  const S = { log: [], text: '', reading: false, big: false };
+  let timer;
+  $('#qa').innerHTML = P.homeGrid();
+
+  const pg = $('#pg-tpl').content.firstElementChild.cloneNode(true);
+  paint(pg);
+  const txt = $('#txt', pg);
+  function render() {
+    $('#thread', pg).innerHTML = S.log.map(([k, v]) => M[k](v)).join('');
+    if (txt.value !== S.text) txt.value = S.text;
+    txt.classList.toggle('big', S.big);
+    $('#b-verify', pg).disabled = S.reading;
+    const sc = $('#sc', pg); requestAnimationFrame(() => { sc.scrollTop = sc.scrollHeight; });
+  }
+
+  /* ---------- Reading a photo: photo bubble, waiting bubble, then the text in the box ---------- */
+  function read(id) {
+    clearTimeout(timer);
+    S.log.push(['pic', id], ['reading']); S.reading = true; S.text = ''; S.big = false;
+    go('edit');
+    timer = setTimeout(() => {
+      S.reading = false; S.log.pop();
+      const r = P.read(id);
+      if (r.msg) { S.log.pop(); go('verify'); return Kit.snack(r.msg, r.again ? { label: P.t.another, onClick: () => Kit.open('sheet-pick') } : undefined); }
+      S.log.push(['readDone']); S.text = r.text; S.big = true; render(); txt.focus(); txt.setSelectionRange(0, 0); txt.scrollTop = 0;
+    }, 1200);
+  }
+
+  /* ---------- Verify: your text as a bubble, then the answer ---------- */
+  function verify() {
+    const r = P.match(txt.value);
+    if (r.kind === 'msg') return Kit.snack(r.msg);
+    S.log.push(['text', txt.value.trim()], r.kind === 'found' ? ['found', r.ids] : ['none']);
+    S.last = txt.value; S.text = ''; S.big = false;
+    go('result');
+  }
+
+  /* ---------- Navigation: a toolbar chip opens a screen in its example state ---------- */
+  let chip = false, from = null;
+  document.addEventListener('click', (e) => { if (e.target.closest('.kit-chip[data-go]')) chip = true; }, true);
+  const go = (id) => Kit.show(id);
+  const EX = {
+    verify: () => ({ log: [['intro']], text: '', big: false }),
+    edit: () => ({ log: [['intro'], ['pic', 'post'], ['readDone']], text: P.ocr.post, big: true }),
+    result: () => ({ log: [['intro'], ['pic', 'post'], ['readDone'], ['text', P.ocr.post.split('\n')[1]], ['found', ['b6116']]], text: '', big: false }),
+  };
+  Kit.onScreen((id) => {
+    if (chip) { clearTimeout(timer); S.reading = false; }
+    if (EX[id]) {
+      $(`.screen[data-screen="${id}"]`).appendChild(pg);
+      if (chip || (id === 'verify' && from === 'home')) Object.assign(S, EX[id]());
+      render();
+    }
+    chip = false; from = id;
+  });
+
+  /* ---------- In-phone events ---------- */
+  txt.addEventListener('input', () => { S.text = txt.value; });
+  txt.addEventListener('focus', () => { if (txt.value.length > 60) { S.big = true; txt.classList.add('big'); } });
+  $('#b-paste', pg).onclick = () => Kit.snack(P.t.clip);
+  $('#b-verify', pg).onclick = verify;
+  $('#thread', pg).addEventListener('click', (e) => { if (e.target.closest('[data-retry]')) { S.text = S.last || ''; S.big = true; render(); txt.focus(); } });
+  $('#p-gal').onclick = () => { Kit.close('sheet-pick'); P.gallery(); };
+  $('#p-cam').onclick = () => { Kit.close('sheet-pick'); P.camera(); };
+
+  /* ---------- Toolbar: permission given yet? ---------- */
+  function syncBar() { const b = $('#tg-perm'); if (!b) return; const on = P.perm.gallery || P.perm.camera; b.textContent = on ? 'অনুমতি দেওয়া আছে' : 'প্রথমবার: অনুমতি চাইবে'; b.setAttribute('aria-pressed', on); }
+
+  P.sys({ onPick: (id) => { if (Kit.current === 'share' || !S.log.length) Object.assign(S, EX.verify()); read(id); }, onPerm: syncBar });
+  paint();
+  Kit.init({ demo: 5, name: 'কথোপকথন',
+    extra: '<button class="kit-chip" id="tg-perm" type="button" title="ছবি ও ক্যামেরার অনুমতি"></button>',
+    screens: [{ id: 'home', label: 'হোম' }, { id: 'verify', label: 'যাচাই পেজ' }, { id: 'edit', label: 'লেখা ঠিক করা' }, { id: 'result', label: 'ফলাফল' }, { id: 'share', label: 'শেয়ার থেকে' }] });
+  $('#tg-perm').onclick = () => { P.setPerm(!(P.perm.gallery || P.perm.camera)); };
+  syncBar();
+</script>
+</body>
+</html>

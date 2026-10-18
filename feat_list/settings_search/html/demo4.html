@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সেটিংস সার্চ — ডেমো ৪ · ভাগের ভেতরেই ফলাফল</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (all 5 demos): page shell, setting controls, empty state ===== */
+.wrap{flex:1;min-height:0;display:flex;flex-direction:column}
+.wrap.green{background:var(--appbar)}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.icon-btn svg,.btn svg{flex:none}
+.field .clr{color:var(--hint);width:28px;height:28px;display:grid;place-items:center;border-radius:50%}
+.field input::-webkit-search-cancel-button{display:none}
+/* Settings section card (SettingsContainer + SettingsCardHeader) */
+.sec{background:var(--card);border-radius:12px;margin:0 12px 10px;box-shadow:var(--shadow);overflow:hidden}
+.sec-h{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:0 14px;text-align:left;font-size:16px;font-weight:700;color:var(--title)}
+.sec-h .si{color:var(--primary);display:grid;place-items:center}
+.sec-h .tx{flex:1}
+.sec-h .chev{color:var(--primary);transition:transform .2s}
+.sec.on .sec-h .chev{transform:rotate(180deg)}
+.sec-b{padding:0 14px 8px}
+/* Option rows: label + switch / slider / dropdown / link */
+.opt{display:flex;align-items:center;gap:12px;min-height:50px;padding:6px 0;border-top:1px solid var(--divider);font-size:15px;color:var(--title)}
+.opt .lb{flex:1;min-width:0}
+.opt.col{flex-direction:column;align-items:stretch;gap:4px}
+.opt.col .top{display:flex;align-items:center;justify-content:space-between}
+.opt .val{font-size:14px;font-weight:700;color:var(--primary)}
+.opt .lk{display:inline-flex;align-items:center;gap:2px;font-size:14px;color:var(--hint)}
+.opt .lk svg{width:18px;height:18px}
+.rng{width:100%;accent-color:var(--primary);height:24px;margin:0}
+.sel{height:36px;padding:0 8px;border-radius:8px;border:1px solid var(--divider);background:var(--card);color:var(--title);font:inherit;font-size:14px}
+/* Empty state (NoSearchResultFound) */
+.nores{display:flex;flex-direction:column;align-items:center;gap:26px;padding:60px 24px;text-align:center}
+.nores h3{margin:0;font-size:19px;font-weight:700;color:var(--title)}
+mark{background:var(--tint);color:var(--primary-dark);border-radius:4px;padding:0 1px}
+:root[data-theme="dark"] mark{color:var(--primary)}
+/* ===== Demo 4 — ভাগের ভেতরেই ফলাফল: search in the green band; sections stay, only matching ones open with matching rows ===== */
+.band{flex:none;background:var(--appbar);padding:2px 12px 16px}
+.band .field{border:0}
+.band small{display:block;margin:8px 4px 0;font-size:12.5px;color:var(--on-appbar);opacity:.85}
+#body{padding-top:12px}
+.sec.hit{outline:1.5px solid var(--primary)}
+.sec .cnt{font-size:12.5px;font-weight:400;color:var(--hint)}
+.sec .opt.hit{background:var(--tint);margin:0 -14px;padding:6px 14px}
+.sec .opt b{font-weight:400}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos); the engine fills each one ===== -->
+      <section class="screen" data-screen="settings"></section>
+      <section class="screen" data-screen="results"></section>
+      <section class="screen" data-screen="sliders"></section>
+      <section class="screen" data-screen="empty"></section>
+
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): the settings list with its search words,
+   setting values, matching, and the flow wiring. Each demo's look lives
+   in the D object below.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ic = (k, w = 20) => icons[k].replace('width="24" height="24"', `width="${w}" height="${w}"`);
+
+/* ---------- Settings page: six sections, ~12 settings (same order as the app) ----------
+   kw = search words people may type for that setting (needed in all 16 languages) */
+const SECTIONS = [
+  { id: 'lang', name: 'ভাষা সেটিংস', icon: svg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'),
+    items: [{ k: 'lang', type: 'link', label: 'ভাষা নির্বাচন করুন', value: 'বাংলা', snack: 'ভাষা বাছার তালিকা খুলবে', kw: 'ভাষা বদলাও, ভাষা পরিবর্তন, অনুবাদের ভাষা, ইংরেজি, বাংলা, language' }] },
+  { id: 'content', name: 'কন্টেন্ট সেটিংস', icon: svg('<path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7"/>'),
+    items: [
+      { k: 'chapter', type: 'toggle', label: 'চ্যাপ্টার দেখান', kw: 'অধ্যায় দেখাও, অধ্যায় লুকাও, চ্যাপ্টার লুকাও, অধ্যায়ের নাম' },
+      { k: 'arabic', type: 'toggle', label: 'আরবি দেখান', kw: 'আরবি লুকাও, আরবি বন্ধ, আরবি চাই না, শুধু অনুবাদ, আরবি লেখা' },
+      { k: 'wbw', type: 'toggle', label: 'শব্দে শব্দে অর্থ', kw: 'শব্দার্থ, শব্দের মানে, শব্দে শব্দে বন্ধ' },
+      { k: 'translit', type: 'toggle', label: 'শব্দের উচ্চারণ দেখান', kw: 'উচ্চারণ দেখাও, উচ্চারণ লুকাও, বাংলা উচ্চারণ' },
+    ] },
+  { id: 'font', name: 'ফন্ট সেটিংস', icon: svg('<path d="M4 19 9 5l5 14M6 14h6M15 19l3.5-9 3.5 9M16.2 16h4.6"/>'),
+    items: [
+      { k: 'arSize', type: 'slider', label: 'আরবি ফন্ট সাইজ', min: 18, max: 32, kw: 'আরবি বড়, আরবি ছোট, ফন্ট বড়, ফন্ট ছোট, লেখা বড়, লেখা ছোট, অক্ষর বড়' },
+      { k: 'trSize', type: 'slider', label: 'অনুবাদ ফন্ট সাইজ', min: 14, max: 32, kw: 'অনুবাদ বড়, বাংলা বড়, ফন্ট বড়, ফন্ট ছোট, লেখা বড়, লেখা ছোট, অক্ষর বড়' },
+      { k: 'arFont', type: 'select', label: 'আরবি ফন্ট', options: ['KFGQ', 'Me Quran'], kw: 'ফন্ট বদলাও, আরবির ধরন, আরবি লেখার ধরন' },
+    ] },
+  { id: 'notif', name: 'নোটিফিকেশন সেটিংস', icon: svg('<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>'),
+    items: [
+      { k: 'daily', type: 'toggle', label: 'দৈনিক নোটিফিকেশন', kw: 'নোটিফিকেশন বন্ধ, নোটিফিকেশন চালু, রিমাইন্ডার, প্রতিদিন হাদিস, বিজ্ঞপ্তি' },
+      { k: 'time', type: 'link', label: 'নোটিফিকেশনের সময়', value: 'সকাল ৮:০০', snack: 'সময় বাছার ঘড়ি খুলবে', kw: 'সময় বদলাও, রিমাইন্ডারের সময়, কখন আসবে' },
+    ] },
+  { id: 'view', name: 'ভিউ সেটিংস', icon: svg('<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/>'),
+    items: [
+      { k: 'night', type: 'toggle', label: 'নাইট মোড', kw: 'ডার্ক মোড, অন্ধকার, কালো থিম, রাতের মোড, চোখে আরাম' },
+      { k: 'keepOn', type: 'toggle', label: 'স্ক্রিন অন রাখুন', kw: 'স্ক্রিন বন্ধ হয়, স্ক্রিন নিভে যায়, স্ক্রিন জ্বালিয়ে রাখো, লক হয়ে যায়' },
+    ] },
+  { id: 'widgets', name: 'হোম উইজেট', page: true, icon: svg('<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="17" height="7" rx="1.5"/>'),
+    items: [{ k: 'widgets', type: 'link', label: 'হোম উইজেট', snack: 'হোম উইজেট পেজ খুলবে', kw: 'উইজেট, হোম স্ক্রিন, হোম স্ক্রিনে হাদিস' }] },
+];
+const ITEMS = SECTIONS.flatMap((s) => s.items.map((it) => ({ ...it, sec: s })));
+const V = { chapter: true, arabic: true, wbw: true, translit: false, arSize: 24, trSize: 18, arFont: 'KFGQ', daily: true, night: false, keepOn: false };
+
+/* ---------- State ---------- */
+const S = { q: '', open: 'lang' };
+const SCREENS = [
+  { id: 'settings', label: 'সেটিংস' },
+  { id: 'results', label: 'সার্চ রেজাল্ট' },
+  { id: 'sliders', label: 'ফন্ট বড়' },
+  { id: 'empty', label: 'খালি' },
+];
+const PRESET = { settings: '', results: 'আরবি লুকাও', sliders: 'ফন্ট বড়', empty: 'ব্যাকআপ' };
+
+/* ---------- Matching: setting name or its everyday words ---------- */
+const norm = (s) => String(s).toLowerCase().replace(/[‌‍]/g, '').replace(/\s+/g, ' ').trim();
+function matches() {
+  const q = norm(S.q);
+  if (!q) return [];
+  const toks = q.split(' ');
+  return ITEMS.map((it) => {
+    const name = norm(it.label), hay = norm(`${it.label}, ${it.sec.name}, ${it.kw}`);
+    const phrases = hay.split(',').map((p) => p.trim()).filter((p) => p.length > 3);
+    let score = 0;
+    if (name.includes(q)) score = 3;                                  // the setting's own name
+    else if (phrases.some((p) => p === q || p.startsWith(q))) score = 2; // one of its words
+    else if (toks.every((t) => hay.includes(t)) || phrases.some((p) => q.includes(p))) score = 1;
+    return [score, it];
+  }).filter(([s]) => s).sort((a, b) => b[0] - a[0]).map(([, it]) => it);
+}
+/* Bold the typed words inside a label */
+function mark(text) {
+  const toks = norm(S.q).split(' ').filter((t) => t.length > 1);
+  let h = text;
+  toks.forEach((t) => {
+    const i = h.indexOf(t);
+    if (i < 0 || h.slice(0, i).includes('<')) return;
+    let j = i + t.length;
+    while (j < h.length && /[\u0981-\u0983\u09BC-\u09CD\u09D7]/.test(h[j])) j += 1; // keep vowel signs with their letter
+    h = `${h.slice(0, i)}<mark>${h.slice(i, j)}</mark>${h.slice(j)}`;
+  });
+  return h;
+}
+
+/* ---------- Controls (shared by sections and results) ---------- */
+function ctl(it) {
+  if (it.type === 'toggle') return `<button class="switch" role="switch" data-act="toggle" data-k="${it.k}" aria-checked="${V[it.k]}" aria-label="${it.label}"></button>`;
+  if (it.type === 'slider') return `<input class="rng" type="range" data-k="${it.k}" min="${it.min}" max="${it.max}" value="${V[it.k]}" aria-label="${it.label}">`;
+  if (it.type === 'select') return `<select class="sel" data-k="${it.k}" aria-label="${it.label}">${it.options.map((o) => `<option${V[it.k] === o ? ' selected' : ''}>${o}</option>`).join('')}</select>`;
+  return `<span class="lk">${it.value || ''}${ic('chevron', 18)}</span>`;
+}
+/* One option row as the settings page draws it */
+function optRow(it, label = it.label) {
+  if (it.type === 'slider') return `<div class="opt col" data-row="${it.k}"><div class="top"><span class="lb">${label}</span><b class="val" data-val="${it.k}">${bn(V[it.k])}</b></div>${ctl(it)}</div>`;
+  if (it.type === 'link') return `<button class="opt" data-act="link" data-k="${it.k}" data-row="${it.k}" style="width:100%;text-align:left"><span class="lb">${label}</span>${ctl(it)}</button>`;
+  return `<div class="opt" data-row="${it.k}"><span class="lb">${label}</span>${ctl(it)}</div>`;
+}
+/* One search result: name (typed words marked), its section underneath, and the control itself */
+function resRow(it, cls = 'res', pre = '') {
+  const name = `${pre}<span class="lb"><b>${mark(it.label)}</b><small>${it.sec.name}</small></span>`;
+  if (it.type === 'slider') return `<div class="${cls} col" data-row="${it.k}"><div class="top">${name}<b class="val" data-val="${it.k}">${bn(V[it.k])}</b></div>${ctl(it)}</div>`;
+  if (it.type === 'link') return `<button class="${cls}" data-act="link" data-k="${it.k}" data-row="${it.k}">${name}${ctl(it)}</button>`;
+  return `<div class="${cls}" data-row="${it.k}">${name}${ctl(it)}</div>`;
+}
+const countLine = (r) => `${bn(r.length)}টি সেটিং পাওয়া গেছে`;
+const searchField = (ph = 'সেটিং খুঁজুন') => `<label class="field sf"><span>${ic('search', 20)}</span><input id="q" type="search" autocomplete="off" placeholder="${ph}" aria-label="সেটিং সার্চ" value="${S.q.replace(/"/g, '&quot;')}"><button class="clr" data-act="clear" aria-label="মুছুন"${S.q ? '' : ' hidden'}>${ic('close', 18)}</button></label>`;
+const emptyHTML = () => `<div class="nores"><svg width="112" height="70" viewBox="0 0 112 70" fill="none" aria-hidden="true"><rect x="12" y="2" width="78" height="52" rx="4" stroke="var(--primary)" stroke-width="2.5"/><path d="M12 13h78" stroke="var(--primary)" stroke-width="2.5"/><circle cx="19" cy="7.5" r="1.6" fill="var(--primary)"/><circle cx="25" cy="7.5" r="1.6" fill="var(--primary)"/><circle cx="84" cy="48" r="13" fill="var(--card)" stroke="var(--primary-dark)" stroke-width="3"/><path d="m93 57 9 9" stroke="var(--primary-dark)" stroke-width="4" stroke-linecap="round"/><path d="m79 43 10 10m0-10-10 10" stroke="var(--primary-dark)" stroke-width="3" stroke-linecap="round"/></svg><h3>কোন সার্চ রেজাল্ট পাওয়া যায়নি</h3></div>`;
+/* The six sections as the app shows them today (one open at a time) */
+const sectionsHTML = () => SECTIONS.map((s) => (s.page
+  ? `<div class="sec"><button class="sec-h" data-act="link" data-k="${s.items[0].k}"><span class="si">${s.icon}</span><span class="tx">${s.name}</span><span class="chev">${ic('chevron', 22)}</span></button></div>`
+  : `<div class="sec${S.open === s.id ? ' on' : ''}"><button class="sec-h" data-act="sec" data-id="${s.id}" aria-expanded="${S.open === s.id}"><span class="si">${s.icon}</span><span class="tx">${s.name}</span><span class="chev">${ic('down', 22)}</span></button>
+      ${S.open === s.id ? `<div class="sec-b">${s.items.map((it) => optRow(it)).join('')}</div>` : ''}</div>`)).join('');
+const bodyHTML = () => { if (!S.q.trim()) return D.sections ? D.sections() : sectionsHTML(); const r = matches(); return r.length ? D.results(r) : emptyHTML(); };
+
+/* ---------- Render ---------- */
+let internal = false;
+function go(id) { internal = true; Kit.show(id); internal = false; }
+function onScreen(id) {
+  if (!internal) { S.q = PRESET[id]; S.open = 'lang'; D.reset?.(id); }
+  $(`.screen[data-screen="${id}"]`).innerHTML = D.page();
+  D.after?.(id);
+}
+function refresh() {
+  const box = $('.screen.on #body');
+  if (box) box.innerHTML = bodyHTML();
+  const c = $('.screen.on .clr'); if (c) c.hidden = !S.q;
+  D.after?.(Kit.current);
+}
+function afterInit() { D.init?.(); }
+function focusSearch() { const q = $('.screen.on #q'); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }
+function screenFor() { const r = matches(); if (!S.q.trim()) return 'settings'; if (!r.length) return 'empty'; return r.every((it) => it.type === 'slider') ? 'sliders' : 'results'; }
+
+/* ---------- Wiring ---------- */
+const ACT = {
+  sec: (t) => { S.open = S.open === t.dataset.id ? null : t.dataset.id; refresh(); },
+  toggle: (t) => {
+    const k = t.dataset.k; V[k] = !V[k];
+    $$(`[data-act="toggle"][data-k="${k}"]`).forEach((b) => b.setAttribute('aria-checked', V[k]));
+    const it = ITEMS.find((i) => i.k === k);
+    Kit.snack(`${it.label}: ${V[k] ? 'চালু' : 'বন্ধ'}`);
+  },
+  link: (t) => Kit.snack(ITEMS.find((i) => i.k === t.dataset.k).snack),
+  clear: () => { S.q = ''; go('settings'); focusSearch(); },
+  open: () => D.openSearch?.(),
+  close: () => { S.q = ''; D.closeSearch?.(); go('settings'); },
+};
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-act]');
+  if (t && t.closest('.phone')) { e.preventDefault(); ACT[t.dataset.act]?.(t); }
+});
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'q') {
+    S.q = e.target.value;
+    const want = screenFor();
+    if (want !== Kit.current) { go(want); focusSearch(); } else refresh();
+    return;
+  }
+  const k = e.target.dataset?.k;
+  if (k && e.target.type === 'range') { V[k] = +e.target.value; $$(`[data-val="${k}"]`).forEach((el) => { el.textContent = bn(V[k]); }); }
+});
+document.addEventListener('change', (e) => {
+  const k = e.target.dataset?.k;
+  if (k && e.target.tagName === 'SELECT') { V[k] = e.target.value; Kit.snack(`আরবি ফন্ট: ${V[k]}`); }
+  if (k && e.target.type === 'range') Kit.snack(`${ITEMS.find((i) => i.k === k).label}: ${bn(V[k])}`);
+});
+/* ======================================================================
+   DEMO 4 — ভাগের ভেতরেই ফলাফল: no separate result list. While typing,
+   sections with no match fold away; the ones with a match open by
+   themselves and show only the matching settings, tinted. The section
+   card itself tells where the setting lives.
+   ====================================================================== */
+const D = {
+  page: () => `<header class="appbar"><button class="icon-btn" aria-label="পেছনে">${icons.back}</button><h1>সেটিংস</h1></header>
+    <div class="band">${searchField('সার্চ করুন')}<small>নাম বা নিজের কথায় লিখুন, যেমন "ফন্ট বড়"</small></div>
+    <div class="scroll" id="body">${bodyHTML()}</div>`,
+  results: (r) => SECTIONS.filter((s) => r.some((it) => it.sec === s)).map((s) => {
+    const hits = r.filter((it) => it.sec === s);
+    if (s.page) return `<div class="sec hit"><button class="sec-h" data-act="link" data-k="${s.items[0].k}"><span class="si">${s.icon}</span><span class="tx">${mark(s.name)}</span><span class="chev">${ic('chevron', 22)}</span></button></div>`;
+    return `<div class="sec on hit"><div class="sec-h"><span class="si">${s.icon}</span><span class="tx">${s.name} <span class="cnt">· ${bn(hits.length)}টি মিল</span></span></div>
+      <div class="sec-b">${hits.map((it) => optRow(it, `<b>${mark(it.label)}</b>`).replace('class="opt', 'class="opt hit')).join('')}</div></div>`;
+  }).join(''),
+};
+Kit.onScreen(onScreen);
+Kit.init({ demo: 4, name: 'ভাগের ভেতরেই ফলাফল', extra: typeof EXTRA === 'string' ? EXTRA : '', screens: SCREENS });
+afterInit();
+</script>
+</body>
+</html>

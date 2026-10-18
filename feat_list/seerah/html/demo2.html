@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সীরাত — ডেমো ২ · বইয়ের তাক</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): menu drawer, rounded body, hadith page ===== */
+.appbar.np h1{margin-left:12px}
+.icon-btn svg,.btn svg{flex:none}
+.screen.g{background:var(--appbar)}
+.rb{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+/* Menu: the drawer, with "জীবনী" next to "লেখক সম্পর্কে" (exact place: team decides) */
+.mn-dim{position:absolute;inset:0;background:var(--scrim)}
+.mn{position:absolute;top:0;bottom:0;left:0;width:82%;background:var(--card);display:flex;flex-direction:column;box-shadow:4px 0 18px rgba(0,0,0,.18)}
+.mn-top{background:var(--appbar);color:var(--on-appbar);padding:22px 20px 18px}
+.mn-top b{display:block;font-size:20px}
+.mn-top span{font-size:13px;opacity:.85}
+.mn-list{padding:10px 8px}
+.mn-row{display:flex;align-items:center;gap:16px;width:100%;min-height:54px;padding:0 14px;border-radius:10px;font-size:16px;color:var(--title);text-align:left;cursor:default}
+.mn-row>svg:first-child{color:var(--primary)}
+.mn-row span{flex:1}
+.mn-row>svg:last-child{width:20px;height:20px;color:var(--hint)}
+.mn-row.on{background:var(--tint);font-weight:700;cursor:pointer}
+/* Hadith details page */
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+/* Reading text: size from the font control (--rfs) */
+.txt p{margin:0 0 14px;font-size:var(--rfs,17px);line-height:1.85;color:var(--title)}
+/* ===== Demo 2: flat light pages, books as covers on a shelf grid ===== */
+.tabs{display:flex;gap:22px;padding:0 16px;border-bottom:1px solid var(--divider);background:var(--scaffold)}
+.tabs span{padding:12px 0 10px;font-size:15px;color:var(--hint);border-bottom:2.5px solid transparent}
+.tabs span.on{color:var(--primary);font-weight:700;border-color:var(--primary)}
+.shelf{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:18px 16px}
+.cv{display:flex;flex-direction:column;gap:8px;text-align:left}
+.cv-art{position:relative;aspect-ratio:3/4;border-radius:6px 12px 12px 6px;padding:16px 14px 14px 22px;display:flex;flex-direction:column;justify-content:space-between;color:var(--on-appbar);background:var(--c);box-shadow:var(--shadow);overflow:hidden}
+.cv-art::before{content:"";position:absolute;left:0;top:0;bottom:0;width:9px;background:rgba(0,0,0,.18)}
+.cv-art::after{content:"";position:absolute;left:22px;right:14px;top:50%;height:1px;background:rgba(255,255,255,.35)}
+.cv-art b{font-size:18px;line-height:1.35}
+.cv-art small{font-size:12.5px;opacity:.9}
+.cv-name{font-size:14.5px;font-weight:700;color:var(--title);line-height:1.35}
+.pill{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 10px;border-radius:20px;font-size:12.5px;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .pill{color:var(--primary)}
+.pill.get{background:var(--primary);color:var(--on-appbar)}
+.pill svg{width:14px;height:14px}
+/* Download sheet */
+.dl-top{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.dl-top .cv-art{width:64px;padding:8px 6px 8px 14px;flex:none}
+.dl-top .cv-art b{font-size:11px}
+.dl-top .cv-art::after{display:none}
+.dl-top p{margin:0;font-size:14.5px;color:var(--body)}
+.dl-top p b{display:block;font-size:16px;color:var(--title)}
+/* ===== সূচিপত্র: cover hero + chapters grouped by era ===== */
+.hero{display:flex;gap:14px;align-items:center;padding:16px}
+.hero .cv-art{width:70px;padding:8px 6px 8px 14px;flex:none}
+.hero .cv-art b{font-size:11px}
+.hero .cv-art::after{display:none}
+.hero h2{margin:0;font-size:18px;color:var(--title)}
+.hero p{margin:2px 0 0;font-size:13.5px;color:var(--hint)}
+.era{margin:10px 16px 4px;font-size:13px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .era{color:var(--primary)}
+.cr{display:flex;align-items:center;gap:14px;width:100%;padding:12px 16px;text-align:left;border-bottom:1px solid var(--divider)}
+.cr-n{width:30px;height:30px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:13.5px;font-weight:700;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .cr-n{color:var(--primary)}
+.cr-t{flex:1}
+.cr-t b{display:block;font-size:15.5px;color:var(--title);font-weight:600}
+.cr-t small{font-size:12.5px;color:var(--hint)}
+/* ===== Reader: font buttons in the app bar, refs as link chips, prev/next cards ===== */
+.ab-fs{height:34px;min-width:38px;padding:0 8px;border-radius:8px;font-weight:700;color:var(--primary)}
+.ab-fs.sm{font-size:14px}.ab-fs.lg{font-size:19px}
+.rp{padding:18px 18px 8px}
+.rp-k{font-size:13px;color:var(--hint)}
+.rp h2{margin:0 0 14px;font-size:21px;color:var(--title)}
+.iref{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 9px;margin:0 2px;border-radius:20px;vertical-align:1px;background:var(--tint);color:var(--primary-dark);font-size:13.5px;font-weight:700}
+:root[data-theme="dark"] .iref{color:var(--primary)}
+.rel{padding:4px 18px 0}
+.rel h3{margin:4px 0 8px;font-size:14px;color:var(--hint);font-weight:700}
+.rel .chip{margin:0 6px 8px 0;color:var(--primary-dark);border-color:var(--primary)}
+:root[data-theme="dark"] .rel .chip{color:var(--primary)}
+.rel .chip svg{width:16px;height:16px}
+.src2{margin:8px 18px 0;padding:10px 12px;border-radius:10px;background:var(--surface-2);font-size:13px;color:var(--body)}
+.pn{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 16px 4px}
+.pn button{padding:12px;border-radius:10px;border:1px solid var(--divider);background:var(--card);text-align:left}
+.pn button:last-child{text-align:right}
+.pn small{display:block;font-size:12.5px;color:var(--primary)}
+.pn b{display:block;font-size:14px;color:var(--title);font-weight:600;line-height:1.35}
+.pn button:disabled{visibility:hidden}
+/* ===== Hadith page: chip in the card footer ===== */
+.hf{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--divider)}
+.hf small{flex:1;font-size:12.5px;color:var(--hint)}
+.hf .chip{color:var(--primary-dark);border-color:var(--primary);background:var(--tint)}
+:root[data-theme="dark"] .hf .chip{color:var(--primary)}
+.hf .chip svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="menu"></section>
+      <section class="screen" data-screen="section" data-status="light"></section>
+      <section class="screen" data-screen="download" data-status="light"></section>
+      <section class="screen" data-screen="toc" data-status="light"></section>
+      <section class="screen" data-screen="read" data-status="light" data-keep-scroll></section>
+      <section class="screen g" data-screen="hadith"></section>
+      <section class="screen g" data-screen="link"></section>
+      <!-- ===== Sheet: download first ===== -->
+      <div class="sheet" id="dl" role="dialog" aria-label="ডাউনলোড"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="seerah_core.js"></script>
+<script>
+/* ======================================================================
+   DEMO 2 — বইয়ের তাক: each book is a cover on a two-column shelf,
+   download from a bottom sheet, contents grouped into মক্কি / মাদানি
+   জীবন, font size buttons right in the app bar, prev/next as cards.
+   ====================================================================== */
+(function () {
+  const { bn, icons } = Kit;
+  const { BOOKS, CH, H, S, ref, src, refsOf, para, book } = SeerahDemo;
+  const COLOR = { rahiq: 'var(--primary)', hisham: 'var(--appbar)' };
+  const DL_IC = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
+  const LINK_IC = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>';
+  const art = (b) => `<span class="cv-art" style="--c:${COLOR[b.id]}"><b>${b.name}</b><small>সীরাত</small></span>`;
+  const flat = (t, sub, act, extra = '') => `<header class="appbar flat"><button class="icon-btn" data-act="${act}" aria-label="পেছনে">${icons.back}</button><h1>${t}${sub ? `<small>${sub}</small>` : ''}</h1>${extra}</header>`;
+
+  const D = {
+    section: () => `${flat('জীবনী', '', 'sback')}<div class="tabs"><span class="on">সীরাত</span><span>সাহাবি ও তাবেঈ</span></div>
+      <div class="scroll"><div class="shelf">${BOOKS.map((b) => `<button class="cv" data-act="book" data-b="${b.id}">${art(b)}
+        <span class="cv-name">${b.name}</span><span class="muted">${bn(CH.length)}টি অধ্যায়</span>
+        ${S.dl[b.id] ? `<span class="pill">${icons.check}ডাউনলোড করা আছে</span>` : `<span class="pill get">${DL_IC}ডাউনলোড · ${b.size}</span>`}</button>`).join('')}</div></div>`,
+    dl: (b) => `<div class="sheet-head"><h2>আগে ডাউনলোড করুন</h2><button class="icon-btn" data-close aria-label="বন্ধ করুন">${icons.close}</button></div>
+      <div class="sheet-body"><div class="dl-top">${art(b)}<p><b>${b.name}</b>${bn(CH.length)}টি অধ্যায় · ${b.size}</p></div>
+        <p class="muted">একবার ডাউনলোড করলে ইন্টারনেট ছাড়াও পুরো বই পড়া যাবে।</p></div>
+      <div class="sheet-foot"><button class="btn text" data-close>বাতিল</button><button class="btn" data-act="dlgo" data-b="${b.id}">${DL_IC}ডাউনলোড করুন</button></div>`,
+    toc: () => {
+      let era = '';
+      return `${flat('সূচিপত্র', book().name, 'tback')}<div class="scroll"><div class="hero">${art(book())}<div><h2>${book().name}</h2><p>${bn(CH.length)}টি অধ্যায়</p></div></div>
+        ${CH.map((c, i) => `${c.era !== era ? `<div class="era">${(era = c.era)}</div>` : ''}<button class="cr" data-act="ch" data-c="${i}"><span class="cr-n">${bn(i + 1)}</span><span class="cr-t"><b>${c.t}</b><small>${c.when}</small></span>${icons.chevron}</button>`).join('')}</div>`;
+    },
+    read: () => {
+      const c = CH[S.ch], refs = refsOf(S.ch), pv = CH[S.ch - 1], nx = CH[S.ch + 1];
+      const fsBtns = `<button class="ab-fs sm" data-act="fs" data-d="-1" aria-label="ফন্ট সাইজ ছোট">অ−</button><button class="ab-fs lg" data-act="fs" data-d="1" aria-label="ফন্ট সাইজ বড়">অ+</button>`;
+      return `${flat(c.t, book().name, 'rback', fsBtns)}<div class="scroll">
+        <div class="rp"><div class="rp-k">অধ্যায় ${bn(S.ch + 1)} · ${c.when}</div><h2>${c.t}</h2>
+          <div class="txt">${c.p.map((p) => `<p>${para(p).replace(/(data-k="\w+">)/g, `$1${LINK_IC}`)}</p>`).join('')}</div></div>
+        ${refs.length ? `<div class="rel"><h3>এই অধ্যায়ের হাদিস</h3>${refs.map((k) => `<button class="chip" data-act="ref" data-k="${k}">${LINK_IC}${ref(k)}</button>`).join('')}</div>` : ''}
+        <p class="src2">সূত্র: ${src()}</p>
+        <div class="pn"><button data-act="prev" ${pv ? '' : 'disabled'}><small>‹ পূর্ববর্তী</small><b>${pv ? pv.t : ''}</b></button>
+          <button data-act="next" ${nx ? '' : 'disabled'}><small>পরবর্তী ›</small><b>${nx ? nx.t : ''}</b></button></div></div>`;
+    },
+    hFoot: (h) => `<div class="hf"><small>সীরাতে আছে: ${CH[h.ch].t}</small><button class="chip" data-act="seerah">${LINK_IC}সীরাতে পড়ুন</button></div>`,
+  };
+  SeerahDemo.start(D, { demo: 2, name: 'বইয়ের তাক' });
+})();
+</script>
+</body>
+</html>

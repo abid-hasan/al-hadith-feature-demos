@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>রাবির নাম দিয়ে সার্চ — ডেমো ৫ · শিটে বাছাই, ভাঁজ খোলা বই</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): rounded body, hadith page, tappable narrator, intro sheet ===== */
+.icon-btn svg,.btn svg{flex:none}
+.screen.g{background:var(--appbar)}
+.rb{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+.nar{font-weight:700;color:var(--primary);text-decoration:underline dotted;text-underline-offset:4px;text-decoration-thickness:1.5px}
+.ns-s{display:block;font-size:12.5px;font-weight:400;color:var(--hint)}
+.ns-p{margin:0;font-size:15px;line-height:1.75;color:var(--title)}
+.fld{display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 12px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--hint)}
+.fld input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.fld input::placeholder{color:var(--hint)}
+.fld .icon-btn{width:34px;height:34px}
+/* ===== Demo 5: narrator picker in a tall sheet, result with fold-open books ===== */
+.pad{padding:14px 14px 0}
+.rbtn{display:flex;align-items:center;gap:12px;width:calc(100% - 28px);margin:14px 14px 0;padding:14px 16px;border-radius:16px;color:var(--on-appbar);background:linear-gradient(140deg,var(--primary),var(--primary-dark));text-align:left;box-shadow:var(--shadow)}
+.rbtn div{flex:1}
+.rbtn b{display:block;font-size:16.5px}
+.rbtn small{font-size:13px;opacity:.9}
+.rbtn .ic{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.2)}
+/* picker sheet */
+.sheet.tall{height:86%}
+.pk-b{flex:1;min-height:0;overflow-y:auto;padding:0 0 12px}
+.pk-f{padding:0 16px 8px}
+.az{display:flex;align-items:center;gap:12px;width:100%;padding:11px 16px;text-align:left}
+.az:hover{background:var(--surface-2)}
+.az .av{width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .az .av{color:var(--primary)}
+.az div{flex:1}
+.az b{display:block;font-size:15.5px;color:var(--title)}
+.az small{font-size:12.5px;color:var(--hint)}
+/* ===== Result: big colour header + accordion books ===== */
+.ch{flex:none;padding:0 18px 20px;color:var(--on-appbar);background:linear-gradient(160deg,var(--appbar),var(--primary-dark))}
+.ch .appbar{background:transparent;padding:0;margin:0 -10px}
+.ch .av{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:700;background:var(--card);color:var(--primary-dark)}
+:root[data-theme="dark"] .ch .av{color:var(--primary)}
+.ch h2{margin:10px 0 0;font-size:21px}
+.ch .t{font-size:13.5px;opacity:.9}
+.ib{margin:-12px 14px 10px;padding:14px 16px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-size:15px;line-height:1.7;color:var(--title);position:relative}
+.ib button{color:var(--primary);font-weight:700}
+.acc{margin:0 14px 10px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+.acc>button{display:flex;align-items:center;gap:12px;width:100%;padding:14px 12px 14px 14px;text-align:left}
+.acc>button[tabindex="-1"]{cursor:default}
+.acc>button span{flex:1;font-size:15.5px;color:var(--title)}
+.acc>button b{min-width:44px;padding:2px 10px;border-radius:12px;background:var(--surface-2);text-align:center;font-size:13.5px;color:var(--title)}
+.acc>button svg{color:var(--hint);transition:transform .2s}
+.acc.on>button svg{transform:rotate(180deg)}
+.acc.on>button{border-bottom:1px solid var(--divider)}
+.ah{display:block;width:100%;padding:12px 16px;border-bottom:1px solid var(--divider);text-align:left}
+.ah:last-child{border-bottom:0}
+.ah small{font-size:12.5px;color:var(--primary-dark);font-weight:700}
+:root[data-theme="dark"] .ah small{color:var(--primary)}
+.ah p{margin:4px 0 0;font-size:15.5px;line-height:1.7;color:var(--title)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen g" data-screen="search"></section>
+      <section class="screen g" data-screen="pick"></section>
+      <section class="screen" data-screen="result"></section>
+      <section class="screen" data-screen="book"></section>
+      <section class="screen g" data-screen="hadith"></section>
+      <section class="screen g" data-screen="namesheet"></section>
+      <!-- ===== Sheet: narrator picker (filled when "রাবি বাছা" is on) ===== -->
+      <div class="sheet tall" id="pk" role="dialog" aria-label="রাবি বাছুন"></div>
+      <div class="sheet" id="ns" role="dialog" aria-label="ছোট পরিচিতি"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="rabi_core.js"></script>
+<script>
+/* ======================================================================
+   DEMO 5 — শিটে বাছাই, ভাঁজ খোলা বই: "রাবি" is a big button on the
+   search page that opens a tall picker sheet. The result has a colour
+   header, a floating intro card, and books that fold open in place.
+   ====================================================================== */
+(function () {
+  const { bn, icons, $ } = Kit;
+  const { S, cur, bookKeys, total, fmt, initial, H, results } = RabiDemo;
+  const USER = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
+  const bar = (t, act) => `<header class="appbar"><button class="icon-btn" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="পেছনে">${icons.back}</button><h1>${t}</h1></header>`;
+
+  function resultPage(open) {
+    const n = cur();
+    return `<div class="ch">${bar('', 'rback')}<span class="av">${initial(n)}</span><h2>${n.name}</h2><span class="t">মোট ${fmt(total(n))}টি হাদিস · ${bn(n.books.length)}টি বই</span></div>
+      <div class="scroll">${n.intro ? `<div class="ib">${n.intro}${S.more && n.more ? ` ${n.more}` : ''} ${n.more ? `<button data-act="more">${S.more ? 'কম দেখুন' : 'আরো পড়ুন'}</button>` : ''}</div>` : '<div style="height:14px"></div>'}
+        ${n.books.map((b, i) => `<div class="acc${open && S.bk === i ? ' on' : ''}"><button ${b[3] ? `data-act="bk" data-b="${i}" aria-expanded="${open && S.bk === i}"` : 'tabindex="-1"'}><span class="book-badge">${b[1]}</span><span>${b[0]}</span><b>${fmt(b[2])}</b>${b[3] ? icons.down : ''}</button>
+          ${open && S.bk === i ? bookKeys().map((k) => `<button class="ah" data-act="hd" data-k="${k}"><small>হাদিস: ${bn(H[k].no)} · ${H[k].kitab}</small><p>${H[k].tr}</p></button>`).join('') : ''}</div>`).join('')}</div>`;
+  }
+  const picker = () => `<div class="sheet-head"><h2>রাবি বাছুন</h2><button class="icon-btn" data-act="pkx" aria-label="বন্ধ করুন">${icons.close}</button></div>
+    <div class="pk-f"><label class="fld">${icons.search}<input data-q value="${S.q}" placeholder="রাবির নাম লিখুন" aria-label="রাবির নাম লিখুন"><button class="icon-btn" data-act="clr" aria-label="মুছুন" ${S.q ? '' : 'hidden'}>${icons.close}</button></label></div>
+    <div class="pk-b" data-res>${D.results(results())}</div>`;
+
+  const D = {
+    search: () => `${bar('সার্চ')}<div class="rb"><div class="scroll"><div class="pad"><div class="fld">${icons.search}<input placeholder="হাদিস সার্চ করুন" aria-label="হাদিস সার্চ করুন"></div></div>
+      <button class="rbtn" data-act="rabi"><span class="ic">${USER}</span><div><b>রাবি দিয়ে খুঁজুন</b><small>সাহাবির নাম বাছুন, তাঁর সব হাদিস দেখুন</small></div>${icons.chevron}</button></div></div>`,
+    pick: () => D.search(),
+    results: (arr) => (arr.length
+      ? arr.map((n) => `<button class="az" data-act="n" data-n="${n.id}"><span class="av">${initial(n)}</span><div><b>${n.name}</b><small>${fmt(total(n))}টি হাদিস</small></div></button>`).join('')
+      : `<div class="empty">${icons.search}<h3>কিছু পাওয়া যায়নি</h3><p>এই নামে কোনো রাবি নেই। অন্য বানানে লিখে দেখুন।</p></div>`),
+    result: () => resultPage(false),
+    book: () => resultPage(true),
+    after: (id) => { if (id === 'pick') { $('#pk').innerHTML = picker(); Kit.open('pk'); } },
+    act: {
+      pkx: (el, { go }) => go('search'),
+      bk: (el, { go }) => { const i = +el.dataset.b; if (Kit.current === 'book' && S.bk === i) { go('result'); return; } S.bk = i; go('book'); },
+    },
+  };
+  /* tapping the scrim while picking also goes back to the search page */
+  document.addEventListener('click', (e) => { if (e.target.classList.contains('scrim') && Kit.current === 'pick') Kit.show('search'); });
+  RabiDemo.start(D, { demo: 5, name: 'শিটে বাছাই, ভাঁজ খোলা বই' });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>হাদিস ডিকশনারি — ডেমো 3 · টাইল আর ট্যাব</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): page body, rounded panel, hadith card ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:14px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.screen.rs{background:var(--appbar)}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden;position:relative}
+.hc{padding:12px 14px 14px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 6px}
+.hc .translation{font-size:16px;color:var(--title)}
+.hc .arabic mark{background:var(--tint);color:var(--primary-dark);border-bottom:2px solid var(--primary);border-radius:4px;padding:0 2px}
+:root[data-theme="dark"] .hc .arabic mark{color:var(--primary)}
+.ar{font-family:var(--font-ar);direction:rtl}
+.acc{color:var(--primary-dark)}
+:root[data-theme="dark"] .acc{color:var(--primary)}
+.np h1{margin-left:12px}
+.field .clr{color:var(--hint);width:28px;height:28px;display:grid;place-items:center;border-radius:50%}
+.field input[dir="auto"]{text-align:start}
+.ex{color:var(--primary);font-weight:700}
+.ex.ar{font-size:17px}
+/* ===== Existing "শব্দে শব্দে" tab (context for the related-words sheet) ===== */
+.track{display:inline-flex;padding:3px;border-radius:20px;background:var(--tint);margin:12px 0 16px}
+.track span{padding:5px 18px;border-radius:17px;font-size:14px;color:var(--body)}
+.track span.on{background:var(--primary-dark);color:var(--on-appbar);font-weight:700}
+:root[data-theme="dark"] .track span.on{background:var(--primary)}
+.wrap{display:flex;flex-wrap:wrap;direction:rtl;gap:16px 12px}
+.wb{display:flex;flex-direction:column;align-items:center;text-align:center}
+.wb .ar{font-size:22px;line-height:1.7;color:var(--title)}
+.wb small{font-size:13px;color:var(--title);direction:ltr}
+.wb.on .ar{color:var(--primary)}
+/* ===== "শব্দের বিস্তারিত" sheet: summary + tappable related words ===== */
+.ws-sum{text-align:center;padding:4px 0 10px}
+.ws-sum .ar{display:block;font-size:34px;line-height:1.5}
+.ws-sum span{font-size:15px;color:var(--title)}
+.ws-rel{margin-top:6px;padding:12px;border:1px solid var(--primary);border-radius:12px}
+.ws-rel b{display:block;font-size:15px}
+.ws-rel small{display:block;font-size:12.5px;color:var(--hint);margin-bottom:8px}
+.ws-rel div{display:flex;flex-wrap:wrap;gap:8px;direction:rtl}
+.ws-rel button{display:inline-flex;align-items:center;gap:6px;padding:2px 12px;border-radius:16px;background:var(--tint);font-size:19px;color:var(--title)}
+.ws-rel button svg{color:var(--primary)}
+
+/* ===== Demo 3: search pill on the bar, results as a 2-column grid ===== */
+.sb{flex:none;padding:0 12px 12px;background:var(--appbar)}
+.sb .field{border-radius:24px;border:0}
+.hint3{margin:16px;padding:14px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-size:14px;line-height:1.8;color:var(--body)}
+.gh{margin:14px 16px 8px;font-size:14px;font-weight:700;color:var(--title)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.tile .ar{align-self:stretch;text-align:right;font-size:26px;line-height:1.4;color:var(--title)}
+.tile b{font-size:14.5px;color:var(--title)}
+.tile .chip{height:24px;padding:0 8px;font-size:12px}
+.nores3{margin:30px 16px;padding:24px;border-radius:14px;background:var(--card);text-align:center}
+.nores3 h3{margin:0 0 4px;font-size:17px;color:var(--title)}
+.nores3 p{margin:0;font-size:14px;color:var(--hint)}
+/* ===== Demo 3: word page with two tabs (অর্থ / হাদিস) ===== */
+.wt{flex:none;background:var(--card);border-bottom:1px solid var(--divider);padding:14px 16px 0;text-align:center}
+.wt .ar{display:block;font-size:40px;line-height:1.4;color:var(--title)}
+.wt em{font-size:13.5px;color:var(--hint)}
+.wt p{margin:2px 0 10px;font-size:17px;font-weight:700;color:var(--title)}
+.tabs{display:flex}
+.tabs button{flex:1;padding:10px 0;font-size:15px;font-weight:700;color:var(--hint);border-bottom:2.5px solid transparent}
+.tabs button[aria-pressed="true"]{color:var(--primary);border-color:var(--primary)}
+.kv{display:flex;flex-direction:column;gap:8px;padding:0 12px}
+.kv div{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow)}
+.kv b{font-weight:400;font-size:13.5px;color:var(--hint)}
+.kv span{font-size:15px;color:var(--title)}
+.kv .ar{font-size:19px}
+.chips3{display:flex;flex-wrap:wrap;gap:8px;padding:0 12px}
+.hchip{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 6px 0 14px;border-radius:20px;background:var(--card);border:1px solid var(--divider);font-size:14.5px;color:var(--title)}
+.hchip i{font-style:normal;min-width:26px;height:26px;padding:0 6px;border-radius:13px;display:grid;place-items:center;background:var(--tint);font-size:12.5px}
+.cnote{margin:12px 16px 0;font-size:12.5px;color:var(--hint)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="home"></section>
+      <section class="screen" data-screen="results"></section>
+      <section class="screen" data-screen="word"></section>
+      <section class="screen rs" data-screen="hadith"></section>
+      <section class="screen rs" data-screen="sheet"></section>
+      <!-- ===== "শব্দের বিস্তারিত" sheet with tappable related words (filled by relSheet) ===== -->
+      <div class="sheet" id="sheet-rel" role="dialog" aria-label="শব্দের বিস্তারিত"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, search, screen wiring.
+   Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const IC = {
+  dict: (w = 20) => svg('<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M9 7h6M9 10.5h4"/>', w),
+  next: (w = 18) => svg('<path d="M9 5l7 7-7 7"/>', w),
+  down: (w = 18) => svg('<path d="M6 9l6 6 6-6"/>', w),
+  info: (w = 16) => svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>', w),
+  open: (w = 14) => svg('<path d="M7 17 17 7M9 7h8v8"/>', w),
+};
+
+/* ---------- Hadiths (safe list only). ar = an excerpt of the main text. ---------- */
+const HAD = {
+  b1: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1, nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত', ar: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى …', text: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' },
+  b6116: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 6116, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', ar: '… أَوْصِنِي، قَالَ: لَا تَغْضَبْ، فَرَدَّدَ مِرَارًا، قَالَ: لَا تَغْضَبْ', text: 'এক ব্যক্তি নবী (সাঃ)-কে বললেন, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বললেন, তিনি প্রতিবারই বললেন, রাগ করো না।' },
+  b6018: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 6018, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', ar: '… مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ', text: 'যে ব্যক্তি আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।' },
+  b1894: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1894, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', ar: 'الصِّيَامُ جُنَّةٌ …', text: 'রোজা ঢালস্বরূপ।' },
+  m223: { book: 'সহীহ মুসলিম', abbr: 'মুসলিম', no: 223, nar: 'আবু মালিক আল-আশআরি (রা.) থেকে বর্ণিত', ar: 'الطُّهُورُ شَطْرُ الإِيمَانِ …', text: 'পবিত্রতা ঈমানের অর্ধেক।' },
+};
+/* ---------- Dictionary entries (content team builds and scholars verify the real
+   list). f = forms as they appear in the text, occ = [hadith, times]. ---------- */
+const E = [
+  { id: 'niyya', ar: 'نِيَّة', tr: 'নিয়্যাহ', bn: 'নিয়ত, সংকল্প', root: 'ن و ي', rj: 'نوي', pos: 'বিশেষ্য', rm: 'মনে সংকল্প করা', f: ['بِالنِّيَّاتِ'], occ: [['b1', 1]] },
+  { id: 'nawa', ar: 'نَوَى', tr: 'নাওয়া', bn: 'নিয়ত করা', root: 'ن و ي', rj: 'نوي', pos: 'ক্রিয়া', rm: 'মনে সংকল্প করা', f: ['نَوَى'], occ: [['b1', 1]] },
+  { id: 'amal', ar: 'عَمَل', tr: 'আমাল', bn: 'কাজ, আমল', root: 'ع م ل', rj: 'عمل', pos: 'বিশেষ্য', rm: 'কাজ করা', f: ['الأَعْمَالُ'], occ: [['b1', 1]] },
+  { id: 'innama', ar: 'إِنَّمَا', tr: 'ইন্নামা', bn: 'নিশ্চয়ই কেবল', pos: 'অব্যয়', f: ['إِنَّمَا'], occ: [['b1', 2]] },
+  { id: 'imru', ar: 'امْرُؤ', tr: 'ইমরু', bn: 'ব্যক্তি, মানুষ', root: 'م ر ء', rj: 'مرء', pos: 'বিশেষ্য', rm: 'মানুষ, পুরুষ', f: ['امْرِئٍ'], occ: [['b1', 1]] },
+  { id: 'kull', ar: 'كُلّ', tr: 'কুল্লু', bn: 'প্রত্যেক, সব', root: 'ك ل ل', rj: 'كلل', pos: 'বিশেষ্য', f: ['لِكُلِّ'], occ: [['b1', 1]] },
+  { id: 'ghadiba', ar: 'غَضِبَ', tr: 'গাদিবা', bn: 'রাগ করা', root: 'غ ض ب', rj: 'غضب', pos: 'ক্রিয়া', rm: 'রাগ করা, ক্ষুব্ধ হওয়া', f: ['تَغْضَبْ'], occ: [['b6116', 2]] },
+  { id: 'awsa', ar: 'أَوْصَى', tr: 'আওসা', bn: 'উপদেশ দেওয়া', root: 'و ص ي', rj: 'وصي', pos: 'ক্রিয়া', rm: 'উপদেশ দেওয়া, অসিয়ত করা', f: ['أَوْصِنِي'], occ: [['b6116', 1]] },
+  { id: 'tuhur', ar: 'طُهُور', tr: 'তুহুর', bn: 'পবিত্রতা', root: 'ط ه ر', rj: 'طهر', pos: 'বিশেষ্য', rm: 'পবিত্র হওয়া', f: ['الطُّهُورُ'], occ: [['m223', 1]] },
+  { id: 'shatr', ar: 'شَطْر', tr: 'শাতর', bn: 'অর্ধেক', root: 'ش ط ر', rj: 'شطر', pos: 'বিশেষ্য', rm: 'দুই ভাগ করা', f: ['شَطْرُ'], occ: [['m223', 1]] },
+  { id: 'iman', ar: 'إِيمَان', tr: 'ঈমান', bn: 'ঈমান, বিশ্বাস', root: 'أ م ن', rj: 'أمن', pos: 'বিশেষ্য', rm: 'নিরাপদ হওয়া, বিশ্বাস করা', f: ['الإِيمَانِ'], occ: [['m223', 1]] },
+  { id: 'amana', ar: 'آمَنَ', tr: 'আমানা', bn: 'ঈমান আনা, বিশ্বাস করা', root: 'أ م ن', rj: 'أمن', pos: 'ক্রিয়া', rm: 'নিরাপদ হওয়া, বিশ্বাস করা', f: ['يُؤْمِنُ'], occ: [['b6018', 3]] },
+  { id: 'siyam', ar: 'صِيَام', tr: 'সিয়াম', bn: 'রোজা', root: 'ص و م', rj: 'صوم', pos: 'বিশেষ্য', rm: 'বিরত থাকা', f: ['الصِّيَامُ'], occ: [['b1894', 2]] },
+  { id: 'junna', ar: 'جُنَّة', tr: 'জুন্নাহ', bn: 'ঢাল', root: 'ج ن ن', rj: 'جنن', pos: 'বিশেষ্য', rm: 'ঢেকে রাখা, আড়াল করা', f: ['جُنَّةٌ'], occ: [['b1894', 1]] },
+  { id: 'khayr', ar: 'خَيْر', tr: 'খাইর', bn: 'ভালো, কল্যাণ', root: 'خ ي ر', rj: 'خير', pos: 'বিশেষ্য', rm: 'ভালো হওয়া', f: ['خَيْرًا'], occ: [['b6018', 1]] },
+  { id: 'samata', ar: 'صَمَتَ', tr: 'সামাতা', bn: 'চুপ থাকা', root: 'ص م ت', rj: 'صمت', pos: 'ক্রিয়া', rm: 'চুপ থাকা', f: ['لِيَصْمُتْ'], occ: [['b6018', 1]] },
+  { id: 'yawm', ar: 'يَوْم', tr: 'ইয়াওম', bn: 'দিন', root: 'ي و م', rj: 'يوم', pos: 'বিশেষ্য', f: ['الْيَوْمِ'], occ: [['b6018', 3]] },
+  { id: 'akhir', ar: 'آخِر', tr: 'আখির', bn: 'শেষ, পরকালীন', root: 'أ خ ر', rj: 'أخر', pos: 'বিশেষণ', rm: 'পিছিয়ে যাওয়া', f: ['الآخِرِ'], occ: [['b6018', 3]] },
+];
+const byId = (id) => E.find((e) => e.id === id);
+const total = (e) => e.occ.reduce((s, o) => s + o[1], 0);
+const books = (e) => [...new Set(e.occ.map((o) => HAD[o[0]].book))].map((b) => ({ book: b, rows: e.occ.filter((o) => HAD[o[0]].book === b) }));
+const NOTE = 'গোনা হয়েছে শুধু হাদিসের মূল লেখা থেকে, সনদ বাদে।';
+
+/* ---------- Search: Arabic with or without harakat, or the meaning ---------- */
+const HARAKAT = new RegExp(`[${String.fromCharCode(0x64B)}-${String.fromCharCode(0x65F)}${String.fromCharCode(0x670)}${String.fromCharCode(0x640)}]`, 'g');
+const norm = (s) => String(s || '').replace(HARAKAT, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').trim().toLowerCase();
+function search(q) {
+  const n = norm(q);
+  if (!n) return { hit: [], same: [] };
+  const hit = E.filter((e) => norm(e.ar).includes(n) || e.f.some((f) => norm(f).includes(n)) || e.bn.includes(q.trim()) || (e.rj && norm(e.rj) === n));
+  const roots = new Set(hit.map((e) => e.rj).filter(Boolean));
+  const same = E.filter((e) => !hit.includes(e) && e.rj && roots.has(e.rj));
+  return { hit, same };
+}
+
+/* ---------- The hadith page: the word marked in the Arabic ---------- */
+const markAr = (h, e) => (e ? e.f.reduce((s, f) => s.split(f).join(`<mark>${f}</mark>`), HAD[h].ar) : HAD[h].ar);
+
+/* ---------- The related-words sheet: a word of Bukhari 1 being read ---------- */
+const SW = { ar: 'بِالنِّيَّاتِ', bn: 'নিয়তের ওপর', tr: 'বিন-নিয়্যাতি', rel: ['niyya', 'nawa'] };
+const B1W = [['إِنَّمَا', 'নিশ্চয়ই কেবল'], ['الأَعْمَالُ', 'কাজসমূহ'], ['بِالنِّيَّاتِ', 'নিয়তের ওপর'], ['وَإِنَّمَا', 'আর নিশ্চয়ই'], ['لِكُلِّ', 'প্রত্যেকের জন্য'], ['امْرِئٍ', 'ব্যক্তি'], ['مَا', 'যা'], ['نَوَى', 'সে নিয়ত করেছে']];
+
+/* ---------- State ---------- */
+const S = { q: '', id: 'niyya', h: 'b1', from: 'results', hfrom: 'word' };
+const SCREENS = [
+  { id: 'home', label: 'ডিকশনারি' },
+  { id: 'results', label: 'সার্চের ফলাফল' },
+  { id: 'word', label: 'শব্দের পেজ' },
+  { id: 'hadith', label: 'হাদিসের পেজ' },
+  { id: 'sheet', label: 'সম্পর্কিত শব্দ' },
+];
+const EXTRA = '<button class="kit-chip" type="button" data-q="قلم">কিছু না পেলে</button>';
+
+/* ---------- Shared pieces ---------- */
+const field = (ph = 'আরবি শব্দ বা অর্থ লিখুন') => `<label class="field">${icons.search}<input id="q" type="search" dir="auto" value="${S.q}" placeholder="${ph}" aria-label="আরবি শব্দ বা অর্থ দিয়ে খুঁজুন" autocomplete="off">${S.q ? `<button class="clr" data-act="clear" aria-label="মুছুন">${icons.close}</button>` : ''}</label>`;
+const hint = () => `আরবি শব্দ হরকতসহ বা ছাড়া, অথবা বাংলা অর্থ লিখে খুঁজুন। যেমন: <button class="ex ar" data-act="ex" data-v="نية">نية</button>, <button class="ex" data-act="ex" data-v="রোজা">রোজা</button>, <button class="ex ar" data-act="ex" data-v="الإيمان">الإيمان</button>`;
+const timesTxt = (e) => `মোট ${bn(total(e))} বার`;
+const hadithCnt = (e) => `${bn(e.occ.length)}টি হাদিসে`;
+const props = (e) => [e.root && ['মূল হরফ', e.root, 1], e.rj && ['মূল শব্দ', e.rj, 1], ['পদের ধরন', e.pos], e.rm && ['মূলের সাধারণ অর্থ', e.rm]].filter(Boolean);
+const val = (p) => (p[2] ? `<span class="ar">${p[1]}</span>` : p[1]);
+
+function hadithHTML() {
+  const h = HAD[S.h];
+  const e = S.hfrom === 'word' ? byId(S.id) : null;
+  return `<header class="appbar"><button class="icon-btn" data-act="hback" aria-label="পেছনে">${icons.back}</button><h1>${h.book}<small>হাদিস: ${bn(h.no)}</small></h1></header>
+    <div class="rbody"><div class="body">${D.hlNote && e ? D.hlNote(e) : ''}<article class="card hc">
+      <div class="hadith-head"><span class="book-badge">${h.abbr}</span><div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${bn(h.no)}</span></div><span class="grade">সহিহ হাদিস</span></div>
+      <p class="arabic">${markAr(S.h, e)}</p><p class="narrator">${h.nar}</p><p class="translation">${h.text}</p></article></div></div>`;
+}
+function readingHTML() {
+  const h = HAD.b1;
+  return `<header class="appbar np"><h1>${h.book}<small>হাদিস: ${bn(h.no)}</small></h1></header>
+    <div class="rbody"><div class="body"><article class="card hc">
+      <div class="hadith-head"><span class="book-badge">${h.abbr}</span><div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${bn(h.no)}</span></div><span class="grade">সহিহ হাদিস</span></div>
+      <div class="track"><span>আরবি</span><span class="on">শব্দে শব্দে</span></div>
+      <div class="wrap">${B1W.map((w) => `<button class="wb${w[0] === SW.ar ? ' on' : ''}" data-act="sheetOpen"><span class="ar">${w[0]}</span><small>${w[1]}</small></button>`).join('')}</div>
+      <p class="narrator">${h.nar}</p><p class="translation">${h.text}</p></article></div></div>`;
+}
+const relSheet = () => `<div class="sheet-head"><h2>শব্দের বিস্তারিত</h2><button class="icon-btn" data-act="sheetClose" aria-label="বন্ধ করুন">${icons.close}</button></div>
+  <div class="sheet-body"><div class="ws-sum"><span class="ar acc">${SW.ar}</span><span>${SW.bn}</span></div>
+  <div class="ws-rel"><b class="acc">সম্পর্কিত শব্দ</b><small>শব্দে ট্যাপ করলে ডিকশনারিতে খুলবে</small><div>${SW.rel.map((id) => `<button data-act="rel" data-id="${id}"><span class="ar">${byId(id).ar}</span>${IC.open()}</button>`).join('')}</div></div></div>`;
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  sec.innerHTML = id === 'home' ? D.home() : id === 'results' ? D.results() : id === 'word' ? D.word() : id === 'hadith' ? hadithHTML() : readingHTML();
+}
+function listOnly() { const l = $('#res'); if (l) l.innerHTML = D.list(); else render(Kit.current); }
+function onScreen(id) {
+  if (id === 'home') S.q = '';
+  if (id === 'results' && !S.q) S.q = 'نية';
+  if (id === 'word' && !S.keep) S.from = 'results';
+  if (id === 'hadith' && !S.keep) { S.hfrom = 'word'; S.h = byId(S.id).occ[0][0]; }
+  S.keep = false;
+  render(id);
+  if (id === 'sheet') { $('#sheet-rel').innerHTML = relSheet(); Kit.open('sheet-rel'); }
+  D.after?.(id);
+}
+function focusQ() { const i = $('#q'); if (i) { i.focus(); const n = i.value.length; i.setSelectionRange?.(n, n); } }
+
+/* ---------- Wiring ---------- */
+const ACT = {
+  clear: () => { S.q = ''; Kit.show('home'); focusQ(); },
+  ex: (t) => { S.q = t.dataset.v; Kit.show('results'); },
+  open: (t) => { S.id = t.dataset.id; S.from = Kit.current; S.keep = true; Kit.show('word'); },
+  hadith: (t) => { S.h = t.dataset.h; S.hfrom = 'word'; S.keep = true; Kit.show('hadith'); },
+  hback: () => { S.keep = true; Kit.show(S.hfrom); },
+  wback: () => Kit.show(S.from === 'sheet' ? 'sheet' : S.from === 'home' ? 'home' : 'results'),
+  sheetOpen: () => Kit.show('sheet'),
+  sheetClose: () => Kit.close('sheet-rel'),
+  rel: (t) => { S.id = t.dataset.id; S.from = 'sheet'; S.keep = true; Kit.show('word'); },
+  noop: () => {},
+};
+document.addEventListener('click', (e) => {
+  const x = e.target.closest('[data-q]');
+  if (x) { S.q = x.dataset.q; Kit.show('results'); return; }
+  const t = e.target.closest('[data-act]');
+  if (t) ACT[t.dataset.act]?.(t);
+});
+document.addEventListener('input', (e) => {
+  if (e.target.id !== 'q') return;
+  S.q = e.target.value;
+  if (S.q && Kit.current !== 'results') { Kit.show('results'); focusQ(); return; }
+  if (!S.q && Kit.current === 'results') { Kit.show('home'); focusQ(); return; }
+  listOnly();
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('[data-act="open"],[data-act="hadith"]')) e.target.click(); });
+
+/* ======================================================================
+   DEMO 3 — টাইল আর ট্যাব: a round search pill in the green bar, results
+   as a two-column tile grid with a count chip, and the word page split
+   into two tabs: "অর্থ" and "হাদিস" (hadiths as count chips).
+   ====================================================================== */
+const tile = (e) => `<button class="tile" data-act="open" data-id="${e.id}"><span class="ar">${e.ar}</span><b>${e.bn}</b><span class="chip on">${bn(total(e))} বার</span></button>`;
+const D = {
+  home: () => `<header class="appbar np"><h1>হাদিস ডিকশনারি</h1></header><div class="sb">${field()}</div><div class="body" style="padding-top:0"><p class="hint3">${hint()}</p></div>`,
+  results: () => `<header class="appbar np"><h1>হাদিস ডিকশনারি</h1></header><div class="sb">${field()}</div><div class="body" id="res" style="padding-top:0">${D.list()}</div>`,
+  list: () => {
+    const r = search(S.q);
+    if (!r.hit.length) return `<div class="nores3"><h3>কোনো শব্দ পাওয়া যায়নি</h3><p>বানান দেখে আবার লিখুন, অথবা হরকত ছাড়া লিখে দেখুন।</p></div>`;
+    return `<h3 class="gh">${bn(r.hit.length)}টি শব্দ মিলেছে</h3><div class="grid">${r.hit.map(tile).join('')}</div>${r.same.length ? `<h3 class="gh">একই মূলের শব্দ</h3><div class="grid">${r.same.map(tile).join('')}</div>` : ''}`;
+  },
+  word: () => {
+    const e = byId(S.id);
+    const t = S.tab || 'meaning';
+    return `<header class="appbar"><button class="icon-btn" data-act="wback" aria-label="পেছনে">${icons.back}</button><h1>শব্দের পেজ</h1></header>
+    <div class="wt"><span class="ar">${e.ar}</span><em>${e.tr}</em><p>${e.bn}</p><div class="tabs"><button data-act="tab" data-t="meaning" aria-pressed="${t === 'meaning'}">অর্থ</button><button data-act="tab" data-t="hadith" aria-pressed="${t === 'hadith'}">হাদিস (${bn(e.occ.length)})</button></div></div>
+    <div class="body">${t === 'meaning' ? `<div class="kv">${props(e).map((p) => `<div><b>${p[0]}</b><span>${val(p)}</span></div>`).join('')}</div>`
+      : `<h3 class="gh" style="margin-top:0">${timesTxt(e)}, ${hadithCnt(e)}</h3>${books(e).map((b) => `<h3 class="gh">${b.book}</h3><div class="chips3">${b.rows.map((o) => `<button class="hchip" data-act="hadith" data-h="${o[0]}">হাদিস ${bn(HAD[o[0]].no)}<i class="acc">${bn(o[1])}×</i></button>`).join('')}</div>`).join('')}<p class="cnote">${NOTE}</p>`}</div>`;
+  },
+};
+ACT.tab = (t) => { S.tab = t.dataset.t; render('word'); };
+const _open = ACT.open; ACT.open = (t) => { S.tab = 'meaning'; _open(t); };
+
+Kit.onScreen(onScreen);
+Kit.init({ demo: 3, name: 'টাইল আর ট্যাব', extra: EXTRA, screens: SCREENS });
+</script>
+</body>
+</html>

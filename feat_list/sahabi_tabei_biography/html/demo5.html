@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সাহাবি আর তাবেঈদের জীবনী — ডেমো ৫ · রঙিন কার্ড আর ভাসমান সার্চ</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): rounded body, hadith cards, tappable narrator ===== */
+.icon-btn svg,.btn svg{flex:none}
+.screen.g{background:var(--appbar)}
+.rb{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+/* the narrator's name becomes a button only when a biography exists */
+.nar{font-weight:700;color:var(--primary);text-decoration:underline dotted;text-underline-offset:4px;text-decoration-thickness:1.5px}
+.fld{display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 12px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--hint)}
+.fld input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.fld input::placeholder{color:var(--hint)}
+.fld .icon-btn{width:34px;height:34px}
+/* "তাঁর বর্ণিত হাদিস" (#৬০-এর পেজ, shared body): total, books with counts, hadith cards */
+.hs-top{margin:14px 14px 10px;padding:14px 16px;border-radius:10px;background:var(--card);box-shadow:var(--shadow)}
+.hs-top b{display:block;font-size:16px;color:var(--title)}
+.hs-top span{font-size:13.5px;color:var(--hint)}
+.hs-b{margin:0 14px 10px;border-radius:10px;background:var(--card);overflow:hidden;box-shadow:var(--shadow)}
+.hs-r{display:flex;align-items:center;gap:10px;width:100%;padding:14px 12px 14px 16px;text-align:left;font-size:15.5px;color:var(--title)}
+.hs-r[tabindex="-1"]{cursor:default}
+.hs-r span{flex:1}
+.hs-r b{font-size:14px;color:var(--primary-dark)}
+:root[data-theme="dark"] .hs-r b{color:var(--primary)}
+.hs-r svg{color:var(--hint);transition:transform .2s}
+.hs-b.on .hs-r svg{transform:rotate(180deg)}
+.hs-c{padding:12px 16px 14px;border-top:1px solid var(--divider)}
+.hs-c .translation{color:var(--title);line-height:1.7}
+/* ===== Demo 5: colourful cards, two-part header, search as a floating pill ===== */
+.hd{flex:none;padding:0 0 14px;background:linear-gradient(160deg,var(--appbar),var(--primary-dark));color:var(--on-appbar)}
+.hd .appbar{background:transparent}
+.hd h2{margin:0 18px;font-size:24px}
+.hd p{margin:2px 18px 0;font-size:13.5px;opacity:.88}
+.two{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 14px 0}
+.two button{padding:8px 6px;border-radius:12px;background:rgba(255,255,255,.14);color:var(--on-appbar);text-align:center;font-size:13px}
+.two button b{display:block;font-size:18px}
+.two button[aria-pressed="true"]{background:var(--card);color:var(--primary-dark)}
+:root[data-theme="dark"] .two button[aria-pressed="true"]{color:var(--primary)}
+.wrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.wrap .scroll{padding:12px 0 96px}
+.cc{display:flex;width:calc(100% - 28px);margin:0 14px 10px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);overflow:hidden;text-align:left}
+.cc i{width:6px;flex:none;background:var(--primary)}
+.cc.tb i{background:var(--disabled)}
+.cc div{flex:1;padding:12px 14px}
+.cc b{display:block;font-size:16px;color:var(--title)}
+.cc span{display:block;font-size:13.5px;color:var(--body)}
+.cc small{display:inline-block;margin-top:6px;font-size:11.5px;padding:0 8px;border-radius:10px;background:var(--surface-2);color:var(--hint)}
+.fp{position:absolute;left:14px;right:14px;bottom:16px;display:flex;align-items:center;gap:8px;height:52px;padding:0 8px 0 16px;border-radius:26px;background:var(--card);box-shadow:0 6px 22px rgba(0,0,0,.2);color:var(--primary);z-index:3}
+.fp input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:15.5px;color:var(--title)}
+.fp input::placeholder{color:var(--hint)}
+.fp .icon-btn{width:36px;height:36px;color:var(--hint)}
+/* ===== Biography as stacked cards ===== */
+.bh{margin:14px 14px 10px;padding:18px;border-radius:16px;color:var(--on-appbar);background:linear-gradient(140deg,var(--primary),var(--primary-dark))}
+.bh.tb{background:linear-gradient(140deg,var(--primary-dark),var(--appbar))}
+:root[data-theme="dark"] .bh.tb{background:linear-gradient(140deg,var(--primary-dark),var(--surface-2))}
+.bh small{font-size:12.5px;opacity:.9}
+.bh h2{margin:2px 0 4px;font-size:21px}
+.bh p{margin:0;font-size:13.5px;opacity:.9}
+.ib{margin:0 14px 10px;padding:14px 16px;border-radius:14px;background:var(--tint);font-size:15.5px;line-height:1.75;color:var(--title)}
+.sc{display:flex;gap:12px;margin:0 14px 10px;padding:14px 16px;border-radius:14px;background:var(--card);box-shadow:var(--shadow)}
+.sc .n{width:28px;height:28px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:var(--on-appbar);font-size:13px;font-weight:700}
+.sc h4{margin:2px 0 4px;font-size:15.5px;color:var(--title)}
+.sc p{margin:0;font-size:15px;line-height:1.75;color:var(--body)}
+.srcc{display:flex;gap:8px;margin:0 14px 10px;padding:12px 14px;border-radius:14px;border:1px dashed var(--divider);font-size:13px;color:var(--hint)}
+.stick{flex:none;padding:10px 14px 14px;background:var(--scaffold)}
+.stick .btn{height:50px;border-radius:14px}
+/* ===== Narrator sheet: tall, coloured head ===== */
+.sh{padding:20px 16px 14px;border-radius:var(--r-sheet) var(--r-sheet) 0 0;color:var(--on-appbar);background:linear-gradient(140deg,var(--primary),var(--primary-dark))}
+.sh .grab{width:40px;height:4px;margin:-8px auto 12px;border-radius:4px;background:rgba(255,255,255,.5)}
+.sh small{font-size:12.5px;opacity:.9}
+.sh h2{margin:2px 0 0;font-size:20px}
+.shb{padding:14px 16px 4px;font-size:15.5px;line-height:1.75;color:var(--title)}
+.sha{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 16px 18px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="list"></section>
+      <section class="screen" data-screen="search"></section>
+      <section class="screen" data-screen="bio" data-status="light"></section>
+      <section class="screen g" data-screen="card"></section>
+      <section class="screen g" data-screen="sheet"></section>
+      <section class="screen g" data-screen="hadiths"></section>
+      <div class="sheet" id="pv" role="dialog" aria-label="ছোট পরিচিতি"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="bio_core.js"></script>
+<script>
+/* ======================================================================
+   DEMO 5 — রঙিন কার্ড আর ভাসমান সার্চ: a gradient header whose three
+   count tiles are the filter, colour-coded name cards (green সাহাবি,
+   slate তাবেঈ), search as a floating pill at the bottom, and the
+   biography as a stack of cards with a pinned button.
+   ====================================================================== */
+(function () {
+  const { bn, icons } = Kit;
+  const { P, S, TYPE, src, hisBody } = BioDemo;
+  const F = [['all', 'সব'], ['sahabi', 'সাহাবি'], ['tabei', 'তাবেঈ']];
+  const n = (t) => P.filter((p) => t === 'all' || p.t === t).length;
+
+  const D = {
+    list: () => `<div class="hd"><header class="appbar"><button class="icon-btn" aria-label="পেছনে" tabindex="-1">${icons.back}</button><h1>জীবনী</h1></header>
+        <h2>সাহাবি ও তাবেঈ</h2><p>হাদিস বর্ণনাকারীদের জীবনী, প্রামাণ্য গ্রন্থ থেকে</p>
+        <div class="two">${F.map(([f, t]) => `<button data-act="f" data-f="${f}" aria-pressed="${S.f === f}"><b>${bn(n(f))}</b>${t}</button>`).join('')}</div></div>
+      <div class="wrap"><div class="scroll" data-res></div>
+        <label class="fp">${icons.search}<input data-q value="${S.q}" placeholder="নাম লিখে খুঁজুন" aria-label="নাম লিখে খুঁজুন"><button class="icon-btn" data-act="clr" aria-label="মুছুন" ${S.q ? '' : 'hidden'}>${icons.close}</button></label></div>`,
+    results: (arr) => (arr.length ? arr.map((p) => `<button class="cc${p.t === 'tabei' ? ' tb' : ''}" data-act="person" data-p="${p.id}"><i></i><div><b>${p.name}</b><span>${p.line}</span><small>${TYPE[p.t]}</small></div></button>`).join('')
+      : `<div class="empty">${icons.search}<h3>নাম পাওয়া যায়নি</h3><p>অন্য বানানে বা নামের অংশ লিখে দেখুন</p></div>`),
+    bio: (p) => `<header class="appbar flat"><button class="icon-btn" data-act="bback" aria-label="পেছনে">${icons.back}</button><h1>জীবনী</h1></header>
+      <div class="scroll"><div class="bh${p.t === 'tabei' ? ' tb' : ''}"><small>${TYPE[p.t]}</small><h2>${p.name}</h2><p>${p.full}</p></div>
+        <div class="ib">${p.intro}</div>
+        ${p.bio.map(([h, t], i) => `<div class="sc"><span class="n">${bn(i + 1)}</span><div><h4>${h}</h4><p>${t}</p></div></div>`).join('')}
+        <div class="srcc">${icons.book}<span>উৎস: ${src(p)}</span></div></div>
+      <div class="stick"><button class="btn block" data-act="his">${icons.book}তাঁর বর্ণিত হাদিস</button></div>`,
+    sheet: (p) => `<div class="sh"><div class="grab"></div><small>${TYPE[p.t]}</small><h2>${p.name}</h2></div>
+      <p class="shb">${p.intro}</p>
+      <div class="sha"><button class="btn tonal" data-act="more">আরো পড়ুন</button><button class="btn" data-act="his">তাঁর বর্ণিত হাদিস</button></div>`,
+    hadiths: (p) => `<header class="appbar"><button class="icon-btn" data-act="hback" aria-label="পেছনে">${icons.back}</button><h1>তাঁর বর্ণিত হাদিস<small>${p.name}</small></h1></header><div class="rb"><div class="scroll">${hisBody(p)}</div></div>`,
+  };
+  BioDemo.start(D, { demo: 5, name: 'রঙিন কার্ড আর ভাসমান সার্চ' });
+})();
+</script>
+</body>
+</html>

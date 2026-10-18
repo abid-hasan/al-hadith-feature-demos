@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>হাদিস স্টোরি মোড — ডেমো ১ · অ্যাপের ধরন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== RoundedScaffoldBody (green behind, radius-20 panel) ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.panel>.scroll{padding-top:14px}
+.icon-btn svg{flex:none}
+
+/* ===== Book list — ListItemCard: hexagon number, title, subtitle ===== */
+.crow{display:flex;align-items:center;gap:12px;width:calc(100% - 24px);margin:0 12px 10px;padding:12px 8px 12px 12px;text-align:left;background:var(--card);border-radius:10px;box-shadow:var(--shadow)}
+.crow:hover{background:var(--surface-2)}
+.crow .book-badge{width:46px;height:46px;font-size:15px;font-weight:600}
+.cmeta{flex:1;min-width:0}
+.cmeta b{display:block;color:var(--title);font-size:16px;line-height:1.35}
+.cmeta span{display:block;margin-top:2px;font-size:13.5px;color:var(--body)}
+.cmeta .nodl{display:inline-flex;align-items:center;gap:4px;color:var(--hint);font-size:12.5px}
+.cmeta .nodl svg{width:14px;height:14px}
+.crow>svg{flex:none;width:20px;height:20px;color:var(--hint)}
+
+/* ===== Chapter header (HadithSectionListItem look) + story card ===== */
+.chap{display:flex;align-items:center;gap:10px;margin:6px 12px 8px;padding:10px 14px;border-radius:10px;background:var(--tint)}
+.chap b{flex:1;font-size:15px;color:var(--primary-dark)}
+:root[data-theme="dark"] .chap b{color:var(--primary)}
+.chap span{font-size:12.5px;color:var(--body)}
+.scard{display:block;width:calc(100% - 24px);text-align:left}
+.scard h3{margin:0;font-size:16px;line-height:1.4;color:var(--title)}
+.scard p{margin:6px 0 0;font-size:14.5px;line-height:1.65;color:var(--body);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.scard small{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12.5px;color:var(--primary-dark)}
+:root[data-theme="dark"] .scard small{color:var(--primary)}
+.scard small .grade{font-size:11.5px}
+
+/* ===== Reading page: hadith card + bottom bar ===== */
+.icon-btn[aria-pressed="true"]{background:rgba(255,255,255,.2)}
+.rd h2{margin:12px 0 4px;font-size:18px;line-height:1.4;color:var(--title)}
+.rd .narrator{color:var(--primary);font-size:15px;margin:10px 0 2px}
+.rd .translation{font-size:16px;line-height:1.8;color:var(--title)}
+.orig{margin:6px 12px 0;width:calc(100% - 24px)}
+.rbar{flex:none;display:flex;align-items:center;gap:6px;padding:8px 12px 12px;background:var(--card);border-top:1px solid var(--divider)}
+.rbar .btn{flex:1;height:44px;padding:0 8px}
+.rbar .btn:disabled{opacity:.4;cursor:default}
+.rbar .pos{flex:none;min-width:52px;text-align:center;font-size:13px;color:var(--hint)}
+
+/* ===== Original hadith inside its chapter (HadithListItem) ===== */
+.sec{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:0 12px 10px;padding:12px var(--pad);font-size:15px;font-weight:700;color:var(--title)}
+.sec b{color:var(--primary)}
+.sec span{display:block;font-weight:400;font-size:13.5px;color:var(--body)}
+.hc.hl{box-shadow:0 0 0 2px var(--primary)}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+
+/* ===== Not downloaded message ===== */
+.dlbox{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:56px 28px}
+.dlbox .ring{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.dlbox h3{margin:6px 0 0;font-size:18px;color:var(--title)}
+.dlbox p{margin:0;font-size:14.5px;color:var(--body)}
+.dlbox .btn{margin-top:10px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos); each is filled by render() ===== -->
+      <section class="screen" data-screen="home"></section>
+      <section class="screen" data-screen="books"></section>
+      <section class="screen" data-screen="stories"></section>
+      <section class="screen" data-screen="read"></section>
+      <section class="screen" data-screen="original"></section>
+      <section class="screen" data-screen="nodl"></section>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="story_data.js"></script>
+<script>
+  const T = window.STORY, S = T.S, I = Kit.icons, bn = Kit.bn, $ = Kit.$;
+  const back = () => `<button class="icon-btn" data-act="back" aria-label="পেছনে">${I.back}</button>`;
+  const shell = (title, body, extra = '', foot = '') => `<header class="appbar">${back()}<h1>${title}</h1>${extra}</header>
+    <div class="rbody"><div class="panel"><div class="scroll">${body}</div>${foot}</div></div>`;
+
+  /* ---------- Home: quick-action grid with the new "গল্প" button ---------- */
+  const homeView = () => `<header class="appbar"><h1 style="margin-left:12px">আল হাদিস</h1></header><div class="scroll">${T.homeHTML()}</div>`;
+
+  /* ---------- Books: name + story count; not-downloaded books say so ---------- */
+  function booksView() {
+    const row = (b, i) => `<button class="crow" data-act="book" data-id="${b.id}"><span class="book-badge">${bn(i + 1)}</span>
+      <span class="cmeta"><b>${b.name}</b><span>${bn(b.stories)}টি গল্প · ${bn(b.chapters)}টি অধ্যায়</span>
+      ${b.dl ? '' : `<span class="nodl">${T.ICON.download(14)}ডাউনলোড করা নেই</span>`}</span>${I.chevron}</button>`;
+    return shell('গল্প', T.BOOKS.map(row).join(''));
+  }
+
+  /* ---------- Stories of one book, grouped by chapter: title + first two lines ---------- */
+  function storiesView() {
+    const body = T.CHAPTERS.map((c) => `<div class="chap"><b>${bn(c.no)}. ${c.title}</b><span>${bn(c.stories.length)}টি গল্প</span></div>
+      ${c.stories.map((sid) => { const st = T.STORIES[sid]; return `<button class="card scard" data-act="story" data-id="${sid}">
+        <h3>${st.title}</h3><p>${T.firstLines(st.text)}</p><small>হাদিস: ${bn(st.no)}<span class="grade">${T.GRADE}</span></small></button>`; }).join('')}`).join('');
+    return shell(`সহীহ বুখারী<small>গল্প</small>`, body);
+  }
+
+  /* ---------- Reading page: full translation, reference, grade, Arabic toggle, prev/next ---------- */
+  function readView() {
+    const st = T.STORIES[S.sid], c = T.chapterOf(S.sid), n = T.neighbours(S.sid);
+    const arabicBtn = `<button class="icon-btn" data-act="arabic" aria-pressed="${S.arabic}" aria-label="আরবি দেখান" title="আরবি">${T.ICON.arabic(22)}</button>`;
+    const body = `<article class="card rd"><div class="hadith-head"><span class="book-badge">বুখারী</span>
+        <div class="hadith-meta"><b>সহীহ বুখারী</b><span>হাদিস: ${bn(st.no)}</span></div><span class="grade">${T.GRADE}</span></div>
+        <h2>${st.title}</h2><p class="narrator">${st.nar} থেকে বর্ণিত:</p>${T.paras(st.text)}</article>
+      <button class="btn outline orig" data-act="orig">${T.ICON.open(18)}মূল হাদিসে যান</button>`;
+    const foot = `<div class="rbar"><button class="btn tonal" data-act="prev" ${n.prev ? '' : 'disabled'}>${T.ICON.prev(18)}পূর্ববর্তী</button>
+      <span class="pos">${bn(n.pos)} / ${bn(n.total)}</span><button class="btn tonal" data-act="next" ${n.next ? '' : 'disabled'}>পরবর্তী${T.ICON.next(18)}</button></div>`;
+    return shell(`গল্প<small>${c.title}</small>`, body, arabicBtn, foot);
+  }
+
+  /* ---------- Original hadith: the app's chapter page, opened at this hadith ---------- */
+  function originalView() {
+    const st = T.STORIES[S.sid], c = T.chapterOf(S.sid);
+    const body = `<div class="sec"><b>অধ্যায়:</b> ${st.sec}<span>${c.title}</span></div>
+      <article class="card hc hl"><div class="hadith-head"><span class="book-badge">বুখারী</span>
+        <div class="hadith-meta"><b>সহীহ বুখারী</b><span>হাদিস: ${bn(st.no)}</span></div><span class="grade">${T.GRADE}</span></div>
+        <p class="narrator">${st.nar} থেকে বর্ণিত:</p>${T.paras(st.text)}</article>`;
+    return shell(`সহীহ বুখারী<small>${c.title}</small>`, body);
+  }
+
+  /* ---------- Book not downloaded: message with "ডাউনলোড ম্যানেজার" ---------- */
+  function nodlView() {
+    const b = T.bookById(S.book);
+    return shell(`${b.name}<small>গল্প</small>`, `<div class="dlbox"><span class="ring">${T.ICON.download(38)}</span>
+      <h3>কিতাবটি ডাউনলোড করা নেই</h3><p>${b.name}-এর ${bn(b.stories)}টি গল্প পড়তে আগে কিতাবটি ডাউনলোড করুন। ডাউনলোড করা কিতাব ইন্টারনেট ছাড়াও পড়া যায়।</p>
+      <button class="btn" data-act="dl">${T.ICON.download(18)}ডাউনলোড ম্যানেজার</button></div>`);
+  }
+
+  /* ---------- Navigation (same flow in all demos) ---------- */
+  const VIEWS = { home: homeView, books: booksView, stories: storiesView, read: readView, original: originalView, nodl: nodlView };
+  const BACK = { books: 'home', stories: 'books', read: 'stories', original: 'read', nodl: 'books' };
+  let internal = false;
+  const go = (id) => { internal = true; Kit.show(id); internal = false; };
+  const render = (id) => { $(`.screen[data-screen="${id}"]`).innerHTML = VIEWS[id](); };
+  Kit.onScreen((id) => {
+    if (!internal) { if (id === 'read' || id === 'original') S.sid = 'b6018'; if (id === 'nodl') S.book = 'muslim'; }
+    render(id);
+  });
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-act]');
+    if (!t || !t.closest('.phone')) return;
+    const a = t.dataset.act, n = T.neighbours(S.sid);
+    if (a === 'home-story') go('books');
+    else if (a === 'back') go(BACK[Kit.current]);
+    else if (a === 'book') { S.book = t.dataset.id; go(T.bookById(S.book).dl ? 'stories' : 'nodl'); }
+    else if (a === 'story') { S.sid = t.dataset.id; go('read'); }
+    else if (a === 'prev' && n.prev) { S.sid = n.prev; go('read'); }
+    else if (a === 'next' && n.next) { S.sid = n.next; go('read'); }
+    else if (a === 'orig') go('original');
+    else if (a === 'arabic') t.setAttribute('aria-pressed', T.toggleArabic());
+    else if (a === 'dl') T.dlManager();
+  });
+
+  Kit.init({ demo: 1, name: 'অ্যাপের ধরন', screens: T.SCREENS });
+</script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ছবি তুলে হাদিস যাচাই — ডেমো ১ · অ্যাপের ধরন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="psv_sys.css">
+<style>
+/* ===== RoundedScaffoldBody ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+
+/* ===== Verify page: VerifySectionCard + VerifyInputField + pinned button ===== */
+.vcard{background:var(--card);border-radius:12px;margin:14px 16px;padding:14px}
+.vcard h2{margin:0 0 12px;font-size:16px;font-weight:700;color:var(--title);line-height:1.4}
+.vfield{position:relative}
+.vfield textarea{display:block;width:100%;min-height:150px;height:230px;resize:none;border-radius:10px;border:.8px solid var(--divider);background:color-mix(in srgb,var(--primary) 4%,transparent);
+  padding:12px 42px 12px 14px;font-size:15px;line-height:1.6;color:var(--title);outline:none}
+.vfield textarea:focus{border:1.2px solid var(--primary)}
+.vfield textarea::placeholder{color:var(--hint)}
+.vfield .clr{position:absolute;top:2px;right:2px;width:40px;height:40px;display:grid;place-items:center;color:var(--hint)}
+.vfield .clr svg{width:20px;height:20px}
+/* New: waiting line inside the field while the photo is read */
+.reading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:10px;background:var(--card);border:.8px solid var(--divider);color:var(--hint);font-size:14.5px}
+/* New: "ছবি থেকে" beside "পেস্ট করুন" (TextButton.icon, end-aligned) */
+.tools{display:flex;justify-content:flex-end;gap:4px;margin-top:6px}
+.tbtn{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 10px;border-radius:20px;font-size:14.5px;font-weight:700;color:var(--primary)}
+.tbtn:hover{background:var(--tint)}
+/* New: the photo the text came from, above the field */
+.src{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:8px;border-radius:10px;background:var(--surface-2)}
+.src .th{width:40px;height:52px;border-radius:6px;overflow:hidden;flex:none;border:1px solid var(--divider)}
+.src p{flex:1;margin:0;font-size:13.5px;line-height:1.45;color:var(--body)}
+.src .icon-btn{width:34px;height:34px;color:var(--primary)}
+.pin{flex:none;padding:8px 16px 12px;background:var(--scaffold)}
+.pin .btn{width:100%;height:48px}
+.pin .btn:disabled{opacity:.5}
+
+/* ===== Picker bottom sheet (new): list rows ===== */
+.prow{display:flex;align-items:center;gap:16px;width:100%;padding:14px 4px;font-size:16px;color:var(--title);text-align:left}
+.prow svg{color:var(--primary)}
+.prow.cancel{color:var(--body);justify-content:center;border-top:1px solid var(--divider);margin-top:4px}
+.full{display:grid;place-items:center;padding-bottom:12px}
+.full>div{width:240px;aspect-ratio:300/440;border-radius:8px;overflow:hidden;border:1px solid var(--divider)}
+
+/* ===== Result page (HadithVerifyResultPage): overview card + match + share ===== */
+.ov{display:flex;gap:10px;margin:4px 14px 7px;padding:10px 14px;border-radius:10px;background:var(--card)}
+.ov>svg{flex:none;color:var(--primary);margin-top:2px}
+.ov b{display:block;font-size:16px;color:var(--title);line-height:1.4}
+.ov span{font-size:14px;color:var(--hint)}
+.mi{margin:7px 14px}
+.mi .card{margin:0 0 8px}
+.grade.sahih{background:var(--grade-sahih)}
+.mi .narrator{color:var(--primary);font-size:14.5px;margin:10px 0 2px}
+.mi .btn{width:100%;height:46px}
+.nf{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:20px}
+.nf h3{margin:0;font-size:19px;color:var(--title)}
+.nf p{margin:0;font-size:14.5px;line-height:1.65;color:var(--body);text-align:justify}
+.yt{width:100%;text-align:left;background:var(--card);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--body)}
+.yt b{display:block;color:var(--hint);font-size:12.5px;font-weight:400}
+.yt span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screen: home (entry: the "যাচাই" quick action) ===== -->
+      <section class="screen" data-screen="home">
+        <header class="appbar"><h1 style="margin-left:12px">আল হাদিস</h1></header>
+        <div class="scroll"><div class="qa" id="qa"></div></div>
+      </section>
+
+      <!-- ===== Verify page states: the same page (#pg) moves between these ===== -->
+      <section class="screen" data-screen="verify"></section>
+      <section class="screen" data-screen="edit"></section>
+
+      <!-- ===== Screen: result (found / not found, as today) ===== -->
+      <section class="screen" data-screen="result">
+        <header class="appbar"><button class="icon-btn" data-go="edit" data-i="back" aria-label="পেছনে"></button><h1 id="r-title"></h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="r-body" style="padding-top:10px"></div></div></div>
+      </section>
+
+      <!-- ===== Sheet: choose a photo (new) ===== -->
+      <div class="sheet" id="sheet-pick" role="dialog" aria-label="ছবি থেকে">
+        <div class="sheet-head"><h2>ছবি থেকে লেখা নিন</h2></div>
+        <div class="sheet-body">
+          <button class="prow" id="p-cam"><span data-x="camera"></span>ছবি তুলুন</button>
+          <button class="prow" id="p-gal"><span data-x="image"></span>গ্যালারি থেকে নিন</button>
+          <button class="prow cancel" data-close>বাতিল করুন</button>
+        </div>
+      </div>
+
+      <!-- ===== Sheet: the photo the text came from ===== -->
+      <div class="sheet" id="sheet-photo" role="dialog" aria-label="ছবি">
+        <div class="sheet-head"><h2>যে ছবি থেকে লেখা পড়া হয়েছে</h2><button class="icon-btn" data-close data-i="close" aria-label="বন্ধ করুন"></button></div>
+        <div class="sheet-body"><div class="full"><div id="photo-full"></div></div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ===== The verify page itself (HadithVerifyPage) ===== -->
+<template id="pg-tpl">
+  <div id="pg" style="display:flex;flex-direction:column;flex:1;min-height:0">
+    <header class="appbar"><button class="icon-btn" data-go="home" data-i="back" aria-label="পেছনে"></button><h1>হাদিস যাচাই</h1></header>
+    <div class="rbody"><div class="panel">
+      <div class="scroll" style="padding-bottom:8px">
+        <div class="vcard">
+          <h2>যে লেখাটি যাচাই করতে চান, সেটি এখানে দিন</h2>
+          <div class="src" id="src" hidden><div class="th" id="src-th"></div><p>ছবি থেকে পড়া লেখা। ভুল বানান বা বাড়তি অংশ থাকলে ঠিক করে নিন।</p><button class="icon-btn" data-open="sheet-photo" aria-label="ছবি দেখুন" data-x="image"></button></div>
+          <div class="vfield">
+            <textarea id="txt" aria-label="যে লেখাটি যাচাই করতে চান" placeholder="ফেসবুক, হোয়াটসঅ্যাপ বা অন্য কোথাও পাওয়া হাদিসটি এখানে পেস্ট করুন…" maxlength="2000"></textarea>
+            <button class="clr" id="clr" data-i="close" aria-label="মুছুন" hidden></button>
+            <div class="reading" id="reading" hidden><span class="spin"></span>ছবি থেকে লেখা পড়া হচ্ছে…</div>
+          </div>
+          <div class="tools">
+            <button class="tbtn" id="b-photo"><span data-x="camera"></span>ছবি থেকে</button>
+            <button class="tbtn" id="b-paste"><span data-x="paste"></span>পেস্ট করুন</button>
+          </div>
+        </div>
+      </div>
+      <div class="pin"><button class="btn" id="b-verify">যাচাই করুন</button></div>
+    </div></div>
+  </div>
+</template>
+
+<script src="../../_kit/kit.js"></script>
+<script src="psv_data.js"></script>
+<script src="psv_sys.js"></script>
+<script>
+  const P = window.PSV, I = Kit.icons, $ = Kit.$, $$ = Kit.$$, bn = Kit.bn;
+  const paint = (root = document) => {
+    $$('[data-i]', root).forEach((b) => { b.innerHTML = I[b.dataset.i]; });
+    $$('[data-x]', root).forEach((b) => { b.innerHTML = P.ic[b.dataset.x](b.closest('.prow') ? 24 : 20); });
+  };
+
+  /* ---------- State ---------- */
+  const S = { text: '', photo: null, reading: false, last: null };
+  let timer;
+  $('#qa').innerHTML = P.homeGrid();
+
+  /* ---------- Verify page (one element, moved between its two states) ---------- */
+  const pg = $('#pg-tpl').content.firstElementChild.cloneNode(true);
+  paint(pg);
+  const txt = $('#txt', pg);
+  function renderPage() {
+    if (txt.value !== S.text) txt.value = S.text;
+    $('#clr', pg).hidden = !S.text || S.reading;
+    $('#reading', pg).hidden = !S.reading;
+    $('#src', pg).hidden = !S.photo || S.reading;
+    if (S.photo) { $('#src-th', pg).innerHTML = P.img[S.photo](); $('#photo-full').innerHTML = P.img[S.photo](); }
+    $('#b-verify', pg).disabled = S.reading;
+  }
+
+  /* ---------- Reading a photo: waiting line in the field, then the text (or a message) ---------- */
+  function read(id) {
+    clearTimeout(timer);
+    S.photo = id; S.text = ''; S.reading = true;
+    go('edit');
+    timer = setTimeout(() => {
+      S.reading = false;
+      const r = P.read(id);
+      if (r.msg) {
+        S.photo = null; go('verify');
+        return Kit.snack(r.msg, r.again ? { label: P.t.another, onClick: () => Kit.open('sheet-pick') } : undefined);
+      }
+      S.text = r.text; renderPage(); txt.focus(); txt.setSelectionRange(0, 0); txt.scrollTop = 0;
+    }, 1100);
+  }
+
+  /* ---------- Verify → result ---------- */
+  function verify() {
+    S.text = txt.value;
+    const r = P.match(S.text);
+    if (r.kind === 'msg') return Kit.snack(r.msg);
+    S.last = r; go('result');
+  }
+  function renderResult() {
+    const r = S.last || { kind: 'found', ids: ['b6116'] };
+    if (r.kind === 'found') {
+      $('#r-title').innerHTML = `${P.t.resultTitle}<small>${bn(r.ids.length)}টি মিল পাওয়া গেছে</small>`;
+      $('#r-body').innerHTML = `<div class="ov">${P.ic.found(22)}<div><b>${P.t.found}</b><span>${P.t.gradeSrc}</span></div></div>` + r.ids.map((id) => {
+        const h = P.hadith[id];
+        return `<div class="mi"><article class="card"><div class="hadith-head"><span class="book-badge">${h.abbr}</span>
+          <div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${h.no}</span></div><span class="grade sahih">${h.grade}</span></div>
+          <p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${h.tr}</p></article>
+          <button class="btn tonal" data-snack="গ্রেডসহ হাদিস কার্ডের ছবি শেয়ার মেনুতে যাবে">${P.ic.share(18)}${P.t.share}</button></div>`;
+      }).join('');
+    } else {
+      $('#r-title').textContent = P.t.resultTitle;
+      $('#r-body').innerHTML = `<div class="nf"><div class="yt"><b>আপনার লেখা</b><span>${S.text}</span></div>${P.notFoundSvg}
+        <h3>${P.t.noMatch}</h3><p>${P.t.noMatchMsg}</p><button class="btn text" data-go="edit">${I.edit}${P.t.edit}</button></div>`;
+    }
+  }
+
+  /* ---------- Navigation: a toolbar chip opens a screen in its example state; taps inside the phone keep the state ---------- */
+  let chip = false, from = null;
+  document.addEventListener('click', (e) => { if (e.target.closest('.kit-chip[data-go]')) chip = true; }, true);
+  const go = (id) => Kit.show(id);
+  Kit.onScreen((id) => {
+    if (chip) { clearTimeout(timer); S.reading = false; }
+    const fresh = chip || (id === 'verify' && from === 'home');
+    if (id === 'verify' || id === 'edit') {
+      $(`.screen[data-screen="${id}"]`).appendChild(pg);
+      if (fresh) { S.photo = id === 'edit' ? 'post' : null; S.text = id === 'edit' ? P.ocr.post : ''; }
+      renderPage();
+    }
+    if (id === 'result') { if (chip) { S.photo = 'post'; S.text = P.ocr.post; S.last = null; } renderResult(); }
+    chip = false; from = id;
+  });
+
+  /* ---------- In-phone events ---------- */
+  txt.addEventListener('input', () => { S.text = txt.value; $('#clr', pg).hidden = !S.text; });
+  $('#clr', pg).onclick = () => { S.text = ''; S.photo = null; go('verify'); txt.focus(); };
+  $('#b-photo', pg).onclick = () => Kit.open('sheet-pick');
+  $('#b-paste', pg).onclick = () => Kit.snack(P.t.clip);
+  $('#b-verify', pg).onclick = verify;
+  $('#p-gal').onclick = () => { Kit.close('sheet-pick'); P.gallery(); };
+  $('#p-cam').onclick = () => { Kit.close('sheet-pick'); P.camera(); };
+
+  /* ---------- Toolbar: permission given yet? ---------- */
+  function syncBar() { const b = $('#tg-perm'); if (!b) return; const on = P.perm.gallery || P.perm.camera; b.textContent = on ? 'অনুমতি দেওয়া আছে' : 'প্রথমবার: অনুমতি চাইবে'; b.setAttribute('aria-pressed', on); }
+
+  P.sys({ onPick: (id) => read(id), onPerm: syncBar });
+  paint();
+  Kit.init({ demo: 1, name: 'অ্যাপের ধরন',
+    extra: '<button class="kit-chip" id="tg-perm" type="button" title="ছবি ও ক্যামেরার অনুমতি"></button>',
+    screens: [{ id: 'home', label: 'হোম' }, { id: 'verify', label: 'যাচাই পেজ' }, { id: 'edit', label: 'লেখা ঠিক করা' }, { id: 'result', label: 'ফলাফল' }, { id: 'share', label: 'শেয়ার থেকে' }] });
+  $('#tg-perm').onclick = () => { P.setPerm(!(P.perm.gallery || P.perm.camera)); };
+  syncBar();
+</script>
+</body>
+</html>

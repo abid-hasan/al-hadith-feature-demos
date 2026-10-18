@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>পার্সোনাল সাজেশন — ডেমো ২ · রঙিন কার্ড ও চিপ</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Home: quick-action card (as in the app) ===== */
+.pg{display:flex;flex-direction:column;flex:1;min-height:0}
+.qa{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin:14px 12px 0;padding:12px 0 10px}
+.qa-row{display:grid;grid-template-columns:repeat(4,1fr)}
+.qa-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px 8px;border-radius:10px;font-size:14px;font-weight:700;color:var(--body);line-height:1.25;text-align:center}
+.qa-tile:hover{background:var(--surface-2)}
+
+/* ===== NEW: tinted suggestion card — reason pill on top, the hadith as a quote ===== */
+.sg2{display:block;width:calc(100% - 24px);margin:12px 12px 16px;padding:16px;border-radius:20px;background:var(--tint);border:1px solid var(--primary);text-align:left}
+.sg2-top{display:flex;align-items:center;gap:8px}
+.sg2-top h2{flex:1;margin:0;font-size:15px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .sg2-top h2{color:var(--primary)}
+.pill{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:4px 12px 4px 8px;border-radius:20px;background:var(--card);font-size:13px;color:var(--title)}
+.pill svg{width:16px;height:16px;color:var(--primary)}
+.quote{margin:12px 0 0;font-size:17px;line-height:1.7;color:var(--title);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.src{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--divider);font-size:13.5px;color:var(--body)}
+.src b{color:var(--title)}
+.src .grade{margin-left:auto}
+.src svg{width:18px;height:18px;color:var(--primary)}
+.sg2 .lead{margin:10px 0 14px;font-size:15px;color:var(--title);line-height:1.6}
+.sg2 .btn{width:100%}
+
+/* ===== RoundedScaffoldBody ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.panel>.scroll{padding-top:14px}
+
+/* ===== NEW: আগ্রহের বিষয় page — toggle chips, picked ones counted on top ===== */
+.hint{margin:0 16px 12px;font-size:14px;color:var(--body);line-height:1.6}
+.picked{margin:0 16px 14px;padding:10px 12px;border-radius:12px;background:var(--card);font-size:13.5px;color:var(--hint)}
+.picked b{color:var(--primary-dark)}
+:root[data-theme="dark"] .picked b{color:var(--primary)}
+.cloud{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px}
+.tchip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:4px 14px;border-radius:20px;border:1px solid var(--divider);background:var(--card);font-size:14px;color:var(--body);text-align:left;line-height:1.35}
+.tchip svg{width:16px;height:16px;display:none}
+.tchip[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:var(--on-appbar)}
+.tchip[aria-pressed="true"] svg{display:block}
+.foot{flex:none;padding:10px 16px 16px;background:var(--scaffold)}
+.foot .btn{width:100%}
+.foot .btn[disabled]{opacity:.45;pointer-events:none}
+
+/* ===== Settings: notification card with the new row ===== */
+.sc{background:var(--card);border-radius:8px;margin:0 12px 12px;padding:10px 15px 15px}
+.sc-head{display:flex;align-items:center;gap:12px;min-height:40px}
+.sc-head .ic{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.sc-head .ic svg{width:20px;height:20px}
+.sc-head b{flex:1;font-size:16px;color:var(--title)}
+.sc-head>svg{color:var(--hint);transform:rotate(180deg)}
+.opt{margin-top:20px}
+.opt-row{display:flex;align-items:center;justify-content:space-between}
+.opt-t{font-size:15px;color:var(--title)}
+.dd{display:flex;align-items:center;gap:8px;width:100%;margin-top:12px;height:44px;padding:0 10px 0 12px;border-radius:6px;border:1px solid var(--divider);text-align:left;font-size:15px;color:var(--primary-dark)}
+:root[data-theme="dark"] .dd{color:var(--primary)}
+.dd span{flex:1}
+.dd svg{color:var(--body)}
+.mini{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.mini span{padding:2px 10px;border-radius:20px;background:var(--tint);font-size:13px;color:var(--primary-dark)}
+:root[data-theme="dark"] .mini span{color:var(--primary)}
+.mini .btn{height:28px;padding:0 8px;font-size:13.5px}
+.radio{display:flex;align-items:center;gap:14px;width:100%;padding:12px 4px;font-size:15.5px;color:var(--title);text-align:left}
+.radio i{width:20px;height:20px;border-radius:50%;border:2px solid var(--disabled);flex:none}
+.radio[aria-checked="true"] i{border:6px solid var(--primary)}
+
+/* ===== Hadith page ===== */
+.chap{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:0 12px 10px;padding:12px var(--pad);font-size:15px;font-weight:700;color:var(--title)}
+.chap b{color:var(--primary)}
+.chap span{display:block;font-weight:400;font-size:13.5px;color:var(--body)}
+.full .narrator{color:var(--primary);font-size:15px;margin:12px 0 4px}
+.full .translation{font-size:16px;line-height:1.75;color:var(--title)}
+
+/* ===== Phone notification shade (pulled down) ===== */
+.shade{flex:1;display:flex;flex-direction:column;padding:14px 12px;background:var(--surface-2)}
+.qs{display:flex;justify-content:space-between;align-items:baseline;padding:0 6px 14px;color:var(--title)}
+.qs b{font-size:30px}
+.qs span{font-size:14px;color:var(--hint)}
+.nt{display:block;width:100%;text-align:left;background:var(--card);border-radius:22px;padding:14px 16px;box-shadow:var(--shadow)}
+.nt-top{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--hint)}
+.nt-top img{width:22px;height:22px;border-radius:6px}
+.nt-top b{color:var(--title)}
+.nt h3{margin:8px 0 4px;font-size:15.5px;color:var(--title)}
+.nt p{margin:0;font-size:14.5px;color:var(--body);line-height:1.6}
+.nt .open{display:inline-flex;margin-top:10px;font-size:14px;font-weight:700;color:var(--primary)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="new" data-keep-scroll></section>
+      <section class="screen" data-screen="topics">
+        <header class="appbar"><button class="icon-btn" id="t-back" data-i="back" aria-label="পেছনে"></button><h1>আগ্রহের বিষয়</h1></header>
+        <div class="rbody"><div class="panel">
+          <div class="scroll" id="t-body"></div>
+          <div class="foot"><button class="btn" id="t-save">সেভ করুন</button></div>
+        </div></div>
+      </section>
+      <section class="screen" data-screen="home" data-keep-scroll></section>
+      <section class="screen" data-screen="hadith">
+        <header class="appbar"><button class="icon-btn" id="h-back" data-i="back" aria-label="পেছনে"></button><h1 id="h-title"></h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="h-body"></div></div></div>
+      </section>
+      <section class="screen" data-screen="settings">
+        <header class="appbar"><button class="icon-btn" data-i="back" aria-label="পেছনে" data-go="home"></button><h1>সেটিংস</h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="s-body"></div></div></div>
+      </section>
+      <section class="screen" data-screen="notif" data-status="light">
+        <div class="shade" id="shade"></div>
+      </section>
+
+      <div id="hold" hidden>
+        <div class="pg" id="pg-home">
+          <header class="appbar"><button class="icon-btn" data-i="menu" aria-label="মেনু" data-go="settings"></button><h1>আল হাদিস</h1><button class="icon-btn" data-i="search" aria-label="সার্চ" data-snack="সার্চ পেজ খুলবে — এই ফিচারের অংশ নয়"></button></header>
+          <div class="scroll" id="home-body"></div>
+        </div>
+      </div>
+
+      <div class="sheet" id="sh-time" role="dialog" aria-label="নোটিফিকেশনের সময় নির্বাচন করুন">
+        <div class="sheet-head"><h2>নোটিফিকেশনের সময় নির্বাচন করুন</h2><button class="icon-btn" data-close data-i="close" aria-label="বন্ধ করুন"></button></div>
+        <div class="sheet-body" id="time-list" style="padding-bottom:18px"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="ps_data.js"></script>
+<script>
+(function () {
+  const { $, $$, icons, bn } = Kit;
+  icons.menu = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+  const ic = (k) => icons[k] || PS.ICON[k];
+  const paint = (root = document) => $$('[data-i]', root).forEach((b) => { b.innerHTML = ic(b.dataset.i); });
+
+  /* ---------- State ---------- */
+  const S = { recent: null, bookmark: null, picked: new Set(), read: new Set(), draft: new Set(), from: 'new', hk: null, back: 'home', daily: true, time: 'সকাল ৮:০০' };
+  const asNew = () => Object.assign(S, { recent: null, bookmark: null, picked: new Set(), read: new Set() });
+  const asReturning = () => Object.assign(S, { recent: 56, bookmark: 41, picked: new Set([56, 45]), read: new Set() });
+  const head = (h) => `<div class="hadith-head"><span class="book-badge" style="background:${h.color}">${h.abbr}</span>
+      <div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${h.no}</span></div><span class="grade">সহিহ হাদিস</span></div>`;
+  function suggestion() { let s = PS.next(S); if (!s) { S.read.clear(); s = PS.next(S); } return s; }
+
+  /* ---------- Home ---------- */
+  const pg = $('#pg-home');
+  function renderHome() {
+    let card;
+    if (!PS.hasSignal(S)) {
+      card = `<section class="sg2" aria-label="এটাও পড়তে পারেন"><div class="sg2-top">${PS.ICON.spark}<h2>এটাও পড়তে পারেন</h2></div>
+        <p class="lead">কোন বিষয়ের হাদিস আপনার ভালো লাগে? দুই-একটা বেছে নিন, এখানে সেই বিষয়ের হাদিস আসবে।</p>
+        <button class="btn" data-topics="new">আগ্রহের বিষয় বাছুন</button></section>`;
+    } else {
+      const s = suggestion(), h = PS.HADITHS[s.k];
+      card = `<button class="sg2" data-h="${s.k}" aria-label="এটাও পড়তে পারেন"><span class="sg2-top">${PS.ICON.spark}<h2>এটাও পড়তে পারেন</h2></span>
+        <span class="pill">${PS.ICON.tag}${s.why}</span>
+        <p class="quote">${h.tr.replace(/\n+/g, ' ')}</p>
+        <span class="src"><b>${h.book}</b> · ${h.no}<span class="grade">সহিহ হাদিস</span>${PS.ICON.arrow}</span></button>`;
+    }
+    $('#home-body').innerHTML = PS.qaGrid() + card;
+  }
+
+  /* ---------- আগ্রহের বিষয়: chips ---------- */
+  function renderTopics() {
+    $('#t-body').innerHTML = `<p class="hint">যে বিষয়গুলো বেশি পড়তে চান, ট্যাপ করে বাছুন। ক্যাটাগরিগুলো "বিষয়ভিত্তিক হাদিস" থেকে।</p>
+      <div class="picked" id="t-picked"></div>
+      <div class="cloud">${PS.SUBJECTS.map((s) => `<button class="tchip" data-sub="${s.id}" aria-pressed="${S.draft.has(s.id)}">${icons.check}${s.t}</button>`).join('')}</div>`;
+    syncFoot();
+  }
+  function syncFoot() {
+    $('#t-picked').innerHTML = S.draft.size ? `বাছা হয়েছে <b>${bn(S.draft.size)}টি</b>: ${[...S.draft].map((id) => PS.subj(id).t).join(', ')}` : 'এখনো কোনো বিষয় বাছা হয়নি';
+    const same = S.draft.size === S.picked.size && [...S.draft].every((x) => S.picked.has(x));
+    $('#t-save').disabled = same;
+  }
+
+  /* ---------- Hadith page ---------- */
+  function renderHadith() {
+    const h = PS.HADITHS[S.hk];
+    S.read.add(S.hk);
+    if (!S.recent) S.recent = h.subj;
+    $('#h-title').innerHTML = `${h.book}<small>হাদিস: ${h.no}</small>`;
+    $('#h-body').innerHTML = `<div class="chap"><b>অধ্যায়:</b> ${h.ch}<span>${h.sec}</span></div>
+      <article class="card full">${head(h)}<p class="narrator">${h.nar} থেকে বর্ণিত:</p>${h.tr.split(/\n+/).map((t) => `<p class="translation">${t}</p>`).join('')}</article>`;
+  }
+
+  /* ---------- Settings ---------- */
+  function renderSettings() {
+    $('#s-body').innerHTML = `<div class="sc">
+      <div class="sc-head"><span class="ic">${PS.ICON.bell}</span><b>নোটিফিকেশন সেটিংস</b>${icons.down}</div>
+      <div class="opt opt-row"><span class="opt-t">দৈনিক নোটিফিকেশন</span><button class="switch" id="sw-daily" role="switch" aria-checked="${S.daily}" aria-label="দৈনিক নোটিফিকেশন"></button></div>
+      <div class="opt"><span class="opt-t">নোটিফিকেশনের সময়</span><button class="dd" data-open="sh-time"><span>${S.time}</span>${icons.down}</button></div>
+      <div class="opt"><div class="opt-row"><span class="opt-t">আগ্রহের বিষয়</span><button class="btn text" data-topics="settings">বদলান</button></div>
+        <div class="mini">${S.picked.size ? [...S.picked].map((id) => `<span>${PS.subj(id).t}</span>`).join('') : '<span>কোনো বিষয় বাছা হয়নি</span>'}</div></div>
+    </div>`;
+    $('#time-list').innerHTML = PS.TIMES.map((t) => `<button class="radio" data-time="${t}" aria-checked="${t === S.time}"><i></i>${t}</button>`).join('');
+  }
+
+  /* ---------- Notification shade ---------- */
+  function renderNotif() {
+    const n = PS.notif(S), h = PS.HADITHS[n.k];
+    $('#shade').innerHTML = `<div class="qs"><b>${bn(S.time.replace(/^\S+ /, ''))}</b><span>শনিবার, ১৮ অক্টোবর</span></div>
+      <button class="nt" data-h="${n.k}"><span class="nt-top"><img src="${PS.ICON.app}" alt=""><b>আল হাদিস</b> · এখন</span>
+        <h3>আপনার আগ্রহের বিষয় থেকে: ${PS.short(n.sid)}</h3><p>${h.tr.replace(/\n+/g, ' ')}</p>
+        <span class="open">${h.book} · হাদিস ${h.no}</span></button>`;
+  }
+
+  /* ---------- Navigation ---------- */
+  let internal = false;
+  const go = (id) => { internal = true; Kit.show(id); internal = false; };
+  Kit.onScreen((id) => {
+    if (id === 'new' || id === 'home') {
+      if (!internal) (id === 'new' ? asNew : asReturning)();
+      $(`.screen[data-screen="${id}"]`).appendChild(pg); renderHome(); $('#home-body').scrollTop = 0;
+    }
+    if (id === 'topics') { if (!internal) { asNew(); S.from = 'new'; S.draft = new Set(); } renderTopics(); }
+    if (id === 'hadith') { if (!internal) { asReturning(); S.hk = PS.next(S).k; S.back = 'home'; } renderHadith(); }
+    if (id === 'settings') { if (!internal) asReturning(); renderSettings(); }
+    if (id === 'notif') { if (!internal) asReturning(); renderNotif(); }
+  });
+
+  /* ---------- In-phone events ---------- */
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-topics],[data-sub],[data-h],[data-time],#t-save,#t-back,#h-back,#sw-daily');
+    if (!t || !t.closest('.phone')) return;
+    if (t.dataset.topics) { S.from = t.dataset.topics; S.draft = new Set(S.picked); return go('topics'); }
+    if (t.dataset.sub) {
+      const id = +t.dataset.sub; S.draft.has(id) ? S.draft.delete(id) : S.draft.add(id);
+      t.setAttribute('aria-pressed', S.draft.has(id)); return syncFoot();
+    }
+    if (t.id === 't-save') { S.picked = new Set(S.draft); go(S.from === 'settings' ? 'settings' : 'home'); return Kit.snack('আগ্রহের বিষয় সেভ হয়েছে'); }
+    if (t.id === 't-back') return go(S.from === 'settings' ? 'settings' : 'new');
+    if (t.dataset.h) { S.hk = t.dataset.h; S.back = Kit.current === 'notif' ? 'home' : Kit.current; return go('hadith'); }
+    if (t.id === 'h-back') return go(S.back === 'new' ? 'home' : S.back);
+    if (t.dataset.time) { S.time = t.dataset.time; Kit.close('sh-time'); renderSettings(); return Kit.snack(`নোটিফিকেশন আসবে ${S.time}`); }
+    if (t.id === 'sw-daily') { S.daily = !S.daily; t.setAttribute('aria-checked', S.daily); return Kit.snack(S.daily ? 'দৈনিক নোটিফিকেশন চালু' : 'দৈনিক নোটিফিকেশন বন্ধ'); }
+  });
+
+  paint();
+  Kit.init({ demo: 2, name: 'রঙিন কার্ড ও চিপ', screens: [
+    { id: 'new', label: 'নতুন ইউজার' },
+    { id: 'topics', label: 'আগ্রহের বিষয়' },
+    { id: 'home', label: 'হোমে সাজেশন' },
+    { id: 'hadith', label: 'পুরো হাদিস' },
+    { id: 'settings', label: 'সেটিংস' },
+    { id: 'notif', label: 'নোটিফিকেশন' },
+  ]});
+})();
+</script>
+</body>
+</html>

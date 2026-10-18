@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>যুদ্ধের টাইমলাইন ও হাদিস — ডেমো ৪ · বটম শিট</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared page body ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.appbar.np h1{margin-left:12px}
+
+/* ===== List: one grouped list, compact rows ===== */
+.group{margin:0 12px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+.lrow{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border-bottom:1px solid var(--divider);text-align:left}
+.lrow:last-child{border-bottom:0}
+.lrow:hover,.lrow.on{background:var(--surface-2)}
+.lrow .ic{flex:none;width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.lrow .t{flex:1;min-width:0}
+.lrow b{display:block;font-size:16px;color:var(--title)}
+.lrow small{font-size:13px;color:var(--body)}
+.lrow .n{flex:none;text-align:right;font-size:18px;font-weight:700;line-height:1.1;color:var(--primary)}
+.lrow .n small{display:block;font-size:11.5px;font-weight:400;color:var(--hint)}
+
+/* ===== Battle sheet: header, book segments, hadith rows ===== */
+#sheet-b{height:84%;max-height:84%}
+.grab{width:40px;height:4px;border-radius:4px;background:var(--divider);margin:8px auto 0}
+.sh-sub{display:flex;gap:12px;margin-top:2px;font-size:13.5px;font-weight:400;color:var(--body)}
+.sh-sub span{display:inline-flex;align-items:center;gap:4px}
+.sh-sub svg{width:15px;height:15px;color:var(--primary)}
+#sheet-b .sheet-body{flex:1;min-height:0}
+.bk{display:flex;align-items:center;gap:8px;margin:14px 0 6px;font-size:14px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .bk{color:var(--primary)}
+.bk span{margin-left:auto;font-weight:400;color:var(--hint)}
+.hrow{display:flex;gap:12px;width:100%;padding:10px 0;border-bottom:1px solid var(--divider);text-align:left}
+.hrow .book-badge{width:36px;height:36px;font-size:10px}
+.hrow .t{flex:1;min-width:0}
+.hrow .t b{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--title)}
+.hrow .t .grade{margin-left:auto;font-size:11.5px}
+.hrow p{margin:3px 0 0;font-size:13.5px;color:var(--body)}
+.dl{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;background:var(--surface-2)}
+.dl svg{color:var(--primary);flex:none;margin-top:2px}
+.dl p{margin:0 0 10px;font-size:14px;line-height:1.6;color:var(--body)}
+.dl .btn{height:36px;font-size:14px}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos): battle / nodl = the list with the sheet open ===== -->
+      <section class="screen" data-screen="list"></section>
+      <section class="screen" data-screen="battle"></section>
+      <section class="screen" data-screen="nodl"></section>
+
+      <!-- ===== Sheet: one battle (filled by sheetHTML) ===== -->
+      <div class="sheet" id="sheet-b" role="dialog" aria-label="যুদ্ধের হাদিস"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="battle_data.js"></script>
+<script>
+  const T = window.BT, S = T.S, I = Kit.icons, bn = Kit.bn, $ = Kit.$;
+
+  /* ---------- List: compact rows, count on the right ---------- */
+  function listView(sel) {
+    const row = (b) => `<button class="lrow${b.id === sel ? ' on' : ''}" data-act="battle" data-id="${b.id}"><span class="ic">${T.ICON.flag(20)}</span>
+      <span class="t"><b>${b.name}</b><small>${b.year} · ${b.place}</small></span><span class="n">${bn(T.total(b))}<small>হাদিস</small></span></button>`;
+    return `<header class="appbar np"><h1>যুদ্ধ ও হাদিস</h1></header><div class="body"><div class="group">${T.BATTLES.map(row).join('')}</div></div>`;
+  }
+
+  /* ---------- Sheet: battle header + hadith by book ---------- */
+  function sheetHTML() {
+    const b = T.byId(S.id);
+    const grp = (g) => `<div class="bk">${g.name}<span>${bn(g.nos.length)}টি হাদিস</span></div>${g.dl ? g.nos.map((no) => { const m = T.meta(g.book, no); return `<button class="hrow" data-act="hadith" data-book="${g.book}" data-no="${no}">
+        <span class="book-badge">${g.abbr}</span><span class="t"><b>হাদিস ${bn(no)}<span class="grade">${T.GRADE}</span></b><p>${m.nar} থেকে বর্ণিত</p><p>পরিচ্ছেদ: ${m.sec}</p></span></button>`; }).join('')
+      : `<div class="dl" id="dl-msg">${T.ICON.download(22)}<div><p>${T.dlText}</p><button class="btn" data-act="dl">ডাউনলোড ম্যানেজার</button></div></div>`}`;
+    return `<div class="grab"></div><div class="sheet-head"><h2>${b.name}<span class="sh-sub"><span>${T.ICON.cal(15)}${b.year}</span><span>${T.ICON.pin(15)}${b.place}</span></span></h2>
+      <button class="icon-btn" data-act="back" aria-label="বন্ধ করুন">${I.close}</button></div><div class="sheet-body">${T.groups(b).map(grp).join('')}</div>`;
+  }
+
+  /* ---------- Navigation ---------- */
+  let internal = false;
+  const go = (id) => { internal = true; Kit.show(id); internal = false; };
+  const openBattle = () => go(T.byId(S.id).groups.muslim && !S.mDl ? 'nodl' : 'battle');
+  Kit.onScreen((id) => {
+    if (!internal && id !== 'list') { S.id = 'uhud'; S.mDl = id === 'battle'; T.syncBar(); }
+    $(`.screen[data-screen="${id}"]`).innerHTML = listView(id === 'list' ? null : S.id);
+    if (id !== 'list') {
+      $('#sheet-b').innerHTML = sheetHTML(); Kit.open('sheet-b');
+      const m = $('#dl-msg'), box = $('#sheet-b .sheet-body');
+      if (id === 'nodl' && m) requestAnimationFrame(() => { box.scrollTop += m.getBoundingClientRect().top - box.getBoundingClientRect().top - 60; });
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-act]');
+    if (!t || !t.closest('.phone')) return;
+    const a = t.dataset.act;
+    if (a === 'battle') { S.id = t.dataset.id; openBattle(); }
+    else if (a === 'back') go('list');
+    else if (a === 'hadith') T.openHadith(t.dataset.book, +t.dataset.no);
+    else if (a === 'dl') T.dlManager();
+  });
+
+  Kit.init({ demo: 4, name: 'বটম শিট', extra: T.extra, screens: T.SCREENS });
+  /* Toolbar: সহীহ মুসলিম downloaded or not */
+  $('#tg-dl').onclick = () => { S.mDl = !S.mDl; T.syncBar(); if (Kit.current === 'list') go('list'); else openBattle(); };
+  T.syncBar();
+</script>
+</body>
+</html>

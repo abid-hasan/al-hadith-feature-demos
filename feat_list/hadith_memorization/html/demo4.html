@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>হাদিস মুখস্থ কোর্স — ডেমো ৪ · শিটে শিখুন</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): page body, home quick actions, hadith card ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.btn:disabled,.icon-btn:disabled{opacity:.4;cursor:default}
+.foot{flex:none;display:flex;gap:10px;padding:10px 12px 16px;background:var(--card);border-top:1px solid var(--divider)}
+.foot .btn{flex:1}
+/* ===== Home (HadithBookListTab): green band + quick-action card (HomeSmallDashboard) ===== */
+.home .body{position:relative;padding-top:0}
+.hband{position:absolute;left:0;right:0;top:0;height:90px;background:linear-gradient(var(--appbar),var(--primary-dark))}
+:root[data-theme="dark"] .hband{background:var(--appbar)}
+.appbar.home-bar h1{text-align:center}
+.dash{position:relative;background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin:12px;padding:10px 0 6px}
+.qa{display:grid;grid-template-columns:repeat(4,1fr);row-gap:4px}
+.qa>span,.qa>button{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px;font-size:13px;font-weight:700;line-height:1.25;color:var(--body);text-align:center;border-radius:10px}
+.qi{width:36px;height:36px;border-radius:50%;background:var(--tint);color:var(--primary);display:grid;place-items:center}
+.qi svg{width:18px;height:18px}
+.qa .dot{position:absolute;top:8px;left:calc(50% + 10px);width:8px;height:8px;border-radius:50%;background:var(--error)}
+.qa>button.feat .qi{background:var(--primary);color:var(--on-appbar)}
+/* ===== Hadith card pieces (HadithListItem: head, narrator in primary, translation) ===== */
+.hc{padding:12px 14px 14px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:12px 0 6px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+.ref{margin:8px 0 0;font-size:13px;color:var(--hint)}
+/* ===== Hidden words for the self test: base look, each demo restyles ===== */
+.mask{display:inline;padding:0 2px;border-radius:6px;font:inherit;color:inherit;line-height:inherit}
+.mask:not(.open){color:transparent;background:var(--tint);box-shadow:inset 0 0 0 1px var(--primary)}
+/* ===== Answer colours: primary = right, error = wrong (as the hadith quiz does) ===== */
+.ok{--v:var(--primary)}
+.bad{--v:var(--error)}
+/* ===== Audio button: playing state ===== */
+.wave{display:inline-flex;align-items:flex-end;gap:2px;height:14px}
+.wave i{width:3px;border-radius:2px;background:currentColor;animation:wv .9s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.15s}.wave i:nth-child(3){animation-delay:.3s}
+@keyframes wv{0%,100%{height:4px}50%{height:14px}}
+
+/* ===== Demo 4 — শিটে শিখুন: the course, the self test and the certificate
+   open as tall bottom sheets over the page you came from; the quiz keeps its
+   answers in a docked panel at the bottom ===== */
+/* Course list rows */
+.crow{display:flex;align-items:center;gap:14px;width:calc(100% - 24px);margin:0 12px 10px;padding:14px;text-align:left}
+.crow .ri{width:52px;height:52px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:17px;font-weight:700;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .crow .ri{color:var(--primary)}
+.crow div{flex:1;min-width:0}
+.crow b{display:block;font-size:16px;color:var(--title)}
+.crow span{font-size:13px;color:var(--hint)}
+.crow .progress{margin-top:8px}
+.crow>svg{color:var(--hint);flex:none}
+/* Sheet pieces */
+#sheet-m{max-height:90%}
+.grab{width:40px;height:4px;border-radius:4px;background:var(--divider);margin:8px auto 0}
+.sh-sum{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:12px;border-radius:12px;background:var(--surface-2)}
+.sh-sum div{flex:1}
+.sh-sum b{font-size:15px;color:var(--title)}
+.sh-sum span{display:block;font-size:12.5px;color:var(--hint)}
+.sh-sum .progress{margin-top:6px}
+.mini{display:flex;align-items:center;gap:10px;width:100%;padding:10px 2px;border-bottom:1px solid var(--divider);text-align:left}
+.mini:last-child{border-bottom:0}
+.mini i{width:28px;height:28px;flex:none;border-radius:8px;display:grid;place-items:center;font-style:normal;font-size:13px;font-weight:700;background:var(--surface-2);color:var(--body)}
+.mini i svg{width:15px;height:15px}
+.mini.done i{background:var(--primary);color:var(--on-appbar)}
+.mini.next i,.mini.again i{background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .mini.next i,:root[data-theme="dark"] .mini.again i{color:var(--primary)}
+.mini.locked{opacity:.55}
+.mini span{flex:1;font-size:14.5px;color:var(--title)}
+.mini small{font-size:12px;color:var(--hint)}
+.mini.next small,.mini.again small{color:var(--primary)}
+.grp{margin:14px 0 4px;font-size:13px;font-weight:700;color:var(--primary)}
+/* Lesson page */
+.lh{margin:2px 16px 12px}
+.lh small{font-size:13px;color:var(--hint)}
+.lh h2{margin:0;font-size:19px;color:var(--title)}
+.hf{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--divider)}
+.hf .ref{margin:0;flex:1}
+.hf .btn{height:34px;padding:0 12px;font-size:14px}
+.btn.playing{background:var(--primary);color:var(--on-appbar)}
+/* Test sheet */
+.tq{margin:0 0 12px;padding:12px 14px;border-radius:12px;border:1px solid var(--divider)}
+.tq .narrator{color:var(--primary);margin:0 0 4px;font-size:14px}
+.tq .translation{margin:0;font-size:16.5px;line-height:1.85;color:var(--title)}
+.tq .ref{margin-top:6px}
+.tq .mask:not(.open){background:var(--surface-2);box-shadow:inset 0 -2px 0 var(--primary);border-radius:4px}
+.tq .mask.open{box-shadow:inset 0 -2px 0 var(--primary)}
+.sheet-foot .btn{flex:1}
+/* Quiz: question on top, answers docked at the bottom */
+.qwrap{flex:1;min-height:0;display:flex;flex-direction:column}
+.qtop{flex:1;min-height:0;overflow-y:auto;padding:16px}
+.qtop small{font-size:13px;color:var(--hint)}
+.qtop .progress{margin:6px 0 18px}
+.qtop p{margin:0;font-size:19px;font-weight:600;line-height:1.65;color:var(--title)}
+.qtop .fb{margin-top:14px;font-size:14.5px;font-weight:400;color:var(--body)}
+.dock{flex:none;padding:8px 14px 16px;border-radius:22px 22px 0 0;background:var(--card);box-shadow:0 -6px 24px rgba(0,0,0,.1)}
+.dock .grab{margin-bottom:10px}
+.dock .o{display:flex;align-items:center;gap:10px;width:100%;margin-bottom:8px;padding:12px 14px;border-radius:12px;background:var(--surface-2);font-size:15.5px;color:var(--title);text-align:left;border:1.5px solid transparent}
+.dock .o i{font-style:normal;font-weight:700;color:var(--hint)}
+.dock .o.ok,.dock .o.bad{border-color:var(--v)}
+.dock .o.ok i,.dock .o.bad i{color:var(--v)}
+.dock .btn{width:100%;margin-top:4px}
+.res4{padding:30px 20px;text-align:center}
+.res4 b{display:block;font-size:40px;color:var(--primary)}
+.res4 span{font-size:15px;color:var(--body)}
+/* Certificate sheet */
+.c4{padding:22px 18px;border-radius:14px;border:1.5px solid var(--primary);background:var(--tint);text-align:center}
+.c4 svg{color:var(--primary);width:40px;height:40px;margin:0 auto 6px}
+.c4 small{font-size:12.5px;color:var(--hint)}
+.c4 h3{margin:0 0 10px;font-size:20px;color:var(--primary-dark)}
+:root[data-theme="dark"] .c4 h3{color:var(--primary)}
+.c4 .nm{font-size:22px;font-weight:700;color:var(--title)}
+.c4 p{margin:8px 0 12px;font-size:14.5px;line-height:1.7;color:var(--body)}
+.c4 .ft{display:flex;justify-content:space-between;font-size:12.5px;color:var(--hint)}
+
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="home"></section>
+      <section class="screen" data-screen="courses"></section>
+      <section class="screen" data-screen="course"></section>
+      <section class="screen" data-screen="lesson"></section>
+      <section class="screen" data-screen="test"></section>
+      <section class="screen" data-screen="quiz"></section>
+      <section class="screen" data-screen="cert"></section>
+      <!-- ===== Overlays used by some demos (filled by D) ===== -->
+      <div class="sheet" id="sheet-m" role="dialog" aria-label="হাদিস মুখস্থ"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, progress state, the flow and
+   screen wiring. Each demo's own look lives in the D object below.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const I = {
+  memo: (w = 18) => svg('<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/><path d="M9 10l2 2 4-4"/>', w),
+  lock: (w = 18) => svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>', w),
+  headset: (w = 18) => svg('<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>', w),
+  eye: (w = 18) => svg('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', w),
+  redo: (w = 18) => svg('<path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/>', w),
+  award: (w = 18) => svg('<circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/>', w),
+  quiz: (w = 18) => svg('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.7M12 17h.01"/>', w),
+  save: (w = 18) => svg('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>', w),
+};
+
+/* ---------- Hadith (safe list only, Bangla only). {…} = hidden in the self test.
+   audio: false means the scholars gave no recording, so no listen button. ---------- */
+const HAD = {
+  b1: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1, nar: 'উমর ইবনুল খাত্তাব (রাঃ) থেকে বর্ণিত:', audio: true,
+    text: 'সকল কাজ {নিয়তের} ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই {পাবে}, যার সে {নিয়ত} করে।' },
+  m223: { book: 'সহীহ মুসলিম', abbr: 'মুসলিম', no: 223, part: true, nar: 'আবু মালিক আল-আশআরি (রাঃ) থেকে বর্ণিত:', audio: true,
+    text: '{পবিত্রতা} ঈমানের {অর্ধেক}।' },
+  b6018: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 6018, part: true, nar: 'আবু হুরায়রা (রাঃ) থেকে বর্ণিত:', audio: false,
+    text: 'যে ব্যক্তি আল্লাহ ও {শেষ দিনের} প্রতি ঈমান রাখে, সে যেন {ভালো কথা} বলে অথবা {চুপ থাকে}।' },
+  b6116: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 6116, nar: 'আবু হুরায়রা (রাঃ) থেকে বর্ণিত:', audio: true,
+    text: 'এক ব্যক্তি নবী (সাঃ)-কে বললেন, আমাকে উপদেশ দিন। তিনি বললেন, {রাগ করো না}। লোকটি কয়েকবার একই কথা বললেন, তিনি প্রতিবারই বললেন, {রাগ করো না}।' },
+  b1894: { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1894, part: true, nar: 'আবু হুরায়রা (রাঃ) থেকে বর্ণিত:', audio: false,
+    text: 'রোজা {ঢালস্বরূপ}।' },
+};
+const GRADE = 'সহিহ হাদিস';
+/* ---------- Courses. h = the lesson's hadith; c = count for lessons this demo
+   does not open. Only the first three lessons carry hadith text. ---------- */
+const TOPICS = ['নামাজ', 'জাকাত', 'হজ', 'মা-বাবার হক', 'প্রতিবেশী', 'মেহমানদারি', 'সত্য কথা', 'লজ্জা', 'দয়া', 'হালাল উপার্জন', 'সালাম', 'ভ্রাতৃত্ব', 'ধৈর্য', 'তাওবা', 'দোয়া', 'জিকির', 'মৃত্যুর স্মরণ'];
+const FIRST = [{ t: 'নিয়ত ও পবিত্রতা', h: ['b1', 'm223'] }, { t: 'কথা ও রাগ', h: ['b6018', 'b6116'] }, { t: 'রোজা', h: ['b1894'] }];
+const COURSES = {
+  c40: { name: '৪০ হাদিস', sub: 'প্রতিদিনের আমল ও আচরণ', n: 40, L: [...FIRST, ...TOPICS.map((t, i) => ({ t, c: i === 16 ? 3 : 2 }))] },
+  c10: { name: '১০ হাদিস', sub: 'সহজ শুরু, ছোট ছোট পাঠ', n: 10, L: [...FIRST, { t: 'সালাম', c: 3 }, { t: 'দয়া', c: 2 }] },
+};
+/* ---------- Course quiz (scholars write the real questions) ---------- */
+const QUIZ = [
+  { q: '“সকল কাজ ___ ওপর নির্ভরশীল।” খালি জায়গায় কোনটা বসবে?', o: ['নিয়তের', 'ফলাফলের', 'চেষ্টার'], a: 0 },
+  { q: 'হাদিসে পবিত্রতাকে ঈমানের কত অংশ বলা হয়েছে?', o: ['এক-তৃতীয়াংশ', 'অর্ধেক', 'এক-চতুর্থাংশ'], a: 1 },
+  { q: 'উপদেশ চাওয়া ব্যক্তিকে নবী (সাঃ) বারবার কী বলেছেন?', o: ['বেশি কথা বলো না', 'দেরি করো না', 'রাগ করো না'], a: 2 },
+  { q: 'হাদিসে রোজাকে কিসের সাথে তুলনা করা হয়েছে?', o: ['ঢাল', 'আলো', 'সেতু'], a: 0 },
+];
+const PASS = 3;
+const OPT = ['ক', 'খ', 'গ', 'ঘ'];
+/* Progress mark for question i: ok | bad | cur | '' */
+const qMark = (i) => (i < S.q.i || S.q.end ? (S.q.ans[i] ? 'ok' : 'bad') : i === S.q.i ? (S.q.pick === null ? 'cur' : S.q.ans[i] ? 'ok' : 'bad') : '');
+const CERT = { name: 'আব্দুর রহমান', date: '১৮ অক্টোবর ২০২৬' };
+
+/* ---------- State ---------- */
+const S = {
+  cid: 'c40', li: 0, nav: false, play: null,
+  done: { c40: new Set(), c10: new Set([0]) }, again: { c40: new Set(), c10: new Set() },
+  all: { c40: false, c10: false }, passed: { c40: false, c10: false },
+  rev: new Set(), q: { i: 0, pick: null, score: 0, end: false, ans: [] },
+};
+const C = () => COURSES[S.cid];
+const L = () => C().L[S.li];
+const cnt = (l) => (l.h ? l.h.length : l.c);
+const isDone = (cid, i) => S.all[cid] || S.done[cid].has(i);
+const isOpen = (cid, i) => i < FIRST.length || S.all[cid];
+const memorized = (cid) => (S.all[cid] ? COURSES[cid].n : [...S.done[cid]].reduce((s, i) => s + cnt(COURSES[cid].L[i]), 0));
+const doneLessons = (cid) => (S.all[cid] ? COURSES[cid].L.length : S.done[cid].size);
+const pct = (cid) => Math.round((memorized(cid) / COURSES[cid].n) * 100);
+const nextLi = (cid) => { const i = COURSES[cid].L.findIndex((l, k) => !isDone(cid, k) && isOpen(cid, k)); return i; };
+/* Lesson row status: done | again | next | open | locked */
+const status = (cid, i) => (isDone(cid, i) ? 'done' : !isOpen(cid, i) ? 'locked' : S.again[cid].has(i) ? 'again' : nextLi(cid) === i ? 'next' : 'open');
+const STATUS = { done: 'মুখস্থ হয়েছে', again: 'আবার পড়ুন', next: 'পরের পাঠ', open: 'বাকি', locked: 'আগের পাঠ শেষ হলে' };
+const quizOpen = (cid) => S.all[cid];
+const hRef = (k) => `${HAD[k].book} · হাদিস: ${bn(HAD[k].no)}${HAD[k].part ? ' (অংশ)' : ''}`;
+const plain = (k) => HAD[k].text.replace(/[{}]/g, '');
+/* Text with the hidden words as buttons (key = hadith:index) */
+const masked = (k) => { let n = 0; return HAD[k].text.replace(/\{([^}]+)\}/g, (m, w) => { const key = `${k}:${n++}`; return `<button class="mask${S.rev.has(key) ? ' open' : ''}" data-act="reveal" data-k="${key}" aria-label="${S.rev.has(key) ? w : 'লুকানো অংশ, ট্যাপ করে দেখুন'}">${w}</button>`; }); };
+const maskKeys = () => L().h.flatMap((k) => (HAD[k].text.match(/\{[^}]+\}/g) || []).map((m, i) => `${k}:${i}`));
+const allRevealed = () => maskKeys().every((x) => S.rev.has(x));
+const playBtn = (k, cls = 'btn tonal') => (HAD[k].audio ? `<button class="${cls}${S.play === k ? ' playing' : ''}" data-act="play" data-hk="${k}" aria-label="${S.play === k ? 'থামান' : 'শুনুন'}">${S.play === k ? `${icons.pause}<span class="wave"><i></i><i></i><i></i></span>থামান` : `${icons.play}শুনুন`}</button>` : '');
+
+const SCREENS = [
+  { id: 'home', label: 'হোম' },
+  { id: 'courses', label: 'কোর্সের তালিকা' },
+  { id: 'course', label: 'কোর্সের পেজ' },
+  { id: 'lesson', label: 'পাঠ' },
+  { id: 'test', label: 'নিজে পরীক্ষা' },
+  { id: 'quiz', label: 'কোর্সের কুইজ' },
+  { id: 'cert', label: 'সার্টিফিকেট' },
+];
+const EXTRA = '<button class="kit-chip" type="button" data-prog="new">নতুন কোর্স</button><button class="kit-chip" type="button" data-prog="all">সব পাঠ শেষ</button>';
+
+/* ---------- Home: only the quick-action card, with the new button ---------- */
+const QA = [['সর্বশেষ', icons.clock], ['জাম্প', icons.chevron], ['ওয়াক্ত', icons.sun], ['সাদাকা', icons.plus], ['ফিড', icons.grid], ['কুইজ', icons.check], ['ফ্ল্যাশকার্ড', icons.copy]];
+function homeHTML() {
+  return `<header class="appbar home-bar"><h1>আল হাদিস</h1></header>
+    <div class="body"><div class="hband"></div><div class="dash"><div class="qa">${QA.map(([n, ic]) => `<span><span class="qi">${ic}</span>${n}</span>`).join('')}
+      <button class="feat" data-act="feature"><span class="qi">${I.memo()}</span>হাদিস মুখস্থ<i class="dot"></i></button></div></div></div>`;
+}
+
+/* ---------- Render ---------- */
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  sec.classList.toggle('home', id === 'home');
+  sec.innerHTML = id === 'home' ? homeHTML() : D[id]();
+  D.after?.(id, sec);
+}
+const rerender = () => { const b = $('.screen.on .body'); const top = b ? b.scrollTop : 0; render(Kit.current); const n = $('.screen.on .body'); if (n) n.scrollTop = top; };
+const go = (id) => { S.nav = true; Kit.show(id); };
+function resetQuiz() { S.q = { i: 0, pick: null, score: 0, end: false, ans: [] }; }
+function setProg(p) {
+  S.cid = 'c40';
+  S.all.c40 = p === 'all'; S.passed.c40 = false;
+  S.done.c40 = new Set(); S.again.c40 = new Set();
+  if (['quiz', 'cert'].includes(Kit.current) && p === 'new') { go('course'); return; }
+  syncExtra(); rerender();
+}
+function syncExtra() { $$('[data-prog]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.prog === 'all' ? S.all.c40 : !S.all.c40 && !S.done.c40.size))); }
+function onScreen(id) {
+  // A toolbar chip can open any screen: put the course in the state that screen needs.
+  if (!S.nav) {
+    if (id === 'lesson' || id === 'test') { S.li = Math.max(0, Math.min(nextLi(S.cid), FIRST.length - 1)); if (!L().h) S.li = 0; }
+    if (id === 'quiz') { S.all[S.cid] = true; S.passed[S.cid] = false; resetQuiz(); }
+    if (id === 'cert') { S.all[S.cid] = true; S.passed[S.cid] = true; }
+  }
+  if (id === 'test' || (id === 'lesson' && !S.nav)) S.rev = new Set();
+  if (id !== 'lesson') S.play = null;
+  S.nav = false;
+  syncExtra();
+  render(id);
+}
+
+/* ---------- Wiring ---------- */
+const BACK = { courses: 'home', course: 'courses', lesson: 'course', test: 'lesson', quiz: 'course', cert: 'course' };
+const ACT = {
+  back: () => go(BACK[Kit.current] || 'home'),
+  feature: () => go('courses'),
+  course: (t) => { S.cid = t.dataset.cid; go('course'); },
+  lesson: (t) => {
+    const i = +t.dataset.li;
+    if (!isOpen(S.cid, i)) { Kit.snack('আগের পাঠগুলো শেষ হলে এই পাঠ খুলবে'); return; }
+    if (!C().L[i].h) { Kit.snack(`পাঠ ${bn(i + 1)}: ${C().L[i].t} · মুখস্থ হয়েছে`); return; }
+    S.li = i; S.rev = new Set(); go('lesson');
+  },
+  resume: () => { const i = nextLi(S.cid); if (i < 0) { ACT.quiz(); return; } S.li = i; S.rev = new Set(); go('lesson'); },
+  play: (t) => { S.play = S.play === t.dataset.hk ? null : t.dataset.hk; rerender(); },
+  test: () => { S.rev = new Set(); go('test'); },
+  reveal: (t) => { S.rev.add(t.dataset.k); t.classList.add('open'); t.setAttribute('aria-label', t.textContent); D.onReveal?.(); },
+  revealAll: () => { maskKeys().forEach((k) => S.rev.add(k)); rerender(); },
+  remembered: () => {
+    S.done[S.cid].add(S.li); S.again[S.cid].delete(S.li);
+    go('course');
+    Kit.snack(`পাঠ ${bn(S.li + 1)} শেষ · ${bn(memorized(S.cid))}টি হাদিস মুখস্থ`);
+  },
+  again: () => { S.again[S.cid].add(S.li); go('course'); Kit.snack('পাঠটা বাকি রইল, পরে আবার পড়ুন'); },
+  quiz: () => { if (!quizOpen(S.cid)) { Kit.snack('সব পাঠ শেষ হলে কুইজ খুলবে'); return; } resetQuiz(); go('quiz'); },
+  pick: (t) => { if (S.q.pick !== null) return; S.q.pick = +t.dataset.o; S.q.ans[S.q.i] = S.q.pick === QUIZ[S.q.i].a; if (S.q.ans[S.q.i]) S.q.score++; rerender(); },
+  qnext: () => {
+    S.q.i++; S.q.pick = null;
+    if (S.q.i >= QUIZ.length) { S.q.end = true; S.q.i = QUIZ.length - 1; if (S.q.score >= PASS) S.passed[S.cid] = true; }
+    rerender();
+  },
+  qretry: () => { resetQuiz(); rerender(); },
+  cert: () => go('cert'),
+  save: () => Kit.snack('সার্টিফিকেট ছবি হিসেবে গ্যালারিতে সেভ হয়েছে'),
+  share: () => Kit.snack('ফোনের শেয়ার মেনু খুলবে'),
+};
+document.addEventListener('click', (e) => {
+  const p = e.target.closest('[data-prog]');
+  if (p) { setProg(p.dataset.prog); return; }
+  const t = e.target.closest('[data-act]');
+  if (t) (D.act?.[t.dataset.act] || ACT[t.dataset.act])?.(t);
+});
+
+/* ======================================================================
+   DEMO 4 — শিটে শিখুন: 'course', 'test' and 'cert' are sheets over a base page
+   ====================================================================== */
+const BASE = { course: 'courses', test: 'lesson', cert: 'courses' };
+const bar = (title, sub = '') => `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="back">${icons.back}</button><h1>${title}${sub ? `<small>${sub}</small>` : ''}</h1></header>`;
+const prog = (p) => `<div class="progress"><i style="width:${p}%"></i></div>`;
+const head = (t, sub) => `<div class="grab"></div><div class="sheet-head"><h2>${t}${sub ? `<small style="display:block;font-size:12.5px;font-weight:400;color:var(--hint)">${sub}</small>` : ''}</h2><button class="icon-btn" data-act="back" aria-label="বন্ধ করুন">${icons.close}</button></div>`;
+const hadithCard = (k) => `<article class="card hc"><div class="hadith-head"><span class="book-badge">${HAD[k].abbr}</span><div class="hadith-meta"><b>${HAD[k].book}</b><span>হাদিস: ${bn(HAD[k].no)}</span></div><span class="grade">${GRADE}</span></div>
+  <p class="narrator">${HAD[k].nar}</p><p class="translation">${plain(k)}</p><div class="hf"><p class="ref">${hRef(k)}</p>${playBtn(k)}</div></article>`;
+/* ---------- Pages ---------- */
+const coursesPage = () => `${bar('হাদিস মুখস্থ')}<div class="body">${Object.entries(COURSES).map(([id, c]) => `<button class="card crow" data-act="course" data-cid="${id}"><span class="ri">${bn(c.n)}</span><div><b>${c.name}</b><span>${c.sub} · ${bn(c.L.length)}টি পাঠ</span>${prog(pct(id))}<span>${bn(memorized(id))}/${bn(c.n)} মুখস্থ</span></div>${icons.chevron}</button>`).join('')}</div>`;
+const lessonPage = () => { const l = L(); return `${bar(`পাঠ ${bn(S.li + 1)}`, C().name)}<div class="body"><div class="lh"><small>${bn(l.h.length)}টি হাদিস</small><h2>${l.t}</h2></div>${l.h.map(hadithCard).join('')}</div>
+  <div class="foot"><button class="btn" data-act="test">${I.eye()}নিজে পরীক্ষা দিন</button></div>`; };
+/* ---------- Sheets ---------- */
+const SHEET = {
+  course: () => {
+    const c = C(), nx = nextLi(S.cid), q = quizOpen(S.cid);
+    const rows = c.L.map((l, i) => { const st = status(S.cid, i); return `<button class="mini ${st}" data-act="lesson" data-li="${i}"><i>${st === 'done' ? icons.check : st === 'locked' ? I.lock(15) : bn(i + 1)}</i><span>${l.t}</span><small>${st === 'locked' ? '' : STATUS[st]}</small></button>`; }).join('');
+    return `${head(c.name, c.sub)}<div class="sheet-body"><div class="sh-sum"><div><b>${bn(memorized(S.cid))}/${bn(c.n)} হাদিস মুখস্থ</b><span>${bn(doneLessons(S.cid))}টি পাঠ শেষ</span>${prog(pct(S.cid))}</div></div>
+      <p class="grp">পাঠ</p>${rows}<p class="grp">কোর্সের শেষে</p>
+      <button class="mini ${q ? 'next' : 'locked'}" data-act="quiz"><i>${q ? I.quiz(15) : I.lock(15)}</i><span>কোর্সের কুইজ</span><small>${q ? `${bn(QUIZ.length)}টি প্রশ্ন` : 'সব পাঠ শেষ হলে'}</small></button>
+      ${S.passed[S.cid] ? `<button class="mini done" data-act="cert"><i>${I.award(15)}</i><span>সার্টিফিকেট</span><small>দেখুন</small></button>` : ''}</div>
+      <div class="sheet-foot">${nx >= 0 ? `<button class="btn" data-act="resume">${icons.play}${doneLessons(S.cid) ? 'চালিয়ে যান' : 'শুরু করুন'}: পাঠ ${bn(nx + 1)}</button>` : `<button class="btn" data-act="quiz">${I.quiz()}কুইজ দিন</button>`}</div>`;
+  },
+  test: () => { const l = L(); return `${head('নিজে পরীক্ষা', `${l.t} · দাগ দেওয়া অংশ মনে করে বলুন, তারপর ট্যাপ করুন`)}<div class="sheet-body">${l.h.map((k) => `<div class="tq"><p class="narrator">${HAD[k].nar}</p><p class="translation">${masked(k)}</p><p class="ref">${hRef(k)}</p></div>`).join('')}
+    <button class="btn text" data-act="revealAll">${I.eye()}সব খুলুন</button></div>
+    <div class="sheet-foot"><button class="btn outline" data-act="again">${I.redo()}আবার পড়ব</button><button class="btn" data-act="remembered">${icons.check}মনে ছিল</button></div>`; },
+  cert: () => `${head('সার্টিফিকেট', C().name)}<div class="sheet-body"><div class="c4">${I.award()}<small>হাদিস মুখস্থ কোর্স</small><h3>সার্টিফিকেট</h3><div class="nm">${CERT.name}</div>
+    <p>“${C().name}” কোর্সের ${bn(C().n)}টি হাদিস মুখস্থ করে কুইজে পাস করেছেন।</p><div class="ft"><span>${CERT.date}</span><span>আল হাদিস</span></div></div></div>
+    <div class="sheet-foot"><button class="btn outline" data-act="save">${I.save()}সেভ করুন</button><button class="btn" data-act="share">${icons.share}শেয়ার করুন</button></div>`,
+};
+const D = {
+  courses: coursesPage,
+  course: coursesPage,
+  lesson: lessonPage,
+  test: lessonPage,
+  cert: coursesPage,
+  /* ---------- Quiz: answers docked at the bottom ---------- */
+  quiz: () => {
+    const q = S.q, Q = QUIZ[q.i];
+    if (q.end) {
+      const pass = q.score >= PASS;
+      return `${bar('কোর্সের কুইজ', C().name)}<div class="qwrap"><div class="qtop res4"><b>${bn(q.score)}/${bn(QUIZ.length)}</b><span>${pass ? 'অভিনন্দন, আপনি পাস করেছেন।' : `পাস করতে ${bn(PASS)}টি সঠিক উত্তর লাগবে।`}</span></div>
+        <div class="dock"><div class="grab"></div>${pass ? `<button class="btn" data-act="cert">${I.award()}সার্টিফিকেট দেখুন</button>` : `<button class="btn" data-act="qretry">${I.redo()}আবার চেষ্টা করুন</button>`}</div></div>`;
+    }
+    return `${bar('কোর্সের কুইজ', C().name)}<div class="qwrap"><div class="qtop"><small>প্রশ্ন ${bn(q.i + 1)}/${bn(QUIZ.length)}</small>${prog(((q.i + (q.pick === null ? 0 : 1)) / QUIZ.length) * 100)}<p>${Q.q}</p>
+      ${q.pick !== null ? `<p class="fb">${q.pick === Q.a ? 'সঠিক উত্তর।' : `সঠিক উত্তর: ${Q.o[Q.a]}`}</p>` : ''}</div>
+      <div class="dock"><div class="grab"></div>${Q.o.map((o, i) => `<button class="o${q.pick !== null && i === Q.a ? ' ok' : q.pick === i ? ' bad' : ''}" data-act="pick" data-o="${i}"><i>${OPT[i]}</i>${o}</button>`).join('')}
+        <button class="btn" data-act="qnext"${q.pick === null ? ' disabled' : ''}>${q.i === QUIZ.length - 1 ? 'ফলাফল দেখুন' : 'পরের প্রশ্ন'}</button></div></div>`;
+  },
+  after: (id) => { if (SHEET[id]) { $('#sheet-m').innerHTML = SHEET[id](); Kit.open('sheet-m'); } },
+};
+/* Tapping outside a sheet (or Esc) closes it and goes back to its base page */
+document.addEventListener('click', (e) => { if (e.target.classList.contains('scrim') && BASE[Kit.current]) ACT.back(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && BASE[Kit.current]) ACT.back(); });
+
+Kit.onScreen(onScreen);
+Kit.init({ demo: 4, name: 'শিটে শিখুন', extra: EXTRA, screens: SCREENS });
+</script>
+</body>
+</html>

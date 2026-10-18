@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ছবি তুলে হাদিস যাচাই — ডেমো ৩ · ধাপে ধাপে</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="psv_sys.css">
+<style>
+/* ===== Step header (flat app bar + 3 steps) ===== */
+.steps{flex:none;display:flex;align-items:center;gap:6px;padding:8px 16px 12px;background:var(--scaffold);border-bottom:1px solid var(--divider)}
+.st{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--hint);white-space:nowrap}
+.st i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:700;border:1.5px solid var(--divider);color:var(--hint)}
+.st.on{color:var(--title);font-weight:700}
+.st.on i{background:var(--primary);border-color:var(--primary);color:white}
+.st.done i{background:var(--tint);border-color:var(--primary);color:var(--primary)}
+.st.done i svg{width:13px;height:13px}
+.sep{flex:1;height:1.5px;background:var(--divider);min-width:8px}
+.sep.done{background:var(--primary)}
+
+/* ===== Step 1: photo zone + field ===== */
+.zone{margin:16px 14px 0;padding:22px 16px 18px;border-radius:16px;border:2px dashed color-mix(in srgb,var(--primary) 45%,transparent);background:var(--card);text-align:center}
+.zone .big{width:64px;height:64px;margin:0 auto 10px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
+.zone h2{margin:0;font-size:17px;color:var(--title)}
+.zone p{margin:4px 0 14px;font-size:13.5px;color:var(--hint)}
+.zone .row{display:flex;gap:8px;justify-content:center}
+.zone .btn{height:42px;padding:0 16px}
+.or{display:flex;align-items:center;gap:10px;margin:18px 16px 8px;font-size:13.5px;color:var(--hint)}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--divider)}
+.f1{display:block;width:calc(100% - 28px);margin:0 14px;height:140px;resize:none;border-radius:12px;border:1px solid var(--divider);background:var(--card);padding:12px 14px;font-size:15px;line-height:1.6;color:var(--title);outline:none}
+.f1:focus{border-color:var(--primary)}
+.f1::placeholder{color:var(--hint)}
+.bar{flex:none;display:flex;gap:10px;padding:10px 14px 12px;border-top:1px solid var(--divider);background:var(--card)}
+.bar .btn{flex:1;height:48px}
+.bar .btn.outline{flex:none}
+.bar .btn:disabled{opacity:.5}
+
+/* ===== Step 2: the read text as editable lines ===== */
+.head2{display:flex;gap:12px;align-items:center;margin:14px 14px 8px}
+.head2 .th{width:44px;height:58px;border-radius:6px;overflow:hidden;flex:none;border:1px solid var(--divider)}
+.head2 p{margin:0;font-size:13.5px;line-height:1.5;color:var(--body)}
+.head2 b{display:block;font-size:15px;color:var(--title)}
+.lines{margin:0 14px;background:var(--card);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.ln{display:flex;align-items:flex-start;gap:6px;padding:6px 4px 6px 12px;border-bottom:1px solid var(--divider)}
+.ln:last-child{border-bottom:0}
+.ln .no{flex:none;width:20px;padding-top:7px;font-size:12px;color:var(--hint)}
+.ln .tx{flex:1;min-width:0;padding:5px 6px;border-radius:6px;font-size:15px;line-height:1.6;color:var(--title);outline:none}
+.ln .tx:focus{background:var(--tint)}
+.ln .rm{flex:none;width:34px;height:34px;display:grid;place-items:center;color:var(--hint);border-radius:50%}
+.ln .rm:hover{background:var(--surface-2);color:var(--error)}
+.ln .rm svg{width:18px;height:18px}
+.reading{margin:0 14px;padding:40px 12px;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:12px;background:var(--card);color:var(--hint);font-size:14.5px}
+.tip2{margin:10px 16px 0;font-size:13px;color:var(--hint)}
+
+/* ===== Picker: floating grouped action sheet ===== */
+.sheet.act{left:10px;right:10px;bottom:10px;background:transparent;box-shadow:none;border-radius:0}
+.grp{background:var(--card);border-radius:16px;overflow:hidden;margin-bottom:8px}
+.grp h2{margin:0;padding:14px 16px 10px;text-align:center;font-size:13.5px;font-weight:400;color:var(--hint);border-bottom:1px solid var(--divider)}
+.grp button{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:56px;font-size:16.5px;color:var(--primary);border-bottom:1px solid var(--divider)}
+.grp button:last-child{border-bottom:0}
+.grp .cx{font-weight:700;color:var(--title)}
+
+/* ===== Step 3: result ===== */
+.ov{display:flex;gap:10px;margin:14px 14px 10px;padding:12px 14px;border-radius:12px;background:var(--card)}
+.ov>svg{flex:none;color:var(--primary);margin-top:2px}
+.ov b{display:block;font-size:16px;color:var(--title)}
+.ov span{font-size:13.5px;color:var(--hint)}
+.grade.sahih{background:var(--grade-sahih)}
+.card .narrator{color:var(--primary);font-size:14.5px;margin:10px 0 2px}
+.card .sh{display:flex;width:100%;height:44px;margin-top:12px}
+.nf{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 22px;text-align:center}
+.nf h3{margin:0;font-size:19px;color:var(--title)}
+.nf p{margin:0;font-size:14.5px;line-height:1.65;text-align:justify}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+
+      <!-- ===== Screen: home ===== -->
+      <section class="screen" data-screen="home">
+        <header class="appbar"><h1 style="margin-left:12px">আল হাদিস</h1></header>
+        <div class="scroll"><div class="qa" id="qa"></div></div>
+      </section>
+
+      <!-- ===== Step 1: give the text (photo zone, or type/paste) ===== -->
+      <section class="screen" data-screen="verify" data-status="light">
+        <header class="appbar flat"><button class="icon-btn" data-go="home" data-i="back" aria-label="পেছনে"></button><h1>হাদিস যাচাই</h1></header>
+        <div class="steps" data-step="1"></div>
+        <div class="scroll">
+          <div class="zone">
+            <div class="big" data-x="camera"></div>
+            <h2>যে লেখাটি যাচাই করতে চান, সেটি এখানে দিন</h2>
+            <p>বই, পোস্টার বা ফেসবুক স্ক্রিনশটের ছবি দিলেও হবে</p>
+            <div class="row"><button class="btn" data-open="sheet-pick"><span data-x="camera"></span>ছবি থেকে</button><button class="btn outline" id="b-paste"><span data-x="paste"></span>পেস্ট করুন</button></div>
+          </div>
+          <div class="or">অথবা লিখে দিন</div>
+          <textarea class="f1" id="t1" aria-label="যে লেখাটি যাচাই করতে চান" placeholder="ফেসবুক, হোয়াটসঅ্যাপ বা অন্য কোথাও পাওয়া হাদিসটি এখানে পেস্ট করুন…"></textarea>
+        </div>
+        <div class="bar"><button class="btn" id="v1">যাচাই করুন</button></div>
+      </section>
+
+      <!-- ===== Step 2: fix the read text, line by line ===== -->
+      <section class="screen" data-screen="edit" data-status="light">
+        <header class="appbar flat"><button class="icon-btn" data-go="verify" data-i="back" aria-label="পেছনে"></button><h1>হাদিস যাচাই</h1></header>
+        <div class="steps" data-step="2"></div>
+        <div class="scroll">
+          <div class="head2"><div class="th" id="e-th"></div><p id="e-head"></p></div>
+          <div class="reading" id="reading" hidden><span class="spin"></span>ছবি থেকে লেখা পড়া হচ্ছে…</div>
+          <div class="lines" id="lines"></div>
+          <p class="tip2" id="tip2">লাইনে চেপে বানান ঠিক করুন। লাইক-কমেন্টের মতো বাড়তি লাইন পাশের কাটা চিহ্ন চেপে সরিয়ে দিন।</p>
+        </div>
+        <div class="bar"><button class="btn outline" data-open="sheet-pick" aria-label="আরেকটা ছবি"><span data-x="image"></span></button><button class="btn" id="v2">যাচাই করুন</button></div>
+      </section>
+
+      <!-- ===== Step 3: result ===== -->
+      <section class="screen" data-screen="result" data-status="light">
+        <header class="appbar flat"><button class="icon-btn" data-go="edit" data-i="back" aria-label="পেছনে"></button><h1 id="r-title"></h1></header>
+        <div class="steps" data-step="3"></div>
+        <div class="scroll" id="r-body"></div>
+      </section>
+
+      <!-- ===== Picker: floating grouped action sheet ===== -->
+      <div class="sheet act" id="sheet-pick" role="dialog" aria-label="ছবি থেকে">
+        <div class="grp"><h2>ছবি থেকে লেখা নিন</h2>
+          <button id="p-cam"><span data-x="camera"></span>ছবি তুলুন</button>
+          <button id="p-gal"><span data-x="image"></span>গ্যালারি থেকে নিন</button>
+        </div>
+        <div class="grp"><button class="cx" data-close>বাতিল করুন</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="../../_kit/kit.js"></script>
+<script src="psv_data.js"></script>
+<script src="psv_sys.js"></script>
+<script>
+  const P = window.PSV, I = Kit.icons, $ = Kit.$, $$ = Kit.$$, bn = Kit.bn;
+  const paint = (root = document) => {
+    $$('[data-i]', root).forEach((b) => { b.innerHTML = I[b.dataset.i]; });
+    $$('[data-x]', root).forEach((b) => { b.innerHTML = P.ic[b.dataset.x](b.classList.contains('big') ? 30 : 20); });
+  };
+
+  /* ---------- Step header ---------- */
+  const STEPS = ['লেখা দিন', 'ঠিক করুন', 'ফলাফল'];
+  $$('.steps').forEach((el) => {
+    const n = +el.dataset.step;
+    el.innerHTML = STEPS.map((s, i) => `${i ? `<span class="sep ${i < n ? 'done' : ''}"></span>` : ''}<span class="st ${i + 1 === n ? 'on' : i + 1 < n ? 'done' : ''}"><i>${i + 1 < n ? I.check : bn(i + 1)}</i>${s}</span>`).join('');
+  });
+
+  /* ---------- State ---------- */
+  const S = { lines: [], photo: 'post', reading: false, last: null, text: '' };
+  let timer;
+  $('#qa').innerHTML = P.homeGrid();
+
+  /* ---------- Step 2: lines ---------- */
+  function renderEdit() {
+    $('#e-th').innerHTML = P.img[S.photo]();
+    $('#reading').hidden = !S.reading;
+    $('#lines').hidden = S.reading || !S.lines.length;
+    $('#tip2').hidden = S.reading;
+    $('#v2').disabled = S.reading;
+    $('#e-head').innerHTML = S.reading ? '<b>ছবিটা পড়া হচ্ছে</b>একটু অপেক্ষা করুন' : `<b>${bn(S.lines.length)}টি লাইন পড়া হয়েছে</b>ছবি থেকে পড়া লেখা। ভুল বানান বা বাড়তি অংশ থাকলে ঠিক করে নিন।`;
+    $('#lines').innerHTML = S.lines.map((l, i) => `<div class="ln"><span class="no">${bn(i + 1)}</span><div class="tx" contenteditable="true" data-ln="${i}">${l}</div><button class="rm" data-rm="${i}" aria-label="লাইনটি সরান">${I.close}</button></div>`).join('');
+  }
+  function read(id) {
+    clearTimeout(timer);
+    S.photo = id; S.lines = []; S.reading = true;
+    go('edit');
+    timer = setTimeout(() => {
+      S.reading = false;
+      const r = P.read(id);
+      if (r.msg) { go('verify'); return Kit.snack(r.msg, r.again ? { label: P.t.another, onClick: () => Kit.open('sheet-pick') } : undefined); }
+      S.lines = r.text.split('\n'); renderEdit();
+    }, 1200);
+  }
+  $('#lines').addEventListener('input', (e) => { const t = e.target.closest('[data-ln]'); if (t) S.lines[+t.dataset.ln] = t.textContent; });
+  $('#lines').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rm]'); if (!b) return;
+    const i = +b.dataset.rm, removed = S.lines.splice(i, 1)[0];
+    renderEdit();
+    Kit.snack('লাইনটি সরানো হয়েছে', { label: 'ফেরত আনুন', onClick: () => { S.lines.splice(i, 0, removed); renderEdit(); } });
+  });
+
+  /* ---------- Verify → step 3 ---------- */
+  function verify(text) {
+    S.text = text;
+    const r = P.match(text);
+    if (r.kind === 'msg') return Kit.snack(r.msg);
+    S.last = r; go('result');
+  }
+  $('#v1').onclick = () => verify($('#t1').value);
+  $('#v2').onclick = () => verify(S.lines.join('\n'));
+  function renderResult() {
+    const r = S.last || { kind: 'found', ids: ['b6116'] };
+    if (r.kind === 'found') {
+      $('#r-title').textContent = P.t.resultTitle;
+      $('#r-body').innerHTML = `<div class="ov">${P.ic.found(22)}<div><b>${P.t.found}</b><span>${bn(r.ids.length)}টি মিল · ${P.t.gradeSrc}</span></div></div>` + r.ids.map((id) => {
+        const h = P.hadith[id];
+        return `<article class="card"><div class="hadith-head"><span class="book-badge">${h.abbr}</span>
+          <div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${h.no}</span></div><span class="grade sahih">${h.grade}</span></div>
+          <p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${h.tr}</p>
+          <button class="btn tonal sh" data-snack="গ্রেডসহ হাদিস কার্ডের ছবি শেয়ার মেনুতে যাবে">${P.ic.share(18)}${P.t.share}</button></article>`;
+      }).join('');
+    } else {
+      $('#r-title').textContent = P.t.resultTitle;
+      $('#r-body').innerHTML = `<div class="nf">${P.notFoundSvg}<h3>${P.t.noMatch}</h3><p>${P.t.noMatchMsg}</p><button class="btn outline" data-go="edit">${P.t.edit}</button></div>`;
+    }
+  }
+
+  /* ---------- Navigation: a toolbar chip opens a screen in its example state ---------- */
+  let chip = false, from = null;
+  document.addEventListener('click', (e) => { if (e.target.closest('.kit-chip[data-go]')) chip = true; }, true);
+  const go = (id) => Kit.show(id);
+  const example = () => { S.photo = 'post'; S.lines = P.ocr.post.split('\n'); };
+  Kit.onScreen((id) => {
+    if (chip) { clearTimeout(timer); S.reading = false; }
+    if (id === 'verify' && (chip || from === 'home')) $('#t1').value = '';
+    if (id === 'edit') { if (chip) example(); renderEdit(); }
+    if (id === 'result') { if (chip) { example(); S.last = null; } renderResult(); }
+    chip = false; from = id;
+  });
+
+  /* ---------- In-phone events ---------- */
+  $('#b-paste').onclick = () => Kit.snack(P.t.clip);
+  $('#p-gal').onclick = () => { Kit.close('sheet-pick'); P.gallery(); };
+  $('#p-cam').onclick = () => { Kit.close('sheet-pick'); P.camera(); };
+
+  /* ---------- Toolbar: permission given yet? ---------- */
+  function syncBar() { const b = $('#tg-perm'); if (!b) return; const on = P.perm.gallery || P.perm.camera; b.textContent = on ? 'অনুমতি দেওয়া আছে' : 'প্রথমবার: অনুমতি চাইবে'; b.setAttribute('aria-pressed', on); }
+
+  P.sys({ onPick: (id) => read(id), onPerm: syncBar });
+  paint();
+  Kit.init({ demo: 3, name: 'ধাপে ধাপে',
+    extra: '<button class="kit-chip" id="tg-perm" type="button" title="ছবি ও ক্যামেরার অনুমতি"></button>',
+    screens: [{ id: 'home', label: 'হোম' }, { id: 'verify', label: 'যাচাই পেজ' }, { id: 'edit', label: 'লেখা ঠিক করা' }, { id: 'result', label: 'ফলাফল' }, { id: 'share', label: 'শেয়ার থেকে' }] });
+  $('#tg-perm').onclick = () => { P.setPerm(!(P.perm.gallery || P.perm.camera)); };
+  syncBar();
+</script>
+</body>
+</html>

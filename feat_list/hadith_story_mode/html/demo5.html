@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>হাদিস স্টোরি মোড — ডেমো ৫ · সূচিপত্র</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared page body (minimal: flat app bars, no cards) ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.kicker{margin:14px 20px 4px;font-size:12.5px;font-weight:700;letter-spacing:.02em;color:var(--primary-dark)}
+:root[data-theme="dark"] .kicker{color:var(--primary)}
+
+/* ===== Books: table of contents with dotted leaders ===== */
+.toc{display:flex;align-items:baseline;gap:8px;width:100%;padding:14px 20px;text-align:left}
+.toc b{font-size:17px;font-weight:700;color:var(--title);white-space:nowrap}
+.toc .lead{flex:1;border-bottom:2px dotted var(--divider);transform:translateY(-5px)}
+.toc .n{font-size:17px;font-weight:700;color:var(--primary)}
+.toc.off b,.toc.off .n{color:var(--hint)}
+.toc-sub{display:block;margin:-10px 20px 0;font-size:12.5px;color:var(--hint)}
+
+/* ===== Stories: chapter chips + numbered list ===== */
+.chip-row{padding:8px 16px 4px}
+.item{display:flex;gap:14px;width:100%;padding:14px 20px;text-align:left;border-bottom:1px solid var(--divider)}
+.item .ix{flex:none;font-size:22px;font-weight:700;line-height:1.2;color:var(--primary)}
+.item b{display:block;font-size:16px;line-height:1.4;color:var(--title)}
+.item p{margin:4px 0 0;font-size:14px;line-height:1.6;color:var(--body);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item small{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--hint)}
+.item .grade{font-size:11.5px}
+
+/* ===== Reading: plain page, progress line, bottom split bar ===== */
+.prog{flex:none;height:3px;background:var(--divider)}
+.prog i{display:block;height:100%;background:var(--primary);transition:width .25s}
+.rd{padding:18px 20px 10px}
+.rd .ref{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--hint)}
+.rd h2{margin:10px 0 14px;font-size:22px;line-height:1.4;color:var(--title)}
+.ar-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;margin-bottom:12px;border-top:1px solid var(--divider);border-bottom:1px solid var(--divider);font-size:14.5px;color:var(--body)}
+.rd .narrator{color:var(--primary);font-size:15px;margin:0 0 6px}
+.rd .translation{font-size:17px;line-height:1.95;color:var(--title)}
+.link{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-size:15px;font-weight:700;color:var(--primary);text-decoration:underline;text-underline-offset:4px}
+.link svg{width:18px;height:18px}
+.split{flex:none;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--divider);background:var(--scaffold)}
+.split button{display:flex;flex-direction:column;gap:1px;padding:10px 16px 14px;text-align:left;min-width:0}
+.split button+button{border-left:1px solid var(--divider);text-align:right;align-items:flex-end}
+.split small{display:flex;align-items:center;font-size:12.5px;font-weight:700;color:var(--primary)}
+.split span{max-width:100%;font-size:14px;color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.split button:disabled{opacity:.4;cursor:default}
+
+/* ===== Not downloaded: plain message ===== */
+.msg{padding:60px 28px;text-align:center}
+.msg h3{margin:0;font-size:20px;color:var(--title)}
+.msg p{margin:10px 0 22px;font-size:15px;line-height:1.7;color:var(--body)}
+
+/* ===== Original hadith (app's chapter page; same in all demos) ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.panel .body{padding-top:14px}
+.sec{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:0 12px 10px;padding:12px var(--pad);font-size:15px;font-weight:700;color:var(--title)}
+.sec b{color:var(--primary)}
+.sec span{display:block;font-weight:400;font-size:13.5px;color:var(--body)}
+.hc.hl{box-shadow:0 0 0 2px var(--primary)}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="home"></section>
+      <section class="screen" data-screen="books" data-status="light"></section>
+      <section class="screen" data-screen="stories" data-status="light"></section>
+      <section class="screen" data-screen="read" data-status="light"></section>
+      <section class="screen" data-screen="original"></section>
+      <section class="screen" data-screen="nodl" data-status="light"></section>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="story_data.js"></script>
+<script>
+  const T = window.STORY, S = T.S, I = Kit.icons, bn = Kit.bn, $ = Kit.$;
+  const back = () => `<button class="icon-btn" data-act="back" aria-label="পেছনে">${I.back}</button>`;
+  const two = (n) => bn(String(n).padStart(2, '0'));
+  let filter = 0; // 0 = সব, else chapter no
+
+  /* ---------- Home ---------- */
+  const homeView = () => `<header class="appbar"><h1 style="margin-left:12px">আল হাদিস</h1></header><div class="body" style="padding-top:0">${T.homeHTML()}</div>`;
+
+  /* ---------- Books: contents page ---------- */
+  function booksView() {
+    const row = (b) => `<button class="toc${b.dl ? '' : ' off'}" data-act="book" data-id="${b.id}"><b>${b.name}</b><span class="lead"></span><span class="n">${bn(b.stories)}</span></button>
+      <small class="toc-sub">${bn(b.chapters)}টি অধ্যায়${b.dl ? '' : ' · ডাউনলোড করা নেই'}</small>`;
+    return `<header class="appbar flat">${back()}<h1>গল্প</h1></header>
+      <div class="body"><p class="kicker">কিতাব · গল্পের সংখ্যা</p>${T.BOOKS.map(row).join('')}</div>`;
+  }
+
+  /* ---------- Stories: chapter chips filter the numbered list ---------- */
+  function storiesView() {
+    const chips = `<div class="chip-row"><button class="chip" data-act="filter" data-no="0" aria-pressed="${filter === 0}">সব</button>${T.CHAPTERS.map((c) =>
+      `<button class="chip" data-act="filter" data-no="${c.no}" aria-pressed="${filter === c.no}">${c.title}</button>`).join('')}</div>`;
+    const body = T.CHAPTERS.filter((c) => !filter || c.no === filter).map((c) => `<p class="kicker">${c.title} · ${bn(c.stories.length)}টি গল্প</p>
+      ${c.stories.map((sid, i) => { const st = T.STORIES[sid]; return `<button class="item" data-act="story" data-id="${sid}"><span class="ix">${two(i + 1)}</span>
+        <span><b>${st.title}</b><p>${T.firstLines(st.text)}</p><small>হাদিস: ${bn(st.no)}<span class="grade">${T.GRADE}</span></small></span></button>`; }).join('')}`).join('');
+    return `<header class="appbar flat">${back()}<h1>সহীহ বুখারী<small>গল্প</small></h1></header>${chips}<div class="body">${body}</div>`;
+  }
+
+  /* ---------- Reading: plain text page ---------- */
+  function readView() {
+    const st = T.STORIES[S.sid], c = T.chapterOf(S.sid), n = T.neighbours(S.sid);
+    const side = (sid, dir) => `<button data-act="${dir}" ${sid ? '' : 'disabled'}><small>${dir === 'prev' ? T.ICON.prev(16) + 'পূর্ববর্তী' : 'পরবর্তী' + T.ICON.next(16)}</small>
+      <span>${sid ? T.STORIES[sid].title : (dir === 'prev' ? 'অধ্যায়ের প্রথম গল্প' : 'অধ্যায়ের শেষ গল্প')}</span></button>`;
+    return `<header class="appbar flat">${back()}<h1>${c.title}<small>গল্প ${bn(n.pos)} / ${bn(n.total)}</small></h1></header>
+      <div class="prog"><i style="width:${(n.pos / n.total) * 100}%"></i></div>
+      <div class="body"><div class="rd"><div class="ref">${T.ref(st)}<span class="grade">${T.GRADE}</span></div><h2>${st.title}</h2>
+        <div class="ar-row">আরবি দেখান<button class="switch" role="switch" data-act="arabic" aria-checked="${S.arabic}" aria-label="আরবি দেখান"></button></div>
+        <p class="narrator">${st.nar} থেকে বর্ণিত:</p>${T.paras(st.text)}
+        <button class="link" data-act="orig">মূল হাদিসে যান${T.ICON.open(18)}</button></div></div>
+      <div class="split">${side(n.prev, 'prev')}${side(n.next, 'next')}</div>`;
+  }
+
+  /* ---------- Not downloaded ---------- */
+  function nodlView() {
+    const b = T.bookById(S.book);
+    return `<header class="appbar flat">${back()}<h1>${b.name}</h1></header>
+      <div class="body"><div class="msg"><h3>কিতাবটি ডাউনলোড করা নেই</h3>
+        <p>এই কিতাবের ${bn(b.stories)}টি গল্প পড়তে আগে কিতাবটি ডাউনলোড করুন। ডাউনলোড করা কিতাব ইন্টারনেট ছাড়াও পড়া যায়।</p>
+        <button class="btn outline" data-act="dl">${T.ICON.download(18)}ডাউনলোড ম্যানেজার</button></div></div>`;
+  }
+
+  /* ---------- Original hadith: the app's chapter page ---------- */
+  function originalView() {
+    const st = T.STORIES[S.sid], c = T.chapterOf(S.sid);
+    return `<header class="appbar">${back()}<h1>সহীহ বুখারী<small>${c.title}</small></h1></header>
+      <div class="rbody"><div class="panel"><div class="body">
+        <div class="sec"><b>অধ্যায়:</b> ${st.sec}<span>${c.title}</span></div>
+        <article class="card hc hl"><div class="hadith-head"><span class="book-badge">বুখারী</span>
+          <div class="hadith-meta"><b>সহীহ বুখারী</b><span>হাদিস: ${bn(st.no)}</span></div><span class="grade">${T.GRADE}</span></div>
+          <p class="narrator">${st.nar} থেকে বর্ণিত:</p>${T.paras(st.text)}</article></div></div></div>`;
+  }
+
+  /* ---------- Navigation ---------- */
+  const VIEWS = { home: homeView, books: booksView, stories: storiesView, read: readView, original: originalView, nodl: nodlView };
+  const BACK = { books: 'home', stories: 'books', read: 'stories', original: 'read', nodl: 'books' };
+  let internal = false;
+  const go = (id) => { internal = true; Kit.show(id); internal = false; };
+  Kit.onScreen((id) => {
+    if (!internal) { if (id === 'read' || id === 'original') S.sid = 'b6018'; if (id === 'nodl') S.book = 'muslim'; if (id === 'stories') filter = 0; }
+    $(`.screen[data-screen="${id}"]`).innerHTML = VIEWS[id]();
+  });
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-act]');
+    if (!t || !t.closest('.phone')) return;
+    const a = t.dataset.act, n = T.neighbours(S.sid);
+    if (a === 'home-story') { filter = 0; go('books'); }
+    else if (a === 'back') go(BACK[Kit.current]);
+    else if (a === 'book') { S.book = t.dataset.id; go(T.bookById(S.book).dl ? 'stories' : 'nodl'); }
+    else if (a === 'filter') { filter = +t.dataset.no; go('stories'); }
+    else if (a === 'story') { S.sid = t.dataset.id; go('read'); }
+    else if (a === 'prev' && n.prev) { S.sid = n.prev; go('read'); }
+    else if (a === 'next' && n.next) { S.sid = n.next; go('read'); }
+    else if (a === 'orig') go('original');
+    else if (a === 'arabic') t.setAttribute('aria-checked', T.toggleArabic());
+    else if (a === 'dl') T.dlManager();
+  });
+
+  Kit.init({ demo: 5, name: 'সূচিপত্র', screens: T.SCREENS });
+</script>
+</body>
+</html>

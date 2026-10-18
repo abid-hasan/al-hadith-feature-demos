@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>রাবির নাম দিয়ে সার্চ — ডেমো ৪ · সাদা সূচি</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): rounded body, hadith page, tappable narrator, intro sheet ===== */
+.icon-btn svg,.btn svg{flex:none}
+.screen.g{background:var(--appbar)}
+.rb{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.hc .narrator{color:var(--primary);font-size:15px;margin:14px 0 4px}
+.hc .translation{font-size:16px;line-height:1.75;color:var(--title)}
+.nar{font-weight:700;color:var(--primary);text-decoration:underline dotted;text-underline-offset:4px;text-decoration-thickness:1.5px}
+.ns-s{display:block;font-size:12.5px;font-weight:400;color:var(--hint)}
+.ns-p{margin:0;font-size:15px;line-height:1.75;color:var(--title)}
+.fld{display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 12px;border-radius:10px;background:var(--card);border:1px solid var(--divider);color:var(--hint)}
+.fld input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:15px}
+.fld input::placeholder{color:var(--hint)}
+.fld .icon-btn{width:34px;height:34px}
+/* ===== Demo 4: card-less paper pages, plain rows, neutral count bars ===== */
+.screen.paper{background:var(--card)}
+.paper .appbar.flat{background:var(--card)}
+.pad{padding:12px 20px 0}
+.lk{display:flex;align-items:center;justify-content:space-between;width:calc(100% - 40px);margin:16px 20px 0;padding:14px 0;border-top:1px solid var(--divider);border-bottom:1px solid var(--divider);font-size:15.5px;color:var(--primary);font-weight:700}
+.lk small{display:block;font-size:12.5px;font-weight:400;color:var(--hint)}
+.big{display:flex;align-items:center;gap:8px;margin:10px 20px 0;border-bottom:2px solid var(--primary);color:var(--primary)}
+.big input{flex:1;min-width:0;height:48px;border:0;background:none;outline:none;font-size:20px;color:var(--title)}
+.big input::placeholder{color:var(--hint)}
+.big .icon-btn{width:34px;height:34px;color:var(--hint)}
+.cap{margin:16px 20px 2px;font-size:12.5px;color:var(--hint)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;width:calc(100% - 40px);margin:0 20px;padding:13px 0;border-bottom:1px solid var(--divider);text-align:left}
+.row span{font-size:16px;color:var(--title)}
+.row small{font-size:13px;color:var(--hint);white-space:nowrap}
+/* ===== Result ===== */
+.rh{padding:18px 20px 4px}
+.rh h2{margin:0;font-size:24px;color:var(--title)}
+.rh .t{font-size:14px;color:var(--hint)}
+.rh p{margin:12px 0 0;font-size:15.5px;line-height:1.8;color:var(--title)}
+.rh p button{color:var(--primary);font-weight:700}
+.bars{margin:8px 20px 0}
+.bar{display:block;width:100%;padding:12px 0;border-bottom:1px solid var(--divider);text-align:left}
+.bar[tabindex="-1"]{cursor:default}
+.bar .l{display:flex;justify-content:space-between;font-size:15px;color:var(--title)}
+.bar .l b{font-weight:700}
+.bar .l svg{width:16px;height:16px;color:var(--hint);display:inline-block;vertical-align:-3px}
+.bar i{display:block;height:4px;margin-top:6px;border-radius:2px;background:var(--disabled);opacity:.55}
+/* ===== Book: numbered plain entries ===== */
+.be{display:flex;gap:14px;width:calc(100% - 40px);margin:0 20px;padding:14px 0;border-bottom:1px solid var(--divider);text-align:left}
+.be .no{width:46px;flex:none;font-size:13px;font-weight:700;color:var(--primary)}
+.be div{flex:1}
+.be p{margin:0;font-size:15.5px;line-height:1.75;color:var(--title)}
+.be small{display:block;margin-top:4px;font-size:12.5px;color:var(--hint)}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens (same ids in all 5 demos) ===== -->
+      <section class="screen paper" data-screen="search" data-status="light"></section>
+      <section class="screen paper" data-screen="pick" data-status="light"></section>
+      <section class="screen paper" data-screen="result" data-status="light"></section>
+      <section class="screen paper" data-screen="book" data-status="light"></section>
+      <section class="screen g" data-screen="hadith"></section>
+      <section class="screen g" data-screen="namesheet"></section>
+      <div class="sheet" id="ns" role="dialog" aria-label="ছোট পরিচিতি"></div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script src="rabi_core.js"></script>
+<script>
+/* ======================================================================
+   DEMO 4 — সাদা সূচি: no cards and no colour blocks. One text link on
+   the search page, a big underlined name field, the books as rows with
+   a thin grey bar for the count, and the hadiths as numbered entries.
+   ====================================================================== */
+(function () {
+  const { bn, icons } = Kit;
+  const { S, cur, book, bookKeys, total, fmt, H } = RabiDemo;
+  const flat = (t, sub, act) => `<header class="appbar flat"><button class="icon-btn" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="পেছনে">${icons.back}</button><h1>${t}${sub ? `<small>${sub}</small>` : ''}</h1></header>`;
+
+  const D = {
+    search: () => `${flat('সার্চ')}<div class="scroll"><div class="pad"><div class="fld">${icons.search}<input placeholder="হাদিস সার্চ করুন" aria-label="হাদিস সার্চ করুন"></div></div>
+      <button class="lk" data-act="rabi"><span>রাবির নাম দিয়ে খুঁজুন<small>কোনো সাহাবির বর্ণিত সব হাদিস, বই অনুযায়ী</small></span>${icons.chevron}</button></div>`,
+    pick: () => `${flat('রাবি', '', 'pback')}<div class="scroll"><label class="big">${icons.search}<input data-q value="${S.q}" placeholder="নাম লিখুন" aria-label="রাবির নাম লিখুন"><button class="icon-btn" data-act="clr" aria-label="মুছুন" ${S.q ? '' : 'hidden'}>${icons.close}</button></label>
+      <div data-res></div></div>`,
+    results: (arr) => (arr.length
+      ? `<p class="cap">${S.q ? `${bn(arr.length)}টি নাম মিলেছে` : 'সব রাবি'}</p>${arr.map((n) => `<button class="row" data-act="n" data-n="${n.id}"><span>${n.name}</span><small>${fmt(total(n))}টি হাদিস</small></button>`).join('')}`
+      : `<div class="empty"><h3>কিছু পাওয়া যায়নি</h3><p>এই নামে কোনো রাবি নেই। অন্য বানানে লিখে দেখুন।</p></div>`),
+    result: () => {
+      const n = cur(), max = Math.max(...n.books.map((b) => b[2]));
+      return `${flat('', '', 'rback')}<div class="scroll"><div class="rh"><h2>${n.name}</h2><span class="t">মোট ${fmt(total(n))}টি হাদিস</span>
+          ${n.intro ? `<p>${n.intro}${S.more && n.more ? ` ${n.more}` : ''} ${n.more ? `<button data-act="more">${S.more ? 'কম দেখুন' : 'আরো পড়ুন'}</button>` : ''}</p>` : ''}</div>
+        <p class="cap">বই অনুযায়ী</p><div class="bars">${n.books.map((b, i) => `<button class="bar" ${b[3] ? `data-act="bk" data-b="${i}"` : 'tabindex="-1"'}><span class="l"><span>${b[0]}</span><b>${fmt(b[2])} ${b[3] ? icons.chevron : ''}</b></span><i style="width:${Math.round((b[2] / max) * 100)}%"></i></button>`).join('')}</div></div>`;
+    },
+    book: () => {
+      const n = cur(), b = book();
+      return `${flat(b[0], `${n.name} · ${fmt(b[2])}টি হাদিস`, 'bback')}<div class="scroll" style="padding-top:6px">
+        ${bookKeys().map((k) => `<button class="be" data-act="hd" data-k="${k}"><span class="no">${bn(H[k].no)}</span><div><p>${H[k].tr}</p><small>${H[k].kitab} · সহিহ হাদিস</small></div></button>`).join('')}</div>`;
+    },
+  };
+  RabiDemo.start(D, { demo: 4, name: 'সাদা সূচি' });
+})();
+</script>
+</body>
+</html>

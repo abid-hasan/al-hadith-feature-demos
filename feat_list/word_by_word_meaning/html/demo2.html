@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>শব্দে শব্দে অর্থ — ডেমো 2 · সারি আর আলাদা পেজ</title>
+<link rel="stylesheet" href="../../_kit/kit.css">
+<style>
+/* ===== Shared (same in all 5 demos): page body, rounded panel, hadith card ===== */
+.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:14px 0 28px}
+.body::-webkit-scrollbar{width:0}
+.icon-btn svg,.btn svg{flex:none}
+.screen.rs{background:var(--appbar)}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden;position:relative}
+.hc{padding:12px 14px 14px}
+.hc .narrator{color:var(--primary);font-size:15px;margin:16px 0 6px}
+.hc .translation{font-size:16px;color:var(--title)}
+.ar{font-family:var(--font-ar);direction:rtl}
+.acc{color:var(--primary-dark)}
+:root[data-theme="dark"] .acc{color:var(--primary)}
+/* ===== Settings (ContentSettingsCard + SettingsToggleOption) ===== */
+.set{padding:14px 16px 6px}
+.set-h{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;color:var(--title);padding-bottom:6px}
+.set-h i{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark);font-style:normal}
+:root[data-theme="dark"] .set-h i{color:var(--primary)}
+.set-row{display:flex;align-items:center;gap:12px;width:100%;padding:14px 0;border-top:1px solid var(--divider);text-align:left;font-size:15px;color:var(--title)}
+.set-row span{flex:1}
+.set-note{margin:4px 16px 0;font-size:13.5px;color:var(--hint)}
+/* ===== Experimental notice (WordByWordDisclaimerDialog) and report sheet ===== */
+.exp-ic{width:64px;height:64px;margin:4px auto 10px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .exp-ic{color:var(--primary)}
+.exp h2{text-align:center}
+.exp p{margin:0 0 10px;text-align:center;font-size:14.5px;line-height:1.6;color:var(--body)}
+.exp .x{position:absolute;top:8px;right:8px}
+.rp-lbl{display:block;margin:6px 0 6px;font-size:13.5px;font-weight:700;color:var(--title)}
+.rp-sub{padding:10px 12px;border-radius:10px;background:var(--surface-2);font-size:14px;color:var(--title)}
+.rp-area{width:100%;min-height:96px;padding:10px 12px;border-radius:10px;border:1px solid var(--divider);background:var(--card);color:var(--title);font-size:14.5px;resize:none}
+
+/* ===== Demo 2: underline tabs, "পরীক্ষামূলক" as a small outlined badge ===== */
+.tabs{display:flex;align-items:flex-end;margin:12px -14px 6px;padding:0 14px;border-bottom:1px solid var(--divider)}
+.tabs button.t{padding:8px 14px 9px;font-size:15px;font-weight:700;color:var(--hint);border-bottom:2.5px solid transparent;margin-bottom:-1px}
+.tabs button.t[aria-pressed="true"]{color:var(--primary);border-color:var(--primary)}
+.badge{margin:0 0 8px auto;display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:6px;border:1px solid var(--primary);font-size:12px;color:var(--primary)}
+/* ===== Demo 2: one word per row ===== */
+.rows{margin:0 -14px}
+.wr{display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px;border-bottom:1px solid var(--divider);text-align:left}
+.wr:last-child{border-bottom:0}
+.wr:hover{background:var(--surface-2)}
+.wr .no{width:26px;height:26px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:12.5px;background:var(--surface-2);color:var(--hint)}
+.wr .m{flex:1;min-width:0}
+.wr .m b{display:block;font-size:15px;font-weight:600;color:var(--title)}
+.wr .m em{font-size:12.5px;color:var(--hint)}
+.wr .ar{font-size:23px;line-height:1.5;color:var(--title)}
+.wr>svg{flex:none;color:var(--hint)}
+/* ===== Demo 2: word detail as its own page ===== */
+.hero{padding:22px 16px 18px;text-align:center;background:var(--card);border-bottom:1px solid var(--divider)}
+.hero .ar{display:block;font-size:40px;line-height:1.5;color:var(--title)}
+.hero em{display:block;font-size:14px;color:var(--hint)}
+.hero p{margin:6px 0 0;font-size:18px;font-weight:700;color:var(--primary)}
+.kv{background:var(--card);margin-top:10px}
+.kv .list-row{justify-content:space-between}
+.kv .list-row b{font-weight:400;font-size:14px;color:var(--hint)}
+.kv .list-row span{font-size:15px;color:var(--title);text-align:right}
+.kv .ar{font-size:20px}
+.relw{padding:14px 16px;background:var(--card);margin-top:10px}
+.relw b{display:block;font-size:14px;font-weight:400;color:var(--hint);margin-bottom:8px}
+.relw div{display:flex;flex-wrap:wrap;gap:8px;direction:rtl}
+.relw .chip{font-family:var(--font-ar);font-size:18px}
+.pbar{flex:none;display:flex;gap:10px;padding:10px 12px 14px;background:var(--card);border-top:1px solid var(--divider)}
+.pbar .btn{flex:1}
+.pbar .btn:disabled{opacity:.45;cursor:default}
+.exp-b{text-align:center}
+</style>
+</head>
+<body>
+<main class="kit-stage">
+  <div class="phone">
+    <div class="viewport">
+      <!-- ===== Screens: the engine renders each one (same ids in all 5 demos) ===== -->
+      <section class="screen" data-screen="settings"></section>
+      <section class="screen rs" data-screen="arabic"></section>
+      <section class="screen rs" data-screen="breakdown"></section>
+      <section class="screen" data-screen="word"></section>
+      <section class="screen rs" data-screen="experimental"></section>
+      <!-- ===== "পরীক্ষামূলক" notice as a bottom sheet ===== -->
+      <div class="sheet exp" id="dlg-exp" role="dialog" aria-label="পরীক্ষামূলক ফিচার">
+        <div class="sheet-head"><h2 style="text-align:left">পরীক্ষামূলক ফিচার</h2><button class="icon-btn" data-act="close" aria-label="বন্ধ করুন" data-i="close"></button></div>
+        <div class="sheet-body exp-b">
+          <div class="exp-ic" data-i="flask"></div>
+          <p>শব্দে শব্দে অনুবাদ পরীক্ষামূলকভাবে দেওয়া হয়েছে, তাই এতে ভুল-ত্রুটি থাকতে পারে। সুতরাং, যেকোনো সিদ্ধান্ত নেওয়ার আগে বিচক্ষণ আলেমদের পরামর্শ নিন।</p>
+          <p>কোনো ভুল চোখে পড়লে আমাদের জানান। আপনার রিপোর্ট শব্দে শব্দে অনুবাদটি আরও নির্ভুল করতে আমাদের সাহায্য করবে।</p>
+        </div>
+        <div class="sheet-foot"><button class="btn text" data-act="close">পরে</button><button class="btn" data-act="report">রিপোর্ট করুন</button></div>
+      </div>
+      <!-- ===== Report sheet (from the notice) ===== -->
+      <div class="sheet" id="sheet-report" role="dialog" aria-label="সমস্যা রিপোর্ট করুন">
+        <div class="sheet-head"><h2>সমস্যা রিপোর্ট করুন</h2><button class="icon-btn" data-act="close" aria-label="বন্ধ করুন" data-i="close"></button></div>
+        <div class="sheet-body">
+          <span class="rp-lbl">রিপোর্টের শিরোনাম</span><div class="rp-sub">হাদিসের সমস্যা: সহীহ বুখারী ১ · শব্দে শব্দে অর্থ</div>
+          <span class="rp-lbl" style="margin-top:14px">সমস্যা বর্ণনা করুন</span>
+          <textarea class="rp-area" aria-label="সমস্যা বর্ণনা করুন" placeholder="আপনি যে সমস্যাটি খুঁজে পেয়েছেন তা বিস্তারিত লিখুন..."></textarea>
+        </div>
+        <div class="sheet-foot"><button class="btn text" data-act="close">বাতিল</button><button class="btn" data-act="send">জমা দিন</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../../_kit/kit.js"></script>
+<script>
+/* ======================================================================
+   ENGINE (same in all 5 demos): demo data, state, screen wiring.
+   Each demo's own look lives in the D object further down.
+   ====================================================================== */
+const { $, $$, bn, icons } = Kit;
+const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const IC = {
+  warn: (w = 15) => svg('<path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4.5M12 17h.01"/>', w),
+  article: (w = 20) => svg('<rect x="4.5" y="3" width="15" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>', w),
+  gear: (w = 22) => svg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>', w),
+  flask: (w = 30) => svg('<path d="M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7.5 15h9"/>', w),
+  prev: (w = 18) => svg('<path d="M15 5l-7 7 7 7"/>', w),
+  next: (w = 18) => svg('<path d="M9 5l7 7-7 7"/>', w),
+  share: (w = 18) => svg('<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/>', w),
+  type: (w = 20) => svg('<path d="M4 7V5h16v2M9 19h6M12 5v14"/>', w),
+};
+
+/* ---------- The hadith being read: Bukhari 1, opening words only ---------- */
+const H = { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1, grade: 'সহিহ হাদিস',
+  nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত',
+  text: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।',
+  ar: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى' };
+
+/* ---------- Word-by-word data (scholars verify the real data; a missing
+   field is simply not shown). en = the new English meaning. ---------- */
+const W = [
+  { ar: 'إِنَّمَا', tr: 'ইন্নামা', bn: 'নিশ্চয়ই কেবল', en: 'indeed, only', pos: 'অব্যয়' },
+  { ar: 'الأَعْمَالُ', tr: 'আল-আ‘মালু', bn: 'কাজসমূহ', en: 'the deeds', root: 'ع م ل', rj: 'عمل', lemma: 'عَمَل', pos: 'বিশেষ্য', rm: 'কাজ করা', rel: ['عَمِلَ', 'عَامِلٌ', 'يَعْمَلُ'] },
+  { ar: 'بِالنِّيَّاتِ', tr: 'বিন-নিয়্যাতি', bn: 'নিয়তের ওপর', en: 'by the intentions', root: 'ن و ي', rj: 'نوي', lemma: 'نِيَّة', pos: 'বিশেষ্য', rm: 'মনে সংকল্প করা', rel: ['نَوَى', 'نِيَّةٌ', 'يَنْوِي'] },
+  { ar: 'وَإِنَّمَا', tr: 'ওয়া ইন্নামা', bn: 'আর নিশ্চয়ই', en: 'and indeed', pos: 'অব্যয়' },
+  { ar: 'لِكُلِّ', tr: 'লিকুল্লি', bn: 'প্রত্যেকের জন্য', en: 'for every', root: 'ك ل ل', rj: 'كلل', lemma: 'كُلّ', pos: 'বিশেষ্য' },
+  { ar: 'امْرِئٍ', tr: 'ইমরিয়িন', bn: 'ব্যক্তি', en: 'person', root: 'م ر ء', rj: 'مرء', lemma: 'امْرُؤ', pos: 'বিশেষ্য', rm: 'মানুষ, পুরুষ', rel: ['الْمَرْءُ', 'امْرَأَةٌ'] },
+  { ar: 'مَا', tr: 'মা', bn: 'যা', en: 'what', pos: 'সম্বন্ধবাচক সর্বনাম' },
+  { ar: 'نَوَى', tr: 'নাওয়া', bn: 'সে নিয়ত করেছে', en: 'he intended', root: 'ن و ي', rj: 'نوي', lemma: 'نَوَى', pos: 'ক্রিয়া', rm: 'মনে সংকল্প করা', rel: ['نِيَّةٌ', 'يَنْوِي'] },
+];
+
+/* ---------- State. lang = the reading language (toolbar). ---------- */
+const S = { on: true, tr: false, tab: 'ar', i: 2, lang: 'bn' };
+const mean = (w) => (S.lang === 'en' ? w.en : w.bn);
+const cur = () => W[S.i];
+/* Detail rows; a field with no data is left out */
+function props(w) {
+  return [
+    ['অর্থ', mean(w)],
+    S.lang === 'bn' && ['ইংরেজি অর্থ', w.en, 'en'],
+    w.root && ['মূল হরফ', w.root, 'ar'],
+    w.rj && ['মূল শব্দ', w.rj, 'ar'],
+    w.lemma && ['মূল শব্দরূপ', w.lemma, 'ar'],
+    ['পদের ধরন', w.pos],
+    w.rm && ['মূলের সাধারণ অর্থ', w.rm],
+  ].filter(Boolean);
+}
+const val = (p) => (p[2] === 'ar' ? `<span class="ar">${p[1]}</span>` : p[2] === 'en' ? `<span lang="en">${p[1]}</span>` : p[1]);
+const pos = () => `${bn(S.i + 1)} / ${bn(W.length)}`;
+const SCREENS = [
+  { id: 'settings', label: 'সেটিংস' },
+  { id: 'arabic', label: 'আরবি ট্যাব' },
+  { id: 'breakdown', label: 'শব্দে শব্দে ট্যাব' },
+  { id: 'word', label: 'শব্দের বিস্তারিত' },
+  { id: 'experimental', label: 'পরীক্ষামূলক' },
+];
+const EXTRA = '<button class="kit-chip" type="button" data-lang="bn">পড়ার ভাষা: বাংলা</button><button class="kit-chip" type="button" data-lang="en">পড়ার ভাষা: ইংরেজি</button>';
+
+/* ---------- Settings page: the two switches ---------- */
+const sw = (key, label) => `<button class="set-row" data-act="sw" data-k="${key}" role="switch" aria-checked="${S[key]}"><span>${label}</span><i class="switch" aria-checked="${S[key]}"></i></button>`;
+function settingsHTML() {
+  return `<header class="appbar"><button class="icon-btn" data-go="arabic" aria-label="পেছনে">${icons.back}</button><h1>সেটিংস</h1></header>
+    <div class="body"><section class="card set"><div class="set-h"><i>${IC.type(18)}</i>কন্টেন্ট সেটিংস</div>
+      ${sw('on', 'শব্দে শব্দে অর্থ')}${S.on ? sw('tr', 'শব্দের উচ্চারণ দেখান') : ''}</section>
+      <p class="set-note">চালু থাকলে হাদিসের আরবির ওপরে "আরবি" আর "শব্দে শব্দে" ট্যাব আসবে।</p></div>`;
+}
+
+/* ---------- Hadith page: card with the tab bar over the Arabic ---------- */
+function arabicBlock() {
+  if (!S.on) return `<p class="arabic">${H.ar}</p>`;
+  return D.tabs() + (S.tab === 'ar' ? `<p class="arabic">${H.ar}</p>` : D.words());
+}
+function pageHTML() {
+  return `<header class="appbar"><h1 style="margin-left:12px">${H.book}<small>হাদিস: ${bn(H.no)}</small></h1><button class="icon-btn" data-go="settings" aria-label="সেটিংস">${IC.gear()}</button></header>
+    <div class="rbody"><div class="body"><article class="card hc">
+      <div class="hadith-head"><span class="book-badge">${H.abbr}</span><div class="hadith-meta"><b>${H.book}</b><span>হাদিস: ${bn(H.no)}</span></div><span class="grade">${H.grade}</span></div>
+      ${arabicBlock()}<p class="narrator">${H.nar}</p><p class="translation">${H.text}</p></article></div>${D.dock ? D.dock() : ''}</div>`;
+}
+
+/* ---------- Render ---------- */
+const OPEN = () => Kit.current === 'word';
+function render(id) {
+  const sec = $(`.screen[data-screen="${id}"]`);
+  if (!sec) return;
+  sec.innerHTML = id === 'settings' ? settingsHTML() : id === 'word' && D.mode === 'page' ? D.detail() : pageHTML();
+}
+const SW = () => $('#sheet-word'); // only demos with a sheet have it
+function refresh() {
+  if (D.mode === 'sheet') SW().innerHTML = D.detail();
+  else render(Kit.current);
+}
+function syncExtra() { $$('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === S.lang))); }
+function onScreen(id) {
+  if (id === 'arabic') S.tab = 'ar'; // keeps the settings switch as the user left it
+  if (id === 'breakdown' || id === 'word' || id === 'experimental') { S.on = true; S.tab = 'wbw'; }
+  syncExtra();
+  render(id);
+  if (id === 'word' && D.mode === 'sheet') { SW().innerHTML = D.detail(); Kit.open(SW().id); }
+  if (id === 'experimental') Kit.open('dlg-exp');
+}
+
+/* ---------- Wiring ---------- */
+const ACT = {
+  tab: (t) => { S.tab = t.dataset.tab; Kit.show(S.tab === 'wbw' ? 'breakdown' : 'arabic'); },
+  word: (t) => { S.i = +t.dataset.i; if (OPEN()) refresh(); else Kit.show('word'); },
+  prev: () => { if (S.i > 0) { S.i -= 1; refresh(); } },
+  next: () => { if (S.i < W.length - 1) { S.i += 1; refresh(); } },
+  close: () => Kit.show('breakdown'),
+  exp: () => Kit.show('experimental'),
+  report: () => Kit.open('sheet-report'),
+  send: () => { Kit.show('breakdown'); Kit.snack('রিপোর্ট সফলভাবে জমা হয়েছে'); },
+  share: () => Kit.snack('ফোনের শেয়ার মেনু খুলবে'),
+  sw: (t) => { S[t.dataset.k] = !S[t.dataset.k]; if (!S.on) S.tr = false; render('settings'); },
+};
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('scrim') && (OPEN() || Kit.current === 'experimental')) { ACT.close(); return; }
+  const l = e.target.closest('[data-lang]');
+  if (l) { S.lang = l.dataset.lang; Kit.show(Kit.current); return; }
+  const t = e.target.closest('[data-act]');
+  if (t) ACT[t.dataset.act]?.(t);
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && (OPEN() || Kit.current === 'experimental')) ACT.close(); });
+
+/* ======================================================================
+   DEMO 2 — সারি আর আলাদা পেজ: underline tabs, one word per row (meaning
+   on the left, Arabic on the right), and the word opens on its own page
+   with big previous / next buttons at the bottom.
+   ====================================================================== */
+const D = {
+  mode: 'page',
+  tabs: () => `<div class="tabs"><button class="t" data-act="tab" data-tab="ar" aria-pressed="${S.tab === 'ar'}">আরবি</button><button class="t" data-act="tab" data-tab="wbw" aria-pressed="${S.tab === 'wbw'}">শব্দে শব্দে</button>
+      <button class="badge" data-act="exp">${IC.warn(13)}পরীক্ষামূলক</button></div>`,
+  words: () => `<div class="rows">${W.map((w, i) => `<button class="wr" data-act="word" data-i="${i}"><span class="no">${bn(i + 1)}</span><span class="m"><b>${mean(w)}</b>${S.tr ? `<em>${w.tr}</em>` : ''}</span><span class="ar">${w.ar}</span>${IC.next(16)}</button>`).join('')}</div>`,
+  detail: () => {
+    const w = cur();
+    return `<header class="appbar"><button class="icon-btn" data-act="close" aria-label="পেছনে">${icons.back}</button><h1>শব্দের বিস্তারিত<small>${H.book} ${bn(H.no)} · শব্দ ${pos()}</small></h1><button class="icon-btn" data-act="share" aria-label="শেয়ার করুন">${IC.share(22)}</button></header>
+      <div class="body" style="padding-top:0"><div class="hero"><span class="ar">${w.ar}</span><em>${w.tr}</em><p>${mean(w)}</p></div>
+      <div class="kv">${props(w).map((p) => `<div class="list-row"><b>${p[0]}</b><span>${val(p)}</span></div>`).join('')}</div>
+      ${w.rel ? `<div class="relw"><b>সম্পর্কিত শব্দ</b><div>${w.rel.map((r) => `<span class="chip">${r}</span>`).join('')}</div></div>` : ''}</div>
+      <div class="pbar"><button class="btn tonal" data-act="prev" ${S.i === 0 ? 'disabled' : ''}>${IC.prev(16)}পূর্ববর্তী</button><button class="btn" data-act="next" ${S.i === W.length - 1 ? 'disabled' : ''}>পরবর্তী${IC.next(16)}</button></div>`;
+  },
+};
+
+const paint = (root = document) => $$('[data-i]', root).forEach((b) => { b.innerHTML = b.dataset.i === 'flask' ? IC.flask() : icons[b.dataset.i]; });
+paint();
+Kit.onScreen(onScreen);
+Kit.init({ demo: 2, name: 'সারি আর আলাদা পেজ', extra: EXTRA, screens: SCREENS });
+</script>
+</body>
+</html>
