@@ -62,6 +62,30 @@ aside{background:var(--surface);border-right:1px solid var(--line);display:flex;
 .f-text{flex:1;min-width:0}
 .f-title{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .f-id{display:block;font-size:11.5px;color:var(--hint);font-family:ui-monospace,Menlo,monospace}
+.f-sub{display:flex;align-items:center;gap:6px;min-width:0;margin-top:2px}
+.f-sub .f-id{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Sheet STATUS: one hue per value, close to the sheet's dropdown colours */
+.status{--c:#5D646F;display:inline-block;flex:none;font-size:11px;line-height:17px;font-weight:600;padding:0 7px;border-radius:20px;white-space:nowrap;color:var(--c);background:color-mix(in srgb,var(--c) 13%,transparent);border:1px solid color-mix(in srgb,var(--c) 28%,transparent)}
+.status[data-s="Markdown"]{--c:#C2410C}
+.status[data-s="HTML"]{--c:#A16207}
+.status[data-s="Flutter Branch"]{--c:#1D6FB8}
+.status[data-s="Merged"]{--c:#0D8C5C}
+.status[data-s="Phase-1 Improvement"]{--c:#7C3AED}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .status{--c:#C6C3CA}
+  :root:not([data-theme="light"]) .status[data-s="Markdown"]{--c:#FDBA74}
+  :root:not([data-theme="light"]) .status[data-s="HTML"]{--c:#FCD34D}
+  :root:not([data-theme="light"]) .status[data-s="Flutter Branch"]{--c:#93C5FD}
+  :root:not([data-theme="light"]) .status[data-s="Merged"]{--c:#6EE7B7}
+  :root:not([data-theme="light"]) .status[data-s="Phase-1 Improvement"]{--c:#C4B5FD}
+}
+:root[data-theme="dark"] .status{--c:#C6C3CA}
+:root[data-theme="dark"] .status[data-s="Markdown"]{--c:#FDBA74}
+:root[data-theme="dark"] .status[data-s="HTML"]{--c:#FCD34D}
+:root[data-theme="dark"] .status[data-s="Flutter Branch"]{--c:#93C5FD}
+:root[data-theme="dark"] .status[data-s="Merged"]{--c:#6EE7B7}
+:root[data-theme="dark"] .status[data-s="Phase-1 Improvement"]{--c:#C4B5FD}
+.heading .status{margin-top:5px}
 .f-count{font-size:12px;color:var(--hint);background:var(--surface-2);border:1px solid var(--line);border-radius:20px;padding:0 8px;flex:none}
 .side-foot{border-top:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;justify-content:flex-end;gap:8px;font-size:12px;color:var(--hint)}
 .icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;width:34px;height:34px;display:inline-grid;place-items:center;flex:none}
@@ -256,7 +280,7 @@ kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;border:1px solid var
         <button class="icon-btn menu-btn" id="menu" aria-label="ফিচারের তালিকা খুলুন">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
-        <div class="heading"><h1 id="title">লোড হচ্ছে…</h1><p id="path"></p></div>
+        <div class="heading"><h1 id="title">লোড হচ্ছে…</h1><div id="h-status"></div><p id="path"></p></div>
       </div>
       <div class="tabs" role="tablist" aria-label="ভিউ">
         <button class="tab" role="tab" id="tab-req" aria-controls="req" aria-selected="true">রিকোয়ারমেন্টস</button>
@@ -387,13 +411,14 @@ function renderSidebar() {
   // Search also matches the feature number, in Bangla or English digits.
   const qNum = q.replace(/[০-৯]/g, (d) => String(BN.indexOf(d)));
   const list = features.filter((f) => !q || f.title.toLowerCase().includes(q) || f.id.includes(q)
-    || String(f.number) === qNum || (f.improvements || []).some((n) => String(n) === qNum));
+    || String(f.number) === qNum || (f.improvements || []).some((n) => String(n) === qNum)
+    || (f.status || '').toLowerCase().includes(q));
   $('side-label').textContent = `ফিচার · ${bn(features.length)}টি`;
   $('features').innerHTML = list.map((f) => {
     const ready = f.demos.filter((d) => !d.empty).length;
     return `<li><button class="feature" data-id="${esc(f.id)}" aria-current="${f.id === state.feature}">
       <span class="f-num" title="শিটের ফিচার নম্বর">${numLabel(f)}</span>
-      <span class="f-text"><span class="f-title">${esc(f.title)}</span><span class="f-id">${esc(f.id)}/</span></span>
+      <span class="f-text"><span class="f-title">${esc(f.title)}</span><span class="f-sub">${statusChip(f)}<span class="f-id">${esc(f.id)}/</span></span></span>
       ${favsOf(f).length ? `<span class="f-fav" title="ফেভারিট">★${bn(favsOf(f).length)}</span>` : ''}
       <span class="f-count" title="ডেমো">${bn(ready)}/${bn(f.demos.length)}</span>
     </button></li>`;
@@ -652,10 +677,14 @@ function renderFavs() {
 
 /* ---------- Page ---------- */
 const numLabel = (f) => (f.number == null ? '–' : bn(f.number));
+// The sheet's STATUS value as a small chip (nothing for features not in the sheet).
+const statusChip = (f) => (f.status
+  ? `<span class="status" data-s="${esc(f.status)}" title="শিটের স্ট্যাটাস">${esc(f.status)}</span>` : '');
 
 function setTitle(f) {
   $('title').innerHTML = f.number == null ? esc(f.title)
     : `<span class="h-num">${bn(f.number)}.</span> ${esc(f.title)}`;
+  $('h-status').innerHTML = statusChip(f);
 }
 
 function renderAll() {
