@@ -70,7 +70,7 @@ aside{background:var(--surface);border-right:1px solid var(--line);display:flex;
 .status[data-s="Flutter Branch"]{--c:#1D6FB8}
 .status[data-s="Merged"]{--c:#0D8C5C}
 .status[data-s="Phase-1 Improvement"]{--c:#7C3AED}
-.status[data-s="Rejected"]{--c:#B42318}
+.status[data-s="Dismissed"]{--c:#B42318}
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]) .status{--c:#C6C3CA}
   :root:not([data-theme="light"]) .status[data-s="Markdown"]{--c:#FDBA74}
@@ -78,7 +78,7 @@ aside{background:var(--surface);border-right:1px solid var(--line);display:flex;
   :root:not([data-theme="light"]) .status[data-s="Flutter Branch"]{--c:#93C5FD}
   :root:not([data-theme="light"]) .status[data-s="Merged"]{--c:#6EE7B7}
   :root:not([data-theme="light"]) .status[data-s="Phase-1 Improvement"]{--c:#C4B5FD}
-  :root:not([data-theme="light"]) .status[data-s="Rejected"]{--c:#FDA29B}
+  :root:not([data-theme="light"]) .status[data-s="Dismissed"]{--c:#FDA29B}
 }
 :root[data-theme="dark"] .status{--c:#C6C3CA}
 :root[data-theme="dark"] .status[data-s="Markdown"]{--c:#FDBA74}
@@ -86,7 +86,7 @@ aside{background:var(--surface);border-right:1px solid var(--line);display:flex;
 :root[data-theme="dark"] .status[data-s="Flutter Branch"]{--c:#93C5FD}
 :root[data-theme="dark"] .status[data-s="Merged"]{--c:#6EE7B7}
 :root[data-theme="dark"] .status[data-s="Phase-1 Improvement"]{--c:#C4B5FD}
-:root[data-theme="dark"] .status[data-s="Rejected"]{--c:#FDA29B}
+:root[data-theme="dark"] .status[data-s="Dismissed"]{--c:#FDA29B}
 .heading .status{margin-top:5px}
 /* Status filter under the search box, and the reject toggle in the rail */
 .filters{display:flex;flex-wrap:wrap;gap:6px;margin:0 10px 8px}
@@ -696,8 +696,9 @@ function renderFavs() {
 
 /* ---------- Page ---------- */
 const numLabel = (f) => (f.number == null ? '–' : bn(f.number));
-// A feature rejected in the viewer shows "Rejected" instead of the sheet's STATUS.
-const statusOf = (f) => (f.rejected ? 'Rejected' : f.status || null);
+// A feature rejected in the viewer shows "Dismissed" (the sheet's word for it)
+// instead of the sheet's STATUS.
+const statusOf = (f) => (f.rejected ? 'Dismissed' : f.status || null);
 const statusKey = (f) => statusOf(f) || 'none';
 // The status as a small chip (nothing for features not in the sheet).
 const statusChip = (f) => {
@@ -709,7 +710,7 @@ const statusChip = (f) => {
 
 /* ---------- Status filter ----------
    One status at a time; tapping the selected chip again shows all. */
-const STATUS_ORDER = ['Markdown', 'HTML', 'Flutter Branch', 'Merged', 'Phase-1 Improvement', 'Transferred to Phase-2', 'Rejected'];
+const STATUS_ORDER = ['Markdown', 'HTML', 'Flutter Branch', 'Merged', 'Phase-1 Improvement', 'Transferred to Phase-2', 'Dismissed'];
 let statusFilter = store.get('featViewer.status') || '';
 
 function renderFilters() {
@@ -810,7 +811,7 @@ function selectDemo(i, side = state.side, screen = null) {
 /* ---------- Theme ----------
    The viewer's theme is the single source of truth. Every demo is opened in
    it, and a theme toggled inside a demo becomes the viewer's theme too.
-   Demos keep their own theme state (old bookmark demos use different
+   Demos keep their own theme state (older demos may use other
    localStorage keys or the OS setting), so the viewer pushes the theme into
    each frame in every way they read it. */
 const DEMO_THEME_KEYS = ['featKit.theme', 'bm-demo-theme'];
