@@ -70,6 +70,7 @@ aside{background:var(--surface);border-right:1px solid var(--line);display:flex;
 .status[data-s="Flutter Branch"]{--c:#1D6FB8}
 .status[data-s="Merged"]{--c:#0D8C5C}
 .status[data-s="Phase-1 Improvement"]{--c:#7C3AED}
+.status[data-s="Rejected"]{--c:#B42318}
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]) .status{--c:#C6C3CA}
   :root:not([data-theme="light"]) .status[data-s="Markdown"]{--c:#FDBA74}
@@ -77,6 +78,7 @@ aside{background:var(--surface);border-right:1px solid var(--line);display:flex;
   :root:not([data-theme="light"]) .status[data-s="Flutter Branch"]{--c:#93C5FD}
   :root:not([data-theme="light"]) .status[data-s="Merged"]{--c:#6EE7B7}
   :root:not([data-theme="light"]) .status[data-s="Phase-1 Improvement"]{--c:#C4B5FD}
+  :root:not([data-theme="light"]) .status[data-s="Rejected"]{--c:#FDA29B}
 }
 :root[data-theme="dark"] .status{--c:#C6C3CA}
 :root[data-theme="dark"] .status[data-s="Markdown"]{--c:#FDBA74}
@@ -84,7 +86,21 @@ aside{background:var(--surface);border-right:1px solid var(--line);display:flex;
 :root[data-theme="dark"] .status[data-s="Flutter Branch"]{--c:#93C5FD}
 :root[data-theme="dark"] .status[data-s="Merged"]{--c:#6EE7B7}
 :root[data-theme="dark"] .status[data-s="Phase-1 Improvement"]{--c:#C4B5FD}
+:root[data-theme="dark"] .status[data-s="Rejected"]{--c:#FDA29B}
 .heading .status{margin-top:5px}
+/* Status filter under the search box, and the reject toggle in the rail */
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin:0 10px 8px}
+.flt{font:inherit;font-size:12px;line-height:20px;border:1px solid var(--line);background:var(--surface);color:var(--body);border-radius:20px;padding:1px 9px;cursor:pointer}
+.flt:hover{background:var(--surface-2)}
+.flt[aria-pressed="true"]{background:var(--bar);border-color:var(--bar);color:#fff}
+.flt .c{margin-left:4px;opacity:.75}
+.feature.is-rejected .f-title{text-decoration:line-through;color:var(--hint)}
+.rej-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.rej-btn{margin-top:5px;font:inherit;font-size:12px;line-height:18px;border:1px solid var(--line);background:var(--surface);color:var(--body);border-radius:8px;padding:2px 10px;cursor:pointer}
+.rej-btn:hover{background:var(--surface-2)}
+.rej-btn[aria-pressed="true"]{color:#B42318;border-color:color-mix(in srgb,#B42318 40%,transparent)}
+:root[data-theme="dark"] .rej-btn[aria-pressed="true"]{color:#FDA29B}
+.readonly .rej-btn{display:none}
 .f-count{font-size:12px;color:var(--hint);background:var(--surface-2);border:1px solid var(--line);border-radius:20px;padding:0 8px;flex:none}
 .side-foot{border-top:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;justify-content:flex-end;gap:8px;font-size:12px;color:var(--hint)}
 .icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;width:34px;height:34px;display:inline-grid;place-items:center;flex:none}
@@ -243,6 +259,7 @@ kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;border:1px solid var
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="q" type="search" placeholder="ফিচার খুঁজুন" aria-label="ফিচার খুঁজুন">
     </label>
+    <div class="filters" id="filters" role="group" aria-label="স্ট্যাটাস দিয়ে ফিল্টার"></div>
     <div class="side-label" id="side-label">ফিচার</div>
     <ul class="features" id="features"></ul>
     <div class="side-foot">
@@ -279,7 +296,7 @@ kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;border:1px solid var
         <button class="icon-btn menu-btn" id="menu" aria-label="ফিচারের তালিকা খুলুন">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
-        <div class="heading"><h1 id="title">লোড হচ্ছে…</h1><div id="h-status"></div><p id="path"></p></div>
+        <div class="heading"><h1 id="title">লোড হচ্ছে…</h1><div class="rej-row"><div id="h-status"></div><button class="rej-btn" id="reject" type="button" aria-pressed="false">রিজেক্ট করুন</button></div><p id="path"></p></div>
       </div>
       <div class="tabs" role="tablist" aria-label="ভিউ">
         <button class="tab" role="tab" id="tab-req" aria-controls="req" aria-selected="true">রিকোয়ারমেন্টস</button>
@@ -406,18 +423,21 @@ function writeHash() {
 
 /* ---------- Sidebar ---------- */
 function renderSidebar() {
+  renderFilters();
   const q = $('q').value.trim().toLowerCase();
   // Search also matches the feature number, in Bangla or English digits.
   const qNum = q.replace(/[০-৯]/g, (d) => String(BN.indexOf(d)));
   const list = features.filter((f) => !q || f.title.toLowerCase().includes(q) || f.id.includes(q)
     || String(f.number) === qNum || (f.improvements || []).some((n) => String(n) === qNum)
-    || (f.status || '').toLowerCase().includes(q));
-  $('side-label').textContent = `ফিচার · ${bn(features.length)}টি`;
+    || (statusOf(f) || '').toLowerCase().includes(q))
+    .filter((f) => !statusFilter || statusKey(f) === statusFilter);
+  $('side-label').textContent = list.length === features.length
+    ? `ফিচার · ${bn(features.length)}টি` : `ফিচার · ${bn(list.length)}/${bn(features.length)}টি`;
   $('features').innerHTML = list.map((f) => {
     const ready = f.demos.filter((d) => !d.empty).length;
-    return `<li><button class="feature" data-id="${esc(f.id)}" aria-current="${f.id === state.feature}">
+    return `<li><button class="feature${f.rejected ? ' is-rejected' : ''}" data-id="${esc(f.id)}" aria-current="${f.id === state.feature}">
       <span class="f-num" title="শিটের ফিচার নম্বর">${numLabel(f)}</span>
-      <span class="f-text"><span class="f-title">${esc(f.title)}</span><span class="f-id">${esc(f.id)}/</span>${f.status ? `<span class="f-st">${statusChip(f)}</span>` : ''}</span>
+      <span class="f-text"><span class="f-title">${esc(f.title)}</span><span class="f-id">${esc(f.id)}/</span>${statusOf(f) ? `<span class="f-st">${statusChip(f)}</span>` : ''}</span>
       ${favsOf(f).length ? `<span class="f-fav" title="ফেভারিট">★${bn(favsOf(f).length)}</span>` : ''}
       <span class="f-count" title="ডেমো">${bn(ready)}/${bn(f.demos.length)}</span>
     </button></li>`;
@@ -676,14 +696,68 @@ function renderFavs() {
 
 /* ---------- Page ---------- */
 const numLabel = (f) => (f.number == null ? '–' : bn(f.number));
-// The sheet's STATUS value as a small chip (nothing for features not in the sheet).
-const statusChip = (f) => (f.status
-  ? `<span class="status" data-s="${esc(f.status)}" title="শিটের স্ট্যাটাস">${esc(f.status)}</span>` : '');
+// A feature rejected in the viewer shows "Rejected" instead of the sheet's STATUS.
+const statusOf = (f) => (f.rejected ? 'Rejected' : f.status || null);
+const statusKey = (f) => statusOf(f) || 'none';
+// The status as a small chip (nothing for features not in the sheet).
+const statusChip = (f) => {
+  const s = statusOf(f);
+  if (!s) return '';
+  const tip = f.rejected ? `ভিউয়ারে রিজেক্ট করা${f.status ? ` · শিটে: ${f.status}` : ''}` : 'শিটের স্ট্যাটাস';
+  return `<span class="status" data-s="${esc(s)}" title="${esc(tip)}">${esc(s)}</span>`;
+};
+
+/* ---------- Status filter ----------
+   One status at a time; tapping the selected chip again shows all. */
+const STATUS_ORDER = ['Markdown', 'HTML', 'Flutter Branch', 'Merged', 'Phase-1 Improvement', 'Transferred to Phase-2', 'Rejected'];
+let statusFilter = store.get('featViewer.status') || '';
+
+function renderFilters() {
+  const counts = new Map();
+  features.forEach((f) => counts.set(statusKey(f), (counts.get(statusKey(f)) || 0) + 1));
+  if (statusFilter && !counts.has(statusFilter)) statusFilter = '';
+  const keys = [...counts.keys()].sort((a, b) => {
+    const ia = a === 'none' ? 99 : (STATUS_ORDER.indexOf(a) + 1 || 50);
+    const ib = b === 'none' ? 99 : (STATUS_ORDER.indexOf(b) + 1 || 50);
+    return ia - ib || a.localeCompare(b);
+  });
+  const chip = (key, label, n) => `<button class="flt" type="button" data-flt="${esc(key)}" aria-pressed="${statusFilter === key}">${esc(label)}<span class="c">${bn(n)}</span></button>`;
+  $('filters').innerHTML = chip('', 'সব', features.length)
+    + keys.map((k) => chip(k, k === 'none' ? 'স্ট্যাটাস নেই' : k, counts.get(k))).join('');
+}
+
+/* ---------- Reject ----------
+   Saved in feat_list/_rejected.json by the local server; read-only on Pages. */
+let rejSaving = 0;
+async function toggleReject() {
+  const f = current();
+  if (!f || !canSave) return;
+  f.rejected = !f.rejected;
+  setTitle(f);
+  renderSidebar();
+  rejSaving++;
+  try {
+    const res = await fetch('api/rejected', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ feature: f.id, rejected: f.rejected }),
+    });
+    if (!res.ok) throw new Error(res.status);
+  } catch {
+    f.rejected = !f.rejected;
+    setTitle(f);
+    renderSidebar();
+    alert('রিজেক্ট সেভ হয়নি। ভিউয়ার সার্ভার চালু আছে কিনা দেখুন।');
+  } finally {
+    rejSaving--;
+  }
+}
 
 function setTitle(f) {
   $('title').innerHTML = f.number == null ? esc(f.title)
     : `<span class="h-num">${bn(f.number)}.</span> ${esc(f.title)}`;
   $('h-status').innerHTML = statusChip(f);
+  $('reject').setAttribute('aria-pressed', String(Boolean(f.rejected)));
+  $('reject').textContent = f.rejected ? 'রিজেক্ট বাতিল করুন' : 'রিজেক্ট করুন';
 }
 
 function renderAll() {
@@ -807,6 +881,8 @@ async function poll() {
     const prevIds = features.map((f) => f.id + ':' + f.demos.map((d) => d.file + (d.empty ? '0' : '1')).join()).join('|');
     const nextIds = next.map((f) => f.id + ':' + f.demos.map((d) => d.file + (d.empty ? '0' : '1')).join()).join('|');
     if (favSaving) next.forEach((n) => { const o = features.find((x) => x.id === n.id); if (o) n.favorites = o.favorites; });
+    if (rejSaving) next.forEach((n) => { const o = features.find((x) => x.id === n.id); if (o) n.rejected = o.rejected; });
+    const rejChanged = features.map((x) => x.rejected).join() !== next.map((x) => x.rejected).join();
     const favChanged = JSON.stringify(features.map((x) => x.favorites)) !== JSON.stringify(next.map((x) => x.favorites));
     features = next;
     const f = current();
@@ -814,6 +890,7 @@ async function poll() {
     if (prevIds !== nextIds) { renderAll(); return; }
     if (f.mdMtime !== mtimes.md) { renderDoc(); setTitle(f); renderSidebar(); }
     if (favChanged) { renderSides(); renderFavs(); renderSidebar(); }
+    if (rejChanged) { setTitle(f); renderSidebar(); }
     if (f.demos[state.demo] && f.demos[state.demo].mtime !== mtimes.a) mountPane('a', state.demo, currentScreen('a')?.id);
     if (state.compare && f.demos[state.demoB] && f.demos[state.demoB].mtime !== mtimes.b) mountPane('b', state.demoB, currentScreen('b')?.id);
   } catch {
@@ -826,6 +903,14 @@ $('features').addEventListener('click', (e) => {
   const b = e.target.closest('.feature'); if (b) selectFeature(b.dataset.id);
 });
 $('q').addEventListener('input', renderSidebar);
+$('filters').addEventListener('click', (e) => {
+  const b = e.target.closest('.flt');
+  if (!b) return;
+  statusFilter = statusFilter === b.dataset.flt ? '' : b.dataset.flt;
+  store.set('featViewer.status', statusFilter);
+  renderSidebar();
+});
+$('reject').addEventListener('click', toggleReject);
 $('tab-req').addEventListener('click', () => setTab('req'));
 $('tab-ui').addEventListener('click', () => setTab('ui'));
 $('tab-fav').addEventListener('click', () => setTab('fav'));

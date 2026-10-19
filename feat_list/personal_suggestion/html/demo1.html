@@ -44,7 +44,7 @@
 .foot span{flex:1;font-size:13.5px;color:var(--hint)}
 .foot .btn[disabled]{opacity:.45;pointer-events:none}
 
-/* ===== Settings: NotificationSettingsCard (SettingsContainer, radius 8, padding 15) ===== */
+/* ===== Settings: ContentSettingsCard (SettingsContainer, radius 8, padding 15) with the new row ===== */
 .sc{background:var(--card);border-radius:8px;margin:0 12px 12px;padding:10px 15px 15px}
 .sc-head{display:flex;align-items:center;gap:12px;min-height:40px}
 .sc-head .ic{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--tint);color:var(--primary)}
@@ -52,16 +52,12 @@
 .sc-head b{flex:1;font-size:16px;color:var(--title)}
 .sc-head>svg{color:var(--hint);transform:rotate(180deg)}
 .opt{margin-top:20px}
-.opt-row{display:flex;align-items:center;justify-content:space-between;padding-left:10px}
 .opt-t{font-size:15px;color:var(--title);padding-left:10px}
 .dd{display:flex;align-items:center;gap:8px;width:calc(100% - 10px);margin:12px 0 0 10px;height:44px;padding:0 10px 0 12px;border-radius:6px;border:1px solid var(--divider);text-align:left;font-size:15px;color:var(--primary-dark)}
 :root[data-theme="dark"] .dd{color:var(--primary)}
 .dd span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dd svg{color:var(--body);flex:none}
 .opt.new .opt-t small{display:block;font-size:13px;color:var(--hint)}
-.radio{display:flex;align-items:center;gap:14px;width:100%;padding:12px 4px;font-size:15.5px;color:var(--title);text-align:left}
-.radio i{width:20px;height:20px;border-radius:50%;border:2px solid var(--disabled);flex:none}
-.radio[aria-checked="true"] i{border:6px solid var(--primary)}
 
 /* ===== Hadith page ===== */
 .chap{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:0 12px 10px;padding:12px var(--pad);font-size:15px;font-weight:700;color:var(--title)}
@@ -70,17 +66,6 @@
 .full .narrator{color:var(--primary);font-size:15px;margin:12px 0 4px}
 .full .translation{font-size:16px;line-height:1.75;color:var(--title)}
 
-/* ===== Phone lock screen with the notification ===== */
-.lock{flex:1;display:flex;flex-direction:column;align-items:center;padding:36px 12px 0;background:linear-gradient(180deg,var(--appbar),var(--primary-dark) 70%)}
-.lock .clock{font-size:64px;font-weight:700;color:var(--on-appbar);line-height:1.1}
-.lock .date{font-size:15px;color:var(--on-appbar);opacity:.85;margin-bottom:34px}
-.nt{width:100%;text-align:left;background:var(--card);border-radius:18px;padding:12px 14px;box-shadow:0 6px 20px rgba(0,0,0,.18)}
-.nt-top{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--hint)}
-.nt-top img{width:20px;height:20px;border-radius:5px}
-.nt-top b{color:var(--title);font-weight:700}
-.nt h3{margin:6px 0 2px;font-size:15px;color:var(--title)}
-.nt p{margin:0;font-size:14px;color:var(--body);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.lock .tip{margin-top:auto;padding:16px;font-size:13px;color:var(--on-appbar);opacity:.75}
 </style>
 </head>
 <body>
@@ -106,9 +91,6 @@
         <header class="appbar"><button class="icon-btn" data-i="back" aria-label="পেছনে" data-go="home"></button><h1>সেটিংস</h1></header>
         <div class="rbody"><div class="panel"><div class="scroll" id="s-body"></div></div></div>
       </section>
-      <section class="screen" data-screen="notif">
-        <div class="lock" id="lock"></div>
-      </section>
 
       <div id="hold" hidden>
         <div class="pg" id="pg-home">
@@ -117,11 +99,6 @@
         </div>
       </div>
 
-      <!-- ===== Sheet: notification time (already in the app) ===== -->
-      <div class="sheet" id="sh-time" role="dialog" aria-label="নোটিফিকেশনের সময় নির্বাচন করুন">
-        <div class="sheet-head"><h2>নোটিফিকেশনের সময় নির্বাচন করুন</h2><button class="icon-btn" data-close data-i="close" aria-label="বন্ধ করুন"></button></div>
-        <div class="sheet-body" id="time-list" style="padding-bottom:18px"></div>
-      </div>
     </div>
   </div>
 </main>
@@ -135,7 +112,7 @@
   const paint = (root = document) => $$('[data-i]', root).forEach((b) => { b.innerHTML = ic(b.dataset.i); });
 
   /* ---------- State: what the phone remembers (reading, bookmarks, picked topics) ---------- */
-  const S = { recent: null, bookmark: null, picked: new Set(), read: new Set(), draft: new Set(), from: 'new', hk: null, back: 'home', daily: true, time: 'সকাল ৮:০০' };
+  const S = { recent: null, bookmark: null, picked: new Set(), read: new Set(), draft: new Set(), from: 'new', hk: null, back: 'home' };
   const asNew = () => Object.assign(S, { recent: null, bookmark: null, picked: new Set(), read: new Set() });
   const asReturning = () => Object.assign(S, { recent: 56, bookmark: 41, picked: new Set([56, 45]), read: new Set() });
   const head = (h) => `<div class="hadith-head"><span class="book-badge" style="background:${h.color}">${h.abbr}</span>
@@ -152,7 +129,7 @@
     let card;
     if (!PS.hasSignal(S)) {
       card = `<section class="sg" aria-label="এটাও পড়তে পারেন"><h2>এটাও পড়তে পারেন</h2>
-        <p class="empty-note">কোন বিষয়ের হাদিস পড়তে ভালো লাগে, বেছে নিন। হোমে আর নোটিফিকেশনে সেই বিষয়ের হাদিস আসবে।</p>
+        <p class="empty-note">কোন বিষয়ের হাদিস পড়তে ভালো লাগে, বেছে নিন। এখানে সেই বিষয়ের হাদিস আসবে।</p>
         <button class="btn tonal block" data-topics="new">${PS.ICON.tag}আগ্রহের বিষয় বাছুন</button></section>`;
     } else {
       const s = suggestion(), h = PS.HADITHS[s.k];
@@ -165,7 +142,7 @@
 
   /* ---------- আগ্রহের বিষয় ---------- */
   function renderTopics() {
-    $('#t-body').innerHTML = `<p class="hint">"বিষয়ভিত্তিক হাদিস"-এর ক্যাটাগরি থেকে বাছুন। এই বিষয়গুলোর হাদিস হোমে আর নোটিফিকেশনে আসবে।</p>
+    $('#t-body').innerHTML = `<p class="hint">"বিষয়ভিত্তিক হাদিস"-এর ক্যাটাগরি থেকে বাছুন। এই বিষয়গুলোর হাদিস হোমের "এটাও পড়তে পারেন" কার্ডে আসবে।</p>
       <div class="tlist">${PS.SUBJECTS.map((s) => `<button class="trow" role="checkbox" aria-checked="${S.draft.has(s.id)}" data-sub="${s.id}">
         <span><b>${s.t}</b><small>${bn(s.n)}টি হাদিস</small></span><i class="cb">${icons.check}</i></button>`).join('')}</div>`;
     syncFoot();
@@ -186,26 +163,14 @@
       <article class="card full">${head(h)}<p class="narrator">${h.nar} থেকে বর্ণিত:</p>${h.tr.split(/\n+/).map((t) => `<p class="translation">${t}</p>`).join('')}</article>`;
   }
 
-  /* ---------- Settings: notification card ---------- */
+  /* ---------- Settings: "কন্টেন্ট সেটিংস" card, the new "আগ্রহের বিষয়" row ---------- */
   const pickedNames = () => (S.picked.size ? [...S.picked].map(PS.short).join(', ') : 'কোনো বিষয় বাছা হয়নি');
   function renderSettings() {
     $('#s-body').innerHTML = `<div class="sc">
-      <div class="sc-head"><span class="ic">${PS.ICON.bell}</span><b>নোটিফিকেশন সেটিংস</b>${icons.down}</div>
-      <div class="opt opt-row"><span class="opt-t" style="padding-left:0">দৈনিক নোটিফিকেশন</span><button class="switch" id="sw-daily" role="switch" aria-checked="${S.daily}" aria-label="দৈনিক নোটিফিকেশন"></button></div>
-      <div class="opt"><span class="opt-t">নোটিফিকেশনের সময়</span><button class="dd" data-open="sh-time"><span>${S.time}</span>${icons.down}</button></div>
-      <div class="opt new"><span class="opt-t">আগ্রহের বিষয়<small>নোটিফিকেশন আর হোমের সাজেশন এই বিষয় থেকে আসবে</small></span>
+      <div class="sc-head"><span class="ic">${PS.ICON.content}</span><b>কন্টেন্ট সেটিংস</b>${icons.down}</div>
+      <div class="opt new"><span class="opt-t">আগ্রহের বিষয়<small>হোমের "এটাও পড়তে পারেন" কার্ডে এই বিষয়ের হাদিস আসবে</small></span>
         <button class="dd" data-topics="settings"><span>${pickedNames()}</span>${icons.chevron}</button></div>
     </div>`;
-    $('#time-list').innerHTML = PS.TIMES.map((t) => `<button class="radio" data-time="${t}" aria-checked="${t === S.time}"><i></i>${t}</button>`).join('');
-  }
-
-  /* ---------- Lock screen notification ---------- */
-  function renderNotif() {
-    const n = PS.notif(S), h = PS.HADITHS[n.k];
-    $('#lock').innerHTML = `<div class="clock">${bn(S.time.replace(/^\S+ /, ''))}</div><div class="date">শনিবার, ১৮ অক্টোবর</div>
-      <button class="nt" data-h="${n.k}"><div class="nt-top"><img src="${PS.ICON.app}" alt=""><b>আল হাদিস</b> · এখন</div>
-        <h3>আজকের হাদিস · ${PS.short(n.sid)}</h3><p>${h.tr.replace(/\n+/g, ' ')}</p></button>
-      <p class="tip">নোটিফিকেশনে ট্যাপ করলে হাদিসটা খুলবে</p>`;
   }
 
   /* ---------- Navigation ---------- */
@@ -219,12 +184,11 @@
     if (id === 'topics') { if (!internal) { asNew(); S.from = 'new'; S.draft = new Set(); } renderTopics(); }
     if (id === 'hadith') { if (!internal) { asReturning(); S.hk = PS.next(S).k; S.back = 'home'; } renderHadith(); }
     if (id === 'settings') { if (!internal) asReturning(); renderSettings(); }
-    if (id === 'notif') { if (!internal) asReturning(); renderNotif(); }
   });
 
   /* ---------- In-phone events ---------- */
   document.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-topics],[data-sub],[data-h],[data-time],#t-save,#t-back,#h-back,#sw-daily');
+    const t = e.target.closest('[data-topics],[data-sub],[data-h],#t-save,#t-back,#h-back');
     if (!t || !t.closest('.phone')) return;
     if (t.dataset.topics) { S.from = t.dataset.topics; S.draft = new Set(S.picked); return go('topics'); }
     if (t.dataset.sub) {
@@ -237,10 +201,8 @@
       return Kit.snack('আগ্রহের বিষয় সেভ হয়েছে');
     }
     if (t.id === 't-back') return go(S.from === 'settings' ? 'settings' : 'new');
-    if (t.dataset.h) { S.hk = t.dataset.h; S.back = Kit.current === 'notif' ? 'home' : Kit.current; return go('hadith'); }
+    if (t.dataset.h) { S.hk = t.dataset.h; S.back = Kit.current; return go('hadith'); }
     if (t.id === 'h-back') return go(S.back === 'new' ? 'home' : S.back);
-    if (t.dataset.time) { S.time = t.dataset.time; Kit.close('sh-time'); renderSettings(); return Kit.snack(`নোটিফিকেশন আসবে ${S.time}`); }
-    if (t.id === 'sw-daily') { S.daily = !S.daily; t.setAttribute('aria-checked', S.daily); return Kit.snack(S.daily ? 'দৈনিক নোটিফিকেশন চালু' : 'দৈনিক নোটিফিকেশন বন্ধ'); }
   });
 
   paint();
@@ -250,7 +212,6 @@
     { id: 'home', label: 'হোমে সাজেশন' },
     { id: 'hadith', label: 'পুরো হাদিস' },
     { id: 'settings', label: 'সেটিংস' },
-    { id: 'notif', label: 'নোটিফিকেশন' },
   ]});
 })();
 </script>
