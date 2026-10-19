@@ -1,38 +1,35 @@
 /* =====================================================================
    পরিস্থিতি দিয়ে শেখা — ৫টা ডেমোর শেয়ার করা ডেটা ও হেল্পার।
-   - পরিস্থিতি: #৫১ "জীবনের পরিস্থিতি দিয়ে সার্চ"-এর তালিকা থেকে (রাগ, সংসার) আর md-র উদাহরণ "সততা"।
+   - হোমের গ্রিড, ৭টা পরিস্থিতি, তাদের দোয়া-হাদিসের ভাগ: #৫১ "জীবনের পরিস্থিতি" সেকশনের
+     ../../life_situations_search/html/situations_data.js (window.LS) থেকে নেওয়া, যাতে দুই ফিচারের
+     হোম, তালিকা আর পরিস্থিতির পেজ এক থাকে। ওই ফাইল এই ফাইলের আগে লোড হতে হবে।
+   - পাঠ #৫১-এর পরিস্থিতি ধরে: চাকরি, রাগ, সংসার। বাকি পরিস্থিতির পাঠ এখনো নেই, তাই সেখানে "পাঠ" ভাগ থাকে না।
    - হাদিস: শুধু নিশ্চিত তালিকার বুখারি ১, ১৮৯৪, ৬০১৮, ৬১১৬; লেখা bukhari_bn.db থেকে হুবহু। আরবি রাখা হয়নি।
    - ঘটনা আর তিন লাইনের শিক্ষা অ্যাপে এখনো নেই; ডেমোর জন্য সাধারণভাবে লেখা, কনটেন্ট টিম আর আলেমরা চূড়ান্ত করবেন।
    ===================================================================== */
 (function () {
   'use strict';
+  const LS = window.LS;
   const p = (d) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
-  /* ---------- Situation icons (line icons) ---------- */
-  const ICON = {
-    honest: p('<path d="M12 4v16M7 20h10"/><path d="M5 8h14"/><path d="M5 8l-2.5 6a3 3 0 0 0 5 0z"/><path d="M19 8l-2.5 6a3 3 0 0 0 5 0z"/>'),
-    anger: p('<path d="M12 21c4 0 7-2.7 7-6.6 0-3.4-2.3-5.4-3.6-7.9-.5 1.8-1.4 2.9-2.6 3.3C13.4 6.6 11.5 4 9 3c.3 2.8-1.2 4.6-2.5 6.3C5.6 10.6 5 12.2 5 14.4 5 18.3 8 21 12 21z"/><path d="M12 21c-1.7 0-3-1.2-3-3 0-1.6 1.4-2.6 2-4 1.2 1 4 2.4 4 4 0 1.8-1.3 3-3 3z"/>'),
-    home: p('<path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M12 17.5s-3-1.8-3-3.6A1.5 1.5 0 0 1 12 13a1.5 1.5 0 0 1 3 .9c0 1.8-3 3.6-3 3.6z"/>'),
+  /* ---------- Icons: #51 situation icons + lesson icons ---------- */
+  const ICON = Object.assign({}, LS.ICON, {
     lesson: p('<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5z"/>'),
     q: p('<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.8M12 17h.01"/>'),
     bulb: p('<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/>'),
     shield: p('<path d="M12 3l7 3v5.5c0 4.3-3 7.8-7 9.5-4-1.7-7-5.2-7-9.5V6z"/><path d="M9 12l2 2 4-4"/>'),
     next: p('<path d="M5 12h13M13 6l6 6-6 6"/>'),
-  };
+  });
 
-  /* ---------- Situations (from #51) — only those with lessons in this demo ---------- */
-  const SITS = [
-    { id: 'honest', name: 'সততা', phrase: 'সৎ থাকতে চাই', comfort: 'লোভ আর সুযোগের মুহূর্তে সৎ থাকার হাদিস আর পাঠ।', hadiths: ['bukhari:1'] },
-    { id: 'anger', name: 'রাগ', phrase: 'রাগ সামলাতে পারছি না', comfort: 'রাগ উঠলে কী বলবেন আর নবীজি (সাঃ) কী বলেছেন, এক জায়গায়।', hadiths: ['bukhari:6116', 'bukhari:6018'] },
-    { id: 'home', name: 'সংসার', phrase: 'সংসারে অশান্তি', comfort: 'ঘরে, আত্মীয় আর প্রতিবেশীর সাথে ভালো আচরণের উপদেশ।', hadiths: ['bukhari:6018'] },
-  ];
+  /* ---------- Situations: the 7 from #51 (sheet order) ---------- */
+  const SITS = LS.SITUATIONS;
 
   /* ---------- Lessons: ঘটনা (question + one-two lines), one hadith, three lines of শিক্ষা ---------- */
   const LESSONS = [
-    { id: 'l1', sit: 'honest', q: 'দোকানদার ভুল করে বেশি টাকা ফেরত দিয়েছে, কী করব?',
+    { id: 'l1', sit: 'job', q: 'দোকানদার ভুল করে বেশি টাকা ফেরত দিয়েছে, কী করব?',
       ev: 'বাজার শেষে বাসায় এসে দেখলেন, দোকানদার ভুল করে ১০০ টাকা বেশি ফেরত দিয়েছেন। দোকান বেশ দূরে, কেউ টেরও পাবে না।',
       h: 'bukhari:1', learn: ['বাড়তি টাকাটা আপনার নয়, যত দ্রুত পারেন দোকানদারকে ফেরত দিন।', 'কেউ না দেখলেও আল্লাহ আপনার নিয়ত আর কাজ দুটোই জানেন।', 'ফেরত দিন আল্লাহকে খুশি করার নিয়তে, প্রশংসা পাওয়ার জন্য নয়।'] },
-    { id: 'l2', sit: 'honest', q: 'অফিসে কেউ খেয়াল করছে না, কাজে একটু ফাঁকি দিলে কী হয়?',
+    { id: 'l2', sit: 'job', q: 'অফিসে কেউ খেয়াল করছে না, কাজে একটু ফাঁকি দিলে কী হয়?',
       ev: 'বস ছুটিতে আছেন। হাজিরা দিয়ে বাকি সময়টা অন্য কাজে কাটিয়ে দেওয়া যায়, কেউ জানতেও পারবে না।',
       h: 'bukhari:1', learn: ['বেতনের বিনিময়ে যে সময় দিয়েছেন, সেটা আমানত।', 'কাজের প্রতিদান নিয়ত অনুযায়ী, কে দেখছে তার ওপর নয়।', 'হালাল রিজিকের নিয়তে পুরো সময় মন দিয়ে কাজ করুন।'] },
     { id: 'l3', sit: 'anger', q: 'ভিড়ে কেউ ধাক্কা দিয়ে উল্টো আমার সাথেই ঝগড়া করছে, কী করব?',
@@ -95,27 +92,28 @@
  }
 };
 
-  /* ---------- Helpers shared by all demos ---------- */
+    /* ---------- Helpers shared by all demos ---------- */
   const sit = (id) => SITS.find((s) => s.id === id);
   const lesson = (id) => LESSONS.find((l) => l.id === id);
   const ofSit = (sid) => LESSONS.filter((l) => l.sit === sid);
+  // Only situations that have lessons (সব পাঠ groups)
+  const withLessons = () => SITS.filter((s) => ofSit(s.id).length);
   // Next lesson in the same situation (wraps to the first)
   const nextOf = (id) => { const l = lesson(id), list = ofSit(l.sit); return list[(list.indexOf(l) + 1) % list.length]; };
   const posOf = (id) => { const l = lesson(id), list = ofSit(l.sit); return [list.indexOf(l) + 1, list.length]; };
-  const norm = (s) => s.normalize('NFC').replace(/[\u200c\u200d]/g, '').trim();
-  // #51 search: matching situations and lessons (question, story, situation name)
-  function search(q) {
-    const t = norm(q);
-    if (!t) return { sits: [], lessons: [] };
-    return {
-      sits: SITS.filter((s) => norm(s.name + ' ' + s.phrase).includes(t)),
-      lessons: LESSONS.filter((l) => norm(l.q + ' ' + l.ev + ' ' + sit(l.sit).name).includes(t)),
-    };
-  }
   const nl = (t) => t.replace(/\n/g, '<br>');
+  // #51 hadith ids ('6116') → this file's hadith keys
+  const hk = (no) => `bukhari:${no}`;
+  // #51 situation page parts in order: dua parts first, then hadith parts (hadith ids mapped to keys)
+  const parts = (s) => s.sections.map((x) => ({ title: x.title, duas: x.duas || [], hadiths: (x.hadiths || []).map(hk) }));
+  // #51 dua card (title → উচ্চারণ → অর্থ → সূত্র); copy/share stay in #51
+  const duaCard = (id) => { const d = window.LS_DUAS[id];
+    return `<article class="card dua"><h4>${d.t}</h4><span class="lbl">উচ্চারণ</span><p class="txt">${d.tr}</p>
+      <span class="lbl">অর্থ</span><p class="txt">${d.m}</p><p class="ref">সূত্র: ${d.ref}</p></article>`; };
   // The whole lesson as plain text (share)
   const lessonText = (id) => { const l = lesson(id), h = HADITHS[l.h];
     return `${l.q}\n\n${l.ev}\n\nহাদিস: ${h.tr.replace(/\n+/g, ' ')}\n(${h.book}, হাদিস নং ${h.no})\n\nশিক্ষণীয় বিষয়:\n${l.learn.map((x, i) => `${'১২৩'[i]}. ${x}`).join('\n')}`; };
 
-  window.SL = { ICON, SITS, LESSONS, HADITHS, sit, lesson, ofSit, nextOf, posOf, search, nl, lessonText };
+  window.SL = { ICON, SITS, LESSONS, HADITHS, sit, lesson, ofSit, withLessons, nextOf, posOf, nl, parts, duaCard, lessonText,
+    homeGrid: LS.homeGrid, countText: LS.countText, LIST_INTRO: LS.LIST_INTRO, UI: LS.UI };
 })();
