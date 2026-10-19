@@ -42,6 +42,12 @@
 .hc{margin:7px 14px}
 .hc .narrator{margin:12px 0 0}
 .none{padding:40px 24px;text-align:center;color:var(--title);font-size:17px;font-weight:600}
+/* AI search switch in the listening UI (shown in all 5 demos) */
+.ai-row{display:flex;align-items:center;gap:12px;text-align:left}
+.ai-tx{flex:1;min-width:0}
+.ai-tx b{display:block;font-size:15px;font-weight:700;color:var(--title)}
+.ai-tx small{display:block;margin-top:2px;font-size:13px;line-height:1.45;color:var(--body)}
+.switch[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
 mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-radius:4px;padding:0 2px}
 :root[data-theme="dark"] mark.hl{color:var(--primary)}
 .lnk{display:inline-flex;align-items:center;gap:4px;color:var(--primary);font-weight:700;font-size:13.5px}
@@ -83,6 +89,7 @@ mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-
 .vs-m{margin:6px 0 0;font-size:14.5px;color:var(--body)}
 .vs-act{margin:18px 0 4px}
 #vsheet .sheet-foot{justify-content:center;border-top:0;padding-top:4px}
+#vsheet .ai-row{align-self:stretch;margin:6px 0 0;padding:12px 2px 2px;border-top:1px solid var(--divider)}
 /* ===== Permission dialog ===== */
 #dlg-perm{text-align:center}
 #dlg-perm .vs-ic{width:60px;height:60px;margin:4px auto 12px}
@@ -109,6 +116,11 @@ mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-
         <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
       </section>
       <section class="screen" data-screen="listening">
+        <header class="appbar"><button class="icon-btn bk" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
+        <div class="body host"></div>
+        <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
+      </section>
+      <section class="screen" data-screen="ai">
         <header class="appbar"><button class="icon-btn bk" aria-label="পেছনে" data-snack="হোম পেজে ফিরে যাবে"></button><h1>সার্চ</h1></header>
         <div class="body host"></div>
         <div class="foot"><button class="btn block" data-run>সার্চ করুন</button></div>
@@ -173,16 +185,18 @@ const ic = (k, w) => { const s = icons[k] || XI[k]; return w ? s.replace(/width=
 /* ---------- Demo data (hadith text only from the safe list) ---------- */
 const BOOKS = { bukhari: { name: 'সহিহ বুখারি', abbr: 'বুখারী' }, muslim: { name: 'সহিহ মুসলিম', abbr: 'মুসলিম' } };
 const HADITHS = [
-  { book: 'bukhari', num: 1894, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'রোজা ঢালস্বরূপ।', keys: 'রোজা সিয়াম সাওম ফজিলত ফাদলুস fasting fast virtue' },
-  { book: 'bukhari', num: 1, nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত', bn: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।', keys: 'নিয়ত আমল intention deeds' },
-  { book: 'bukhari', num: 6018, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।', keys: 'কথা চুপ জবান speech silence' },
-  { book: 'bukhari', num: 6116, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'এক ব্যক্তি নবী (সাঃ)-কে বলল, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বলল, তিনি প্রতিবারই বললেন, রাগ করো না।', keys: 'রাগ ক্রোধ উপদেশ anger' },
-  { book: 'muslim', num: 223, nar: 'আবু মালিক আশআরি (রা.) থেকে বর্ণিত', bn: 'পবিত্রতা ঈমানের অর্ধেক।', keys: 'পবিত্রতা ঈমান অজু purity faith' },
+  { book: 'bukhari', num: 1894, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'রোজা ঢালস্বরূপ।', keys: 'রোজা সিয়াম সাওম ফজিলত ফাদলুস fasting fast virtue', ai: 'রোজা সিয়াম ঢাল গুনাহ fasting shield' },
+  { book: 'bukhari', num: 1, nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত', bn: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।', keys: 'নিয়ত আমল intention deeds', ai: 'নিয়ত আমল ইচ্ছা intention' },
+  { book: 'bukhari', num: 6018, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।', keys: 'কথা চুপ জবান speech silence', ai: 'রাগ জবান কথা চুপ গালি tongue speech silent' },
+  { book: 'bukhari', num: 6116, nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'এক ব্যক্তি নবী (সাঃ)-কে বলল, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বলল, তিনি প্রতিবারই বললেন, রাগ করো না।', keys: 'রাগ ক্রোধ উপদেশ গাদাব anger', ai: 'রাগ রেগে ক্রোধ গাদাব কমানো নিয়ন্ত্রণ উপদেশ anger angry control temper' },
+  { book: 'muslim', num: 223, nar: 'আবু মালিক আশআরি (রা.) থেকে বর্ণিত', bn: 'পবিত্রতা ঈমানের অর্ধেক।', keys: 'পবিত্রতা ঈমান অজু purity faith', ai: 'পবিত্রতা অজু ঈমান purity' },
 ];
 /* What the user "says" in each language. Arabic speech is shown in Bangla
    letters here because the demos never show Arabic script. */
 const LANGS = [{ id: 'bn', label: 'বাংলা' }, { id: 'en', label: 'English' }, { id: 'ar', label: 'আরবি' }];
 const SCRIPT = { bn: 'রোজার ফজিলত', en: 'virtue of fasting', ar: 'ফাদলুস সিয়াম' };
+/* With AI search on, the user asks in their own words. */
+const SCRIPT_AI = { bn: 'রাগ কমানোর জন্য নবীজি কী বলেছেন', en: 'what did the Prophet say about controlling anger', ar: 'আল গাদাব' };
 const TX = {
   hint: 'হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন',
   sayHint: 'হাদিসের বিষয় বা নাম্বার বলুন',
@@ -193,6 +207,11 @@ const TX = {
   permMsg: 'কথা বলে হাদিস খুঁজতে মাইকের অনুমতি লাগবে।',
   permNo: 'এখন না',
   permYes: 'অনুমতি দিন',
+  ai: 'AI সার্চ',
+  aiHint: 'নিজের কথায় প্রশ্ন বলুন',
+  aiOff: 'চালু করলে নিজের কথায় প্রশ্ন বলা যায়',
+  aiSignIn: 'AI সার্চ ব্যবহার করতে সাইন ইন করুন। এবার সাধারণ সার্চ হবে।',
+  aiEmpty: 'আজকের ক্রেডিট শেষ। এবার সাধারণ সার্চ হবে।',
 };
 const STATES = {
   nohear: { icon: 'mic', title: 'কিছু শোনা যায়নি, আরেকবার বলুন', msg: '', act: 'retry', label: 'আবার চেষ্টা করুন', aicon: 'retry' },
@@ -203,18 +222,30 @@ const SCREENS = [
   { id: 'search', label: 'সার্চ পেজ' },
   { id: 'permission', label: 'অনুমতি চাওয়া' },
   { id: 'listening', label: 'শুনছি' },
+  { id: 'ai', label: 'AI সার্চে শুনছি' },
   { id: 'results', label: 'সার্চ রেজাল্ট' },
   { id: 'nohear', label: 'শোনা যায়নি' },
   { id: 'denied', label: 'অনুমতি নেই' },
   { id: 'offline', label: 'ইন্টারনেট নেই' },
 ];
-const VOICE = ['permission', 'listening', 'nohear', 'denied', 'offline'];
+const VOICE = ['permission', 'listening', 'ai', 'nohear', 'denied', 'offline'];
+const LISTEN = ['listening', 'ai'];
 /* Toolbar: what the next mic tap does (the demo has no real microphone) */
 const SCEN = [{ id: 'speak', label: 'মাইকে: কথা বলবে' }, { id: 'silent', label: 'মাইকে: চুপ থাকবে' }, { id: 'offline', label: 'মাইকে: নেট নেই' }];
-const SCEN_HTML = SCEN.map((s) => `<button class="kit-chip" type="button" data-scen="${s.id}" aria-pressed="false">${s.label}</button>`).join('');
+/* Toolbar: the user's AI search account (sign-in and today's credits) */
+const ACC = [{ id: 'in', label: 'AI: সাইন ইন আছে' }, { id: 'out', label: 'AI: সাইন ইন নেই' }, { id: 'empty', label: 'AI: ক্রেডিট শেষ' }];
+const CREDITS = 27;
+const SCEN_HTML = SCEN.map((s) => `<button class="kit-chip" type="button" data-scen="${s.id}" aria-pressed="false">${s.label}</button>`).join('')
+  + ACC.map((a) => `<button class="kit-chip" type="button" data-acc="${a.id}" aria-pressed="false">${a.label}</button>`).join('');
 
 /* ---------- State ---------- */
-const S = { text: '', scope: 'online', lang: 'bn', perm: 'ask', scen: 'speak', force: false, live: '', last: null, from: 'search', focus: false };
+const S = { text: '', scope: 'online', lang: 'bn', perm: 'ask', scen: 'speak', force: false, live: '', last: null, from: 'search', focus: false,
+  ai: false, acc: 'in', credits: CREDITS };
+/* AI search runs only when switched on, signed in and with credits left;
+   otherwise the spoken words go to the normal search. */
+const aiOk = () => S.acc === 'in' && S.credits > 0;
+const aiOn = () => S.ai && aiOk();
+const aiNote = () => (S.acc === 'out' ? TX.aiSignIn : S.credits <= 0 ? TX.aiEmpty : S.ai ? `আজ ${bn(S.credits)}টি ক্রেডিট বাকি।` : TX.aiOff);
 
 /* ---------- Search: words match the translation or the topic keys ---------- */
 const SUFFIX = ['য়ের', 'ের', 'র', 'কে', 'তে'];
@@ -236,6 +267,15 @@ function run(q) {
   }
   return { q, list, ws };
 }
+/* AI search (demo): ranks hadith by meaning from the topic list, never
+   writes an answer. Only real hadith from the list come back. */
+function runAi(q) {
+  q = String(q).trim();
+  const ws = q.split(/\s+/).map(stem).filter((w) => w.length >= 2);
+  const hit = (h) => ws.filter((w) => h.ai.split(' ').some((k) => k.length >= 3 && w.length >= 3 && (w.startsWith(k) || k.startsWith(w)))).length;
+  const list = HADITHS.map((h) => ({ h, n: hit(h) })).filter((r) => r.n).sort((a, b) => b.n - a.n).map((r) => r.h);
+  return { q, list, ws: ws.filter((w) => w.length >= 3), ai: true };
+}
 
 /* ---------- Scripted listening ---------- */
 let timers = [];
@@ -246,7 +286,7 @@ function paintLive(final) {
   const w = S.live ? S.live.split(' ') : [];
   const html = w.length
     ? w.map((x, i) => `<span class="w${i === w.length - 1 && !final ? ' new' : ''}">${esc(x)}</span>`).join(' ') + (final ? '' : '<i class="caret"></i>')
-    : `<span class="hint">${TX.sayHint}</span>`;
+    : `<span class="hint">${aiOn() ? TX.aiHint : TX.sayHint}</span>`;
   $$('[data-live]').forEach((el) => { el.innerHTML = html; });
   D.live?.(S.live, final);
 }
@@ -255,7 +295,7 @@ function listen() {
   const silent = S.scen === 'silent' && !S.force;
   S.force = false;
   if (silent) { later(() => Kit.show('nohear'), 3600); return; }
-  const words = SCRIPT[S.lang].split(' ');
+  const words = (S.ai ? SCRIPT_AI : SCRIPT)[S.lang].split(' ');
   words.forEach((_, i) => later(() => { S.live = words.slice(0, i + 1).join(' '); setVs('speak'); paintLive(false); }, 1200 + i * 650));
   const end = 1200 + words.length * 650;
   later(() => { setVs('done'); paintLive(true); }, end + 250);          // speech stopped
@@ -265,7 +305,8 @@ function finish(q) { if (D.confirm?.(q)) return; search(q); }
 function search(q) {
   q = String(q || '').trim();
   if (!q) { Kit.snack('সার্চ করার জন্য কিছু লিখুন'); return; }
-  S.text = q; S.last = run(q);
+  S.text = q;
+  if (aiOn()) { S.last = runAi(q); S.credits -= 1; } else S.last = run(q);
   Kit.show('results');
 }
 const back = () => Kit.show(S.from === 'results' ? 'results' : 'search');
@@ -274,10 +315,24 @@ function micTap() {
   if (S.perm === 'ask') Kit.show('permission');
   else if (S.perm === 'denied') Kit.show('denied');
   else if (S.scen === 'offline') Kit.show('offline');
-  else Kit.show('listening');
+  else Kit.show(listenId());
 }
+const listenId = () => (S.ai ? 'ai' : 'listening');
 function relisten() { S.force = true; render(Kit.current); listen(); }
-function setLang(l) { S.lang = l; markLang(); if (Kit.current === 'listening') listen(); }
+function setLang(l) { S.lang = l; markLang(); if (LISTEN.includes(Kit.current)) listen(); }
+/* The switch only lives on the listening UI; flipping it moves between the
+   "শুনছি" and "AI সার্চে শুনছি" screens, which start listening again. */
+function toggleAi() { if (!aiOk()) return; S.ai = !S.ai; Kit.show(listenId()); }
+const accNow = () => (S.acc === 'out' ? 'out' : S.credits <= 0 ? 'empty' : 'in');
+const markAcc = () => $$('[data-acc]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.acc === accNow()));
+function setAcc(a) {
+  S.acc = a === 'out' ? 'out' : 'in';
+  if (a === 'in') S.credits = CREDITS;
+  if (a === 'empty') S.credits = 0;
+  markAcc();
+  if (LISTEN.includes(Kit.current)) render(Kit.current);
+  if (LISTEN.includes(Kit.current)) paintLive(false);
+}
 const markLang = () => $$('[data-lang]').forEach((b) => { const on = b.dataset.lang === S.lang; b.setAttribute('aria-pressed', on); b.classList.toggle('on', on); });
 const markScen = () => $$('[data-scen]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.scen === S.scen));
 function syncField() {
@@ -291,6 +346,9 @@ const langBtns = (cls = 'chip') => LANGS.map((l) => `<button class="${cls}${S.la
 const actBtn = (id, cls = 'btn') => { const s = STATES[id]; return `<button class="${cls}" type="button" data-${s.act}>${ic(s.aicon, 18)}${s.label}</button>`; };
 const wave = (n) => `<div class="wave" aria-hidden="true">${Array.from({ length: n }, (_, i) => `<i style="animation-delay:-${((i * 173) % 800) / 1000}s"></i>`).join('')}</div>`;
 const scopeName = () => (S.scope === 'online' ? 'অনলাইন' : 'অফলাইন');
+const searchName = (r) => (r.ai ? TX.ai : `${scopeName()} সার্চ`);
+const aiRow = (cls = '') => `<div class="ai-row ${cls}"><span class="ai-tx"><b>${TX.ai}</b><small>${aiNote()}</small></span>`
+  + `<button class="switch" type="button" role="switch" data-ai aria-label="${TX.ai}" aria-checked="${aiOn()}"${aiOk() ? '' : ' aria-disabled="true"'}></button></div>`;
 const scopeCard = () => `<div class="sc"><h3 class="st">কোথায় সার্চ করবেন</h3><div class="opts" role="radiogroup" aria-label="কোথায় সার্চ করবেন">${
   ['online', 'offline'].map((k) => `<button class="opt" type="button" role="radio" data-scope="${k}" aria-checked="${S.scope === k}"><span class="rd"></span>${k === 'online' ? 'অনলাইন' : 'অফলাইন'}</button>`).join('')}</div></div>`;
 const clearBtn = () => `<button class="icon-btn" type="button" data-clear aria-label="ক্লিয়ার" hidden>${ic('close', 20)}</button>`;
@@ -327,14 +385,14 @@ function boot(opts) {
     if (e.target.classList?.contains('scrim') && VOICE.includes(Kit.current)) { back(); return; }
     const x = e.target.closest('[data-x]');
     if (x && D.click?.(x.dataset.x)) return;
-    const t = e.target.closest('[data-mic],[data-allow],[data-deny],[data-settings],[data-retry],[data-cancel],[data-type],[data-lang],[data-scope],[data-clear],[data-run],[data-edit],[data-scen]');
+    const t = e.target.closest('[data-mic],[data-allow],[data-deny],[data-settings],[data-retry],[data-cancel],[data-type],[data-lang],[data-scope],[data-clear],[data-run],[data-edit],[data-scen],[data-ai],[data-acc]');
     if (!t) return;
     const d = t.dataset;
     if ('mic' in d) micTap();
-    else if ('allow' in d) { S.perm = 'granted'; Kit.show(S.scen === 'offline' ? 'offline' : 'listening'); }
+    else if ('allow' in d) { S.perm = 'granted'; Kit.show(S.scen === 'offline' ? 'offline' : listenId()); }
     else if ('deny' in d) { S.perm = 'denied'; Kit.show('denied'); }
     else if ('settings' in d) { S.perm = 'granted'; back(); Kit.snack('ফোনের সেটিংস খুলবে। মাইক চালু করে ফিরে এসে আবার চাপুন'); }
-    else if ('retry' in d) { S.force = true; Kit.show('listening'); }
+    else if ('retry' in d) { S.force = true; Kit.show(listenId()); }
     else if ('cancel' in d) back();
     else if ('type' in d) { S.focus = true; back(); }
     else if (d.lang) setLang(d.lang);
@@ -343,6 +401,8 @@ function boot(opts) {
     else if ('run' in d) search(S.text);
     else if ('edit' in d) { S.focus = true; Kit.show('search'); }
     else if (d.scen) { S.scen = d.scen; markScen(); }
+    else if ('ai' in d) toggleAi();
+    else if (d.acc) setAcc(d.acc);
   });
   document.addEventListener('input', (e) => { if (e.target.matches('.q')) { S.text = e.target.value; syncField(); } });
   document.addEventListener('keydown', (e) => {
@@ -352,12 +412,13 @@ function boot(opts) {
   Kit.onScreen((id) => {
     stop(); setVs('idle');
     if (id === 'permission') S.perm = 'ask';
-    if (id === 'listening' || id === 'nohear') S.perm = 'granted';
+    if (LISTEN.includes(id) || id === 'nohear') S.perm = 'granted';
+    if (LISTEN.includes(id)) S.ai = id === 'ai';
     if (id === 'denied') S.perm = 'denied';
     if (id === 'results' && !S.last) { S.text = SCRIPT[S.lang]; S.last = run(S.text); }
     render(id);
-    markScen(); markLang();
-    if (id === 'listening') listen();
+    markScen(); markLang(); markAcc();
+    if (LISTEN.includes(id)) listen();
     if (S.focus) { S.focus = false; $('.screen.on .q')?.focus(); }
   });
   Kit.init({ ...opts, extra: SCEN_HTML, screens: SCREENS });
@@ -376,9 +437,9 @@ const D = {
       ${scopeCard()}</div>`;
   },
   sheet(id) {
-    if (id === 'listening') {
+    if (LISTEN.includes(id)) {
       return `<div class="chip-row">${langBtns()}</div><div class="orb">${ic('mic', 34)}</div>
-        <div class="vstatus">${TX.listening}</div><p class="live" data-live></p>`;
+        <div class="vstatus">${TX.listening}</div><p class="live" data-live></p>${aiRow()}`;
     }
     const s = STATES[id];
     return `${id === 'nohear' ? `<div class="chip-row">${langBtns()}</div>` : ''}<div class="vs-ic">${ic(s.icon, 32)}</div>
@@ -386,12 +447,12 @@ const D = {
   },
   results(r) {
     return `<div class="ov"><p class="ql">আপনি ( <b class="q-t">${esc(r.q)}</b> ) লিখে সার্চ করেছেন</p><p class="ct">${countLine(r)}</p>
-      <div class="bks"><span class="mt">${scopeName()}</span>${byBook(r)}</div>
+      <div class="bks">${r.ai ? `<span class="mt">${TX.ai}</span>` : ''}<span class="mt">${scopeName()}</span>${byBook(r)}</div>
       <button class="lnk" data-edit>${icons.edit}লেখা ভুল হলে ঠিক করুন</button></div>${cards(r)}`;
   },
   after(id, sec) {
     if (id === 'permission') Kit.open('dlg-perm');
-    if (['listening', 'nohear', 'denied', 'offline'].includes(id)) { $('#vs-body').innerHTML = D.sheet(id); Kit.open('vsheet'); }
+    if (['listening', 'ai', 'nohear', 'denied', 'offline'].includes(id)) { $('#vs-body').innerHTML = D.sheet(id); Kit.open('vsheet'); }
     if (id === 'results') $('.r-sub', sec).textContent = countLine(S.last);
   },
 };

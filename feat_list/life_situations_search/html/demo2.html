@@ -3,15 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>জীবনের পরিস্থিতি দিয়ে সার্চ — ডেমো ২ · গ্রিড আর বটম শিট</title>
+<title>জীবনের পরিস্থিতি সেকশন — ডেমো ২ · গ্রিড আর বটম শিট</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
+/* ===== NEW entry: home quick-action card (HomeSmallDashboard, 4 per row, radius 20), "পরিস্থিতি" opens row 3 ===== */
+.qa-wrap{position:relative;margin:14px 12px 0;padding-bottom:22px}
+.qa{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:12px 0 18px}
+.qa-row{display:grid;grid-template-columns:repeat(4,1fr)}
+.qa-row[hidden]{display:none}
+.qa-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px 8px;border-radius:10px;font-size:14px;font-weight:700;color:var(--body);line-height:1.25;text-align:center}
+.qa-tile:hover{background:var(--surface-2)}
+.qa-more{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:44px;height:44px;display:grid;place-items:center;color:var(--primary)}
+.qa-more svg{transition:transform .25s}
+.qa-more[aria-expanded="true"] svg{transform:rotate(180deg)}
+
+/* ===== Pages that sit under the situation sheet (search page or the section page) ===== */
+.pg{display:flex;flex-direction:column;flex:1;min-height:0}
+
 /* ===== RoundedScaffoldBody + search card (NewSearchPage) ===== */
 .rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
 .panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
 .panel>.scroll{padding:14px 0 24px}
 .scard{background:var(--card);border-radius:12px;margin:0 16px 16px;padding:14px}
-.stitle{margin:0 0 10px;font-size:16px;font-weight:700;color:var(--title)}
+.stitle{margin:0;font-size:16px;font-weight:700;color:var(--title)}
+.srow{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.see-all{font-size:13.5px;font-weight:700;color:var(--primary);padding:4px 2px}
 .sfield{display:flex;align-items:center;gap:8px;height:46px;padding:0 12px;border-radius:10px;border:.8px solid var(--divider);background:var(--tint)}
 .sfield:focus-within{border-color:var(--primary)}
 .sfield svg{width:18px;height:18px;color:var(--hint);flex:none}
@@ -27,6 +43,17 @@
 :root[data-theme="dark"] .tile .ic{color:var(--primary)}
 .tile b{font-size:13px;color:var(--title);line-height:1.25}
 .tile small{font-size:11.5px;color:var(--hint);line-height:1.3}
+
+/* ===== NEW: "জীবনের পরিস্থিতি" page — big two-column tiles; tap opens the same sheet ===== */
+.intro{margin:0 18px 12px;font-size:14.5px;line-height:1.6;color:var(--body)}
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px}
+.btile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px 12px 12px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);text-align:left}
+.btile:hover{background:var(--surface-2)}
+.btile .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark);margin-bottom:4px}
+:root[data-theme="dark"] .btile .ic{color:var(--primary)}
+.btile b{font-size:16px;color:var(--title);line-height:1.3}
+.btile small{font-size:13px;color:var(--hint);line-height:1.4}
+.btile .cnt{font-size:12.5px;color:var(--body)}
 
 /* ===== Situation sheet (tall bottom sheet) ===== */
 #sit-sheet{height:88%;max-height:88%}
@@ -66,14 +93,28 @@
 <main class="kit-stage">
   <div class="phone">
     <div class="viewport">
-      <!-- ===== Search page (moved into whichever of these 2 screens is open) ===== -->
-      <section class="screen" data-screen="search">
-        <div id="search-page" style="display:contents">
-          <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-snack="হোম পেজে ফিরবে" data-i="back"></button><h1>সার্চ</h1></header>
+      <!-- ===== Screen: home (app bar + quick actions, only what leads to the feature) ===== -->
+      <section class="screen" data-screen="home">
+        <header class="appbar"><button class="icon-btn" aria-label="মেনু" data-snack="ড্রয়ার খুলবে — এই ফিচারের অংশ নয়" data-i="menu"></button><h1>আল হাদিস</h1><button class="icon-btn" aria-label="সার্চ" data-go="search" data-i="search"></button></header>
+        <div class="scroll" id="home-body"></div>
+      </section>
+
+      <!-- ===== Screens list / search / sit: the page under the sheet moves into whichever is open ===== -->
+      <section class="screen" data-screen="list"></section>
+      <section class="screen" data-screen="search"></section>
+      <section class="screen" data-screen="sit" data-keep-scroll></section>
+      <div id="hold" hidden>
+        <!-- ===== Page: NEW "জীবনের পরিস্থিতি" ===== -->
+        <div class="pg" id="pg-list">
+          <header class="appbar"><button class="icon-btn" aria-label="পেছনে" id="list-back" data-i="back"></button><h1>জীবনের পরিস্থিতি</h1></header>
+          <div class="rbody"><div class="panel"><div class="scroll" id="list-body"></div></div></div>
+        </div>
+        <!-- ===== Page: search ===== -->
+        <div class="pg" id="pg-search">
+          <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="home" data-i="back"></button><h1>সার্চ</h1></header>
           <div class="rbody"><div class="panel"><div class="scroll" id="search-body"></div></div></div>
         </div>
-      </section>
-      <section class="screen" data-screen="sheet"></section>
+      </div>
 
       <!-- ===== Full hadith page ===== -->
       <section class="screen" data-screen="hadith">
@@ -101,8 +142,18 @@
 <script>
 (function () {
   const { $, $$, icons } = Kit;
-  const ic = (n) => icons[n];
-  const S = { sit: 'debt', hadith: '6116', menu: null };
+  const ic = (n) => icons[n] || LS.UI[n];
+  const S = { sit: 'debt', hadith: '6116', menu: null, expanded: true, listFrom: 'home', from: 'list' };
+
+  /* ---------- NEW: home quick actions with the "পরিস্থিতি" tile ---------- */
+  function renderHome() { $('#home-body').innerHTML = LS.homeGrid(S.expanded); }
+
+  /* ---------- NEW: "জীবনের পরিস্থিতি" page ---------- */
+  function renderList() {
+    $('#list-body').innerHTML = `<p class="intro">${LS.LIST_INTRO}</p>
+      <div class="bgrid">${LS.SITUATIONS.map((s) => `<button class="btile" data-sit="${s.id}" data-from="list"><span class="ic">${LS.ICON[s.id]}</span>
+        <b>${s.name}</b><small>${s.phrase}</small><span class="cnt">${LS.countText(s)}</span></button>`).join('')}</div>`;
+  }
 
   /* ---------- Search page ---------- */
   function renderSearch() {
@@ -110,9 +161,9 @@
       <div class="scard">
         <label class="sfield">${ic('search')}<input id="q" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন" aria-label="সার্চ"></label>
         <div class="sdiv"></div>
-        <!-- NEW: জীবনের পরিস্থিতি grid -->
-        <h2 class="stitle">জীবনের পরিস্থিতি</h2>
-        <div class="grid">${LS.SITUATIONS.map((s) => `<button class="tile" data-sit="${s.id}"><span class="ic">${LS.ICON[s.id]}</span><b>${s.name}</b><small>${s.phrase}</small></button>`).join('')}</div>
+        <!-- জীবনের পরিস্থিতি: shortcut grid; "সব দেখুন" opens the section page -->
+        <div class="srow"><h2 class="stitle">জীবনের পরিস্থিতি</h2><button class="see-all" data-list="search">সব দেখুন</button></div>
+        <div class="grid">${LS.SITUATIONS.map((s) => `<button class="tile" data-sit="${s.id}" data-from="search"><span class="ic">${LS.ICON[s.id]}</span><b>${s.name}</b><small>${s.phrase}</small></button>`).join('')}</div>
       </div>`;
   }
 
@@ -142,7 +193,7 @@
     b.innerHTML = s.sections.map((x) => `<h3 class="sec-h">${x.title}</h3>${(x.duas || []).map(duaCard).join('')}${(x.hadiths || []).map((n) => hadithCard(n)).join('')}`).join('');
     b.scrollTop = S.keep || 0;
   }
-  function openSit(id) { S.sit = id; S.keep = 0; renderSheet(); Kit.open('sit-sheet'); }
+  function openSit(id, from) { S.sit = id; S.from = from || 'list'; S.keep = 0; Kit.show('sit'); }
 
   /* ---------- Copy / share menu (dua and hadith share the same sheet) ---------- */
   function openMenu(kind, id) {
@@ -168,37 +219,50 @@
 
   /* ---------- Events ---------- */
   document.addEventListener('click', (e) => {
+    // Closing the situation sheet (✕ or scrim) leaves the page it was opened from
+    if (e.target.classList.contains('scrim') || e.target.closest('#sit-sheet [data-close]')) return backFromSheet();
     const t = e.target.closest('button,[data-h]');
     if (!t) return;
-    if (t.dataset.sit) return openSit(t.dataset.sit);
+    if (t.id === 'qa-more') { S.expanded = !S.expanded; return renderHome(); }
+    if (t.dataset.list) { S.listFrom = t.dataset.list; return Kit.show('list'); }
+    if (t.id === 'list-back') return Kit.show(S.listFrom);
+    if (t.dataset.sit) return openSit(t.dataset.sit, t.dataset.from);
     if (t.dataset.dmenu) return openMenu('dua', t.dataset.dmenu);
     if (t.dataset.hmenu) { e.stopPropagation(); return openMenu('hadith', t.dataset.hmenu); }
     if (t.dataset.act) return act(t.dataset.act);
     if (t.dataset.h) { S.hadith = t.dataset.h; S.keep = $('#sh-body').scrollTop; S.back = true; return Kit.show('hadith'); }
-    if (t.id === 'h-back') return Kit.show('sheet');
+    if (t.id === 'h-back') return Kit.show('sit');
   });
+  const backFromSheet = () => setTimeout(() => { if (Kit.current === 'sit' && !$('#sit-sheet').classList.contains('on')) Kit.show(S.from); }, 0);
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') backFromSheet();
     if (e.target.id === 'q' && e.key === 'Enter') Kit.snack(e.target.value.trim() ? `"${e.target.value}" এর সার্চ ফলাফল খুলবে` : 'সার্চ করতে কিছু লিখুন');
   });
 
-  /* ---------- Screens: search / sheet share one search page ---------- */
+  /* ---------- Screens: list / search pages move into their screen, or under the sheet ---------- */
+  function place(screen, page) {
+    $(`.screen[data-screen="${screen}"]`).appendChild($(`#pg-${page}`));
+    if (page === 'search' && !$('#q')) renderSearch();
+    if (page === 'list') renderList();
+  }
   Kit.onScreen((id) => {
-    if (id === 'search' || id === 'sheet') {
-      $(`.screen[data-screen="${id}"]`).appendChild($('#search-page'));
-      if (!$('#q')) renderSearch();
-      if (id === 'sheet') {
-        if (!S.back) S.keep = 0;
-        S.back = false;
-        renderSheet(); Kit.open('sit-sheet');
-      }
+    if (id === 'home') { S.listFrom = 'home'; renderHome(); }
+    if (id === 'list' || id === 'search') place(id, id);
+    if (id === 'sit') {
+      place('sit', S.from);
+      if (!S.back) S.keep = 0;
+      S.back = false;
+      renderSheet(); Kit.open('sit-sheet');
     }
     if (id === 'hadith') { if (!LS.byId(S.sit).sections.some((x) => (x.hadiths || []).includes(S.hadith))) S.sit = 'anger'; renderHadith(); }
   });
   $('#h-back').addEventListener('click', () => { S.back = true; }, true);
-  $$('[data-i]').forEach((b) => { b.innerHTML = icons[b.dataset.i]; });
+  $$('[data-i]').forEach((b) => { b.innerHTML = ic(b.dataset.i); });
   Kit.init({ demo: 2, name: 'গ্রিড আর বটম শিট', screens: [
+    { id: 'home', label: 'হোম' },
+    { id: 'list', label: 'পরিস্থিতির তালিকা' },
     { id: 'search', label: 'সার্চ পেজ' },
-    { id: 'sheet', label: 'পরিস্থিতির শিট' },
+    { id: 'sit', label: 'পরিস্থিতির পেজ' },
     { id: 'hadith', label: 'পুরো হাদিস' },
   ]});
 })();

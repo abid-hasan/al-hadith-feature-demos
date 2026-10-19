@@ -38,6 +38,10 @@
 .acts{display:flex;gap:4px;margin-top:6px}
 .btn.sm{height:34px;padding:0 10px;font-size:14px;gap:6px}
 .btn.sm svg{width:17px;height:17px}
+/* ===== Open in Quran Mazid (same in all 5): tappable reference, "app not on phone" box ===== */
+.qref{display:inline;padding:0;font:inherit;color:var(--primary);text-align:left;cursor:pointer}
+.qref svg{width:13px;height:13px;margin-left:3px;vertical-align:-1px}
+.dialog.qd p{margin:0;font-size:14.5px;line-height:1.7;color:var(--body)}
 /* ===== Demo 3: an outlined bar right under the card opens a page of its own ===== */
 .pill{display:flex;align-items:center;gap:10px;width:calc(100% - 24px);margin:-2px 12px 10px;padding:9px 12px;border-radius:10px;border:1.5px solid var(--primary);background:var(--card);text-align:left}
 .pill>svg:first-child{color:var(--primary)}
@@ -64,6 +68,9 @@
 .dr .dt .dp{margin:2px 0 0;font-size:14.5px;line-height:1.6;color:var(--body);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .dr .di{display:flex;flex-direction:column;color:var(--hint)}
 .dr .di svg{width:19px;height:19px}
+/* Demo 3: a full-width "কুরআন মাজীদে খুলুন" under copy/share on the page; an icon on the details rows */
+.pv .qbig{height:44px;margin-top:10px;gap:8px;font-size:15px}
+.dr .di .qi{color:var(--primary)}
 </style>
 </head>
 <body>
@@ -74,7 +81,10 @@
       <section class="screen" data-screen="reading"></section>
       <section class="screen" data-screen="ayah" data-status="light"></section>
       <section class="screen" data-screen="multi" data-status="light"></section>
+      <section class="screen" data-screen="noapp" data-status="light"></section>
       <section class="screen rs" data-screen="details"></section>
+      <!-- ===== Box: Quran Mazid is not on the phone (filled by noappHTML / D.noapp) ===== -->
+      <div class="dialog qd" id="dlg-app" data-stack role="dialog" aria-label="কুরআন মাজীদ অ্যাপটি ফোনে নেই"></div>
     </div>
   </div>
 </main>
@@ -88,6 +98,9 @@ const { $, $$, bn, icons } = Kit;
 const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 /* Open book: the icon on the "আয়াত" chip */
 const QURAN = (w = 18) => svg('<path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"/><path d="M12 6.5v13"/>', w);
+
+/* Arrow out of the app: on the tappable reference */
+const OUT = svg('<path d="M7 17 17 7"/><path d="M8 7h9v9"/>', 13);
 
 /* ---------- The hadith being read (text only from the safe list, no Arabic) ---------- */
 const H = { book: 'সহীহ বুখারী', abbr: 'বুখারী', no: 1894, kitab: 'সাওম', bab: 'রোজার ফজিলত',
@@ -107,8 +120,9 @@ const KIND = { quoted: 'হাদিসে উল্লেখিত আয়া
 /* "শিক্ষণীয় বিষয়" is hidden in the app today: sample lines only, to place "সম্পর্কিত আয়াত" after it */
 const TEACH = ['রোজা মুমিনকে গুনাহ থেকে আগলে রাখে, যেমন ঢাল আঘাত থেকে বাঁচায়।', 'রোজা রাখা অবস্থায় মন্দ কথা ও কাজ থেকে নিজেকে সংযত রাখা।'];
 
-/* ---------- State: n = how many ayat this hadith has (toolbar: ১টি / ২টি) ---------- */
-const S = { n: 1, from: 'reading', tab: 0 };
+/* ---------- State: n = how many ayat this hadith has (toolbar: ১টি / ২টি);
+   app = is Quran Mazid on the phone (toolbar: আছে / নেই); q = the ayah tapped ---------- */
+const S = { n: 1, from: 'reading', tab: 0, app: true, q: 0, tapped: false };
 const list = () => AYAT.slice(0, S.n);
 const chipText = () => (S.n > 1 ? `আয়াত ${bn(S.n)}` : 'আয়াত');
 const refFull = (a) => `সূরা ${a.sura}, আয়াত ${bn(a.a)}${a.part ? ' (অংশ)' : ''}`;
@@ -116,14 +130,23 @@ const refShort = (a) => `${bn(a.s)}:${bn(a.a)}`;
 const kindHTML = (a) => `<span class="kind">${KIND[a.kind]}</span>`;
 const actsHTML = (cls = 'btn text sm') =>
   `<button class="${cls}" data-act="copy">${icons.copy}কপি</button><button class="${cls}" data-act="share">${icons.share}শেয়ার</button>`;
+/* ---------- Open in Quran Mazid: the reference itself, and a clear button (i = index in list()) ---------- */
+const refLink = (a, i, tail = '') =>
+  `<button class="qref" data-act="quran" data-i="${i}" aria-label="${refFull(a)}, কুরআন মাজীদে খুলুন">${refFull(a)}${tail}${OUT}</button>`;
+const openBtn = (i, cls = 'btn tonal sm') => `<button class="${cls}" data-act="quran" data-i="${i}">${QURAN(17)}কুরআন মাজীদে খুলুন</button>`;
+const noappHTML = () => `<h2>কুরআন মাজীদ অ্যাপটি ফোনে নেই</h2>
+  <p>${refFull(list()[S.q] || AYAT[0])} কুরআন মাজীদ অ্যাপে খুলতে আগে অ্যাপটি ডাউনলোড করুন। চাইলে আয়াতটি এখানেই পড়তে পারেন।</p>
+  <div class="actions"><button class="btn text" data-act="here">এখানেই পড়ুন</button><button class="btn" data-act="store">ডাউনলোড করুন</button></div>`;
 const SCREENS = [
   { id: 'reading', label: 'হাদিস পড়া' },
   { id: 'ayah', label: 'আয়াত খোলা' },
   { id: 'multi', label: 'একাধিক আয়াত' },
   { id: 'details', label: 'বিস্তারিত পেজ' },
+  { id: 'noapp', label: 'অ্যাপ না থাকলে' },
 ];
-const EXTRA = '<button class="kit-chip" type="button" data-n="1">১টি আয়াত</button><button class="kit-chip" type="button" data-n="2">২টি আয়াত</button>';
-const OPEN = (id) => id === 'ayah' || id === 'multi';
+const EXTRA = '<button class="kit-chip" type="button" data-n="1">১টি আয়াত</button><button class="kit-chip" type="button" data-n="2">২টি আয়াত</button>'
+  + '<button class="kit-chip" type="button" data-app="1">কুরআন মাজীদ আছে</button><button class="kit-chip" type="button" data-app="0">কুরআন মাজীদ নেই</button>';
+const OPEN = (id) => id === 'ayah' || id === 'multi' || id === 'noapp';
 
 /* ---------- Shared markup: hadith card, reading list, details page ---------- */
 function cardHTML(foot = '', tap = true) {
@@ -148,19 +171,35 @@ function render(id) {
   if (!sec) return;
   sec.innerHTML = id === 'details' ? detailsHTML() : OPEN(id) && D.page ? D.page() : readingHTML(OPEN(id));
 }
-function syncExtra() { $$('[data-n]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.n === S.n))); }
+function syncExtra() {
+  $$('[data-n]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.n === S.n)));
+  $$('[data-app]').forEach((b) => b.setAttribute('aria-pressed', String(!!+b.dataset.app === S.app)));
+}
 function onScreen(id) {
   // A toolbar chip can open any screen: set the ayah count that screen shows.
   if (id === 'ayah') S.n = 1;
   if (id === 'multi') S.n = 2;
   if (id === 'reading') S.from = 'reading';
-  S.tab = 0;
+  // "অ্যাপ না থাকলে": from the toolbar it shows the first ayah; from a tap, the ayah tapped.
+  const tapped = S.tapped;
+  S.tapped = false;
+  if (id === 'noapp') { S.app = false; if (!tapped) { S.n = 1; S.q = 0; } }
+  if (!tapped) S.tab = 0;
+  $('#dlg-app').classList.remove('on');
   syncExtra();
   render(id);
   // Demos with a sheet: fill it and open it over the reading screen.
   const sheet = $('.viewport > .sheet');
   if (OPEN(id) && D.sheet && sheet) { sheet.innerHTML = D.sheet(); Kit.open(sheet.id); }
   D.after?.(id);
+  if (id === 'noapp') openNoApp();
+}
+function openNoApp() { $('#dlg-app').innerHTML = D.noapp ? D.noapp() : noappHTML(); Kit.open('dlg-app'); }
+function setApp(v) {
+  S.app = v;
+  if (v && Kit.current === 'noapp') { Kit.show(S.n > 1 ? 'multi' : 'ayah'); return; }
+  if (v) Kit.close('dlg-app');
+  syncExtra();
 }
 function setCount(n) {
   S.n = n;
@@ -183,16 +222,34 @@ const ACT = {
   back: () => Kit.show('reading'),
   copy: () => Kit.snack('কপি হয়েছে'),
   share: () => Kit.snack('ফোনের শেয়ার মেনু খুলবে'),
+  // Reference or "কুরআন মাজীদে খুলুন": opens Quran Mazid at that ayah, or the box if it is not on the phone.
+  quran: (t) => {
+    const i = +t.dataset.i || 0;
+    if (S.app) { Kit.snack(`কুরআন মাজীদ অ্যাপে ${refFull(list()[i] || AYAT[0])} খুলবে`); return; }
+    S.q = i;
+    if (Kit.current === 'details') { openNoApp(); return; }
+    S.tapped = true;
+    Kit.show('noapp');
+  },
+  here: () => (Kit.current === 'noapp' ? (S.tapped = true, Kit.show(S.n > 1 ? 'multi' : 'ayah')) : Kit.close('dlg-app')),
+  store: () => { ACT.here(); Kit.snack('স্টোরে কুরআন মাজীদ অ্যাপের পেজ খুলবে'); },
   noop: () => {},
 };
 document.addEventListener('click', (e) => {
-  if (e.target.classList.contains('scrim')) { if (OPEN(Kit.current)) ACT.close(); return; }
+  if (e.target.classList.contains('scrim')) {
+    if ($('#dlg-app.on')) { e.stopImmediatePropagation(); ACT.here(); return; }
+    if (OPEN(Kit.current)) ACT.close();
+    return;
+  }
   const n = e.target.closest('[data-n]');
   if (n) { setCount(+n.dataset.n); return; }
+  const ap = e.target.closest('[data-app]');
+  if (ap) { setApp(!!+ap.dataset.app); return; }
   const t = e.target.closest('[data-act]');
   if (t) ACT[t.dataset.act]?.(t);
 });
 document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && $('#dlg-app.on')) { e.stopImmediatePropagation(); ACT.here(); return; }
   if (e.key === 'Escape' && OPEN(Kit.current) && D.sheet) ACT.close();
   if (e.key === 'Enter' && e.target.matches('[data-act="details"]')) ACT.details();
 });
@@ -200,17 +257,19 @@ document.addEventListener('keydown', (e) => {
    DEMO 3 — আলাদা পেজ: an outlined bar right under the hadith card opens
    the ayat on their own page (flat app bar, big text). On the details
    page each ayah is a short row; tapping it opens the same page.
+   Each ayah card ends with a full-width "কুরআন মাজীদে খুলুন"; on the
+   details rows it is the book icon above copy and share.
    ====================================================================== */
 const D = {
   card: () => `${cardHTML()}<button class="pill" data-act="open" aria-label="${chipText()}, কুরআনের আয়াত দেখুন">${QURAN(22)}<span class="pt"><b>${S.n > 1 ? `আয়াত · ${bn(S.n)}টি` : 'আয়াত'}</b><small>${list().map((a) => `সূরা ${a.sura} ${bn(a.a)}`).join(', ')}</small></span>${icons.chevron}</button>`,
   page: () => `<header class="appbar flat"><button class="icon-btn" aria-label="বন্ধ করুন" data-act="close">${icons.back}</button><h1>কুরআনের আয়াত<small>${H.book} · হাদিস: ${bn(H.no)}</small></h1></header>
     <div class="body">${list().map((a, i) => `<article class="card pv">
       <div class="pv-h"><span class="pv-n">${bn(i + 1)}</span><div><b>সূরা ${a.sura}</b><small>আয়াত ${bn(a.a)}${a.part ? ' (অংশ)' : ''}</small></div></div>
-      <div>${kindHTML(a)}</div><p class="mean">${a.text}</p><p class="ref">${refFull(a)}</p>
-      <div class="acts">${actsHTML('btn outline sm')}</div></article>`).join('')}</div>`,
-  section: () => `<section class="card dsc"><h3 class="dst">সম্পর্কিত আয়াত</h3>${list().map((a) => `<div class="dr">
+      <div>${kindHTML(a)}</div><p class="mean">${a.text}</p><p class="ref">${refLink(a, i)}</p>
+      <div class="acts">${actsHTML('btn outline sm')}</div>${openBtn(i, 'btn block qbig')}</article>`).join('')}</div>`,
+  section: () => `<section class="card dsc"><h3 class="dst">সম্পর্কিত আয়াত</h3>${list().map((a, i) => `<div class="dr">
       <button class="dt" data-act="open" aria-label="${refFull(a)} পুরো পেজে খুলুন"><b>${refFull(a)}</b><span>${kindHTML(a)}</span><span class="dp">${a.text}</span></button>
-      <div class="di"><button class="icon-btn" data-act="copy" aria-label="কপি">${icons.copy}</button><button class="icon-btn" data-act="share" aria-label="শেয়ার">${icons.share}</button></div></div>`).join('')}</section>`,
+      <div class="di"><button class="icon-btn qi" data-act="quran" data-i="${i}" aria-label="কুরআন মাজীদে খুলুন">${QURAN(19)}</button><button class="icon-btn" data-act="copy" aria-label="কপি">${icons.copy}</button><button class="icon-btn" data-act="share" aria-label="শেয়ার">${icons.share}</button></div></div>`).join('')}</section>`,
 };
 Kit.onScreen(onScreen);
 Kit.init({ demo: 3, name: 'আলাদা পেজ', extra: EXTRA, screens: SCREENS });

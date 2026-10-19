@@ -14,26 +14,29 @@
 .hcard .translation{line-height:1.7}
 .top-gap{height:12px}
 
-/* ===== Card with a summary gets a tinted cap: header + summary share one colour ===== */
+/* ===== Card with "মূল কথা" gets a tinted cap: header + points share one colour ===== */
 .cap{margin:-8px -16px 0;padding:8px 16px 12px;background:var(--tint)}
 .pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:20px;background:var(--card);color:var(--primary-dark);font-size:12.5px;font-weight:700;margin-top:10px}
 :root[data-theme="dark"] .pill{color:var(--primary)}
 .pill svg{width:14px;height:14px}
-.sum-text{margin:6px 0 0;color:var(--title);font-size:16.5px;font-weight:700;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pts{margin:8px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.pts li{display:flex;gap:10px;align-items:flex-start;color:var(--title);font-size:16px;font-weight:700;line-height:1.5}
+.pts li::before{content:"";flex:none;width:8px;height:8px;margin-top:.55em;border-radius:50%;background:var(--primary)}
 .sum-note{margin:4px 0 0;font-size:12.5px;color:var(--body)}
 .tag{font-size:10.5px;font-weight:400;padding:0 6px;border-radius:6px;border:1px solid var(--divider);color:var(--hint);margin-left:4px}
 .orig{display:flex;align-items:center;gap:10px;margin:12px 0 0;font-size:12.5px;color:var(--hint)}
 .orig::after{content:"";flex:1;height:1px;background:var(--divider)}
 
-/* ===== Details page: summary lives in the coloured app-bar area (hero) ===== */
+/* ===== Details page: "মূল কথা" lives in the coloured app-bar area (hero) ===== */
 .rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
 .rbody>.scroll{background:var(--scaffold);border-radius:20px 20px 0 0;padding-top:14px}
 .hero{flex:none;padding:4px 20px 18px;color:var(--on-appbar)}
 .hero .lab{display:flex;align-items:center;gap:8px;font-size:13px;opacity:.85}
 .hero .lab span{font-size:10.5px;padding:0 6px;border-radius:6px;border:1px solid currentColor}
-.hero p{margin:6px 0 0;font-size:19px;font-weight:700;line-height:1.5}
+.hero .pts li{color:inherit;font-size:17.5px}
+.hero .pts li::before{background:currentColor;opacity:.8}
 .hero small{display:block;margin-top:6px;font-size:12.5px;opacity:.8}
-:root[data-theme="dark"] .hero p{color:var(--title)}
+:root[data-theme="dark"] .hero .pts li{color:var(--title)}
 
 /* ===== More-options grid, only the two items this feature uses ===== */
 .mhead{display:flex;align-items:center;padding:18px 12px 8px 22px}
@@ -69,7 +72,7 @@
         <div class="scroll" id="list-body"></div>
       </section>
 
-      <!-- ===== Screen: no summary ===== -->
+      <!-- ===== Screen: no reviewed points ===== -->
       <section class="screen" data-screen="nosum">
         <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="list" data-i="back"></button><h1>সহীহ বুখারী</h1></header>
         <div class="scroll" id="nosum-body"></div>
@@ -106,29 +109,31 @@
 (function () {
   const { bn, icons, $, $$ } = Kit;
 
-  /* ---------- Data: real hadiths, copied from the app's own book database (hadith.db).
-     Only the summary text is sample data — that content does not exist in the app yet. ---------- */
-  const SUMMARY = 'ইসলাম, ঈমান আর ইহসানের সংজ্ঞা, আর কিয়ামতের কিছু আলামত।';
+  /* ---------- Data: hadith text only from the agreed safe list (Muslim 223, Bukhari 1/6018/6116).
+     The "মূল কথা" points are the only new content — scholars write or check them, then they ship with the book. ---------- */
   // Hexagon badge = the book's abvr_code and colour_code from the books table
   const BOOKS = { m: { book: 'সহীহ মুসলিম', abbr: 'M', color: '#2d91c2' }, b: { book: 'সহীহ বুখারী', abbr: 'B', color: '#70bb65' } };
   const H = {
-    m1: { ...BOOKS.m, no: "১", grade: "সহিহ হাদিস", nar: "ইয়াহ্‌ইয়া ইবনু ইয়া‘মার", tr: "বাসরার অধিবাসী মা’বাদ জুহাইনি প্রথম ব্যক্তি যে তাকদীর অস্বীকার করে। আমি ও হুমায়দ ইবনু আবদুর রহমান উভয়ে হজ্জ অথবা উমরার উদ্দেশ্যে রওয়ানা করলাম। আমরা বললাম, যদি আমরা এ সফরে রাসূলুল্লাহ (ﷺ) এর যে কোন সাহাবীর সাক্ষাৎ পেয়ে যাই তাহলে ঐ সব লোক তাকদীর সম্বন্ধে যা কিছু বলে সে সম্পর্কে তাঁকে জিজ্ঞেস করব। সৌভাগ্যক্রমে আমরা আব্দুল্লাহ ইবনু উমর (রাঃ)-এর মসজিদে ঢোকার পথে পেয়ে গেলাম। আমি ও আমার সাথী তাঁকে এমনভাবে ঘিরে নিলাম যে, আমাদের একজন তাঁর ডানে এবং অপরজন তাঁর বামে থাকলাম। আমি মনে করলাম আমার সাথী আমাকেই কথা বলার সুযোগ দেবে। (কারণ আমি ছিলাম বাকপটু)।\n\nআমি বললাম : “হে আবু আব্দুর রহমান! আমাদের এলাকায় এমন কিছু লোকের আবির্ভাব ঘটেছে, তারা একদিকে কুরআন পাঠ করে অপরদিকে জ্ঞানের অন্বেষণও করে। ইয়াহিয়া তাদের কিছু গুণাবলীর কথাও উল্লেখ করলেন। তাদের ধারণা (বক্তব্য) হচ্ছে, তাকদীর বলতে কিছু নেই এবং প্রত্যেক কাজ অকস্মাৎ সংঘটিত হয়।” ইবনু উমর (রাঃ) বললেনঃ “যখন তুমি এদের সাথে সাক্ষাৎ করবে তখন তাদেরকে জানিয়ে দাও যে, তাদের সাথে আমার কোন সম্পর্ক নেই, আর আমার সাথেও তাদের কোন সম্পর্ক নেই। আব্দুল্লাহ ইবনু উমর (রাঃ) আল্লাহর নামে শপথ করে বললেন, এদের কারো কাছে যদি উহুদ পাহাড় পরিমাণ স্বর্ণ থাকে এবং তা দান-খয়রাত করে দেয় তবে আল্লাহ তাঁর এ দান গ্রহণ করবেন না যতক্ষণ পর্যন্ত সে তাকদীরের উপর ঈমান না আনবে। অতঃপর তিনি বললেন, আমার পিতা উমর ইবনুল খাত্তাব (রাঃ) আমার কাছে বর্ণনা করেছেন, তিনি বলেনঃ একদা আমরা রাসূলুল্লাহ (ﷺ)-এর নিকট উপস্থিত ছিলাম। এমন সময় এক ব্যক্তি আমাদের সামনে আবির্ভূত হলো। তার পরনের কাপড়-চোপড় ছিল ধবধবে সাদা এবং মাথার চুলগুলো ছিল মিশমিশে কালো। সফর করে আসার কোন চিহ্নও তাঁর মধ্যে দেখা যায়নি। আমাদের কেউই তাঁকে চিনেও না।\n\nঅবশেষে সে নবী (ﷺ)-এর সামনে বসলো। সে তাঁর হাঁটুদ্বয় নবী (ﷺ)-এর হাঁটুদ্বয়ের সাথে মিলিয়ে দিলো এবং দুই হাতের তালু তাঁর (অথবা নিজের) উরুর উপর রাখলো এবং বললো, হে মুহাম্মাদ (ﷺ)! আমাকে ইসলাম সম্বন্ধে বলুন। রাসূলুল্লাহ (ﷺ) বললেনঃ ইসলাম হচ্ছে এই- তুমি সাক্ষ্য দিবে যে, আল্লাহ ছাড়া প্রকৃতপক্ষে কোন ইলাহ (মাবুদ) নেই, এবং মুহাম্মাদ (ﷺ) আল্লাহর রাসূল, সালাত কায়েম করবে, যাকাত আদায় করবে, রমযানের সাওম পালন করবে এবং যদি পথ অতিক্রম করার সামর্থ্য হয় তখন বাইতুল্লাহর হজ্জ করবে। সে বললো, আপনি সত্যই বলেছেন। বর্ণনাকারী [উমর (রাঃ)] বলেন, আমরা তাঁর কথা শুনে আশ্চর্যান্বিত হলাম। কেননা সে (অজ্ঞের ন্যায়) প্রশ্ন করছে আর (বিজ্ঞের ন্যায়) সমর্থন করছে।\n\nএরপর সে বললো, আমাকে ঈমান সম্পর্কে বলুন। রাসূলুল্লাহ (ﷺ) বললেনঃ ঈমান এই যে, তুমি আল্লাহ, তাঁর ফেরেশতাকুল, তাঁর কিতাবসমূহ, তাঁর প্রেরিত নবীগণ ও শেষ দিনের উপর ঈমান রাখবে এবং তুমি তাকদীর ও এর ভালো ও মন্দের প্রতিও ঈমান রাখবে। সে বললো, আপনি সত্যই বলেছেন। এবার সে বললো, আমাকে ‘ইহসান’ সম্পর্কে বলুন। রাসূলুল্লাহ (ﷺ) বললেনঃ ‘ইহসান’ এই যে, তুমি এমনভাবে আল্লাহর ইবাদত করবে যেন তাঁকে দেখছো, যদি তাকে না দেখো তাহলে তিনি তোমাকে দেখছেন বলে অনুভব করবে।\n\nএবার সে জিজ্ঞেস করলো, আমাকে কেয়ামত সম্বন্ধে বলুন! রাসূলুল্লাহ (ﷺ) বললেনঃ এ ব্যাপারে জিজ্ঞাসাকারীর চেয়ে জিজ্ঞাসিত ব্যক্তি বেশি কিছু জানে না। অতঃপর সে বললো, তাহলে আমাকে এর কিছু নিদর্শন বলুন। তিনি বললেন, দাসী তাঁর মনিবকে প্রসব করবে এবং (এককালের) নগ্নপদ, বস্ত্রহীন, দরিদ্র, ছাগলের রাখালদের বড় দালান-কোঠা নির্মাণের প্রতিযোগিতায় গর্ব-অহংকারে মত্ত দেখতে পাবে।\n\nবর্ণনাকারী [উমর (রাঃ)] বলেন, এরপর লোকটি চলে গেলো। আমি বেশ কিছুক্ষণ অপেক্ষা করলাম। তারপর রাসূলুল্লাহ (ﷺ) আমাকে বললেন, হে উমর! তুমি জান, এ প্রশ্নকারী কে? আমি আরজ করলাম, আল্লাহ ও তাঁর রাসূলই অধিক জ্ঞাত আছেন। রাসূলুল্লাহ (ﷺ) বললেন, তিনি জিবরাইল। তোমাদের কাছে তিনি তোমাদের দ্বীন শিক্ষা দিতে এসেছিলেন।", sum: SUMMARY },
-    m422: { ...BOOKS.m, no: "৪২২", grade: "সহিহ হাদিস", nar: "আবূ মালিক আল আশ’আরী (রাঃ)", tr: "রাসূলুল্লাহ (ﷺ) বলেছেন: পবিত্রতা হল ঈমানের অর্ধেক অংশ। ‘আলহামদুলিল্লাহ’ মীজানের পরিমাপকে পরিপূর্ণ করে দিবে এবং “সুবহানাল্লাহ ওয়াল হামদুলিল্লাহ” আসমান ও জমীনের মধ্যবর্তী স্থানকে পরিপূর্ণ করে দিবে। ‘সালাত’ হচ্ছে একটি উজ্জ্বল জ্যোতি। ‘সাদাকা’ হচ্ছে দলিল। ‘ধৈর্য’ হচ্ছে জ্যোতির্ময়। আর ‘আল কুরআন’ হবে তোমার পক্ষে অথবা বিপক্ষে প্রমাণস্বরূপ। বস্তুতঃ সকল মানুষই প্রত্যেক ভোরে নিজেকে আমলের বিনিময়ে বিক্রি করে। তার আমল দ্বারা সে নিজেকে (আল্লাহর আজাব থেকে) মুক্ত করে অথবা সে তার নিজের ধ্বংস সাধন করে।" },
+    m223: { ...BOOKS.m, no: "২২৩", grade: "সহিহ হাদিস", nar: "আবূ মালিক আল আশ’আরী (রাঃ)", tr: "রাসূলুল্লাহ (ﷺ) বলেছেন: পবিত্রতা হল ঈমানের অর্ধেক অংশ। ‘আলহামদুলিল্লাহ’ মীজানের পরিমাপকে পরিপূর্ণ করে দিবে এবং “সুবহানাল্লাহ ওয়াল হামদুলিল্লাহ” আসমান ও জমীনের মধ্যবর্তী স্থানকে পরিপূর্ণ করে দিবে। ‘সালাত’ হচ্ছে একটি উজ্জ্বল জ্যোতি। ‘সাদাকা’ হচ্ছে দলিল। ‘ধৈর্য’ হচ্ছে জ্যোতির্ময়। আর ‘আল কুরআন’ হবে তোমার পক্ষে অথবা বিপক্ষে প্রমাণস্বরূপ। বস্তুতঃ সকল মানুষই প্রত্যেক ভোরে নিজেকে আমলের বিনিময়ে বিক্রি করে। তার আমল দ্বারা সে নিজেকে (আল্লাহর আজাব থেকে) মুক্ত করে অথবা সে তার নিজের ধ্বংস সাধন করে।",
+      pts: ['পবিত্রতা ঈমানের অর্ধেক।', 'আলহামদুলিল্লাহ আর সুবহানাল্লাহর সওয়াব অনেক বড়।', 'সালাত আলো, সাদাকা দলিল, আর ধৈর্য জ্যোতি।'] },
     b1: { ...BOOKS.b, no: "১", grade: "সহিহ হাদিস", nar: "‘আলক্বামাহ ইব্‌নু ওয়াক্কাস আল-লায়সী (রহঃ)", tr: "আমি উমর ইবনুল খাত্তাব (রাঃ)-কে মিম্বরের উপর দাঁড়িয়ে বলতে শুনেছিঃ আমি আল্লাহর রসূল (ﷺ)-কে বলতে শুনেছিঃ আমল (এর প্রাপ্য হবে) নিয়ত অনুযায়ী। আর মানুষ তার নিয়ত অনুযায়ী প্রতিফল পাবে।\n\nতাই যার হিজরত হবে দুনিয়া লাভের অথবা কোন মহিলাকে বিবাহ করার উদ্দেশ্যে- তবে তার হিজরত সে উদ্দেশ্যেই হবে, যে জন্যে, সে হিজরত করেছে।" },
+    b6018: { ...BOOKS.b, no: "৬০১৮", grade: "সহিহ হাদিস", nar: "আবূ হুরায়রা (রাঃ)", tr: "যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।" },
     b6116: { ...BOOKS.b, no: "৬১১৬", grade: "সহিহ হাদিস", nar: "আবূ হুরায়রা (রাঃ)", tr: "এক ব্যক্তি নবী (ﷺ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বললেন, নবী (ﷺ) প্রত্যেক বারেই বললেন: রাগ করো না।" },
   };
-  const LISTS = { list: ['m1', 'm422'], nosum: ['b1', 'b6116'] };
+  const LISTS = { list: ['m223'], nosum: ['b1', 'b6018', 'b6116'] };
 
   /* ---------- Card text pieces, same order and labels as HadithListItem ---------- */
   const badge = (h) => `<span class="book-badge" style="background:${h.color}" aria-label="${h.book}">${h.abbr}</span>`;
   const narLine = (h) => `<p class="narrator">${h.nar} থেকে বর্ণিত:</p>`;            // HadithListItemNarrator
   const paras = (s) => s.split(/\n{2,}/).map((p) => `<p class="translation">${p}</p>`).join('');
 
-  let cur = 'm1', from = 'list';
+  let cur = 'm223', from = 'list';
   const ic = (k) => icons[k];
   const LINES_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h8"/></svg>';
 
-  /* ---------- Card: [tinted cap: head + summary] → "মূল হাদিস" → narrator → translation ---------- */
+  const ptsList = (h) => `<ul class="pts">${h.pts.map((t) => `<li>${t}</li>`).join('')}</ul>`;
+
+  /* ---------- Card: [tinted cap: head + মূল কথা] → "মূল হাদিস" → narrator → translation ---------- */
   function card(id, opts = {}) {
     const h = H[id];
     const head = `<div class="hadith-head">
@@ -136,8 +141,8 @@
         <div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${bn(h.no)}</span></div>
         <span class="grade">${h.grade}</span>
         <button class="icon-btn" data-more="${id}" aria-label="হাদিস নং ${bn(h.no)}-এর অপশন">${ic('more')}</button></div>`;
-    const top = h.sum && !opts.noSum
-      ? `<div class="cap" role="note" aria-label="সংক্ষেপে">${head}<span class="pill">${LINES_IC}সংক্ষেপে</span><p class="sum-text">${h.sum}</p><p class="sum-note">এটা সারাংশ, মূল হাদিস পড়ুন</p></div><div class="orig">মূল হাদিস</div>`
+    const top = h.pts && !opts.noSum
+      ? `<div class="cap" role="note" aria-label="মূল কথা">${head}<span class="pill">${LINES_IC}মূল কথা</span>${ptsList(h)}<p class="sum-note">এটা সারাংশ, মূল হাদিস পড়ুন</p></div><div class="orig">মূল হাদিস</div>`
       : head;
     return `<article class="card hcard">${top}${narLine(h)}${paras(h.tr)}</article>`;
   }
@@ -150,7 +155,7 @@
   function renderDetails() {
     const h = H[cur];
     $('#d-title').innerHTML = `${h.book}<small>হাদিস: ${bn(h.no)}</small>`;
-    $('#d-hero').innerHTML = h.sum ? `<div class="hero" role="note" aria-label="সংক্ষেপে"><div class="lab">সংক্ষেপে</div><p>${h.sum}</p><small>এটা সারাংশ, মূল হাদিস পড়ুন</small></div>` : '';
+    $('#d-hero').innerHTML = h.pts ? `<div class="hero" role="note" aria-label="মূল কথা"><div class="lab">মূল কথা</div>${ptsList(h)}<small>এটা সারাংশ, মূল হাদিস পড়ুন</small></div>` : '';
     $('#d-body').innerHTML = card(cur, { noSum: true });
     $('#d-body').scrollTop = 0;
   }
@@ -201,10 +206,10 @@
   });
 
   /* "রিপোর্ট" chip opens the report sheet over the list */
-  const VIRTUAL = { report: () => { Kit.show('list'); cur = 'm1'; openReport(); } };
+  const VIRTUAL = { report: () => { Kit.show('list'); cur = 'm223'; openReport(); } };
   const press = (id) => $$('.kit-chip').forEach((c) => c.setAttribute('aria-pressed', c.dataset.go === id));
   const runVirtual = (id) => {
-    if (id === 'details') { from = 'list'; cur = 'm1'; renderDetails(); } // chip always shows the summary example
+    if (id === 'details') { from = 'list'; cur = 'm223'; renderDetails(); } // chip always shows the "মূল কথা" example
     if (VIRTUAL[id]) { VIRTUAL[id](); press(id); }
   };
 
@@ -212,7 +217,7 @@
     { id: 'list', label: 'হাদিস লিস্ট' },
     { id: 'details', label: 'হাদিসের বিস্তারিত' },
     { id: 'report', label: 'রিপোর্ট' },
-    { id: 'nosum', label: 'সারাংশ নেই' },
+    { id: 'nosum', label: 'মূল কথা নেই' },
   ]});
   document.addEventListener('click', (e) => { const c = e.target.closest('.kit-chip'); if (c) runVirtual(c.dataset.go); });
   window.addEventListener('message', (e) => { const m = e.data || {}; if (m.type === 'screen') runVirtual(m.id); });

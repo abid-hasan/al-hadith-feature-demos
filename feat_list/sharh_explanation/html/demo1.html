@@ -31,6 +31,8 @@
 .rt{margin:0;font-size:var(--rf);line-height:1.8;color:var(--body)}
 .vf{display:flex;align-items:center;gap:6px;margin:0;font-size:12.5px;color:var(--hint)}
 .vf svg{flex:none}
+/* ===== The sharh book's Arabic text (kit .arabic font), same size in all demos ===== */
+.sa{font-size:20px;line-height:1.9;margin:0}
 /* ===== Card menu (MoreOptionBottomSheet + MenuGrid): only this feature's item ===== */
 .mhead{display:flex;align-items:center;padding:18px 12px 8px 22px}
 .mhead div{flex:1;min-width:0}
@@ -44,16 +46,24 @@
 .mi .sw{stroke:var(--on-appbar);fill:none;stroke-width:2;stroke-linecap:round}
 /* ===== Demo 1 — অ্যাপের ধরন: "ব্যাখ্যা" part in HadithListItem under the translation,
    HadithDetailsSectionCard ×2 on the details page, HadithNeighbourBar below ===== */
-/* Card: short explanation, 3 lines, then "আরো পড়ুন" */
+/* Card: short explanation, 3 lines, the book reference, then "আরো পড়ুন" */
 .xp{margin-top:12px;padding-top:10px;border-top:1px solid var(--divider)}
 .xp h4{margin:0 0 4px;font-size:calc(var(--rf) - 1px);font-weight:600;color:var(--primary)}
 .xp .rt{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.src{display:flex;align-items:center;gap:6px;margin:6px 0 0;font-size:12.5px;color:var(--hint)}
 .rm{height:32px;padding:0;margin-top:2px;font-size:calc(var(--rf) - 1.5px)}
 /* Details: section cards (title in primary, w600) */
 .dsc{margin:0 12px 10px;padding:14px}
 .dst{margin:0 0 10px;font-size:var(--rf);font-weight:600;color:var(--primary)}
 .pt{margin:14px 0 2px;font-size:calc(var(--rf) - 1px);font-weight:700;color:var(--title)}
-.dsc .pt:first-of-type{margin-top:0}
+/* One block per sharh book: name, volume and page, Bangla, then the Arabic toggle */
+.ps+.ps{margin-top:12px;padding-top:12px;border-top:1px solid var(--divider)}
+.ps .pt{margin-top:0}
+.pref{display:flex;align-items:center;gap:6px;margin:0 0 6px;font-size:12.5px;color:var(--hint)}
+.arx{margin-top:8px;padding:10px 12px;border-radius:10px;background:var(--surface-2)}
+.arb{height:34px;padding:0;margin-top:4px;gap:4px;font-size:calc(var(--rf) - 1.5px)}
+.arb svg{transition:transform .2s}
+.arb[aria-expanded="true"] svg{transform:rotate(180deg)}
 /* HadithTeachingsList: numbers on a 26px guide */
 .tl{list-style:none;margin:0;padding:0}
 .tl li{display:flex;margin-bottom:10px}
@@ -74,6 +84,7 @@
       <section class="screen" data-screen="list"></section>
       <section class="screen" data-screen="menu"></section>
       <section class="screen rs" data-screen="detail"></section>
+      <section class="screen rs" data-screen="arabic"></section>
       <section class="screen rs" data-screen="neighbour"></section>
       <!-- ===== Sheet: the card's menu, only "বিস্তারিত" (MenuGridAction icMenuDetails) ===== -->
       <div class="sheet" id="sh-menu" role="dialog" aria-label="অন্যান্য অপশন">
@@ -99,11 +110,15 @@ const I = {
   ok: (w = 15) => svg('<path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m8.8 12 2.3 2.3 4.3-4.6"/>', w),
   /* light bulb: the explanation label */
   bulb: (w = 16) => svg('<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/>', w),
+  /* open book: a sharh book's reference */
+  book: (w = 15) => svg('<path d="M2 5.5C4.5 4 8 4 12 6c4-2 7.5-2 10-.5V19c-2.5-1.5-6-1.5-10 .5-4-2-7.5-2-10-.5z"/><path d="M12 6v13.5"/>', w),
 };
 
 /* ---------- Data: one book's list. Hadith text only from the safe list, Bangla only.
-   The explanations are new content (the app has none yet), written plainly,
-   in the shape the feature asks for: plain meaning, context, daily life, lessons.
+   The explanation is passages from well-known classical sharh books. Scholars
+   choose each passage, translate it and verify it; it ships as data and the
+   app writes nothing. A passage = book, volume, page, the Bangla translation
+   (bn) and the book's own Arabic text (ar). Volume and page are demo data.
    ex: null = no explanation made yet, so the card stays as it is today. ---------- */
 const BOOK = 'সহীহ বুখারী';
 const ABBR = 'বুখারী';
@@ -112,47 +127,45 @@ const H = [
   { no: 1, nar: 'উমর ইবনুল খাত্তাব (রাঃ) থেকে বর্ণিত',
     tr: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।',
     ex: {
-      mean: 'কোনো কাজের মূল্য নির্ভর করে মনের উদ্দেশ্যের ওপর। বাইরে থেকে একই রকম দুটি কাজ শুধু নিয়তের কারণে আল্লাহর কাছে আলাদা হয়ে যেতে পারে। তাই কাজের আগে নিজের নিয়ত দেখে নেওয়া জরুরি।',
-      ctx: 'সহীহ বুখারী এই হাদিস দিয়েই শুরু হয়েছে। ইবাদত হোক বা দুনিয়ার কাজ, সব আমলের ভিত্তি হিসেবে নিয়তের এই কথাটি সবার আগে জানা দরকার।',
-      life: 'নামাজ, দান, পড়াশোনা বা পরিবারের জন্য উপার্জন, যেকোনো কাজ শুরুর আগে নিজেকে একবার জিজ্ঞেস করা: কাজটা আমি কার জন্য করছি?',
+      src: [
+        { book: 'ফাতহুল বারী', vol: 1, page: 13,
+          bn: '"সকল কাজ নিয়তের ওপর নির্ভরশীল" কথাটির মানে হলো, নিয়ত ছাড়া কোনো আমল গণ্য হয় না। আর নিয়ত মানে মনের উদ্দেশ্য।',
+          ar: 'قوله: إنما الأعمال بالنيات، أي لا يعتد بالأعمال إلا بالنية، والنية هي القصد.' },
+        { book: 'শরহে মুসলিম', vol: 13, page: 53,
+          bn: 'এই হাদিসটি দ্বীনের বড় মূলনীতিগুলোর একটি। শরিয়তের অনেক বিধান এর ওপর নির্ভর করে।',
+          ar: 'وهذا الحديث أصل عظيم من أصول الدين، وعليه مدار كثير من الأحكام.' },
+      ],
       teach: ['প্রতিটি আমলের শুরুতে নিয়ত ঠিক করে নেওয়া।', 'যে কাজ মানুষকে দেখানোর জন্য করা হয়, তার প্রতিদানও সেই নিয়ত অনুযায়ীই হয়।', 'ভালো নিয়তে করা সাধারণ দৈনন্দিন কাজও সওয়াবের কাজ হতে পারে।'],
     } },
   { no: 1894, nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত', tr: 'রোজা ঢালস্বরূপ।', ex: null },
   { no: 6018, nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত',
-    tr: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।',
-    ex: {
-      mean: 'আল্লাহ ও আখিরাতে বিশ্বাসের একটি চিহ্ন হলো মুখ সংযত রাখা। কথা বলার আগে ভেবে দেখা, কথাটি ভালো কি না। ভালো না হলে চুপ থাকাই উত্তম।',
-      ctx: 'হাদিসটি আচার-ব্যবহার বিষয়ক অধ্যায়ে এসেছে। এখানে মুখের কথাকে সরাসরি ঈমানের সাথে যুক্ত করা হয়েছে, তাই কথা বলা শুধু অভ্যাস নয়, দ্বীনেরও অংশ।',
-      life: 'রাগের মাথায় মেসেজ পাঠানো, কারো পেছনে সমালোচনা বা অকারণ তর্কে জড়ানোর আগে একটু থেমে ভাবা।',
-      teach: ['কথা বলার আগে ভেবে নেওয়া।', 'ভালো ও উপকারী কথা বলাও একটি নেক আমল।', 'যে কথায় কল্যাণ নেই, তার চেয়ে চুপ থাকা উত্তম।'],
-    } },
+    tr: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।', ex: null },
   { no: 6116, nar: 'আবূ হুরায়রা (রাঃ) থেকে বর্ণিত',
-    tr: 'এক ব্যক্তি নবী (সাঃ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বলল, নবী (সাঃ) প্রত্যেক বারেই বললেন: রাগ করো না।',
-    ex: {
-      mean: 'একজন মানুষ নবী (সাঃ)-এর কাছে উপদেশ চাইলে তিনি একটি কথাই বললেন: রাগ করো না। রাগের মুহূর্তে মানুষ এমন কথা বলে বা কাজ করে, যার জন্য পরে আফসোস করতে হয়।',
-      ctx: 'লোকটি কয়েকবার উপদেশ চেয়েছিলেন, প্রতিবারই একই উত্তর এসেছে। একই কথা বারবার বলায় বোঝা যায়, রাগ নিয়ন্ত্রণ কত গুরুত্বপূর্ণ।',
-      life: 'রাগ উঠলে সঙ্গে সঙ্গে কিছু না বলা বা না করা। একটু সময় নিয়ে শান্ত হওয়া, তারপর কথা বলা।',
-      teach: ['রাগ নিয়ন্ত্রণ করা একটি বড় গুণ।', 'ছোট একটি উপদেশও সারা জীবন মনে রাখার মতো হতে পারে।', 'কেউ উপদেশ চাইলে সংক্ষেপে ও পরিষ্কার করে বলা।'],
-    } },
+    tr: 'এক ব্যক্তি নবী (সাঃ)-এর নিকট বলল: আপনি আমাকে ওসিয়ত করুন। তিনি বললেন: তুমি রাগ করো না। লোকটি কয়েকবার তা বলল, নবী (সাঃ) প্রত্যেক বারেই বললেন: রাগ করো না।', ex: null },
 ];
-const PARTS = [['mean', 'সহজ অর্থ'], ['ctx', 'প্রসঙ্গ'], ['life', 'রোজকার জীবনে']];
-const T = { exp: 'ব্যাখ্যা', teach: 'শিক্ষণীয় বিষয়', more: 'আরো পড়ুন', ok: 'আলেমদের যাচাই করা ব্যাখ্যা', prev: 'আগের', next: 'পরের' };
+const T = { exp: 'ব্যাখ্যা', teach: 'শিক্ষণীয় বিষয়', more: 'আরো পড়ুন', ok: 'আলেমদের অনুবাদ ও যাচাই করা ব্যাখ্যা', prev: 'আগের', next: 'পরের', ar: 'মূল আরবি দেখুন', arHide: 'মূল আরবি লুকান', arT: 'মূল আরবি', bnT: 'বাংলা অনুবাদ' };
+/* Reference line: book, volume, page */
+const volPage = (s) => `খণ্ড ${bn(s.vol)} · পৃষ্ঠা ${bn(s.page)}`;
+const ref = (s) => `${s.book} · ${volPage(s)}`;
+/* Card: the first book's reference, plus how many more books the page has */
+const cardRef = (h) => `${ref(h.ex.src[0])}${h.ex.src.length > 1 ? ` · আরো ${bn(h.ex.src.length - 1)}টি কিতাব` : ''}`;
 
 /* ---------- Screens (same ids and labels in all 5 demos) ---------- */
 const SCREENS = [
   { id: 'list', label: 'হাদিস লিস্ট' },
   { id: 'menu', label: 'কার্ডের মেনু' },
   { id: 'detail', label: 'পুরো ব্যাখ্যা' },
+  { id: 'arabic', label: 'মূল আরবি' },
   { id: 'neighbour', label: 'পাশের হাদিস' },
 ];
 /* A toolbar chip opens a screen on this hadith (index in H) */
-const START = { detail: 2, neighbour: 3 };
-/* Reading font size (toolbar): the explanation grows and shrinks with it */
+const START = { detail: 0, arabic: 0, neighbour: 1 };
+/* Reading font size (toolbar): the Bangla text grows and shrinks with it */
 const FS = [{ px: 14.5, t: 'লেখা ছোট' }, { px: 16, t: 'লেখা মাঝারি' }, { px: 18.5, t: 'লেখা বড়' }];
 const EXTRA = FS.map((f, k) => `<button class="kit-chip" type="button" data-fs="${k}">${f.t}</button>`).join('');
 
-/* ---------- State ---------- */
-const S = { cur: 2, menu: 0, fs: 1, dir: 0, own: false, listTop: 0 };
+/* ---------- State. ar = the passages (index in ex.src) whose Arabic is open ---------- */
+const S = { cur: 0, menu: 0, fs: 1, dir: 0, own: false, listTop: 0, ar: new Set() };
 const nb = () => ({ prev: S.cur > 0 ? H[S.cur - 1] : null, next: S.cur < H.length - 1 ? H[S.cur + 1] : null });
 
 /* ---------- Shared markup: hadith card, list page, details page ---------- */
@@ -165,6 +178,10 @@ function cardHTML(i, inList) {
     <p class="narrator">${h.nar}</p><p class="translation">${h.tr}</p>${inList && h.ex ? D.snippet(h, i) : ''}</article>`;
 }
 const teachHTML = (h, cls = 'tl') => `<ol class="${cls}">${h.ex.teach.map((t, j) => `<li><b>${bn(j + 1)}</b><span class="rt">${t}</span></li>`).join('')}</ol>`;
+/* The book's Arabic text, right to left in the Arabic font */
+const arHTML = (s) => `<p class="arabic sa" lang="ar" dir="rtl">${s.ar}</p>`;
+/* "মূল আরবি দেখুন" / "মূল আরবি লুকান" for passage j */
+const arLabel = (j) => (S.ar.has(j) ? T.arHide : T.ar);
 function listHTML() {
   return `<header class="appbar np"><h1>${BOOK}</h1></header>
     <div class="scroll">${H.map((h, i) => cardHTML(i, true)).join('')}</div>`;
@@ -191,16 +208,45 @@ function openMenu() {
 }
 function onScreen(id) {
   // Opened from a toolbar chip (not from inside the phone): start fresh.
-  if (!S.own) { if (START[id] != null) S.cur = START[id]; S.dir = 0; S.listTop = 0; S.menu = 0; }
+  // "মূল আরবি" opens the details page with the first book's Arabic showing.
+  if (!S.own) {
+    if (START[id] != null) S.cur = START[id];
+    S.dir = 0; S.listTop = 0; S.menu = 0;
+    S.ar = new Set(id === 'arabic' ? [0] : []);
+    D.fresh?.();
+  }
   render(id);
   syncFs();
   if (id === 'menu') openMenu();
+  if (id === 'arabic') D.onArabic?.();
 }
 function go(id) { S.own = true; Kit.show(id); S.own = false; }
 function keepListTop() {
   if (Kit.current !== 'list' && Kit.current !== 'menu') return;
   const sc = $('.screen.on .scroll');
   if (sc) S.listTop = sc.scrollTop;
+}
+/* Re-draw the details page without losing the reader's place
+   (the page's scroll and, in demo 4, the side-swipe position). */
+function keepPlace(fn) {
+  const sc = $('.screen.on .rbody > .scroll');
+  const y = sc ? sc.scrollTop : 0;
+  const car = $('.screen.on .car');
+  const x = car ? car.scrollLeft : 0;
+  fn();
+  const sc2 = $('.screen.on .rbody > .scroll');
+  if (sc2) sc2.scrollTop = y;
+  const car2 = $('.screen.on .car');
+  if (car2) car2.scrollLeft = x;
+}
+/* "মূল আরবি দেখুন": open or close one passage's Arabic in place. The screen
+   chip follows: "মূল আরবি" while any Arabic is open, else "পুরো ব্যাখ্যা". */
+function arToggle(j) {
+  if (S.ar.has(j)) S.ar.delete(j); else S.ar.add(j);
+  S.dir = 0;
+  const on = Kit.current;
+  const want = on === 'neighbour' ? on : S.ar.size ? 'arabic' : 'detail';
+  keepPlace(() => (want === on ? render(on) : go(want)));
 }
 // Kit.show() clears aria-pressed on every toolbar chip, so the size chips are re-synced.
 const syncFs = () => $$('[data-fs]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.fs === S.fs)));
@@ -214,39 +260,51 @@ function step(d) {
   if (n < 0 || n >= H.length) return;
   S.cur = n;
   S.dir = d;
+  S.ar = new Set();
   if (Kit.current === 'neighbour') render('neighbour'); else go('neighbour');
+}
+/* Scrim or Escape: close the card menu, or the Arabic sheet where a demo has one */
+function closeOverlay() {
+  if (Kit.current === 'menu') go('list');
+  else D.closeAr?.();
 }
 
 /* ---------- Wiring ---------- */
 const ACT = {
-  open: (el) => { keepListTop(); S.cur = +el.dataset.i; S.dir = 0; go('detail'); },
+  open: (el) => { keepListTop(); S.cur = +el.dataset.i; S.dir = 0; S.ar = new Set(); go('detail'); },
   menu: (el) => { keepListTop(); S.menu = +el.dataset.i; go('menu'); },
-  'menu-detail': () => { S.cur = S.menu; S.dir = 0; go('detail'); },
+  'menu-detail': () => { S.cur = S.menu; S.dir = 0; S.ar = new Set(); go('detail'); },
   'menu-close': () => go('list'),
   back: () => go('list'),
   prev: () => step(-1),
   next: () => step(1),
+  ar: (el) => arToggle(+el.dataset.k),
 };
 document.addEventListener('click', (e) => {
-  if (e.target.classList.contains('scrim')) { if (Kit.current === 'menu') go('list'); return; }
+  if (e.target.classList.contains('scrim')) { closeOverlay(); return; }
   const f = e.target.closest('[data-fs]');
   if (f) { setFs(+f.dataset.fs); return; }
   const t = e.target.closest('[data-act]');
   if (t && !t.disabled) ACT[t.dataset.act]?.(t, e);
 });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && Kit.current === 'menu') go('list');
+  if (e.key === 'Escape') closeOverlay();
   if (e.key === 'Enter' && e.target.matches('.hc[data-act="open"]')) ACT.open(e.target);
 });
 /* ======================================================================
    DEMO 1 — অ্যাপের ধরন: what the app already has, switched on. The card
-   gets a "ব্যাখ্যা" part under the translation; the details page shows
-   the hidden "ব্যাখ্যা" and "শিক্ষণীয় বিষয়" section cards and the
-   আগের / পরের bar.
+   gets a "ব্যাখ্যা" part under the translation with the first book's
+   reference; the details page shows the hidden "ব্যাখ্যা" section card,
+   one block per sharh book (name, volume, page, Bangla) with a
+   "মূল আরবি দেখুন" text button that opens the Arabic in a box below,
+   then "শিক্ষণীয় বিষয়" and the আগের / পরের bar.
    ====================================================================== */
 const D = {
-  snippet: (h, i) => `<div class="xp"><h4>${T.exp}</h4><p class="rt">${h.ex.mean}</p><button class="btn text rm" data-act="open" data-i="${i}">${T.more}</button></div>`,
-  explain: (h) => `<section class="card dsc"><h3 class="dst">${T.exp}</h3>${PARTS.map(([k, t]) => `<h4 class="pt">${t}</h4><p class="rt">${h.ex[k]}</p>`).join('')}</section>
+  snippet: (h, i) => `<div class="xp"><h4>${T.exp}</h4><p class="rt">${h.ex.src[0].bn}</p><p class="src">${I.book(14)}${cardRef(h)}</p><button class="btn text rm" data-act="open" data-i="${i}">${T.more}</button></div>`,
+  explain: (h) => `<section class="card dsc"><h3 class="dst">${T.exp}</h3>${h.ex.src.map((s, j) => `<div class="ps">
+      <h4 class="pt">${s.book}</h4><p class="pref">${I.book(14)}${volPage(s)}</p><p class="rt">${s.bn}</p>
+      ${S.ar.has(j) ? `<div class="arx">${arHTML(s)}</div>` : ''}
+      <button class="btn text arb" data-act="ar" data-k="${j}" aria-expanded="${S.ar.has(j)}">${arLabel(j)}${I.down(18)}</button></div>`).join('')}</section>
     <section class="card dsc"><h3 class="dst">${T.teach}</h3>${teachHTML(h)}</section>
     <p class="vf c">${I.ok()}${T.ok}</p>`,
   nav: () => {

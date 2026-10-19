@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>স্মার্ট সার্চ — ডেমো ২ · ওপরে সার্চ বার, নিচে তালিকা</title>
+<title>স্মার্ট AI সার্চ — ডেমো ২ · ওপরে সার্চ বার, নিচে তালিকা</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
-/* ===== Shared (same in all 5 demos): highlight, chapter tag, body, empty art ===== */
+/* ===== Shared (same in all 5 demos): highlight, chapter tag, AI badge, fix line ===== */
 mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-radius:4px;padding:0 2px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 :root[data-theme="dark"] mark.hl{color:var(--primary)}
 .body{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column}
@@ -17,6 +17,11 @@ mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-
 [data-hid]{cursor:pointer}
 .q-t{color:var(--primary)}
 .empty-art{color:var(--primary);flex:none}
+.aib{display:inline-block;font-size:11px;font-weight:700;padding:0 4px;border-radius:4px;background:color-mix(in srgb,var(--accent) 28%,transparent);color:var(--title);line-height:1.5;flex:none}
+.fix{margin:6px 0 0;font-size:13px;color:var(--body)}
+.fix b{color:var(--title)}
+.lnk{display:inline;font-weight:600;color:var(--primary-dark);text-decoration:underline;text-underline-offset:3px;text-align:left}
+:root[data-theme="dark"] .lnk{color:var(--primary)}
 
 /* ===== Demo 2: light pages; the search box itself is the top bar ===== */
 .sbar{flex:none;display:flex;align-items:center;gap:2px;padding:6px 10px 10px 4px;background:var(--scaffold);color:var(--title)}
@@ -27,14 +32,23 @@ mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-
 .sbox input::placeholder{color:var(--hint)}
 .sbox .icon-btn{width:38px;height:38px}
 .sbox .icon-btn svg{width:18px;height:18px}
+.sbox .mic{color:var(--primary)}
 .go{flex:none;padding:0 16px 12px;background:var(--scaffold)}
 .go .btn{border-radius:24px}
+
+/* ===== Search method: a row of pills right under the bar ===== */
+.mlabel{margin:6px 16px 8px;font-size:13px;color:var(--hint)}
+.mrow{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px}
+.mo{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:20px;border:1px solid var(--divider);background:var(--card);color:var(--body);font-size:14px}
+.mo .rd{display:none}
+.mo[aria-pressed="true"]{background:var(--tint);border-color:var(--primary);color:var(--primary-dark);font-weight:700}
+:root[data-theme="dark"] .mo[aria-pressed="true"]{color:var(--primary)}
 
 /* ===== Summary strip under the bar ===== */
 .sum{flex:none;padding:2px 16px 10px;border-bottom:1px solid var(--divider)}
 .sum p{margin:0}
 .sum .ql{font-size:15px;font-weight:600;color:var(--title)}
-.sum .ct{font-size:13px;color:var(--hint)}
+.sum .ct{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--hint)}
 
 /* ===== Result row: edge to edge, no card ===== */
 .row{display:block;padding:14px 16px;background:var(--card);border-bottom:1px solid var(--divider)}
@@ -45,6 +59,12 @@ mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-
 .row .top .grade{margin-left:auto}
 .row .translation{margin:8px 0 0}
 .row .narrator{margin:6px 0 0;font-size:12.5px}
+.row .cn{margin:6px 0 0;font-size:12.5px;color:var(--hint)}
+
+/* ===== AI: the closest row gets a label strip and a primary edge ===== */
+.lab{padding:12px 16px 6px;font-size:13px;font-weight:700;color:var(--hint);background:var(--scaffold)}
+.row.best{border-left:3px solid var(--primary);padding-left:13px}
+.row.best .translation{font-size:16px}
 
 /* ===== Hadith page: plain reading view ===== */
 .read{padding:16px 18px}
@@ -55,10 +75,11 @@ mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-
 .read .grade{display:inline-block;margin-bottom:12px}
 
 /* ===== Nothing matched ===== */
-.nores{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:56px 32px 24px}
+.nores{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:48px 32px 24px}
 .nores h3{margin:22px 0 0;font-size:18px;font-weight:600;color:var(--title)}
 .nores p{margin:8px 0 0;font-size:14.5px;color:var(--body)}
-.nores .btn{margin-top:18px;border-radius:24px}
+.nores .btn{margin-top:14px;border-radius:24px}
+.nores .btn+.btn{margin-top:8px}
 </style>
 </head>
 <body>
@@ -66,10 +87,10 @@ mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-
   <div class="phone">
     <div class="viewport">
 
-      <!-- ===== Screen: search — the bar is the page ===== -->
+      <!-- ===== Screen: search — the bar is the page, method pills below ===== -->
       <section class="screen" data-screen="search" data-status="light">
         <div class="sbar"><button class="icon-btn" aria-label="পেছনে" data-act="home" data-ic="back"></button><div class="sbox" data-box></div></div>
-        <div class="go"><button class="btn block" data-act="run">হাদিস সার্চ করুন</button></div>
+        <div class="go"><button class="btn block" data-act="run">সার্চ করুন</button></div>
         <div class="body"></div>
       </section>
 
@@ -80,9 +101,16 @@ mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-
         <div class="body"></div>
       </section>
 
+      <!-- ===== Screen: AI result — closest row first ===== -->
+      <section class="screen" data-screen="ai" data-status="light">
+        <div class="sbar"><button class="icon-btn" aria-label="পেছনে" data-go="search" data-ic="back"></button><div class="sbox" data-box></div></div>
+        <div class="sum"></div>
+        <div class="body"></div>
+      </section>
+
       <!-- ===== Screen: hadith ===== -->
       <section class="screen" data-screen="hadith" data-status="light">
-        <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-go="results" data-ic="back"></button><h1><span data-hb></span><small data-hn></small></h1></header>
+        <header class="appbar flat"><button class="icon-btn" aria-label="পেছনে" data-act="back" data-ic="back"></button><h1><span data-hb></span><small data-hn></small></h1></header>
         <div class="body"></div>
       </section>
 
@@ -97,195 +125,41 @@ mark.hl{background:var(--tint);color:var(--primary-dark);font-weight:700;border-
   </div>
 </main>
 <script src="../../_kit/kit.js"></script>
+<script src="ss_engine.js"></script>
 <script>
-/* ======================================================================
-   ENGINE (same in all 5 demos): demo hadith, the team's spelling list,
-   the Bangla spelling fold, chapter match, highlight and the flow.
-   Each demo's own look lives in the D object further down.
-   ====================================================================== */
-const { $, $$, bn, icons } = Kit;
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
-/* ---------- Demo hadith (text only from the safe list) + chapter name ---------- */
-const BOOKS = { bukhari: { name: 'সহিহ বুখারি', abbr: 'বুখারী' }, muslim: { name: 'সহিহ মুসলিম', abbr: 'মুসলিম' } };
-const HADITHS = [
-  { id: 'b1', book: 'bukhari', num: 1, chapter: 'ওহীর সূচনা', nar: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত', bn: 'সকল কাজ নিয়তের ওপর নির্ভরশীল। প্রত্যেক ব্যক্তি তা-ই পাবে, যার সে নিয়ত করে।' },
-  { id: 'b1894', book: 'bukhari', num: 1894, chapter: 'সাওম (রোজা)', nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'রোজা ঢালস্বরূপ।' },
-  { id: 'b6018', book: 'bukhari', num: 6018, chapter: 'আদব (শিষ্টাচার)', nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'যে আল্লাহ ও শেষ দিনের প্রতি ঈমান রাখে, সে যেন ভালো কথা বলে অথবা চুপ থাকে।' },
-  { id: 'b6116', book: 'bukhari', num: 6116, chapter: 'আদব (শিষ্টাচার)', nar: 'আবু হুরায়রা (রা.) থেকে বর্ণিত', bn: 'এক ব্যক্তি নবী (সাঃ)-কে বলল, আমাকে উপদেশ দিন। তিনি বললেন, রাগ করো না। লোকটি কয়েকবার একই কথা বলল, তিনি প্রতিবারই বললেন, রাগ করো না।' },
-  { id: 'm223', book: 'muslim', num: 223, chapter: 'পবিত্রতা', nar: 'আবু মালিক আশআরি (রা.) থেকে বর্ণিত', bn: 'পবিত্রতা ঈমানের অর্ধেক।' },
-].map((h, i) => ({ ...h, order: i }));
-
-/* ---------- Spelling fold: small Bangla differences count as the same ----------
-   ঈ/ই, ী/ি, ঊ/উ, ূ/ু, য/জ, ণ/ন, ৎ/ত, য-ফলা dropped. `map` keeps the
-   source index of every folded letter, so the highlight lands on the
-   hadith's own spelling. */
-const FOLD = { 'ঈ': 'ই', 'ী': 'ি', 'ঊ': 'উ', 'ূ': 'ু', 'য': 'জ', 'ণ': 'ন', 'ৎ': 'ত', '‌': '', '‍': '' };
-const YA = 'য', NUKTA = '়', HASANTA = '্', YYA = 'য়';
-function fold(s) {
-  const t = [], map = [];
-  for (let i = 0; i < s.length; i++) {
-    let c = s[i];
-    if (c === YA && s[i + 1] === NUKTA) { t.push(YYA); map.push(i); i++; continue; }   // য + ় = য়
-    if (c === HASANTA && s[i + 1] === YA && s[i + 2] !== NUKTA) { i++; continue; }      // য-ফলা
-    c = c in FOLD ? FOLD[c] : c.toLowerCase();
-    if (c) { t.push(c); map.push(i); }
-  }
-  return { t: t.join(''), map };
-}
-
-/* ---------- Team spelling list (ships with the app, works offline) ---------- */
-const SPELLINGS = [
-  ['সদকা', 'সাদাকা', 'সাদকা', 'ছদকা'],
-  ['নিয়ত', 'নিয়্যত', 'নিয়াত', 'নিয়্যাত'],
-  ['অজু', 'ওজু', 'ওযু', 'উযু'],
-  ['কুরআন', 'কোরআন', 'কুরান'],
-  ['জিকির', 'যিকির', 'যিকর'],
-  ['হজ', 'হজ্জ', 'হজ্ব'],
-].map((g) => [...new Set(g.map((w) => fold(w).t))]);
-function expand(word) {
-  const f = fold(word).t;
-  return SPELLINGS.find((g) => g.includes(f)) || [f];
-}
-
-/* ---------- Highlight ranges (grown to whole Bangla letters) ---------- */
-const MARK = /[ঁ-ঃ়া-্ৗ]/;
-function grow(s, end) {
-  while (end < s.length && MARK.test(s[end])) end += s[end] === HASANTA ? 2 : 1;
-  return Math.min(end, s.length);
-}
-function ranges(text, alts) {
-  const { t, map } = fold(text), out = [];
-  alts.forEach((a) => {
-    if (!a) return;
-    for (let i = t.indexOf(a); i >= 0; i = t.indexOf(a, i + a.length)) out.push([map[i], grow(text, map[i + a.length - 1] + 1)]);
-  });
-  out.sort((x, y) => x[0] - y[0]);
-  return out.reduce((m, r) => {                                       // join touching words: "ভালো কথা"
-    const l = m[m.length - 1];
-    if (l && (r[0] <= l[1] || !text.slice(l[1], r[0]).trim())) l[1] = Math.max(l[1], r[1]); else m.push(r);
-    return m;
-  }, []);
-}
-function hl(text, alts) {
-  if (!alts || !alts.length) return esc(text);
-  let o = '', p = 0;
-  ranges(text, alts).forEach(([a, b]) => { o += esc(text.slice(p, a)) + `<mark class="hl">${esc(text.slice(a, b))}</mark>`; p = b; });
-  return o + esc(text.slice(p));
-}
-
-/* ---------- Search: number, or words in the translation, or the chapter name ---------- */
-const toLatin = (s) => s.replace(/[০-৯]/g, (d) => '০১২৩৪৫৬৭৮৯'.indexOf(d));
-function compute(raw) {
-  const q = raw.trim().replace(/\s+/g, ' ');
-  if (/^[0-9০-৯]+$/.test(q)) {
-    const n = +toLatin(q);
-    return { q, num: true, list: HADITHS.filter((h) => h.num === n).map((h) => ({ h, inText: false, inChap: false, alts: [] })) };
-  }
-  const groups = q.split(' ').map(expand);
-  const alts = groups.flat();
-  const list = HADITHS.map((h) => {
-    const ft = fold(h.bn).t, fc = fold(h.chapter).t;
-    const inText = groups.every((g) => g.some((a) => ft.includes(a)));
-    const inChap = groups.every((g) => g.some((a) => fc.includes(a)));
-    return inText || inChap ? { h, inText, inChap, alts } : null;
-  }).filter(Boolean).sort((a, b) => (b.inText - a.inText) || (a.h.order - b.h.order));
-  return { q, list };
-}
-
-/* ---------- App strings ---------- */
-const T = {
-  hint: 'হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন',
-  btn: 'হাদিস সার্চ করুন',
-  you: (q) => `আপনি ( <b class="q-t">${esc(q)}</b> ) লিখে সার্চ করেছেন`,
-  count: (n) => `সর্বমোট ফলাফল পাওয়া গেছে : ${bn(n)} টি`,
-  chap: 'অধ্যায়ে মিলেছে',
-  none: 'কোন সার্চ রেজাল্ট পাওয়া যায়নি',
-  tip: 'বানান একটু বদলে বা আরবিতে লিখে আবার সার্চ করুন।',
-};
-const ART = '<svg class="empty-art" width="84" height="84" viewBox="0 0 84 84" fill="none" aria-hidden="true"><rect x="14" y="8" width="44" height="58" rx="6" style="fill:var(--tint);stroke:var(--primary)" stroke-width="2.5"/><path d="M24 24h24M24 34h24M24 44h12" style="stroke:var(--primary)" stroke-width="2.5" stroke-linecap="round" opacity=".55"/><circle cx="54" cy="54" r="13" style="fill:var(--card);stroke:var(--primary-dark)" stroke-width="3"/><path d="m63.5 63.5 9 9" style="stroke:var(--primary-dark)" stroke-width="4" stroke-linecap="round"/><path d="m49.5 49.5 9 9m0-9-9 9" style="stroke:var(--primary-dark)" stroke-width="2.5" stroke-linecap="round"/></svg>';
-const ctag = (r) => (r && r.inChap ? `<span class="ctag">${icons.book}${T.chap}</span>` : '');
-const grade = () => '<span class="grade">সহিহ হাদিস</span>';
-const input = (cls = '') => `<input class="${cls}" data-q type="search" enterkeyhint="search" autocomplete="off" aria-label="হাদিস সার্চ ইনপুট" placeholder="${T.hint}">`;
-const clearBtn = () => `<button class="icon-btn" type="button" data-act="clear" aria-label="ক্লিয়ার">${icons.close}</button>`;
-
-/* ---------- State + flow ---------- */
-const S = { text: 'ইমান', res: null, cur: null };
-const EXAMPLES = ['ইমান', 'রোযা', 'নিয়্যত', 'আদব', 'ভালো কথা', '৬১১৬', 'রুজা'];
-const EXTRA = EXAMPLES.map((q) => `<button class="kit-chip" type="button" data-ex="${q}" aria-pressed="false">${q}</button>`).join('');
-const cur = () => HADITHS.find((h) => h.id === S.cur);
-const hit = () => (S.res ? S.res.list.find((r) => r.h.id === S.cur) : null);
-function run(raw) {
-  const v = String(raw == null ? S.text : raw).trim();
-  if (!v) { Kit.snack('সার্চ করার জন্য কিছু লিখুন'); return; }
-  S.text = v;
-  S.res = compute(v);
-  Kit.show(S.res.list.length ? 'results' : 'empty');
-}
-function syncClear(sec) {
-  $$('[data-act="clear"]', sec).forEach((b) => { const i = $('[data-q]', sec); b.hidden = !(i && i.value); });
-}
-function markEx() {
-  $$('[data-ex]').forEach((b) => b.setAttribute('aria-pressed', String(!!S.res && Kit.current !== 'search' && b.dataset.ex === S.res.q)));
-}
-function render(id) {
-  const sec = $(`.screen[data-screen="${id}"]`);
-  if (!sec) return;
-  D[id] && D[id](sec);
-  $$('.body, .rl', sec).forEach((b) => { b.scrollTop = 0; });
-  $$('[data-q]', sec).forEach((i) => { i.value = id === 'search' || !S.res ? S.text : S.res.q; });
-  $$('[data-count]', sec).forEach((el) => { el.textContent = T.count(S.res ? S.res.list.length : 0); });
-  const h = cur();
-  if (h) {
-    $$('[data-hb]', sec).forEach((el) => { el.textContent = BOOKS[h.book].name; });
-    $$('[data-hn]', sec).forEach((el) => { el.textContent = `হাদিস: ${bn(h.num)}`; });
-  }
-  syncClear(sec);
-  markEx();
-}
-/* A screen opened straight from the toolbar gets a fitting search. */
-Kit.onScreen((id) => {
-  if ((id === 'results' || id === 'hadith') && !(S.res && S.res.list.length)) { S.text = 'ইমান'; S.res = compute(S.text); }
-  if (id === 'empty' && !(S.res && !S.res.list.length)) { S.text = 'রুজা'; S.res = compute(S.text); }
-  if (id === 'hadith' && !hit()) S.cur = S.res.list[0].h.id;
-  render(id);
-});
-document.addEventListener('click', (e) => {
-  const t = e.target.closest('[data-act],[data-hid],[data-ex]');
-  if (!t) return;
-  if (t.dataset.ex) { S.text = t.dataset.ex; run(); return; }
-  if (t.dataset.hid) { S.cur = t.dataset.hid; Kit.show('hadith'); return; }
-  const a = t.dataset.act, sec = t.closest('.screen');
-  if (a === 'run') { const i = sec && $('[data-q]', sec); run(i ? i.value : S.text); }
-  if (a === 'clear') { const i = $('[data-q]', sec); S.text = ''; i.value = ''; i.focus(); syncClear(sec); }
-  if (a === 'edit') { Kit.show('search'); setTimeout(() => { const i = $('.screen.on [data-q]'); if (i) { i.focus(); i.select(); } }, 30); }
-  if (a === 'home') Kit.snack('হোম পেজে ফিরে যাবে');
-});
-document.addEventListener('input', (e) => { if (e.target.matches('[data-q]')) { S.text = e.target.value; syncClear(e.target.closest('.screen')); } });
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && e.target.matches('[data-q]')) { e.preventDefault(); run(e.target.value); }
-  if (e.key === 'Enter' && e.target.matches('[data-hid]')) e.target.click();
-});
-
 /* ======================================================================
    DEMO 2 — ওপরে সার্চ বার, নিচে তালিকা: light pages. The rounded search
    box is the top bar on every search screen, so the query can be changed
-   right on the result page (Enter searches again). Results are flat rows.
+   right on the result page (Enter searches again with the same method).
+   Method = pills under the bar. AI rows: a "সবচেয়ে কাছের হাদিস" strip,
+   then "আরো কাছাকাছি হাদিস".
    ====================================================================== */
-const box = () => `${icons.search}${input()}${clearBtn()}`;
-function row(r) {
+const box = () => `${icons.search}${input()}${tools()}`;
+function row(r, best) {
   const h = r.h;
-  return `<article class="row" data-hid="${h.id}" tabindex="0">
+  return `<article class="row${best ? ' best' : ''}" data-hid="${h.id}" tabindex="0">
     <div class="top"><b>${BOOKS[h.book].name}</b><span class="no">${bn(h.num)}</span>${ctag(r)}${grade()}</div>
-    <p class="translation">${hl(h.bn, r.alts)}</p><p class="narrator">${h.nar}</p></article>`;
+    <p class="translation">${hl(h.bn, r.alts)}</p>${S.res.ai ? `<p class="cn">অধ্যায়: ${esc(h.chapter)}</p>` : ''}<p class="narrator">${h.nar}</p></article>`;
 }
-const sum = (sec) => { $('.sum', sec).innerHTML = `<p class="ql">${T.you(S.res.q)}</p><p class="ct">${T.count(S.res.list.length)}</p>`; };
+const sum = (sec) => {
+  $('.sum', sec).innerHTML = `<p class="ql">${T.you(S.res.q)}</p><p class="ct">${S.res.ai ? aib() : ''}${T.count(S.res.list.length)}</p>${fixLine()}`;
+};
 const D = {
-  search(sec) { $('[data-box]', sec).innerHTML = box(); },
+  search(sec) {
+    $('[data-box]', sec).innerHTML = box();
+    $('.body', sec).innerHTML = `<p class="mlabel">${T.method}</p><div class="mrow">${methods()}</div>`;
+  },
   results(sec) {
     $('[data-box]', sec).innerHTML = box();
     sum(sec);
-    $('.body', sec).innerHTML = S.res.list.map(row).join('');
+    $('.body', sec).innerHTML = S.res.list.map((r) => row(r)).join('');
+  },
+  ai(sec) {
+    const [first, ...rest] = S.res.list;
+    $('[data-box]', sec).innerHTML = box();
+    sum(sec);
+    $('.body', sec).innerHTML = `<div class="lab">${T.best}</div>${row(first, true)}
+      ${rest.length ? `<div class="lab">${T.more}</div>${rest.map((r) => row(r)).join('')}` : ''}`;
   },
   hadith(sec) {
     const h = cur();
@@ -296,8 +170,8 @@ const D = {
   empty(sec) {
     $('[data-box]', sec).innerHTML = box();
     sum(sec);
-    $('.body', sec).innerHTML = `<div class="nores">${ART}<h3>${T.none}</h3><p>${T.tip}</p>
-      <button class="btn tonal" data-focus>অন্য বানানে লিখুন</button></div>`;
+    $('.body', sec).innerHTML = `<div class="nores">${ART}<h3>${T.none}</h3><p>${emptyTip()}</p>
+      ${tryAiBtn('btn')}<button class="btn tonal" data-focus>অন্য বানানে লিখুন</button></div>`;
   },
 };
 /* The tip button puts the cursor back in this page's own bar. */
@@ -309,6 +183,7 @@ $$('[data-ic]').forEach((el) => { el.innerHTML = icons[el.dataset.ic]; });
 Kit.init({ demo: 2, name: 'ওপরে সার্চ বার, নিচে তালিকা', extra: EXTRA, screens: [
   { id: 'search', label: 'সার্চ পেজ' },
   { id: 'results', label: 'সার্চ রেজাল্ট' },
+  { id: 'ai', label: 'AI রেজাল্ট' },
   { id: 'hadith', label: 'হাদিস পেজ' },
   { id: 'empty', label: 'কিছু মেলেনি' },
 ]});

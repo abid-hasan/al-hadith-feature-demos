@@ -1,6 +1,6 @@
 /* =====================================================================
    পরিস্থিতি দিয়ে শেখা — ৫টা ডেমোর শেয়ার করা ডেটা ও হেল্পার।
-   - পরিস্থিতি: #১২ "জীবনের পরিস্থিতি দিয়ে সার্চ"-এর তালিকা থেকে (রাগ, সংসার) আর md-র উদাহরণ "সততা"।
+   - পরিস্থিতি: #৫১ "জীবনের পরিস্থিতি দিয়ে সার্চ"-এর তালিকা থেকে (রাগ, সংসার) আর md-র উদাহরণ "সততা"।
    - হাদিস: শুধু নিশ্চিত তালিকার বুখারি ১, ১৮৯৪, ৬০১৮, ৬১১৬; লেখা bukhari_bn.db থেকে হুবহু। আরবি রাখা হয়নি।
    - ঘটনা আর তিন লাইনের শিক্ষা অ্যাপে এখনো নেই; ডেমোর জন্য সাধারণভাবে লেখা, কনটেন্ট টিম আর আলেমরা চূড়ান্ত করবেন।
    ===================================================================== */
@@ -20,7 +20,7 @@
     next: p('<path d="M5 12h13M13 6l6 6-6 6"/>'),
   };
 
-  /* ---------- Situations (from #12) — only those with lessons in this demo ---------- */
+  /* ---------- Situations (from #51) — only those with lessons in this demo ---------- */
   const SITS = [
     { id: 'honest', name: 'সততা', phrase: 'সৎ থাকতে চাই', comfort: 'লোভ আর সুযোগের মুহূর্তে সৎ থাকার হাদিস আর পাঠ।', hadiths: ['bukhari:1'] },
     { id: 'anger', name: 'রাগ', phrase: 'রাগ সামলাতে পারছি না', comfort: 'রাগ উঠলে কী বলবেন আর নবীজি (সাঃ) কী বলেছেন, এক জায়গায়।', hadiths: ['bukhari:6116', 'bukhari:6018'] },
@@ -103,7 +103,7 @@
   const nextOf = (id) => { const l = lesson(id), list = ofSit(l.sit); return list[(list.indexOf(l) + 1) % list.length]; };
   const posOf = (id) => { const l = lesson(id), list = ofSit(l.sit); return [list.indexOf(l) + 1, list.length]; };
   const norm = (s) => s.normalize('NFC').replace(/[\u200c\u200d]/g, '').trim();
-  // #12 search: matching situations and lessons (question, story, situation name)
+  // #51 search: matching situations and lessons (question, story, situation name)
   function search(q) {
     const t = norm(q);
     if (!t) return { sits: [], lessons: [] };

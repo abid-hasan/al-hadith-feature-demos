@@ -52,6 +52,18 @@
 .shot-foot b{display:block;font-size:15px;color:var(--title)}
 .shot-foot small{font-size:12px;color:var(--hint)}
 .shot-btn{margin:16px 16px 0}
+/* ===== Shared: the details section's parts (সনদ, তাহকিক, ফিকহি দিক), the list box link, the tahkik popup ===== */
+.pv{margin:0;font-size:14.5px;line-height:1.7;color:var(--title)}
+.fq{margin:0;padding-left:20px;font-size:14.5px;line-height:1.7;color:var(--title)}
+.fq li+li{margin-top:4px}
+.gchip{display:inline-block;margin:0 0 6px;padding:2px 10px;font-size:12.5px;line-height:1.6}
+.dlink{display:inline-flex;align-items:center;gap:2px;height:34px;font-size:14px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .dlink{color:var(--primary)}
+/* TahkikDetailsDialog (already in the app): grade illustration, grade name, its description, ঠিক আছে */
+.tdlg{text-align:center}
+.tdlg .ill{width:72px;height:72px;margin:4px auto 14px;border-radius:50%;display:grid;place-items:center;background:var(--grade-sahih);color:var(--on-appbar)}
+.tdlg h2{font-size:19px}
+.tdlg p{margin:0;font-size:14.5px;line-height:1.7;color:var(--body);text-align:justify}
 /* ===== Demo 4 only ===== */
 /* A full-width coloured band across the card, white text, fact tiles when open */
 .cb{margin:12px -14px 0;padding:12px 14px 4px;background:var(--primary-dark);color:var(--on-appbar);cursor:default}
@@ -59,14 +71,22 @@
 .cb-t{margin:8px 0 0;font-size:14.5px;line-height:1.7;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .tile{padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--on-appbar) 13%,transparent)}
-.tile.what{grid-column:1/-1}
+.tile.where,.tile.what,.tile.why{grid-column:1/-1}
 .tk{display:flex;align-items:center;gap:5px;font-size:12.5px;opacity:.85}
 .tv{display:block;margin-top:2px;font-size:14.5px;line-height:1.6}
 .cb .note,.cb .s{color:color-mix(in srgb,var(--on-appbar) 82%,transparent)}
 .cb .vmark{color:var(--on-appbar);border-color:color-mix(in srgb,var(--on-appbar) 45%,transparent)}
-.cb-btn{display:inline-flex;align-items:center;gap:2px;height:36px;font-size:14px;font-weight:700;color:var(--on-appbar)}
-/* Details: the same band as its own rounded block above the hadith, always open */
-.cb.d{margin:0 12px 10px;padding-bottom:14px;border-radius:10px}
+.cb-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cb-btn,.cb-link{display:inline-flex;align-items:center;gap:2px;height:36px;font-size:14px;font-weight:700;color:var(--on-appbar)}
+.cb-link{text-decoration:underline;text-underline-offset:3px}
+/* Details: one rounded block below the hadith — the band on top (background), a card area under it with a tinted tile per part */
+.d4{margin:0 12px 10px;border-radius:10px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+.d4 .cb{margin:0;padding-bottom:14px}
+.d4p{display:grid;gap:8px;padding:12px 12px 0}
+.d4r{padding:10px 12px;border-radius:10px;background:var(--tint)}
+.d4k{display:flex;align-items:center;gap:5px;margin-bottom:4px;font-size:12.5px;font-weight:700;color:var(--primary-dark)}
+:root[data-theme="dark"] .d4k{color:var(--primary)}
+.d4s{padding:2px 14px 14px}
 /* Menu: two large coloured tiles */
 .m4{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:6px 16px 22px}
 .m4 button{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:14px;border-radius:14px;background:var(--primary-dark);color:var(--on-appbar);text-align:left;font-size:14.5px;font-weight:700;line-height:1.35}
@@ -83,10 +103,11 @@
       <section class="screen rs" data-screen="details"></section>
       <section class="screen" data-screen="menu"></section>
       <section class="screen" data-screen="shot" data-status="light"></section>
-      <!-- ===== Overlays (filled by the demo): full context sheet, menu sheet, menu popup ===== -->
+      <!-- ===== Overlays (filled by the demo): full context sheet, menu sheet, menu popup, tahkik popup ===== -->
       <div class="sheet" id="sheet-bg" role="dialog" aria-label="প্রেক্ষাপট"></div>
       <div class="sheet" id="sheet-menu" role="dialog" aria-label="অন্যান্য অপশন"></div>
       <div class="dialog pop" id="pop-menu" role="menu" aria-label="অন্যান্য অপশন"></div>
+      <div class="dialog tdlg" id="dlg-tahkik" role="dialog" aria-label="তাহকিক"></div>
     </div>
   </div>
 </main>
@@ -101,8 +122,15 @@ const svg = (d, w = 20) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" 
 const I = {
   ctx: (w = 16) => svg('<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12.5h5"/>', w),
   who: (w = 16) => svg('<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>', w),
+  when: (w = 16) => svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', w),
   where: (w = 16) => svg('<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>', w),
   what: (w = 16) => svg('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>', w),
+  why: (w = 16) => svg('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>', w),
+  /* the details section's parts: সনদ (a chain), তাহকিক (a check), ফিকহি দিক (scales) */
+  sanad: (w = 16) => svg('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>', w),
+  tahkik: (w = 16) => svg('<circle cx="11" cy="11" r="7"/><path d="m8 11 2 2 4-4M20 20l-4-4"/>', w),
+  fiqh: (w = 16) => svg('<path d="M12 4v16M8 20h8M5 7h14"/><path d="M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/>', w),
+  right: (w = 16) => svg('<path d="M9 5l7 7-7 7"/>', w),
   shield: (w = 13) => svg('<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="m9 12 2 2 4-4"/>', w),
   shot: (w = 20) => svg('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l2-3h4l2 3"/><circle cx="12" cy="13.5" r="3.5"/>', w),
   copy: (w = 20) => svg('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>', w),
@@ -128,13 +156,15 @@ const PLAIN = [
 ];
 
 /* ---------- The background (প্রেক্ষাপট). Comes verified with the book data;
-   only known facts: who, where, what happened. ---------- */
+   only known facts: who, when, where, what happened, and why it was said. ---------- */
 const BG = {
   short: 'হিজরতের সময়ের ঘটনা। মুহাজিরদের মধ্যে এক ব্যক্তি আল্লাহ ও তাঁর রাসূলের (সাঃ) জন্য নয়, এক নারীকে বিয়ে করার উদ্দেশ্যে মদিনায় হিজরত করেছিলেন।',
   facts: [
     { k: 'who', label: 'কে', text: 'মক্কা থেকে মদিনায় হিজরত করা এক ব্যক্তি' },
-    { k: 'where', label: 'কোথায়', text: 'মক্কা থেকে মদিনা, হিজরতের সময়' },
+    { k: 'when', label: 'কখন', text: 'হিজরতের সময়' },
+    { k: 'where', label: 'কোথায়', text: 'মক্কা থেকে মদিনা' },
     { k: 'what', label: 'কী ঘটেছিল', text: 'তিনি এক নারীকে বিয়ের প্রস্তাব দেন। ওই নারী জানান, হিজরত না করলে বিয়ে করবেন না। তখন তিনি হিজরত করেন এবং তাঁকে বিয়ে করেন।' },
+    { k: 'why', label: 'কী উদ্দেশ্যে', text: 'আমলের মূল্য যে নিয়তের ওপর নির্ভর করে, তা বোঝাতে।' },
   ],
   note: 'এই ঘটনার কারণেই হাদিসটি বলা হয়েছিল কি না, তা নিশ্চিত নয়। তবে হাদিসের শেষ অংশের সাথে ঘটনাটি মিলে যায়।',
   src: 'আল-মুজামুল কাবির, ইবনে মাসউদ (রা.) থেকে বর্ণিত',
@@ -145,10 +175,37 @@ const LESS = 'কম দেখান';
 const srcHTML = () => `<div class="src"><span class="s">সূত্র: ${BG.src}</span><span class="vmark">${I.shield()}আলেমদের যাচাই করা</span></div>`;
 const noteHTML = () => `<p class="note">${BG.note}</p>`;
 
+/* ---------- The details section's other parts: সনদ (a short summary; the
+   full chain is feature #42), তাহকিক (the existing grade chip + a short
+   word, the chip opens the existing tahkik popup) and ফিকহি দিক. Same
+   verified data; a part without data is simply left out. ---------- */
+const P = {
+  sanad: 'উমর ইবনুল খাত্তাব (রা.) থেকে বর্ণিত। প্রথম কয়েক স্তরে একজন করে বর্ণনাকারী, পরের স্তরগুলোতে অনেকে বর্ণনা করেছেন। সনদ শুরু থেকে শেষ পর্যন্ত অবিচ্ছিন্ন।',
+  tahkik: 'হাদিসটি সহীহ বুখারী ও সহীহ মুসলিম দুই গ্রন্থেই এসেছে। মুহাদ্দিসগণ একমত যে এটি সহিহ।',
+  fiqh: [
+    'যেকোনো আমলের সওয়াব নিয়তের ওপর নির্ভর করে।',
+    'একই কাজ নিয়তের কারণে ইবাদত হয়, আবার দুনিয়াবি কাজও হতে পারে।',
+    'নামাজ, রোজার মতো ইবাদতে নিয়ত করা জরুরি।',
+  ],
+  /* the existing grade description the tahkik popup shows */
+  gradeInfo: 'যে হাদিসের সনদ শুরু থেকে শেষ পর্যন্ত অবিচ্ছিন্ন, প্রত্যেক বর্ণনাকারী ন্যায়পরায়ণ ও স্মৃতিতে নির্ভরযোগ্য, আর যাতে কোনো অসংগতি বা গোপন ত্রুটি নেই, তাকে সহিহ হাদিস বলে।',
+};
+const gchipHTML = () => `<button class="grade gchip" data-open="dlg-tahkik" aria-label="তাহকিক দেখুন: ${BOOK.grade}">${BOOK.grade}</button>`;
+/* In order; empty when the data has only the background (toolbar: শুধু প্রেক্ষাপট) */
+const parts = () => (S.has !== 'all' ? [] : [
+  { k: 'sanad', label: 'সনদ', body: `<p class="pv">${P.sanad}</p>` },
+  { k: 'tahkik', label: 'তাহকিক', body: `${gchipHTML()}<p class="pv">${P.tahkik}</p>` },
+  { k: 'fiqh', label: 'ফিকহি দিক', body: `<ul class="fq">${P.fiqh.map((x) => `<li>${x}</li>`).join('')}</ul>` },
+]);
+/* "হাদিসের বিস্তারিত" at the end of the opened list box, only when the section has more to show */
+const linkHTML = (cls = 'dlink') => (S.has === 'all' ? `<button class="${cls}" data-act="details" data-no="${H1.no}">হাদিসের বিস্তারিত${I.right(16)}</button>` : '');
+const tahkikDlgHTML = () => `<div class="ill">${I.tahkik(34)}</div><h2>${BOOK.grade}</h2><p>${P.gradeInfo}</p><div class="actions"><button class="btn tonal block" data-close>ঠিক আছে</button></div>`;
+
 /* ---------- State ----------
-   has  = the chapter has a hadith with a background (toolbar: আছে / নেই)
+   has  = what the chapter's hadith has (toolbar): 'all' = background and
+          every part, 'bg' = the background only, 'none' = no background
    open = the list box is expanded; from = where the menu / image was opened */
-const S = { has: true, open: false, from: 'list', cur: H1 };
+const S = { has: 'all', open: false, from: 'list', cur: H1 };
 const SCREENS = [
   { id: 'list', label: 'অধ্যায়ের লিস্ট' },
   { id: 'open', label: 'পুরো প্রেক্ষাপট' },
@@ -156,29 +213,30 @@ const SCREENS = [
   { id: 'menu', label: 'শেয়ার মেনু' },
   { id: 'shot', label: 'শেয়ারের ছবি' },
 ];
-const EXTRA = '<button class="kit-chip" type="button" data-has="1">প্রেক্ষাপট আছে</button><button class="kit-chip" type="button" data-has="0">প্রেক্ষাপট নেই</button>';
+const EXTRA = '<button class="kit-chip" type="button" data-has="all">সব অংশ আছে</button><button class="kit-chip" type="button" data-has="bg">শুধু প্রেক্ষাপট</button><button class="kit-chip" type="button" data-has="none">প্রেক্ষাপট নেই</button>';
 const refText = (h) => `${h.book} · হাদিস: ${bn(h.no)}`;
 
 /* ---------- Shared markup: top bar, hadith card, chapter list, details, share image ---------- */
 function headHTML(h, more = true) {
   return `<div class="hadith-head"><span class="book-badge">${h.abbr}</span><div class="hadith-meta"><b>${h.book}</b><span>হাদিস: ${bn(h.no)}</span></div><span class="grade">${h.grade}</span>${more ? `<button class="icon-btn" data-act="more" data-no="${h.no}" aria-label="অন্যান্য অপশন">${icons.more}</button>` : ''}</div>`;
 }
-/* mode: 'list' (box collapsed or open) | 'detail' (box fully open) */
+/* mode: 'list' (box collapsed or open) | 'detail' (no box: the page has its own section) */
 function cardHTML(h, mode = 'list') {
-  const box = !h.bg ? '' : mode === 'list' ? D.box(S.open) : (D.detailInCard ? D.detailInCard() : '');
+  const box = h.bg && mode === 'list' ? D.box(S.open) : '';
   const tap = mode === 'list' ? `data-act="details" data-no="${h.no}" role="button" tabindex="0" aria-label="হাদিসের বিস্তারিত খুলুন"` : '';
   return `<article class="card hc" ${tap}>${headHTML(h)}${box}<p class="narrator">${h.nar}</p><p class="translation">${h.text}</p></article>`;
 }
 const secHTML = (h) => `<div class="card sc"><small>অধ্যায়</small><b>${h.bab}</b></div>`;
 function listHTML() {
-  const hs = S.has ? [H1] : PLAIN;
+  const hs = S.has !== 'none' ? [H1] : PLAIN;
   return `<header class="appbar np"><h1>${BOOK.book}<small>${hs[0].kitab}</small></h1></header>
     <div class="body">${hs.map((h) => secHTML(h) + cardHTML(h)).join('')}</div>`;
 }
+/* Details page: chapter card, the hadith, then the "প্রেক্ষাপট" section below it */
 function detailsHTML() {
   const h = S.cur;
   return `<header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-act="back">${icons.back}</button><h1>${h.book}<small>হাদিস: ${bn(h.no)}</small></h1></header>
-    <div class="rbody"><div class="body">${secHTML(h)}${h.bg && D.detailAbove ? D.detailAbove() : ''}${cardHTML(h, 'detail')}</div></div>`;
+    <div class="rbody"><div class="body">${secHTML(h)}${cardHTML(h, 'detail')}${h.bg ? D.section() : ''}</div></div>`;
 }
 function shotHTML() {
   const h = S.cur;
@@ -201,12 +259,12 @@ function render(id) {
   else if (id === 'shot') sec.innerHTML = shotHTML();
   else sec.innerHTML = listHTML();
 }
-function syncExtra() { $$('[data-has]').forEach((b) => b.setAttribute('aria-pressed', String(!!+b.dataset.has === S.has))); }
+function syncExtra() { $$('[data-has]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.has === S.has))); }
 function onScreen(id) {
-  if (id === 'open') { S.has = true; S.open = !D.sheet; }
+  if (id === 'open') { if (S.has === 'none') S.has = 'all'; S.open = !D.sheet; }
   if (id === 'list') S.open = false;
   if (id === 'list' || id === 'open' || id === 'details') S.from = id;
-  if (S.has) S.cur = H1; else if (S.cur.bg) S.cur = PLAIN[1];
+  if (S.has !== 'none') S.cur = H1; else if (S.cur.bg) S.cur = PLAIN[1];
   syncExtra();
   render(id);
   // The full context as a sheet (demos with D.sheet), over the collapsed card.
@@ -216,7 +274,7 @@ function onScreen(id) {
 }
 function setHas(v) {
   S.has = v;
-  Kit.show(!v && Kit.current === 'open' ? 'list' : Kit.current);
+  Kit.show(v === 'none' && Kit.current === 'open' ? 'list' : Kit.current);
 }
 
 /* ---------- Wiring ---------- */
@@ -242,7 +300,7 @@ document.addEventListener('click', (e) => {
     return;
   }
   const h = e.target.closest('[data-has]');
-  if (h) { setHas(!!+h.dataset.has); return; }
+  if (h) { setHas(h.dataset.has); return; }
   const t = e.target.closest('[data-act]');
   if (t) ACT[t.dataset.act]?.(t);
 });
@@ -250,17 +308,21 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && (Kit.current === 'menu' || (Kit.current === 'open' && D.sheet))) Kit.show(Kit.current === 'menu' ? base() : 'list');
   if (e.key === 'Enter' && e.target.matches('[data-act="details"]')) ACT.details(e.target);
 });
+$('#dlg-tahkik').innerHTML = tahkikDlgHTML();
 /* ======================================================================
-   DEMO 4 — রঙিন ব্যান্ড: the context is a coloured band running edge to
-   edge across the card; opening it shows tiles for কে / কোথায় /
-   কী ঘটেছিল. Details page: the band as a rounded block above the hadith.
+   DEMO 4 — রঙিন ব্যান্ড: the background is a coloured band running edge
+   to edge across the card; opening it shows tiles for কে / কখন /
+   কোথায় / কী ঘটেছিল / কী উদ্দেশ্যে and a "হাদিসের বিস্তারিত" link.
+   Details page: one rounded block below the hadith, the band on top and
+   a tinted tile for each of সনদ / তাহকিক / ফিকহি দিক under it.
    ====================================================================== */
 const tiles4 = () => `<div class="tiles">${BG.facts.map((f) => `<div class="tile ${f.k}"><span class="tk">${I[f.k](14)}${f.label}</span><span class="tv">${f.text}</span></div>`).join('')}</div>`;
+const parts4 = () => { const ps = parts(); return ps.length ? `<div class="d4p">${ps.map((p) => `<div class="d4r"><span class="d4k">${I[p.k](14)}${p.label}</span>${p.body}</div>`).join('')}</div>` : ''; };
 const D = {
   box: (open) => `<div class="cb" data-act="noop"><span class="cb-tag">${I.ctx(14)}প্রেক্ষাপট</span>
     ${open ? tiles4() + noteHTML() + srcHTML() : `<p class="cb-t">${BG.short}</p>`}
-    <button class="cb-btn" data-act="toggle" aria-expanded="${open}">${open ? LESS : MORE}${open ? I.up(15) : I.down(15)}</button></div>`,
-  detailAbove: () => `<section class="cb d"><span class="cb-tag">${I.ctx(14)}প্রেক্ষাপট</span>${tiles4()}${noteHTML()}${srcHTML()}</section>`,
+    <div class="cb-foot"><button class="cb-btn" data-act="toggle" aria-expanded="${open}">${open ? LESS : MORE}${open ? I.up(15) : I.down(15)}</button>${open ? linkHTML('cb-link') : ''}</div></div>`,
+  section: () => `<section class="d4"><div class="cb"><span class="cb-tag">${I.ctx(14)}প্রেক্ষাপট</span>${tiles4()}${noteHTML()}</div>${parts4()}<div class="d4s">${srcHTML()}</div></section>`,
   menu: () => {
     const sub = S.cur.bg ? '<small>প্রেক্ষাপটের লাইনসহ</small>' : '';
     return `<div class="mhead"><div><h2>অন্যান্য অপশন</h2><p>${refText(S.cur)}</p></div><button class="xbtn" data-act="base" aria-label="বন্ধ করুন">${icons.close}</button></div>
