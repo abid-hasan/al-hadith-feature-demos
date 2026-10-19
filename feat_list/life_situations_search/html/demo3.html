@@ -17,26 +17,6 @@
 .qa-more svg{transition:transform .25s}
 .qa-more[aria-expanded="true"] svg{transform:rotate(180deg)}
 
-/* ===== Search page (NewSearchPage card) ===== */
-.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
-.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
-.panel>.scroll{padding:14px 0 24px}
-.scard{background:var(--card);border-radius:12px;margin:0 16px 16px;padding:14px}
-.stitle{margin:0;font-size:16px;font-weight:700;color:var(--title)}
-.srow{display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px}
-.see-all{font-size:13.5px;font-weight:700;color:var(--primary);padding:4px 2px}
-.sfield{display:flex;align-items:center;gap:8px;height:46px;padding:0 12px;border-radius:10px;border:.8px solid var(--divider);background:var(--tint)}
-.sfield:focus-within{border-color:var(--primary)}
-.sfield svg{width:18px;height:18px;color:var(--hint);flex:none}
-.sfield input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:14.5px}
-.sfield input::placeholder{color:var(--hint)}
-
-/* ===== NEW: situation chips (icon + short phrase), right under the field ===== */
-.sit-chips{display:flex;flex-wrap:wrap;gap:8px}
-.sit-chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px 0 8px;border-radius:20px;border:1px solid var(--primary);background:var(--card);font-size:13.5px;color:var(--title)}
-.sit-chip svg{width:20px;height:20px;color:var(--primary)}
-.sit-chip:hover{background:var(--tint)}
-
 /* ===== NEW: "জীবনের পরিস্থিতি" page — green header, then one big pill per situation with count chips ===== */
 .pills{display:flex;flex-direction:column;gap:10px;padding:16px 12px 24px}
 .pill{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px 10px 10px;border-radius:30px;border:1px solid var(--primary);background:var(--card);text-align:left}
@@ -90,25 +70,19 @@
     <div class="viewport">
       <!-- ===== Screen: home (app bar + quick actions, only what leads to the feature) ===== -->
       <section class="screen" data-screen="home">
-        <header class="appbar"><button class="icon-btn" aria-label="মেনু" data-snack="ড্রয়ার খুলবে — এই ফিচারের অংশ নয়" data-i="menu"></button><h1>আল হাদিস</h1><button class="icon-btn" aria-label="সার্চ" data-go="search" data-i="search"></button></header>
+        <header class="appbar"><button class="icon-btn" aria-label="মেনু" data-snack="ড্রয়ার খুলবে — এই ফিচারের অংশ নয়" data-i="menu"></button><h1>আল হাদিস</h1></header>
         <div class="scroll" id="home-body"></div>
       </section>
 
       <!-- ===== Screen: NEW "জীবনের পরিস্থিতি" page ===== -->
       <section class="screen" data-screen="list">
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" id="list-back" data-i="back"></button><h1></h1></header>
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="home" data-i="back"></button><h1></h1></header>
         <div class="scroll" id="list-body"></div>
-      </section>
-
-      <!-- ===== Search page ===== -->
-      <section class="screen" data-screen="search">
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="home" data-i="back"></button><h1>সার্চ</h1></header>
-        <div class="rbody"><div class="panel"><div class="scroll" id="search-body"></div></div></div>
       </section>
 
       <!-- ===== Situation page: hero + দোয়া / হাদিস tabs ===== -->
       <section class="screen" data-screen="sit">
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" id="sit-back" data-i="back"></button><h1></h1></header>
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="list" data-i="back"></button><h1></h1></header>
         <div class="scroll" id="sit-body" style="padding-bottom:24px"></div>
       </section>
 
@@ -132,7 +106,7 @@
 (function () {
   const { $, $$, bn, icons } = Kit;
   const ic = (n) => icons[n] || LS.UI[n];
-  const S = { sit: 'debt', tab: 0, hadith: '6116', expanded: true, listFrom: 'home', from: 'list' };
+  const S = { sit: 'debt', tab: 0, hadith: '6116', expanded: true };
 
   /* ---------- NEW: home quick actions with the "পরিস্থিতি" tile ---------- */
   function renderHome() { $('#home-body').innerHTML = LS.homeGrid(S.expanded); }
@@ -140,20 +114,9 @@
   /* ---------- NEW: "জীবনের পরিস্থিতি" page ---------- */
   function renderList() {
     $('#list-body').innerHTML = `<div class="hero"><div class="hero-row"><span class="ic">${LS.HOME_ICONS.situations}</span><div><h2>জীবনের পরিস্থিতি</h2><span>${bn(LS.SITUATIONS.length)}টি পরিস্থিতি</span></div></div><p>${LS.LIST_INTRO}</p></div>
-      <div class="pills">${LS.SITUATIONS.map((s) => { const c = LS.counts(s); return `<button class="pill" data-sit="${s.id}" data-from="list"><span class="pic">${LS.ICON[s.id]}</span>
+      <div class="pills">${LS.SITUATIONS.map((s) => { const c = LS.counts(s); return `<button class="pill" data-sit="${s.id}"><span class="pic">${LS.ICON[s.id]}</span>
         <span class="t"><b>${s.phrase}</b><small>${s.name}</small></span>
         <span class="cc"><span class="chip">দোয়া ${bn(c.d)}</span>${c.h ? `<span class="chip">হাদিস ${bn(c.h)}</span>` : ''}</span></button>`; }).join('')}</div>`;
-  }
-
-  /* ---------- Search page ---------- */
-  function renderSearch() {
-    $('#search-body').innerHTML = `
-      <div class="scard">
-        <label class="sfield">${ic('search')}<input id="q" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন" aria-label="সার্চ"></label>
-        <!-- জীবনের পরিস্থিতি: shortcut chips; "সব দেখুন" opens the section page -->
-        <div class="srow"><h2 class="stitle">জীবনের পরিস্থিতি</h2><button class="see-all" data-list="search">সব দেখুন</button></div>
-        <div class="sit-chips">${LS.SITUATIONS.map((s) => `<button class="sit-chip" data-sit="${s.id}" data-from="search">${LS.ICON[s.id]}${s.phrase}</button>`).join('')}</div>
-      </div>`;
   }
 
   /* ---------- Cards ---------- */
@@ -182,7 +145,7 @@
       <div class="segtabs" role="tablist"><button role="tab" data-tab="0" aria-selected="${S.tab === 0}">দোয়া (${bn(c.d)})</button><button role="tab" data-tab="1" aria-selected="${S.tab === 1}" ${c.h ? '' : 'disabled'}>হাদিস (${bn(c.h)})</button></div>
       ${secs.map((x) => `<h3 class="sec-h">${x.title}</h3>${(x.duas || []).map(duaCard).join('')}${(x.hadiths || []).map((n) => hadithCard(n)).join('')}`).join('')}`;
   }
-  function openSit(id, from) { S.sit = id; S.from = from || 'list'; S.tab = 0; Kit.show('sit'); }
+  function openSit(id) { S.sit = id; S.tab = 0; Kit.show('sit'); }
 
   /* ---------- Full hadith ---------- */
   function renderHadith() {
@@ -211,25 +174,19 @@
     const t = e.target.closest('button,[data-h]');
     if (!t) return;
     if (t.id === 'qa-more') { S.expanded = !S.expanded; return renderHome(); }
-    if (t.dataset.list) { S.listFrom = t.dataset.list; return Kit.show('list'); }
-    if (t.id === 'list-back') return Kit.show(S.listFrom);
-    if (t.id === 'sit-back') return Kit.show(S.from);
-    if (t.dataset.sit) return openSit(t.dataset.sit, t.dataset.from);
+    if (t.dataset.list) return Kit.show('list');
+    if (t.dataset.sit) return openSit(t.dataset.sit);
     if (t.dataset.tab) { S.tab = +t.dataset.tab; renderSit(); return; }
     if (t.dataset.dmenu) return openMenu('dua', t.dataset.dmenu);
     if (t.dataset.hmenu) { e.stopPropagation(); return openMenu('hadith', t.dataset.hmenu); }
     if (t.dataset.act) return act(t.dataset.act);
     if (t.dataset.h) { S.hadith = t.dataset.h; return Kit.show('hadith'); }
   });
-  document.addEventListener('keydown', (e) => {
-    if (e.target.id === 'q' && e.key === 'Enter') Kit.snack(e.target.value.trim() ? `"${e.target.value}" এর সার্চ ফলাফল খুলবে` : 'সার্চ করতে কিছু লিখুন');
-  });
 
   /* ---------- Screens ---------- */
   Kit.onScreen((id) => {
-    if (id === 'home') { S.listFrom = 'home'; renderHome(); }
+    if (id === 'home') renderHome();
     if (id === 'list') renderList();
-    if (id === 'search') renderSearch();
     if (id === 'hadith') { if (!LS.byId(S.sit).sections.some((x) => (x.hadiths || []).includes(S.hadith))) { S.sit = 'anger'; S.tab = 1; } renderHadith(); }
     if (id === 'sit') renderSit();
   });
@@ -237,7 +194,6 @@
   Kit.init({ demo: 3, name: 'চিপ আর দোয়া-হাদিস ট্যাব', screens: [
     { id: 'home', label: 'হোম' },
     { id: 'list', label: 'পরিস্থিতির তালিকা' },
-    { id: 'search', label: 'সার্চ পেজ' },
     { id: 'sit', label: 'পরিস্থিতির পেজ' },
     { id: 'hadith', label: 'পুরো হাদিস' },
   ]});

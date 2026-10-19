@@ -61,9 +61,8 @@ aside{background:var(--surface);border-right:1px solid var(--line);display:flex;
 .heading .h-num{color:var(--primary)}
 .f-text{flex:1;min-width:0}
 .f-title{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.f-id{display:block;font-size:11.5px;color:var(--hint);font-family:ui-monospace,Menlo,monospace}
-.f-sub{display:flex;align-items:center;gap:6px;min-width:0;margin-top:2px}
-.f-sub .f-id{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.f-id{display:block;font-size:11.5px;color:var(--hint);font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere}
+.f-st{display:block;margin-top:3px}
 /* Sheet STATUS: one hue per value, close to the sheet's dropdown colours */
 .status{--c:#5D646F;display:inline-block;flex:none;font-size:11px;line-height:17px;font-weight:600;padding:0 7px;border-radius:20px;white-space:nowrap;color:var(--c);background:color-mix(in srgb,var(--c) 13%,transparent);border:1px solid color-mix(in srgb,var(--c) 28%,transparent)}
 .status[data-s="Markdown"]{--c:#C2410C}
@@ -418,7 +417,7 @@ function renderSidebar() {
     const ready = f.demos.filter((d) => !d.empty).length;
     return `<li><button class="feature" data-id="${esc(f.id)}" aria-current="${f.id === state.feature}">
       <span class="f-num" title="শিটের ফিচার নম্বর">${numLabel(f)}</span>
-      <span class="f-text"><span class="f-title">${esc(f.title)}</span><span class="f-sub">${statusChip(f)}<span class="f-id">${esc(f.id)}/</span></span></span>
+      <span class="f-text"><span class="f-title">${esc(f.title)}</span><span class="f-id">${esc(f.id)}/</span>${f.status ? `<span class="f-st">${statusChip(f)}</span>` : ''}</span>
       ${favsOf(f).length ? `<span class="f-fav" title="ফেভারিট">★${bn(favsOf(f).length)}</span>` : ''}
       <span class="f-count" title="ডেমো">${bn(ready)}/${bn(f.demos.length)}</span>
     </button></li>`;

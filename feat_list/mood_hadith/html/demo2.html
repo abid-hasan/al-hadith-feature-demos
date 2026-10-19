@@ -3,11 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>মুড অনুযায়ী হাদিস — ডেমো ২ · আইকনের সারি ও ট্যাব শিট</title>
+<title>মুড অনুযায়ী হাদিস — ডেমো ২ · আইকনের সারি ও ট্যাব</title>
 <link rel="stylesheet" href="../../_kit/kit.css">
 <style>
 /* ===== Home: quick-action card (as in the app) ===== */
-.pg{display:flex;flex-direction:column;flex:1;min-height:0}
 .qa{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin:14px 12px 0;padding:12px 0 10px}
 .qa-row{display:grid;grid-template-columns:repeat(4,1fr)}
 .qa-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px 8px;border-radius:10px;font-size:14px;font-weight:700;color:var(--body);line-height:1.25;text-align:center}
@@ -15,28 +14,42 @@
 
 /* ===== NEW: mood row sits right on the page (no card): five round icons with names ===== */
 .m2{margin:20px 0 0}
-.m2 h2{margin:0 16px 12px;font-size:16px;font-weight:700;color:var(--title)}
+.m2-top{display:flex;align-items:center;justify-content:space-between;margin:0 10px 12px 16px}
+.m2-top h2{margin:0;font-size:16px;font-weight:700;color:var(--title)}
+.see-all{font-size:13.5px;font-weight:700;color:var(--primary);padding:6px}
 .m2-row{display:grid;grid-template-columns:repeat(5,1fr);padding:0 8px}
 .mt{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:var(--body)}
 .circ{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:var(--card);box-shadow:var(--shadow);color:var(--primary);border:1.5px solid transparent;transition:background .15s}
 .circ svg{width:26px;height:26px}
 .mt:hover .circ{border-color:var(--primary)}
-.mt.on .circ{background:var(--primary);color:var(--on-appbar)}
-.mt.on{color:var(--primary-dark)}
-:root[data-theme="dark"] .mt.on{color:var(--primary)}
 
-/* ===== Mood sheet: big header → tabs (দোয়া | হাদিস) → tab content → help ===== */
-#sh-mood{height:82%}
-#sh-mood .sheet-body{flex:1}
-.grab{width:40px;height:4px;border-radius:4px;background:var(--divider);margin:8px auto 0;flex:none}
-.band{display:flex;align-items:center;gap:12px;padding:12px 10px 12px 16px}
-.band .big{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--primary);color:var(--on-appbar);flex:none}
+/* ===== RoundedScaffoldBody ===== */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
+.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
+.panel>.scroll{padding-top:16px}
+
+/* ===== NEW: section page — the same round icons, bigger, two per row ===== */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px}
+.gt{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px 14px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);text-align:center}
+.gt:hover{background:var(--surface-2)}
+.gt .circ{width:62px;height:62px;box-shadow:none;background:var(--tint);color:var(--primary-dark)}
+:root[data-theme="dark"] .gt .circ{color:var(--primary)}
+.gt .circ svg{width:30px;height:30px}
+.gt b{font-size:16px;color:var(--title)}
+.gt small{font-size:13px;color:var(--body);line-height:1.45}
+.gt .cnt{font-size:12.5px;color:var(--hint)}
+.g2 .gt:last-child:nth-child(odd){grid-column:1/-1}
+
+/* ===== NEW: mood page — big header → tabs (দোয়া | হাদিস) → tab content → help ===== */
+.band{display:flex;align-items:center;gap:12px;margin:0 16px 14px}
+.band .big{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:var(--primary);color:var(--on-appbar);flex:none}
 .band .big svg{width:28px;height:28px}
 .band h2{flex:1;margin:0;font-size:19px;color:var(--title);line-height:1.25}
-.band h2 small{display:block;font-size:13px;font-weight:400;color:var(--hint)}
-.seg{display:flex;height:44px;margin:0 16px 12px;padding:3px;border:1.5px solid var(--primary);border-radius:10px;flex:none}
+.band h2 small{display:block;margin-top:3px;font-size:13.5px;font-weight:400;color:var(--body);line-height:1.5}
+.seg{display:flex;height:44px;margin:0 16px 12px;padding:3px;border:1.5px solid var(--primary);border-radius:10px}
 .seg button{flex:1;border-radius:7px;font-size:14.5px;font-weight:700;color:var(--body)}
 .seg button[aria-selected="true"]{background:var(--primary);color:var(--on-appbar)}
+.tabc{margin:0 12px;padding:14px;background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow)}
 .dua .arabic{font-size:24px;margin:4px 0 6px;text-align:center}
 .lbl{display:block;margin-top:10px;font-size:13px;font-weight:700;color:var(--primary-dark)}
 :root[data-theme="dark"] .lbl{color:var(--primary)}
@@ -49,28 +62,12 @@
 .hc2 .translation{color:var(--title);line-height:1.7}
 .hc2 .open{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:13.5px;font-weight:700;color:var(--primary)}
 .hc2 .open svg{width:16px;height:16px}
-.help{display:flex;gap:10px;margin:16px 0 4px;padding:12px;border-radius:var(--r-card);border:1px dashed var(--primary)}
+.help{display:flex;gap:10px;margin:16px 12px 4px;padding:12px;border-radius:var(--r-card);border:1px dashed var(--primary)}
 .help svg{width:22px;height:22px;flex:none;color:var(--primary)}
 .help b{display:block;color:var(--title);font-size:14.5px}
 .help p{margin:2px 0 0;font-size:14px;color:var(--body);line-height:1.55}
-#sh-mood .sheet-foot{justify-content:space-between}
-#sh-mood .sheet-foot svg{width:18px;height:18px}
-
-/* ===== RoundedScaffoldBody ===== */
-.rbody{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--appbar)}
-.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
-.panel>.scroll{padding-top:14px}
-
-/* ===== Situation page (#51) ===== */
-.sh-ic{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark);flex:none}
-:root[data-theme="dark"] .sh-ic{color:var(--primary)}
-.shead{display:flex;gap:12px;align-items:flex-start}
-.shead h2{margin:0;font-size:18px;color:var(--title);line-height:1.3}
-.comfort{margin:4px 0 0;font-size:14.5px;color:var(--body);line-height:1.6}
-.sec-h{margin:18px 16px 8px;font-size:16px;font-weight:700;color:var(--title)}
-.card.dua .arabic{text-align:right}
-.card.hc{cursor:pointer}
-.card.hc .translation{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;color:var(--title)}
+.mfoot{flex:none;display:flex;justify-content:center;padding:6px 12px 8px;background:var(--card);border-top:1px solid var(--divider)}
+.mfoot svg{width:18px;height:18px}
 
 /* ===== Hadith page ===== */
 .chap{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow);margin:0 12px 10px;padding:12px var(--pad);font-size:15px;font-weight:700;color:var(--title)}
@@ -85,39 +82,30 @@
   <div class="phone">
     <div class="viewport">
 
-      <!-- ===== Screens (same ids in all 5 demos) ===== -->
-      <section class="screen" data-screen="home" data-keep-scroll></section>
-      <section class="screen" data-screen="mood" data-keep-scroll></section>
-
-      <section class="screen" data-screen="sit">
-        <header class="appbar"><button class="icon-btn" data-go="home" data-i="back" aria-label="পেছনে"></button><h1 id="sit-title"></h1></header>
-        <div class="rbody"><div class="panel"><div class="scroll" id="sit-body"></div></div></div>
+      <!-- ===== Screen: home ===== -->
+      <section class="screen" data-screen="home" data-keep-scroll>
+        <header class="appbar"><button class="icon-btn" data-i="menu" aria-label="মেনু" data-snack="ড্রয়ার খুলবে — এই ফিচারের অংশ নয়"></button><h1>আল হাদিস</h1></header>
+        <div class="scroll" id="home-body"></div>
       </section>
 
+      <!-- ===== Screen: NEW "মুড অনুযায়ী হাদিস" section page ===== -->
+      <section class="screen" data-screen="moods">
+        <header class="appbar"><button class="icon-btn" data-go="home" data-i="back" aria-label="পেছনে"></button><h1>মুড অনুযায়ী হাদিস</h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="moods-body"></div></div></div>
+      </section>
+
+      <!-- ===== Screen: NEW mood page with দোয়া / হাদিস tabs ===== -->
+      <section class="screen" data-screen="mood" data-keep-scroll>
+        <header class="appbar"><button class="icon-btn" id="m-back" data-i="back" aria-label="পেছনে"></button><h1 id="m-title"></h1></header>
+        <div class="rbody"><div class="panel"><div class="scroll" id="mood-body"></div></div></div>
+        <div class="mfoot"><button class="btn text" id="b-next"></button></div>
+      </section>
+
+      <!-- ===== Screen: full hadith ===== -->
       <section class="screen" data-screen="hadith">
         <header class="appbar"><button class="icon-btn" id="h-back" data-i="back" aria-label="পেছনে"></button><h1 id="h-title"></h1></header>
         <div class="rbody"><div class="panel"><div class="scroll" id="h-body"></div></div></div>
       </section>
-
-      <div id="hold" hidden>
-        <!-- ===== Page: home ===== -->
-        <div class="pg" id="pg-home">
-          <header class="appbar"><button class="icon-btn" data-i="menu" aria-label="মেনু" data-snack="ড্রয়ার খুলবে — এই ফিচারের অংশ নয়"></button><h1>আল হাদিস</h1><button class="icon-btn" data-i="search" aria-label="সার্চ" data-snack="সার্চ পেজ খুলবে — এই ফিচারের অংশ নয়"></button></header>
-          <div class="scroll" id="home-body"></div>
-        </div>
-      </div>
-
-      <!-- ===== Sheet: the mood, with দোয়া / হাদিস tabs ===== -->
-      <div class="sheet" id="sh-mood" role="dialog" aria-label="মুড">
-        <div class="grab"></div>
-        <div class="band"><span class="big" id="sh-ic"></span><h2 id="sh-name"></h2><button class="icon-btn" data-close data-i="close" aria-label="বন্ধ করুন"></button></div>
-        <div class="seg" role="tablist"><button role="tab" data-tab="dua">দোয়া</button><button role="tab" data-tab="hadith">হাদিস</button></div>
-        <div class="sheet-body" id="sh-body"></div>
-        <div class="sheet-foot">
-          <button class="btn text" id="b-next"></button>
-          <button class="btn" id="b-more"></button>
-        </div>
-      </div>
     </div>
   </div>
 </main>
@@ -132,21 +120,26 @@
 
   /* ---------- State ---------- */
   const START = 'worry';
-  const S = { mood: START, pair: 0, tab: 'dua', hk: 'muslim:223', back: 'mood' };
+  const S = { mood: START, pair: 0, tab: 'dua', hk: 'muslim:223', from: 'moods' };
   const mood = () => MH.byId(S.mood);
   const pair = () => mood().pairs[S.pair];
 
   /* ---------- Home ---------- */
-  const pg = $('#pg-home');
   function renderHome() {
-    const sel = Kit.current === 'mood' ? S.mood : null;
     $('#home-body').innerHTML = `${MH.qaGrid()}
-      <section class="m2" aria-label="এখন কেমন লাগছে?"><h2>এখন কেমন লাগছে?</h2>
-        <div class="m2-row">${MH.MOODS.map((m) => `<button class="mt ${sel === m.id ? 'on' : ''}" data-mood="${m.id}"><span class="circ">${MH.ICON[m.id]}</span>${m.name}</button>`).join('')}</div>
+      <section class="m2" aria-label="এখন কেমন লাগছে?">
+        <div class="m2-top"><h2>এখন কেমন লাগছে?</h2><button class="see-all" data-all>সব দেখুন</button></div>
+        <div class="m2-row">${MH.MOODS.map((m) => `<button class="mt" data-mood="${m.id}"><span class="circ">${MH.ICON[m.id]}</span>${m.name}</button>`).join('')}</div>
       </section>`;
   }
 
-  /* ---------- Sheet tabs ---------- */
+  /* ---------- Section page: two-column round-icon tiles ---------- */
+  function renderMoods() {
+    $('#moods-body').innerHTML = `<div class="g2">${MH.MOODS.map((m) => `<button class="gt" data-mood="${m.id}"><span class="circ">${MH.ICON[m.id]}</span>
+        <b>${m.name}</b><small>${m.line}</small><span class="cnt">${MH.countText(m)}</span></button>`).join('')}</div>`;
+  }
+
+  /* ---------- Mood page tabs ---------- */
   function duaTab(id) {
     const d = MH.DUAS[id];
     return `<article class="dua"><p class="arabic">${d.ar}</p>
@@ -164,27 +157,18 @@
         <span class="open">পুরো হাদিস ${MH.ICON.open}</span></article>
       <div class="acts"><button data-hcopy="${k}">${ic('copy')}কপি</button><button data-hshare="${k}">${ic('share')}শেয়ার</button></div>`;
   }
-  function renderSheet() {
+  function renderMood() {
     const m = mood(), p = pair();
-    $('#sh-ic').innerHTML = MH.ICON[m.id];
-    $('#sh-name').innerHTML = `${m.name}<small>একটা দোয়া আর একটা হাদিস</small>`;
-    $$('[data-tab]').forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === S.tab));
-    $('#sh-body').innerHTML = (S.tab === 'dua' ? duaTab(p.dua) : hadithTab(p.h))
-      + (m.help ? `<div class="help">${MH.ICON.help}<div><b>${MH.HELP.title}</b><p>${MH.HELP.text}</p></div></div>` : '');
-    $('#sh-body').scrollTop = 0;
+    $('#m-title').textContent = m.name;
+    $('#mood-body').innerHTML = `<div class="band"><span class="big">${MH.ICON[m.id]}</span><h2>${m.name}<small>${m.line}</small></h2></div>
+      <div class="seg" role="tablist"><button role="tab" data-tab="dua" aria-selected="${S.tab === 'dua'}">দোয়া</button><button role="tab" data-tab="hadith" aria-selected="${S.tab === 'hadith'}">হাদিস</button></div>
+      <div class="tabc">${S.tab === 'dua' ? duaTab(p.dua) : hadithTab(p.h)}</div>
+      ${m.help ? `<div class="help">${MH.ICON.help}<div><b>${MH.HELP.title}</b><p>${MH.HELP.text}</p></div></div>` : ''}`;
   }
   $('#b-next').innerHTML = `${MH.ICON.refresh}নতুন হাদিস দেখান`;
-  $('#b-more').innerHTML = `আরো পড়ুন${MH.ICON.open}`;
-
-  /* ---------- Situation page (#51) ---------- */
-  function renderSit() {
-    const m = mood();
-    $('#sit-title').textContent = m.sit;
-    $('#sit-body').innerHTML = `<div class="card"><div class="shead"><span class="sh-ic">${MH.ICON[m.id]}</span>
-        <div><h2>${m.sit}</h2><p class="comfort">${m.line}</p></div></div></div>
-      <h3 class="sec-h">দোয়া</h3>${MH.allOf(m, 'dua').map((id) => `<div class="card">${duaTab(id)}</div>`).join('')}
-      <h3 class="sec-h">হাদিস</h3>${MH.allOf(m, 'h').map((k) => { const h = MH.HADITHS[k]; return `<article class="card hc" data-h="${k}" tabindex="0">${head(h)}
-        <p class="narrator">${h.nar} থেকে বর্ণিত:</p><p class="translation">${MH.nl(h.tr)}</p></article>`; }).join('')}`;
+  function openMood(id) {
+    S.mood = id; S.pair = 0; S.tab = 'dua'; S.from = Kit.current === 'home' ? 'home' : 'moods';
+    go('mood'); $('#mood-body').scrollTop = 0;
   }
 
   /* ---------- Hadith page ---------- */
@@ -199,38 +183,33 @@
   let internal = false;
   const go = (id) => { internal = true; Kit.show(id); internal = false; };
   Kit.onScreen((id) => {
-    if (id === 'home' || id === 'mood') {
-      $(`.screen[data-screen="${id}"]`).appendChild(pg);
-      if (id === 'mood') { if (!internal) { S.mood = START; S.pair = 0; S.tab = 'dua'; } renderSheet(); Kit.open('sh-mood'); }
-      renderHome();
-    }
-    if (id === 'sit') { if (!internal) S.mood = START; renderSit(); }
-    if (id === 'hadith') { if (!internal) { S.mood = START; S.pair = 0; S.tab = 'hadith'; S.hk = pair().h; S.back = 'mood'; } renderHadith(); }
+    if (id === 'home') renderHome();
+    if (id === 'moods') renderMoods();
+    if (id === 'mood') { if (!internal) { S.mood = START; S.pair = 0; S.tab = 'dua'; S.from = 'moods'; $('#mood-body').scrollTop = 0; } renderMood(); }
+    if (id === 'hadith') { if (!internal) { S.mood = START; S.pair = 0; S.tab = 'hadith'; S.hk = pair().h; } renderHadith(); }
   });
-  const backHome = () => setTimeout(() => { if (Kit.current === 'mood' && !$('#sh-mood').classList.contains('on')) go('home'); }, 0);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') backHome(); });
 
   /* ---------- In-phone events ---------- */
   document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('scrim') || e.target.closest('#sh-mood [data-close]')) return backHome();
-    const t = e.target.closest('[data-mood],[data-tab],[data-dcopy],[data-dshare],[data-hcopy],[data-hshare],[data-h],#b-next,#b-more,#h-back');
+    const t = e.target.closest('[data-mood],[data-all],[data-tab],[data-dcopy],[data-dshare],[data-hcopy],[data-hshare],[data-h],#b-next,#m-back,#h-back');
     if (!t || !t.closest('.phone')) return;
-    if (t.dataset.mood) { S.mood = t.dataset.mood; S.pair = 0; S.tab = 'dua'; return go('mood'); }
-    if (t.dataset.tab) { S.tab = t.dataset.tab; return renderSheet(); }
+    if (t.dataset.mood) return openMood(t.dataset.mood);
+    if (t.hasAttribute('data-all')) return go('moods');
+    if (t.dataset.tab) { S.tab = t.dataset.tab; return renderMood(); }
     if (t.dataset.dcopy) { MH.copy(MH.duaText(t.dataset.dcopy)); return Kit.snack('দোয়া কপি হয়েছে'); }
     if (t.dataset.hcopy) { MH.copy(MH.hadithText(t.dataset.hcopy)); return Kit.snack('হাদিস কপি হয়েছে'); }
     if (t.dataset.dshare || t.dataset.hshare) return Kit.snack('ফোনের শেয়ার মেনু খুলবে');
-    if (t.dataset.h) { S.hk = t.dataset.h; S.back = Kit.current; return go('hadith'); }
-    if (t.id === 'b-next') { S.pair = (S.pair + 1) % mood().pairs.length; renderSheet(); return Kit.snack('নতুন দোয়া আর হাদিস দেখানো হচ্ছে'); }
-    if (t.id === 'b-more') return go('sit');
-    if (t.id === 'h-back') return go(S.back);
+    if (t.dataset.h) { S.hk = t.dataset.h; return go('hadith'); }
+    if (t.id === 'b-next') { S.pair = (S.pair + 1) % mood().pairs.length; renderMood(); $('#mood-body').scrollTop = 0; return Kit.snack('নতুন দোয়া আর হাদিস দেখানো হচ্ছে'); }
+    if (t.id === 'm-back') return go(S.from);
+    if (t.id === 'h-back') return go('mood');
   });
 
   paint();
-  Kit.init({ demo: 2, name: 'আইকনের সারি ও ট্যাব শিট', screens: [
+  Kit.init({ demo: 2, name: 'আইকনের সারি ও ট্যাব', screens: [
     { id: 'home', label: 'হোম' },
-    { id: 'mood', label: 'মুডের হাদিস' },
-    { id: 'sit', label: 'পরিস্থিতির পেজ' },
+    { id: 'moods', label: 'সব মুড' },
+    { id: 'mood', label: 'মুডের পেজ' },
     { id: 'hadith', label: 'পুরো হাদিস' },
   ]});
 })();

@@ -22,26 +22,9 @@
 .panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--scaffold);border-radius:20px 20px 0 0;overflow:hidden}
 .panel>.scroll{padding:14px 0 24px}
 
-/* ===== NewSearchPage: _SearchSectionCard (radius 12, padding 14), field ===== */
-.scard{background:var(--card);border-radius:12px;margin:0 16px 16px;padding:14px}
-.stitle{margin:0;font-size:16px;font-weight:700;color:var(--title)}
-.srow{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.sfield{display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 12px;border-radius:10px;border:.8px solid var(--divider);background:var(--tint)}
-.sfield:focus-within{border-color:var(--primary)}
-.sfield svg{width:18px;height:18px;color:var(--hint);flex:none}
-.sfield input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--title);font-size:14.5px}
-.sfield input::placeholder{color:var(--hint)}
-.sfield .clr{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--hint)}
-
-/* ===== NEW: "জীবনের পরিস্থিতি" — horizontal row of small situation cards ===== */
-.sit-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:2px 14px 4px}
-.sit-row::-webkit-scrollbar{display:none}
-.sit-card{flex:none;width:98px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 6px 10px;border-radius:10px;border:.8px solid var(--divider);background:var(--card);text-align:center}
-.sit-card:hover{background:var(--surface-2)}
+/* ===== Situation icon (list rows and page header) ===== */
 .sit-ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--primary-dark)}
 :root[data-theme="dark"] .sit-ic{color:var(--primary)}
-.sit-card b{font-size:13px;line-height:1.35;color:var(--title);font-weight:700}
-.see-all{font-size:13.5px;font-weight:700;color:var(--primary);padding:4px 2px}
 
 /* ===== NEW: "জীবনের পরিস্থিতি" page — one card row per situation (app list style) ===== */
 .intro{margin:0 20px 12px;font-size:14.5px;line-height:1.6;color:var(--body)}
@@ -89,25 +72,19 @@
     <div class="viewport">
       <!-- ===== Screen: home (app bar + quick actions, only what leads to the feature) ===== -->
       <section class="screen" data-screen="home">
-        <header class="appbar"><button class="icon-btn" aria-label="মেনু" data-snack="ড্রয়ার খুলবে — এই ফিচারের অংশ নয়" data-i="menu"></button><h1>আল হাদিস</h1><button class="icon-btn" aria-label="সার্চ" data-go="search" data-i="search"></button></header>
+        <header class="appbar"><button class="icon-btn" aria-label="মেনু" data-snack="ড্রয়ার খুলবে — এই ফিচারের অংশ নয়" data-i="menu"></button><h1>আল হাদিস</h1></header>
         <div class="scroll" id="home-body"></div>
       </section>
 
       <!-- ===== Screen: NEW "জীবনের পরিস্থিতি" page ===== -->
       <section class="screen" data-screen="list">
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" id="list-back" data-i="back"></button><h1>জীবনের পরিস্থিতি</h1></header>
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="home" data-i="back"></button><h1>জীবনের পরিস্থিতি</h1></header>
         <div class="rbody"><div class="panel"><div class="scroll" id="list-body"></div></div></div>
-      </section>
-
-      <!-- ===== Screen: search page ===== -->
-      <section class="screen" data-screen="search">
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="home" data-i="back"></button><h1>সার্চ</h1></header>
-        <div class="rbody"><div class="panel"><div class="scroll" id="search-body"></div></div></div>
       </section>
 
       <!-- ===== Screen: situation page ===== -->
       <section class="screen" data-screen="sit" data-keep-scroll>
-        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" id="sit-back" data-i="back"></button><h1 class="sit-name">ঋণ</h1></header>
+        <header class="appbar"><button class="icon-btn" aria-label="পেছনে" data-go="list" data-i="back"></button><h1 class="sit-name">ঋণ</h1></header>
         <div class="rbody"><div class="panel"><div class="scroll" id="sit-body"></div></div></div>
       </section>
 
@@ -134,7 +111,7 @@
 (function () {
   const { $, $$, icons } = Kit;
   const ic = (n) => icons[n] || LS.UI[n];
-  const S = { sit: 'debt', hadith: '6116', q: '', expanded: true, listFrom: 'home', from: 'list' };
+  const S = { sit: 'debt', hadith: '6116', expanded: true };
 
   /* ---------- NEW: home quick actions with the "পরিস্থিতি" tile ---------- */
   function renderHome() { $('#home-body').innerHTML = LS.homeGrid(S.expanded); }
@@ -142,25 +119,8 @@
   /* ---------- NEW: "জীবনের পরিস্থিতি" page ---------- */
   function renderList() {
     $('#list-body').innerHTML = `<p class="intro">${LS.LIST_INTRO}</p>
-      ${LS.SITUATIONS.map((s) => `<button class="lrow" data-sit="${s.id}" data-from="list"><span class="sit-ic">${LS.ICON[s.id]}</span>
+      ${LS.SITUATIONS.map((s) => `<button class="lrow" data-sit="${s.id}"><span class="sit-ic">${LS.ICON[s.id]}</span>
         <span class="t"><b>${s.name}</b><small>${s.phrase}</small><small>${LS.countText(s)}</small></span><span class="chev">${ic('chevron')}</span></button>`).join('')}`;
-  }
-  function openList(from) { S.listFrom = from; Kit.show('list'); }
-
-  /* ---------- Search page ---------- */
-  function renderSearch() {
-    $('#search-body').innerHTML = `
-      <div class="scard">
-        <label class="sfield">${ic('search')}<input id="q" placeholder="হাদিস নাম্বার / শব্দ দিয়ে খুঁজুন" value="${S.q}" aria-label="সার্চ">
-          <button class="clr" id="q-clr" aria-label="মুছুন" ${S.q ? '' : 'hidden'}>${ic('close')}</button></label>
-        <!-- জীবনের পরিস্থিতি: shortcut row; "সব দেখুন" opens the section page -->
-        <div class="srow" style="margin-top:16px"><h2 class="stitle">জীবনের পরিস্থিতি</h2><button class="see-all" data-list="search">সব দেখুন</button></div>
-        <div class="sit-row">${LS.SITUATIONS.map((s) => `<button class="sit-card" data-sit="${s.id}" data-from="search" aria-label="${s.phrase}"><span class="sit-ic">${LS.ICON[s.id]}</span><b>${s.phrase}</b></button>`).join('')}</div>
-      </div>`;
-  }
-  function runSearch(term) {
-    if (!term.trim()) { Kit.snack('সার্চ করতে কিছু লিখুন'); return; }
-    Kit.snack(`"${term}" এর সার্চ ফলাফল খুলবে`);
   }
 
   /* ---------- Situation page ---------- */
@@ -201,18 +161,15 @@
     $('#h-body').innerHTML = `<div class="chap">অধ্যায় ${h.ch}<span>${LS.BOOK.name}</span></div>${hadithCard(S.hadith, true)}`;
   }
 
-  function openSit(id, from) { S.sit = id; S.from = from || 'list'; Kit.show('sit'); $('#sit-body').scrollTop = 0; }
+  function openSit(id) { S.sit = id; Kit.show('sit'); $('#sit-body').scrollTop = 0; }
 
   /* ---------- Events ---------- */
   document.addEventListener('click', (e) => {
     const t = e.target.closest('button,[data-h]');
     if (!t) return;
     if (t.id === 'qa-more') { S.expanded = !S.expanded; return renderHome(); }
-    if (t.dataset.list) return openList(t.dataset.list);
-    if (t.id === 'list-back') return Kit.show(S.listFrom);
-    if (t.id === 'sit-back') return Kit.show(S.from);
-    if (t.dataset.sit) return openSit(t.dataset.sit, t.dataset.from);
-    if (t.id === 'q-clr') { e.preventDefault(); S.q = ''; $('#q').value = ''; t.hidden = true; return; }
+    if (t.dataset.list) return Kit.show('list');
+    if (t.dataset.sit) return openSit(t.dataset.sit);
     if (t.dataset.dcopy) { LS.copy(LS.duaText(t.dataset.dcopy)); return Kit.snack('কপি হয়েছে'); }
     if (t.dataset.dshare) return Kit.snack('শেয়ার করার অপশন খুলেছে');
     if (t.dataset.hmore) { e.stopPropagation(); S.menu = t.dataset.hmore; $('#sheet-h-title').textContent = `${LS.BOOK.name}, হাদিস নং ${window.LS_HADITHS[S.menu].no}`; return Kit.open('sheet-h'); }
@@ -224,16 +181,11 @@
     }
     if (t.dataset.h) { S.hadith = t.dataset.h; return Kit.show('hadith'); }
   });
-  document.addEventListener('keydown', (e) => {
-    if (e.target.id === 'q' && e.key === 'Enter') runSearch(e.target.value);
-  });
-  document.addEventListener('input', (e) => { if (e.target.id === 'q') { S.q = e.target.value; $('#q-clr').hidden = !S.q; } });
 
   /* ---------- Screens ---------- */
   Kit.onScreen((id) => {
-    if (id === 'home') { S.listFrom = 'home'; renderHome(); }
+    if (id === 'home') renderHome();
     if (id === 'list') renderList();
-    if (id === 'search') renderSearch();
     if (id === 'sit') renderSit();
     if (id === 'hadith') { if (!LS.byId(S.sit).sections.some((x) => (x.hadiths || []).includes(S.hadith))) S.sit = 'anger'; renderHadith(); }
   });
@@ -241,7 +193,6 @@
   Kit.init({ demo: 1, name: 'অ্যাপের ধরন', screens: [
     { id: 'home', label: 'হোম' },
     { id: 'list', label: 'পরিস্থিতির তালিকা' },
-    { id: 'search', label: 'সার্চ পেজ' },
     { id: 'sit', label: 'পরিস্থিতির পেজ' },
     { id: 'hadith', label: 'পুরো হাদিস' },
   ]});

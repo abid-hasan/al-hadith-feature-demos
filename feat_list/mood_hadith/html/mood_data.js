@@ -22,24 +22,26 @@
     refresh: p('<path d="M19.5 12a7.5 7.5 0 0 1-13.4 4.6M4.5 12a7.5 7.5 0 0 1 13.4-4.6"/><path d="M18.5 3.5v4.2h-4.2M5.5 20.5v-4.2h4.2"/>'),
     help: p('<path d="M12 20.5s-7.5-4.3-7.5-10A4.2 4.2 0 0 1 12 7.8a4.2 4.2 0 0 1 7.5 2.7c0 5.7-7.5 10-7.5 10z"/><path d="M9.5 12.5h5M12 10v5"/>'),
     open: p('<path d="M5 12h13M13 6l6 6-6 6"/>'),
+    all: p('<rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/>'),
   };
 
-  /* ---------- 5 moods, sheet order. pairs = one dua + one hadith shown together;
-     "নতুন হাদিস দেখান" moves to the next pair. sit = the #51 situation page name. ---------- */
+  /* ---------- 5 moods, in section order. line = the one line under the name (scholars verify);
+     pairs = this mood's own list, one dua + one hadith shown together;
+     "নতুন হাদিস দেখান" moves to the next pair. ---------- */
   const MOODS = [
-    { id: 'sad', name: 'মন খারাপ', sit: 'মন খারাপ', help: true,
+    { id: 'sad', name: 'মন খারাপ', help: true,
       line: 'মন ভারী লাগছে? একটু থামুন, ধীরে ধীরে এই দোয়াটা পড়ুন।',
       pairs: [{ dua: 424, h: 'muslim:223' }, { dua: 425, h: 'bukhari:1' }] },
-    { id: 'anger', name: 'রাগ', sit: 'রাগ',
+    { id: 'anger', name: 'রাগ',
       line: 'রাগ উঠলে আগে আল্লাহর কাছে আশ্রয় চান, তারপর চুপ থাকুন।',
       pairs: [{ dua: 482, h: 'bukhari:6116' }, { dua: 776, h: 'bukhari:6018' }, { dua: 482, h: 'bukhari:1894' }] },
-    { id: 'worry', name: 'দুশ্চিন্তা', sit: 'দুশ্চিন্তা', help: true,
+    { id: 'worry', name: 'দুশ্চিন্তা', help: true,
       line: 'চিন্তা মাথা থেকে যাচ্ছে না? আল্লাহর ওপর ভরসা রেখে এই দোয়া পড়ুন।',
       pairs: [{ dua: 423, h: 'muslim:223' }, { dua: 427, h: 'bukhari:1' }] },
-    { id: 'grateful', name: 'কৃতজ্ঞ', sit: 'কৃতজ্ঞতা',
+    { id: 'grateful', name: 'কৃতজ্ঞ',
       line: 'ভালো কিছু পেয়েছেন? আলহামদুলিল্লাহ বলে শুকরিয়া জানান।',
       pairs: [{ dua: 763, h: 'muslim:223' }, { dua: 476, h: 'bukhari:6018' }] },
-    { id: 'lonely', name: 'একা', sit: 'একাকীত্ব', help: true,
+    { id: 'lonely', name: 'একা', help: true,
       line: 'একা লাগছে? আল্লাহ সবসময় কাছেই আছেন।',
       pairs: [{ dua: 440, h: 'bukhari:6018' }, { dua: 421, h: 'muslim:223' }] },
   ];
@@ -180,13 +182,15 @@
   const duaText = (id) => { const d = DUAS[id]; return `${d.t}\n\n${d.ar}\n\nউচ্চারণ: ${d.tr}\n\nঅর্থ: ${d.m}\n\nসূত্র: ${d.ref}`; };
   const hadithText = (k) => { const h = HADITHS[k]; return `${h.nar} থেকে বর্ণিত:\n${h.tr}\n\n${h.book}, হাদিস নং ${h.no}`; };
   function copy(text) { try { navigator.clipboard?.writeText(text).catch(() => {}); } catch { /* not allowed in this frame */ } }
-  // All distinct duas / hadiths of a mood (for the situation page)
+  // All distinct duas / hadiths of a mood, and the count line on the section page
   const allOf = (m, key) => [...new Set(m.pairs.map((x) => x[key]))];
+  const bnNum = (n) => String(n).replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[d]);
+  const countText = (m) => `${bnNum(allOf(m, 'dua').length)}টি দোয়া · ${bnNum(allOf(m, 'h').length)}টি হাদিস`;
   // Home quick-action grid (context only: tiles say they are not part of this feature)
   const qaGrid = (cls = 'qa') => {
     const rows = []; for (let i = 0; i < QA.length; i += 4) rows.push(`<div class="qa-row">${QA.slice(i, i + 4).map(([k, l]) => `<button class="qa-tile" data-snack="${l} খুলবে — এই ফিচারের অংশ নয়">${HOME_ICONS[k]}${l}</button>`).join('')}</div>`);
     return `<div class="${cls}">${rows.join('')}</div>`;
   };
 
-  window.MH = { ICON, MOODS, HELP, DUAS, HADITHS, byId, nl, duaText, hadithText, copy, allOf, qaGrid };
+  window.MH = { ICON, MOODS, HELP, DUAS, HADITHS, byId, nl, duaText, hadithText, copy, allOf, countText, qaGrid };
 })();
