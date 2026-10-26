@@ -129,6 +129,8 @@ main{display:flex;min-width:0;min-height:0}
 .doc-wrap{max-width:820px;width:100%;margin:0 auto;padding:26px 26px 60px}
 .doc-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
 .chip{font-size:12.5px;border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:2px 10px;color:var(--body)}
+.chip.schema{cursor:pointer;font:inherit;font-size:12.5px;color:var(--primary-dark);border-color:var(--primary)}
+:root[data-theme="dark"] .chip.schema{color:var(--primary)}
 .chip.num{background:var(--tint);color:var(--primary-dark);border-color:transparent;font-weight:700}
 :root[data-theme="dark"] .chip.num{color:var(--primary)}
 .doc h1 .h-num{color:var(--primary)}
@@ -451,11 +453,16 @@ function renderDoc() {
   mtimes.md = f.mdMtime;
   const meta = [];
   if (f.markdown) {
-    const words = f.markdown.replace(/[#>*|`\-]/g, ' ').split(/\s+/).filter(Boolean).length;
+    // The optional "## ৪. ড্রাফট ডেটাবেস স্কিমা" is for the database team, so it
+    // is left out of the reading time and the three-section check.
+    const schemaAt = f.markdown.search(SCHEMA_HEADING);
+    const body = schemaAt >= 0 ? f.markdown.slice(0, schemaAt) : f.markdown;
+    const words = body.replace(/[#>*|`\-]/g, ' ').split(/\s+/).filter(Boolean).length;
     const mins = Math.max(1, Math.round(words / 200));
     meta.push(`<span class="chip${mins > 2 ? ' warn' : ''}" title="শব্দ গুনে আনুমানিক হিসাব, প্রতি মিনিটে ২০০ শব্দ। লক্ষ্য: এক-দুই মিনিট">পড়তে আনুমানিক ${bn(mins)} মিনিট · ${bn(words)} শব্দ</span>`);
-    const sections = (f.markdown.match(/^##\s/gm) || []).length;
+    const sections = (body.match(/^##\s/gm) || []).length;
     meta.push(`<span class="chip${sections === 3 ? '' : ' warn'}" title="লক্ষ্য: ৩টি সেকশন">${bn(sections)}টি সেকশন</span>`);
+    if (schemaAt >= 0) meta.push('<button class="chip schema" type="button" data-jump="schema" title="ডেটাবেস টিমের জন্য খসড়া স্কিমায় যান">ড্রাফট ডেটাবেস স্কিমা</button>');
   }
   const sheet = [];
   if (f.number != null) sheet.push(`<span class="chip num" title="শিটের ফিচার নম্বর">ফিচার নম্বর ${bn(f.number)}</span>`);
@@ -698,6 +705,7 @@ function renderFavs() {
 const numLabel = (f) => (f.number == null ? '–' : bn(f.number));
 // A feature rejected in the viewer shows "Dismissed" (the sheet's word for it)
 // instead of the sheet's STATUS.
+const SCHEMA_HEADING = /^##\s+৪\.\s+ড্রাফট ডেটাবেস স্কিমা/m;
 const statusOf = (f) => (f.rejected ? 'Dismissed' : f.status || null);
 const statusKey = (f) => statusOf(f) || 'none';
 // The status as a small chip (nothing for features not in the sheet).
@@ -912,6 +920,11 @@ $('filters').addEventListener('click', (e) => {
   renderSidebar();
 });
 $('reject').addEventListener('click', toggleReject);
+$('doc-meta').addEventListener('click', (e) => {
+  if (!e.target.closest('[data-jump="schema"]')) return;
+  const h = [...$('doc').querySelectorAll('h2')].find((x) => x.textContent.includes('ড্রাফট ডেটাবেস স্কিমা'));
+  h?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 $('tab-req').addEventListener('click', () => setTab('req'));
 $('tab-ui').addEventListener('click', () => setTab('ui'));
 $('tab-fav').addEventListener('click', () => setTab('fav'));
